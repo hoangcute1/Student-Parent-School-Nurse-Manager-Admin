@@ -7,18 +7,36 @@ import { ConfigModule } from '@nestjs/config';
 import { ConditionModule } from './modules/condition.module';
 import configuration from './configuration';
 import { ProfileModule } from './modules/profile.module';
+import { AuthModule } from './modules/auth.module';
+import { StudentModule } from './modules/student.module';
+import { RoleModule } from './modules/role.module';
+import { ThrottlerModule } from './modules/throttler.module';
+import { TokenBlacklistModule } from './modules/token-blacklist.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AppThrottlerGuard } from './guards/throttler.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
     }),
-    MongooseModule.forRoot(configuration().mongodbUri),
+    MongooseModule.forRoot(configuration().MONGODB_URI),
+    ThrottlerModule,
+    TokenBlacklistModule,
     UserModule,
     ConditionModule,
     ProfileModule,
+    AuthModule,
+    StudentModule,
+    RoleModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AppThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

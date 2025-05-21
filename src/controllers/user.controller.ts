@@ -1,39 +1,116 @@
-import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
-import { UserService } from '../services/user.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiProperty, ApiParam } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
+import { UserService } from '@/services/user.service';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { CreateUserDto } from '@/decorations/dto/create-user.dto';
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
-class CreateUserDto {
-  @ApiProperty({ example: 'Nguyen Van A', description: 'Tên người dùng' })
-  name: string;
-
-  @ApiProperty({ example: 'nva@example.com', description: 'Email người dùng' })
-  email: string;
-}
-
-@ApiTags('users')
+@ApiTags('users✅')
 @Controller('users')
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Tạo user mới' })
-  @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, description: 'User đã được tạo.' })
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto.name, createUserDto.email);
-  }
-
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Lấy danh sách user' })
   @ApiResponse({ status: 200, description: 'Danh sách user.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
   async findAll() {
     return this.userService.findAll();
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Xoá user theo id' })
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Lấy thông tin user theo ID' })
   @ApiParam({ name: 'id', description: 'ID của user' })
-  @ApiResponse({ status: 200, description: 'User đã bị xoá.' })
+  @ApiResponse({ status: 200, description: 'Thông tin user.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy user.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'ID không hợp lệ.',
+  })
+  async findOne(@Param('id') id: string) {
+    // Validate ObjectId format
+    if (id.length !== 24) {
+      return {
+        statusCode: 400,
+        message:
+          'Invalid ID format. MongoDB ObjectId must be 24 characters long.',
+      };
+    }
+
+    try {
+      return await this.userService.findById(id);
+    } catch (error) {
+      if (error.name === 'CastError') {
+        return {
+          statusCode: 400,
+          message: 'Invalid ID format',
+          error: 'Bad Request',
+        };
+      }
+      throw error; // Re-throw other errors
+    }
+  }
+
+  @Put(':id/role')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Cập nhật vai trò của user' })
+  @ApiParam({ name: 'id', description: 'ID của user' })
+  @ApiBody({
+    schema: { type: 'object', properties: { roleName: { type: 'string', example: 'parent' } } },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vai trò của user đã được cập nhật.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy user hoặc vai trò.',
+  })
+  async updateRole(
+    @Param('id') id: string,
+    @Body('roleName') roleName: string,
+  ) {
+    return this.userService.updateRole(id, roleName);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Xóa user theo id' })
+  @ApiParam({ name: 'id', description: 'ID của user' })
+  @ApiResponse({ status: 200, description: 'User đã bị xóa.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
   async delete(@Param('id') id: string) {
     return this.userService.deleteById(id);
   }

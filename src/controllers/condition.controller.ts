@@ -12,7 +12,7 @@ class CreateConditionDto {
 export class ConditionController {
   constructor(private readonly conditionService: ConditionService) {}
 
-  @Get()
+  @Get() 
   @ApiOperation({ summary: 'Lấy danh sách condition' })
   @ApiResponse({ status: 200, description: 'Danh sách condition.' })
   async findAll() {
