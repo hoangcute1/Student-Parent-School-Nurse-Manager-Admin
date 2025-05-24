@@ -88,7 +88,15 @@ export class UserService {
     }
   }
 
+  async findByIdWithRole(userId: string): Promise<UserDocument | null> {
+    return this.userModel.findById(userId).populate('roleId').exec();
+  }
+
   async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).populate('roleId').exec();
+  }
+
+  async findByEmailWithRole(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).populate('roleId').exec();
   }
 

@@ -7,14 +7,19 @@ import { UnauthorizedException } from '@nestjs/common';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super({ usernameField: 'email' });
+    super({
+      usernameField: 'email',
+      passReqToCallback: true,
+    });
   }
 
-  async validate(email: string, password: string): Promise<any> {
-    const user = await this.authService.validateUser(email, password);
-    if (!user) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
+  async validate(req: any, email: string, password: string): Promise<any> {
+    const { role } = req.body;
+    if (!role) {
+      throw new UnauthorizedException('Vai trò không được để trống');
     }
+
+    const user = await this.authService.validateUser(email, password, role);
     return user;
   }
 }

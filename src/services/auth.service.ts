@@ -19,13 +19,51 @@ export class AuthService {
     private staffService: StaffService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string, role: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user.toObject();
-      return result;
+    if (!user) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
     }
-    return null;
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
+    }
+
+    const userId = user._id?.toString();
+    if (!userId) {
+      throw new UnauthorizedException('Lỗi xác thực người dùng');
+    }
+
+    // Get user with populated role information
+    const userWithRole = await this.userService.findByEmailWithRole(email);
+    const userRole = userWithRole?.roleId as any;
+    const roleName = userRole?.name;
+
+    // For staff login
+    if (role === 'staff') {
+      // Allow both admin and staff roles to log in as staff
+      if (!roleName || (roleName !== 'admin' && roleName !== 'staff')) {
+        throw new UnauthorizedException('Tài khoản không có quyền truy cập với vai trò staff');
+      }
+      
+      const staffProfile = await this.staffService.findByUserId(userId);
+      if (!staffProfile) {
+        throw new UnauthorizedException('Không tìm thấy thông tin nhân viên');
+      }
+    } 
+    // For parent login
+    else if (role === 'parent') {
+      const parentProfile = await this.parentService.findByUserId(userId);
+      if (!parentProfile) {
+        throw new UnauthorizedException('Không tìm thấy thông tin phụ huynh');
+      }
+    } else {
+      throw new UnauthorizedException('Vai trò không hợp lệ');
+    }
+
+    const { password: _, ...result } = user.toObject();
+    return result;
   }
 
   async login(user: any) {
