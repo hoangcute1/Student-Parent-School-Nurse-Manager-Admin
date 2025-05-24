@@ -4,14 +4,17 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from '@/services/auth.service';
 import { AuthController } from '@/controllers/auth.controller';
 import { UserModule } from './user.module';
+import { ProfileModule } from './profile.module';
+import { TokenBlacklistModule } from './token-blacklist.module';
 import { JwtStrategy } from '@/strategies/jwt.strategy';
 import { LocalStrategy } from '@/strategies/local.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-@Module({
-  imports: [
+@Module({  imports: [
     UserModule,
+    ProfileModule,
+    TokenBlacklistModule,
     PassportModule,
     ConfigModule,
     JwtModule.registerAsync({

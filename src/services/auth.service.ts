@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { TokenBlacklistService } from './token-blacklist.service';
+import { ProfileService } from './profile.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '@/decorations/dto/register.dto';
 
@@ -11,6 +12,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private tokenBlacklistService: TokenBlacklistService,
+    private profileService: ProfileService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -21,6 +23,7 @@ export class AuthService {
     }
     return null;
   }
+  
   async login(user: any) {
     // Get permissions from role if available
     // Use optional chaining and ensure roleId is an object with permissions
@@ -60,9 +63,16 @@ export class AuthService {
       },
     };
   }
-  async register({ email, password, role }: RegisterDto) {
-    const newUser = await this.userService.create(email, password, role);
-    return newUser;
+  
+  async register(registerDto: RegisterDto) {
+    // Create user
+    const user = await this.userService.create(
+      registerDto.email,
+      registerDto.password,
+      registerDto.role,
+    );
+
+    return user;
   }
 
   async logout(userId: string, token?: string) {
@@ -89,12 +99,15 @@ export class AuthService {
 
     return { success: true, message: 'Đăng xuất thành công' };
   }
+  
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.userService.findById(userId);
 
     if (!user || !user.refreshToken || user.refreshToken !== refreshToken) {
       throw new UnauthorizedException('Refresh token không hợp lệ');
-    } // Get permissions from role if available
+    } 
+    
+    // Get permissions from role if available
     // Use optional chaining and check if roleId is populated
     let permissions: string[] = [];
     if (

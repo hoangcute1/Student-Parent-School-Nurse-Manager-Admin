@@ -8,12 +8,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '@/schemas/user.schema';
 import { RoleService } from './role.service';
+import { ProfileService } from './profile.service';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private roleService: RoleService,
+    private profileService: ProfileService,
   ) {}
 
   async create(email: string, password: string, role?: string): Promise<User> {
@@ -129,8 +131,17 @@ export class UserService {
       throw error;
     }
   }
-
   async deleteById(id: string) {
     return this.userModel.findByIdAndDelete(id).exec();
+  }
+
+  async getUserProfile(userId: string) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    const profile = await this.profileService.findByUserId(userId);
+    return { user, profile };
   }
 }

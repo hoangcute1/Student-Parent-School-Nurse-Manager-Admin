@@ -1,50 +1,75 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, Matches } from 'class-validator';
+import { 
+  IsOptional, 
+  IsString, 
+  IsDate, 
+  IsEnum, 
+  IsMongoId 
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateStudentDto {
   @ApiProperty({
     example: 'Nguyen Van A',
-    description: 'Họ tên sinh viên',
+    description: 'Họ tên học sinh',
     required: false,
   })
   @IsOptional()
   @IsString({ message: 'Họ tên phải là chuỗi' })
-  fullName?: string;
+  name?: string;
 
   @ApiProperty({
     example: 'SV001',
-    description: 'Mã sinh viên',
+    description: 'Mã học sinh',
     required: false,
   })
   @IsOptional()
-  @IsString({ message: 'Mã sinh viên phải là chuỗi' })
+  @IsString({ message: 'Mã học sinh phải là chuỗi' })
   studentId?: string;
 
-  @ApiProperty({
-    example: 'sva@example.com',
-    description: 'Email sinh viên',
-    required: false,
+  @ApiProperty({ 
+    example: '2000-01-01', 
+    description: 'Ngày sinh',
+    required: false 
   })
   @IsOptional()
-  @IsEmail({}, { message: 'Email không hợp lệ' })
-  email?: string;
+  @Type(() => Date)
+  @IsDate({ message: 'Ngày sinh không hợp lệ' })
+  birth?: Date;
 
-  @ApiProperty({
-    example: '0912345678',
-    description: 'Số điện thoại',
-    required: false,
+  @ApiProperty({ 
+    example: 'male', 
+    description: 'Giới tính', 
+    enum: ['male', 'female', 'other'],
+    required: false 
   })
   @IsOptional()
-  @IsString({ message: 'Số điện thoại phải là chuỗi' })
-  @Matches(/^[0-9]{10,11}$/, { message: 'Số điện thoại không hợp lệ' })
-  phone?: string;
+  @IsEnum(['male', 'female', 'other'], { message: 'Giới tính phải là male, female hoặc other' })
+  gender?: string;
 
-  @ApiProperty({
-    example: 'Hồ Chí Minh',
-    description: 'Địa chỉ',
-    required: false,
+  @ApiProperty({ 
+    example: '10', 
+    description: 'Khối lớp',
+    required: false 
   })
   @IsOptional()
-  @IsString({ message: 'Địa chỉ phải là chuỗi' })
-  address?: string;
+  @IsString({ message: 'Khối lớp phải là chuỗi' })
+  grade?: string;
+
+  @ApiProperty({ 
+    example: '10A1', 
+    description: 'Lớp',
+    required: false 
+  })
+  @IsOptional()
+  @IsString({ message: 'Lớp phải là chuỗi' })
+  class?: string;
+  @ApiProperty({ 
+    example: '60d0fe4f5311236168a109ca', 
+    description: 'ID của phụ huynh (MongoDB ObjectID)',
+    required: false 
+  })
+  @IsOptional()
+  @IsMongoId({ message: 'ID phụ huynh không hợp lệ' })
+  parentId?: string;
 }

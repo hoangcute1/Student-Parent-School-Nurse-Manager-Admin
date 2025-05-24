@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   MinLength,
@@ -21,6 +20,7 @@ export class RegisterDto {
   @ApiProperty({
     example: 'user',
     description: 'Vai trò người dùng',
+    required: false,
   })
   @IsOptional()
   role?: string;

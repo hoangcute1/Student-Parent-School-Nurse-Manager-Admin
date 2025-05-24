@@ -12,11 +12,12 @@ import { StudentModule } from './modules/student.module';
 import { RoleModule } from './modules/role.module';
 import { ThrottlerModule } from './modules/throttler.module';
 import { TokenBlacklistModule } from './modules/token-blacklist.module';
+import { ParentModule } from './modules/parent.module';
+import { StaffModule } from './modules/staff.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
 
-@Module({
-  imports: [
+@Module({  imports: [
     ConfigModule.forRoot({
       load: [configuration],
     }),
@@ -29,6 +30,8 @@ import { AppThrottlerGuard } from './guards/throttler.guard';
     AuthModule,
     StudentModule,
     RoleModule,
+    ParentModule,
+    StaffModule,
   ],
   controllers: [AppController],
   providers: [

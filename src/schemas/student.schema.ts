@@ -1,22 +1,30 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Parent } from './parent.schema';
+
+export type StudentDocument = Student & Document;
 
 @Schema({ versionKey: false })
 export class Student extends Document {
   @Prop({ required: true })
-  fullName: string;
+  name: string;
 
   @Prop({ required: true, unique: true })
   studentId: string;
 
-  @Prop({ required: true })
-  email: string;
+  @Prop()
+  birth: Date;
+
+  @Prop({ enum: ['male', 'female', 'other'] })
+  gender: string;
 
   @Prop()
-  phone: string;
+  grade: string;
 
   @Prop()
-  address: string;
+  class: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Parent' })
+  parentId: MongooseSchema.Types.ObjectId;
 
   @Prop({ default: Date.now })
   createdAt: Date;

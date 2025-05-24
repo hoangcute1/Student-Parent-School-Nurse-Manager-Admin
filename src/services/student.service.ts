@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -13,11 +14,13 @@ import {
   FilterOperator,
 } from '@/decorations/dto/filter-student.dto';
 import { SortOrder } from '@/decorations/dto/pagination.dto';
+import { ParentService } from '@/services/parent.service';
 
 @Injectable()
 export class StudentService {
   constructor(
     @InjectModel(Student.name) private studentModel: Model<Student>,
+    private parentService: ParentService
   ) {}
 
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
@@ -30,6 +33,15 @@ export class StudentService {
 
     if (existingStudent) {
       throw new ConflictException('Mã sinh viên đã tồn tại');
+    }
+
+    // Check if parentId exists
+    if (createStudentDto.parentId) {
+      try {
+        await this.parentService.findById(createStudentDto.parentId);
+      } catch (error) {
+        throw new BadRequestException(`Phụ huynh với ID "${createStudentDto.parentId}" không tồn tại`);
+      }
     }
 
     const createdStudent = new this.studentModel(createStudentDto);
@@ -91,17 +103,13 @@ export class StudentService {
   }
   async findAll(
     filterDto?: FilterStudentDto,
-  ): Promise<{ data: Student[]; total: number; page: number; limit: number }> {
-    const {
+  ): Promise<{ data: Student[]; total: number; page: number; limit: number }> {    const {
       page = 1,
       limit = 10,
       sortBy,
       sortOrder = SortOrder.ASC,
       search,
       studentId,
-      email,
-      phone,
-      address,
       createdFrom,
       createdTo,
       advancedFilters,
@@ -118,18 +126,6 @@ export class StudentService {
 
     if (studentId) {
       query.studentId = { $regex: studentId, $options: 'i' };
-    }
-
-    if (email) {
-      query.email = { $regex: email, $options: 'i' };
-    }
-
-    if (phone) {
-      query.phone = { $regex: phone, $options: 'i' };
-    }
-
-    if (address) {
-      query.address = { $regex: address, $options: 'i' };
     }
 
     // Date range filtering
@@ -396,5 +392,10 @@ export class StudentService {
     }
 
     return result;
+  }
+
+  // Phương thức này sẽ được gọi từ StudentController thông qua endpoint DELETE
+  async remove(id: string): Promise<Student> {
+    return this.delete(id);
   }
 }

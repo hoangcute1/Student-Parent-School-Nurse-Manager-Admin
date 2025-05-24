@@ -1,31 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ProfileService } from '../services/profile.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiProperty } from '@nestjs/swagger';
-
-class CreateProfileDto {
-  @ApiProperty({ example: 'Nguyen Van B', description: 'Tên profile' })
-  name: string;
-  @ApiProperty({ example: '123 Đường ABC', description: 'Địa chỉ' })
-  address: string;
-  @ApiProperty({ example: 25, description: 'Tuổi' })
-  age: number;
-  @ApiProperty({ example: 'b@example.com', description: 'Email' })
-  email: string;
-}
-
-class UpdateProfileDto {
-  @ApiProperty({ example: 'Nguyen Van B', required: false })
-  name?: string;
-  @ApiProperty({ example: '123 Đường ABC', required: false })
-  address?: string;
-  @ApiProperty({ example: 25, required: false })
-  age?: number;
-  @ApiProperty({ example: 'b@example.com', required: false })
-  email?: string;
-}
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
+import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
+import { UpdateProfileDto } from '@/decorations/dto/update-profile.dto';
 
 @ApiTags('profiles')
 @Controller('profiles')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
@@ -33,8 +16,8 @@ export class ProfileController {
   @ApiOperation({ summary: 'Tạo profile mới' })
   @ApiBody({ type: CreateProfileDto })
   @ApiResponse({ status: 201, description: 'Profile đã được tạo.' })
-  async create(@Body() dto: CreateProfileDto) {
-    return this.profileService.create(dto);
+  async create(@Body() createProfileDto: CreateProfileDto) {
+    return this.profileService.create(createProfileDto);
   }
 
   @Get()
@@ -52,13 +35,21 @@ export class ProfileController {
     return this.profileService.findById(id);
   }
 
+  @Get('user/:userId')
+  @ApiOperation({ summary: 'Lấy profile theo userId' })
+  @ApiParam({ name: 'userId', description: 'ID của user' })
+  @ApiResponse({ status: 200, description: 'Profile theo userId.' })
+  async findByUserId(@Param('userId') userId: string) {
+    return this.profileService.findByUserId(userId);
+  }
+
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật profile theo id' })
   @ApiParam({ name: 'id', description: 'ID của profile' })
   @ApiBody({ type: UpdateProfileDto })
   @ApiResponse({ status: 200, description: 'Profile đã được cập nhật.' })
-  async update(@Param('id') id: string, @Body() dto: UpdateProfileDto) {
-    return this.profileService.updateById(id, dto);
+  async update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
+    return this.profileService.updateById(id, updateProfileDto);
   }
 
   @Delete(':id')

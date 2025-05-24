@@ -101,7 +101,6 @@ export class UserController {
   ) {
     return this.userService.updateRole(id, roleName);
   }
-
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Xóa user theo id' })
@@ -113,5 +112,19 @@ export class UserController {
   })
   async delete(@Param('id') id: string) {
     return this.userService.deleteById(id);
+  }
+
+  @Get(':id/profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Lấy thông tin profile của user' })
+  @ApiParam({ name: 'id', description: 'ID của user' })
+  @ApiResponse({ status: 200, description: 'Thông tin profile của user.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy user hoặc profile.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
+  async getUserProfile(@Param('id') id: string) {
+    return this.userService.getUserProfile(id);
   }
 }

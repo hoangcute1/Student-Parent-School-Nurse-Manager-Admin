@@ -41,26 +41,10 @@ export class FilterStudentDto extends PaginationDto {
   @IsOptional()
   @IsString()
   search?: string;
-
   @ApiProperty({ required: false, description: 'Lọc theo mã sinh viên' })
   @IsOptional()
   @IsString()
   studentId?: string;
-
-  @ApiProperty({ required: false, description: 'Lọc theo email' })
-  @IsOptional()
-  @IsString()
-  email?: string;
-
-  @ApiProperty({ required: false, description: 'Lọc theo số điện thoại' })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiProperty({ required: false, description: 'Lọc theo địa chỉ' })
-  @IsOptional()
-  @IsString()
-  address?: string;
 
   @ApiProperty({ required: false, description: 'Lọc theo ngày tạo từ' })
   @IsOptional()

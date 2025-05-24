@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
 import { AuthService } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
+import { ProfileService } from '@/services/profile.service';
 import { LocalAuthGuard } from '@/guards/local-auth.guard';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
@@ -11,10 +12,10 @@ import { RefreshTokenDto } from '@/decorations/dto/refresh-token.dto';
 
 @ApiTags('auth')
 @Controller('auth')
-export class AuthController {
-  constructor(
+export class AuthController {  constructor(
     private authService: AuthService,
     private userService: UserService,
+    private profileService: ProfileService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -28,8 +29,7 @@ export class AuthController {
   })
   async login(@Req() req) {
     return this.authService.login(req.user);
-  }
-  @Post('register')
+  }  @Post('register')
   @ApiOperation({ summary: 'Đăng ký người dùng mới' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
@@ -38,7 +38,26 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Email đã tồn tại.' })
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    // Register the user
+    const user = await this.authService.register(registerDto);
+    
+    // Determine the userId safely
+    let userId: string;
+    if (user._id) {
+      userId = user._id.toString();
+    } else if (user.id) {
+      userId = user.id.toString();
+    } else {
+      throw new Error('User ID not available after registration');
+    }
+    
+    // Create an empty profile automatically
+    await this.profileService.create({
+      userId: userId,
+    });
+    
+    // Login the user to get tokens
+    return this.authService.login(user);
   }
   @UseGuards(JwtAuthGuard)
   @Post('logout')
@@ -70,7 +89,6 @@ export class AuthController {
   getProfile(@Req() req) {
     return req.user;
   }
-
   @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết người dùng hiện tại' })
@@ -82,8 +100,16 @@ export class AuthController {
   async getMe(@Req() req) {
     // Get detailed user information from the database using the ID in the JWT
     const user = await this.userService.findById(req.user.userId);
+    
+    // Get user's profile
+    const profile = await this.profileService.findByUserId(req.user.userId);
+    
     // Remove sensitive information
-    const { password, refreshToken, ...result } = user.toObject();
-    return result;
+    const { password, refreshToken, ...userResult } = user.toObject();
+    
+    return {
+      user: userResult,
+      profile: profile
+    };
   }
 }
