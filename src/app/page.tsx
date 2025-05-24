@@ -1,47 +1,32 @@
-import Link from "next/link"
-import Image from "next/image"
-import { BookOpen, Calendar, FileText, Heart, Info, MessageSquare, Shield, Users } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-
+import Link from "next/link";
+import Image from "next/image";
+import {
+  BookOpen,
+  Calendar,
+  FileText,
+  Heart,
+  Info,
+  MessageSquare,
+  Shield,
+  Users,
+} from "lucide-react";
+import type { User as AppUser, UserProfile } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Header from "@/components/layout/header/header";
+import { useState } from "react";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen min-w-full">
-      <header className="sticky flex justify-center items-center top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-2 pl-4">
-            <Heart className="h-6 w-6 text-red-500" />
-            <span className="text-xl font-bold">Y Tế Học Đường</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
-              Trang chủ
-            </Link>
-            <Link href="#features" className="text-sm font-medium transition-colors hover:text-primary">
-              Tính năng
-            </Link>
-            <Link href="#resources" className="text-sm font-medium transition-colors hover:text-primary">
-              Tài liệu
-            </Link>
-            <Link href="#blog" className="text-sm font-medium transition-colors hover:text-primary">
-              Blog
-            </Link>
-            <Link href="#contact" className="text-sm font-medium transition-colors hover:text-primary">
-              Liên hệ
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="outline">Đăng nhập</Button>
-            </Link>
-            <Link href="/register">
-              <Button>Đăng ký ngay</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
       <main className="flex-1 w-full">
         <section className="flex justify-center items-center w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-blue-50 to-white">
           <div className="container px-4 md:px-6">
@@ -52,8 +37,8 @@ export default function Home() {
                     Hệ thống Quản lý Y tế Học đường
                   </p>
                   <p className="max-w-[600px] text-gray-500 md:text-xl">
-                    Giải pháp toàn diện để quản lý sức khỏe học sinh, theo dõi sự kiện y tế, và đảm bảo môi trường học
-                    tập an toàn.
+                    Giải pháp toàn diện để quản lý sức khỏe học sinh, theo dõi
+                    sự kiện y tế, và đảm bảo môi trường học tập an toàn.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -76,13 +61,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 flex justify-center items-center">
+        <section
+          id="features"
+          className="w-full py-12 md:py-24 lg:py-32 flex justify-center items-center"
+        >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Tính năng chính</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  Tính năng chính
+                </h2>
                 <p className="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Hệ thống của chúng tôi cung cấp đầy đủ các công cụ cần thiết để quản lý sức khỏe học sinh hiệu quả
+                  Hệ thống của chúng tôi cung cấp đầy đủ các công cụ cần thiết
+                  để quản lý sức khỏe học sinh hiệu quả
                 </p>
               </div>
             </div>
@@ -92,13 +83,16 @@ export default function Home() {
                   <FileText className="h-8 w-8 text-blue-500" />
                   <div>
                     <CardTitle>Hồ sơ sức khỏe</CardTitle>
-                    <CardDescription>Quản lý thông tin sức khỏe học sinh</CardDescription>
+                    <CardDescription>
+                      Quản lý thông tin sức khỏe học sinh
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều trị, thị lực, thính lực, tiêm chủng và
-                    các thông tin sức khỏe khác.
+                    Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử
+                    điều trị, thị lực, thính lực, tiêm chủng và các thông tin
+                    sức khỏe khác.
                   </p>
                 </CardContent>
               </Card>
@@ -112,8 +106,8 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Nhân viên y tế có thể ghi nhận và xử lý các sự kiện như tai nạn, sốt, té ngã, dịch bệnh và các tình
-                    huống y tế khác.
+                    Nhân viên y tế có thể ghi nhận và xử lý các sự kiện như tai
+                    nạn, sốt, té ngã, dịch bệnh và các tình huống y tế khác.
                   </p>
                 </CardContent>
               </Card>
@@ -127,7 +121,8 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Quản lý toàn bộ quy trình tiêm chủng và kiểm tra y tế định kỳ từ thông báo đến theo dõi kết quả.
+                    Quản lý toàn bộ quy trình tiêm chủng và kiểm tra y tế định
+                    kỳ từ thông báo đến theo dõi kết quả.
                   </p>
                 </CardContent>
               </Card>
@@ -141,7 +136,8 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Truy cập tài liệu về sức khỏe học đường, hướng dẫn phòng bệnh và các thông tin y tế quan trọng khác.
+                    Truy cập tài liệu về sức khỏe học đường, hướng dẫn phòng
+                    bệnh và các thông tin y tế quan trọng khác.
                   </p>
                 </CardContent>
               </Card>
@@ -150,12 +146,15 @@ export default function Home() {
                   <MessageSquare className="h-8 w-8 text-yellow-500" />
                   <div>
                     <CardTitle>Tư vấn & Liên lạc</CardTitle>
-                    <CardDescription>Kết nối phụ huynh và nhà trường</CardDescription>
+                    <CardDescription>
+                      Kết nối phụ huynh và nhà trường
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Hệ thống liên lạc giữa phụ huynh và nhân viên y tế, đặt lịch tư vấn và thông báo kết quả kiểm tra.
+                    Hệ thống liên lạc giữa phụ huynh và nhân viên y tế, đặt lịch
+                    tư vấn và thông báo kết quả kiểm tra.
                   </p>
                 </CardContent>
               </Card>
@@ -164,22 +163,32 @@ export default function Home() {
                   <Users className="h-8 w-8 text-orange-500" />
                   <div>
                     <CardTitle>Quản lý thuốc</CardTitle>
-                    <CardDescription>Theo dõi và cấp phát thuốc</CardDescription>
+                    <CardDescription>
+                      Theo dõi và cấp phát thuốc
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p>Phụ huynh có thể gửi thuốc cho trường, nhân viên y tế quản lý và cấp phát thuốc theo chỉ định.</p>
+                  <p>
+                    Phụ huynh có thể gửi thuốc cho trường, nhân viên y tế quản
+                    lý và cấp phát thuốc theo chỉ định.
+                  </p>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
 
-        <section id="resources" className="w-full py-12 md:py-24 lg:py-32 bg-gray-50 flex justify-center items-center">
+        <section
+          id="resources"
+          className="w-full py-12 md:py-24 lg:py-32 bg-gray-50 flex justify-center items-center"
+        >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Tài liệu sức khỏe</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  Tài liệu sức khỏe
+                </h2>
                 <p className="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   Thông tin và tài liệu hữu ích về sức khỏe học đường
                 </p>
@@ -189,7 +198,8 @@ export default function Home() {
               {[
                 {
                   title: "Hướng dẫn phòng bệnh mùa học",
-                  description: "Các biện pháp phòng ngừa bệnh tật trong năm học mới",
+                  description:
+                    "Các biện pháp phòng ngừa bệnh tật trong năm học mới",
                   icon: Shield,
                 },
                 {
@@ -199,7 +209,8 @@ export default function Home() {
                 },
                 {
                   title: "Sức khỏe tâm lý học sinh",
-                  description: "Nhận biết và hỗ trợ vấn đề tâm lý ở trẻ em và thanh thiếu niên",
+                  description:
+                    "Nhận biết và hỗ trợ vấn đề tâm lý ở trẻ em và thanh thiếu niên",
                   icon: Info,
                 },
               ].map((item, index) => (
@@ -212,7 +223,9 @@ export default function Home() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-500">Tài liệu hướng dẫn chi tiết về chủ đề này.</p>
+                    <p className="text-gray-500">
+                      Tài liệu hướng dẫn chi tiết về chủ đề này.
+                    </p>
                   </CardContent>
                   <CardFooter>
                     <Button variant="outline" className="w-full">
@@ -225,7 +238,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="blog" className="w-full py-12 md:py-24 lg:py-32 flex justify-center items-center">
+        <section
+          id="blog"
+          className="w-full py-12 md:py-24 lg:py-32 flex justify-center items-center"
+        >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
@@ -258,7 +274,9 @@ export default function Home() {
                 <Card key={index}>
                   <CardHeader>
                     <Image
-                      src={`/placeholder.svg?height=200&width=400&text=Blog+${index + 1}`}
+                      src={`/placeholder.svg?height=200&width=400&text=Blog+${
+                        index + 1
+                      }`}
                       alt={post.title}
                       width={400}
                       height={200}
@@ -273,7 +291,8 @@ export default function Home() {
                       <span>{post.author}</span>
                     </div>
                     <p className="mt-4 text-gray-600">
-                      Tóm tắt bài viết chia sẻ kinh nghiệm và các thông tin hữu ích về chủ đề sức khỏe học đường...
+                      Tóm tắt bài viết chia sẻ kinh nghiệm và các thông tin hữu
+                      ích về chủ đề sức khỏe học đường...
                     </p>
                   </CardContent>
                   <CardFooter>
@@ -287,11 +306,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="contact" className="w-full py-12 md:py-24 lg:py-32 bg-gray-50 flex justify-center items-center">
+        <section
+          id="contact"
+          className="w-full py-12 md:py-24 lg:py-32 bg-gray-50 flex justify-center items-center"
+        >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Liên hệ với chúng tôi</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  Liên hệ với chúng tôi
+                </h2>
                 <p className="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   Có thắc mắc hoặc cần hỗ trợ? Hãy liên hệ với chúng tôi
                 </p>
@@ -354,7 +378,9 @@ export default function Home() {
                       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                       <circle cx="12" cy="10" r="3" />
                     </svg>
-                    <span>123 Đường Giáo Dục, Quận Học Đường, TP. Hồ Chí Minh</span>
+                    <span>
+                      123 Đường Giáo Dục, Quận Học Đường, TP. Hồ Chí Minh
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -433,18 +459,27 @@ export default function Home() {
             © 2025 Y Tế Học Đường. Đã đăng ký bản quyền.
           </p>
           <div className="flex items-center gap-4">
-            <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="#"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Điều khoản
             </Link>
-            <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="#"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Chính sách
             </Link>
-            <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link
+              href="#"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Trợ giúp
             </Link>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

@@ -7,10 +7,10 @@ import { usePathname } from "next/navigation";
 import { Heart, Home, Menu, Users, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { UserNav } from "@/components/user-nav";
 import type { User as AppUser, UserProfile } from "@/lib/types";
 import { getAuthToken } from "@/lib/auth";
 import CheckAuth from "./check-auth";
+import Header from "@/components/layout/header/header";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -112,28 +112,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             isSidebarOpen ? "lg:ml-64" : "lg:ml-0"
           )}
         >
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background  pl-1 pr-4 md:pr-6">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleSidebar}
-                className="shrink-0"
-              >
-                {isSidebarOpen ? (
-                  <ChevronLeft className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
+          <Header />
 
-            <div className="flex items-center gap-4">
-              {user && profile ? (
-                <UserNav user={user} profile={profile} />
-              ) : null}
-            </div>
-          </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
         </div>
 
