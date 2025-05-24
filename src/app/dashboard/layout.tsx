@@ -1,24 +1,15 @@
 "use client";
 
 import type React from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Bell,
-  Calendar,
-  FileText,
-  Heart,
-  Home,
-  LogOut,
-  Menu,
-  MessageSquare,
-  Settings,
-  Shield,
-  User,
-} from "lucide-react";
-
+import { usePathname } from "next/navigation";
+import { Heart, Home, Menu, Users, ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { logout } from "@/lib/auth";
+import { UserNav } from "@/components/user-nav";
+import type { User as AppUser, UserProfile } from "@/lib/types";
+import { getAuthToken } from "@/lib/auth";
 import CheckAuth from "./check-auth";
 
 interface DashboardLayoutProps {
@@ -26,167 +17,133 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const pathname = usePathname();
+
+  // Effect for handling initial state
+  useEffect(() => {
+    // Check auth token first
+    if (!getAuthToken()) {
+      return;
+    }
+
+    // Get sidebar state from localStorage
+    const savedSidebarState = localStorage.getItem("sidebarOpen");
+    if (savedSidebarState !== null) {
+      setIsSidebarOpen(JSON.parse(savedSidebarState));
+    }
+
+    // Get user data from localStorage
+    const authData = localStorage.getItem("authData");
+    if (authData) {
+      try {
+        const data = JSON.parse(authData);
+        if (data.user && data.profile) {
+          setUser(data.user);
+          setProfile(data.profile);
+        }
+      } catch (error) {
+        console.error("Error parsing auth data:", error);
+      }
+    }
+  }, []);
+
+  // Save sidebar state to localStorage when it changes
+  const toggleSidebar = () => {
+    const newState = !isSidebarOpen;
+    setIsSidebarOpen(newState);
+    localStorage.setItem("sidebarOpen", JSON.stringify(newState));
+  };
+
+  const navLinks = [
+    { href: "/dashboard", icon: Home, label: "Trang chủ" },
+    { href: "/dashboard/health-records", icon: Heart, label: "Hồ sơ sức khỏe" },
+    { href: "/dashboard/users", icon: Users, label: "Người dùng" },
+  ];
+
   return (
     <CheckAuth>
-      <div className="flex min-h-screen flex-col">
-        <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-              <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <Home className="h-5 w-5" />
-                  Trang chủ
-                </Link>
-                <Link
-                  href="/dashboard/health-records"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <FileText className="h-5 w-5" />
-                  Hồ sơ sức khỏe
-                </Link>
-                <Link
-                  href="/dashboard/events"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <Shield className="h-5 w-5" />
-                  Sự kiện y tế
-                </Link>
-                <Link
-                  href="/dashboard/vaccinations"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <Calendar className="h-5 w-5" />
-                  Tiêm chủng
-                </Link>
-                <Link
-                  href="/dashboard/messages"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  Tin nhắn
-                </Link>
-                <Link
-                  href="/dashboard/profile"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <User className="h-5 w-5" />
-                  Hồ sơ
-                </Link>
-                <Link
-                  href="/dashboard/settings"
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <Settings className="h-5 w-5" />
-                  Cài đặt
-                </Link>
-              </nav>
-              <div className="mt-auto">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-2"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="h-5 w-5" />
-                  Đăng xuất
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <div className="flex items-center gap-2">
-            <Heart className="h-6 w-6 text-red-500" />
-            <Link href="/" className="font-bold">
-              Y Tế Học Đường
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out",
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="flex h-16 items-center justify-between gap-2 border-b px-4">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 font-semibold"
+            >
+              <Heart className="h-6 w-6" />
+              <span>HEALTH CARE</span>
             </Link>
           </div>
-          <div className="flex-1"></div>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Bell className="h-4 w-4" />
-            <span className="sr-only">Thông báo</span>
-          </Button>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <User className="h-4 w-4" />
-            <span className="sr-only">Tài khoản</span>
-          </Button>
-        </header>
-        <div className="flex flex-1">
-          <aside className="hidden w-64 border-r bg-gray-50/40 md:block">
-            <div className="flex h-full flex-col gap-2 p-4">
-              <nav className="grid gap-1 text-sm font-medium">
+          <nav className="space-y-1 px-2 py-4">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname === link.href;
+              return (
                 <Link
-                  href="/dashboard"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg px-3 py-2 transition-all hover:bg-accent",
+                    isActive
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  <Home className="h-4 w-4" />
-                  Trang chủ
+                  <Icon className="h-5 w-5" />
+                  {link.label}
                 </Link>
-                <Link
-                  href="/dashboard/health-records"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <FileText className="h-4 w-4" />
-                  Hồ sơ sức khỏe
-                </Link>
-                <Link
-                  href="/dashboard/events"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <Shield className="h-4 w-4" />
-                  Sự kiện y tế
-                </Link>
-                <Link
-                  href="/dashboard/vaccinations"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <Calendar className="h-4 w-4" />
-                  Tiêm chủng
-                </Link>
-                <Link
-                  href="/dashboard/messages"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Tin nhắn
-                </Link>
-              </nav>
-              <div className="mt-auto space-y-2">
-                <nav>
-                  <Link
-                    href="/dashboard/profile"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                  >
-                    <User className="h-4 w-4" />
-                    Hồ sơ
-                  </Link>
-                  <Link
-                    href="/dashboard/settings"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Cài đặt
-                  </Link>
-                </nav>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-2"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Đăng xuất
-                </Button>
-              </div>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* Main content */}
+        <div
+          className={cn(
+            "flex min-h-screen flex-1 flex-col transition-all duration-200 ease-in-out",
+            isSidebarOpen ? "lg:ml-64" : "lg:ml-0"
+          )}
+        >
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background  pl-1 pr-4 md:pr-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="shrink-0"
+              >
+                {isSidebarOpen ? (
+                  <ChevronLeft className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
             </div>
-          </aside>
-          <main className="flex-1 p-4 md:p-6">{children}</main>
+
+            <div className="flex items-center gap-4">
+              {user && profile ? (
+                <UserNav user={user} profile={profile} />
+              ) : null}
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
         </div>
+
+        {/* Mobile overlay */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
+            onClick={toggleSidebar}
+          />
+        )}
       </div>
     </CheckAuth>
   );

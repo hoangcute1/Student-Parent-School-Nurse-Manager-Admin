@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/auth";
 
 export default function RolesAdminPage() {
   const [roles, setRoles] = useState<Role[]>([]);
-  const { user } = useAuth("admin");
+  const { user } = useAuth();
 
   useEffect(() => {
     // Get all roles from the roles utility

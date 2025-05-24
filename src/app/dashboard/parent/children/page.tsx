@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getParentChildren } from "@/lib/api";
 import { Child as ChildType } from "@/lib/models";
 import { useAuth } from "@/lib/auth";
 
@@ -29,8 +28,6 @@ export default function ParentChildrenPage() {
 
       try {
         setLoading(true);
-        const result = await getParentChildren(user.id);
-        setChildren(result);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching children:", error);

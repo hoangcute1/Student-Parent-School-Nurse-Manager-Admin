@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,11 +21,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { loginUser, type LoginCredentials } from "@/lib/api";
-import { isLoggedIn } from "@/lib/auth";
+import { storeAuthData, getAuthToken } from "@/lib/auth";
+import type { AuthResponse } from "@/lib/types";
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [formData, setFormData] = useState<LoginCredentials>({
+  const [isLoadingParent, setIsLoadingParent] = useState<boolean>(false);
+  const [isLoadingStaff, setIsLoadingStaff] = useState<boolean>(false);
+  const [parentFormData, setParentFormData] = useState<LoginCredentials>({
+    email: "",
+    password: "",
+  });
+  const [staffFormData, setStaffFormData] = useState<LoginCredentials>({
     email: "",
     password: "",
   });
@@ -36,16 +41,17 @@ export default function LoginPage() {
     general?: string;
   }>({});
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("parent");
   const router = useRouter();
 
   // Check if user is already logged in
   useEffect(() => {
-    if (isLoggedIn()) {
+    if (getAuthToken()) {
       router.replace("/dashboard");
     }
   }, [router]);
 
-  const validateForm = (): boolean => {
+  const validateForm = (data: LoginCredentials): boolean => {
     const newErrors: {
       email?: string;
       password?: string;
@@ -53,19 +59,19 @@ export default function LoginPage() {
     let isValid = true;
 
     // Email validation
-    if (!formData.email) {
+    if (!data.email) {
       newErrors.email = "Email không được để trống";
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
       newErrors.email = "Email không hợp lệ";
       isValid = false;
     }
 
     // Password validation
-    if (!formData.password) {
+    if (!data.password) {
       newErrors.password = "Mật khẩu không được để trống";
       isValid = false;
-    } else if (formData.password.length < 6) {
+    } else if (data.password.length < 6) {
       newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
       isValid = false;
     }
@@ -74,9 +80,25 @@ export default function LoginPage() {
     return isValid;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleParentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
+    setParentFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+
+    // Clear error for this field when user starts typing
+    if (errors[id as keyof typeof errors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [id]: undefined,
+      }));
+    }
+  };
+
+  const handleStaffChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setStaffFormData((prev) => ({
       ...prev,
       [id]: value,
     }));
@@ -94,71 +116,65 @@ export default function LoginPage() {
     setShowPassword(!showPassword);
   };
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+    formData: LoginCredentials,
+    role: "parent" | "staff"
+  ) => {
+    e.preventDefault();
 
-    // Validate form before submitting
-    if (!validateForm()) {
-      return;
+    // Set loading state based on role
+    if (role === "parent") {
+      setIsLoadingParent(true);
+    } else {
+      setIsLoadingStaff(true);
     }
-
-    setIsLoading(true);
-    setErrors({});
 
     try {
-      const response = await loginUser(formData);
-      
-      // Save user info or token to localStorage/sessionStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(response.user));
-        
-        // Lưu token, ưu tiên access_token nếu có
-        if (response.access_token) {
-          localStorage.setItem("access_token", response.access_token);
-        } else if (response.token) {
-          localStorage.setItem("token", response.token);
-        }
-        
-        // Lưu refresh_token nếu có
-        if (response.refresh_token) {
-          localStorage.setItem("refresh_token", response.refresh_token);
-        }
-        
-        console.log("Đã lưu thông tin đăng nhập:", {
-          user: response.user,
-          hasAccessToken: !!response.access_token,
-          hasToken: !!response.token,
-          hasRefreshToken: !!response.refresh_token
-        });
-      }
+      // Add role to credentials
+      const credentials = { ...formData, role };
 
-      // Hiển thị thông báo thành công và đợi một chút trước khi chuyển hướng
+      // Login user
+      const response = await loginUser(credentials);
+
+      // Store auth data
+      storeAuthData(response);
+
+      // Show success message
       toast({
         title: "Đăng nhập thành công",
-        description: `Chào mừng ${response.user.email} quay trở lại!`,
+        description: "Đang chuyển hướng...",
       });
 
-      // Sử dụng setTimeout để đảm bảo localStorage đã được cập nhật
-      setTimeout(() => {
-        // Sử dụng replace thay vì push để ngăn quay lại trang login
-        router.replace("/dashboard");
-      }, 500);
-    } catch (error: any) {
+      // Redirect to dashboard
+      router.push("/dashboard");
+    } catch (error) {
       console.error("Login error:", error);
-      const errorMessage =
-        error?.message || "Email hoặc mật khẩu không chính xác";
-      setErrors({
-        general: errorMessage,
-      });
+      let message = "Có lỗi xảy ra khi đăng nhập";
+
+      if (error instanceof Error) {
+        if (error.message.includes("401")) {
+          message = "Email hoặc mật khẩu không chính xác";
+        } else if (error.message.includes("403")) {
+          message = "Tài khoản của bạn không có quyền truy cập";
+        }
+      }
+
+      setErrors({ general: message });
       toast({
-        title: "Đăng nhập thất bại",
-        description: errorMessage,
         variant: "destructive",
+        title: "Đăng nhập thất bại",
+        description: message,
       });
     } finally {
-      setIsLoading(false);
+      // Reset loading state
+      if (role === "parent") {
+        setIsLoadingParent(false);
+      } else {
+        setIsLoadingStaff(false);
+      }
     }
-  }
+  };
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
@@ -178,7 +194,20 @@ export default function LoginPage() {
             Nhập thông tin đăng nhập của bạn để truy cập hệ thống
           </p>
         </div>
-        <Tabs defaultValue="parent" className="w-full">
+        <Tabs
+          defaultValue="parent"
+          className="w-full"
+          onValueChange={(value) => {
+            setActiveTab(value);
+            // Reset form data and errors when switching tabs
+            if (value === "parent") {
+              setParentFormData({ email: "", password: "" });
+            } else {
+              setStaffFormData({ email: "", password: "" });
+            }
+            setErrors({});
+          }}
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="parent">Phụ huynh</TabsTrigger>
             <TabsTrigger value="staff">Nhân viên y tế</TabsTrigger>
@@ -191,7 +220,9 @@ export default function LoginPage() {
                   Quản lý hồ sơ sức khỏe của con bạn
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={onSubmit}>
+              <form
+                onSubmit={(e) => handleSubmit(e, parentFormData, "parent")}
+              >
                 <CardContent className="space-y-4">
                   {errors.general && (
                     <Alert variant="destructive">
@@ -205,8 +236,8 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       placeholder="example@email.com"
-                      value={formData.email}
-                      onChange={handleChange}
+                      value={parentFormData.email}
+                      onChange={handleParentChange}
                       required
                       className={errors.email ? "border-red-500" : ""}
                     />
@@ -230,8 +261,8 @@ export default function LoginPage() {
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        value={formData.password}
-                        onChange={handleChange}
+                        value={parentFormData.password}
+                        onChange={handleParentChange}
                         required
                         className={errors.password ? "border-red-500" : ""}
                       />
@@ -264,9 +295,23 @@ export default function LoginPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col">
-                  <Button className="w-full" type="submit" disabled={isLoading}>
-                    {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
-                  </Button>
+                  <div className="flex w-full gap-2">
+                    <Button
+                      className="w-full"
+                      type="submit"
+                      disabled={isLoadingParent}
+                    >
+                      {isLoadingParent ? "Đang đăng nhập..." : "Đăng nhập"}
+                    </Button>
+                    <Button
+                      className="w-full"
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push("/")}
+                    >
+                      Quay lại
+                    </Button>
+                  </div>
                   <p className="mt-4 text-center text-sm text-gray-500">
                     Chưa có tài khoản?{" "}
                     <Link
@@ -288,7 +333,7 @@ export default function LoginPage() {
                   Quản lý sức khỏe học sinh và sự kiện y tế
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={onSubmit}>
+              <form onSubmit={(e) => handleSubmit(e, staffFormData, "staff")}>
                 <CardContent className="space-y-4">
                   {errors.general && (
                     <Alert variant="destructive">
@@ -302,8 +347,8 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       placeholder="staff@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
+                      value={staffFormData.email}
+                      onChange={handleStaffChange}
                       required
                       className={errors.email ? "border-red-500" : ""}
                     />
@@ -327,8 +372,8 @@ export default function LoginPage() {
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        value={formData.password}
-                        onChange={handleChange}
+                        value={staffFormData.password}
+                        onChange={handleStaffChange}
                         required
                         className={errors.password ? "border-red-500" : ""}
                       />
@@ -361,9 +406,23 @@ export default function LoginPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" type="submit" disabled={isLoading}>
-                    {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
-                  </Button>
+                  <div className="flex w-full gap-2">
+                    <Button
+                      className="w-full"
+                      type="submit"
+                      disabled={isLoadingStaff}
+                    >
+                      {isLoadingStaff ? "Đang đăng nhập..." : "Đăng nhập"}
+                    </Button>
+                    <Button
+                      className="w-full"
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push("/")}
+                    >
+                      Quay lại
+                    </Button>
+                  </div>
                 </CardFooter>
               </form>
             </Card>

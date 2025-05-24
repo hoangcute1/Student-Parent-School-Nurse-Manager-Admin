@@ -1,134 +1,84 @@
 // Authentication utilities
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RoleName, hasPermission } from "./roles";
+import { RoleName } from "./roles";
+import type { AuthResponse, User, UserProfile } from "./types";
 
-// Type for user data
-export interface AuthUser {
-  id: string; // Sửa từ number thành string vì từ MongoDB sẽ trả về ID dạng string
-  email: string;
-  role: RoleName;
+// Storage keys
+const AUTH_TOKEN_KEY = "authToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
+const AUTH_DATA_KEY = "authData";
+
+// Type for stored auth data
+interface StoredAuthData {
+  user: User;
+  profile: UserProfile;
 }
 
-// Check if code is running on the client side
-const isClient = typeof window !== "undefined";
+// Function to store auth data
+export function storeAuthData(response: AuthResponse) {
+  if (typeof window === "undefined") return;
+
+  localStorage.setItem(AUTH_TOKEN_KEY, response.access_token);
+  localStorage.setItem(REFRESH_TOKEN_KEY, response.refresh_token);
+  localStorage.setItem(
+    AUTH_DATA_KEY,
+    JSON.stringify({
+      user: response.user,
+      profile: response.profile,
+    })
+  );
+}
+
+// Function to get auth token
+export function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+// Function to get user data
+export function getAuthData(): StoredAuthData | null {
+  if (typeof window === "undefined") return null;
+  const data = localStorage.getItem(AUTH_DATA_KEY);
+  return data ? JSON.parse(data) : null;
+}
+
+// Function to clear auth data on logout
+export function clearAuthData() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_DATA_KEY);
+}
+
+// Function to logout
+export async function logout() {
+  clearAuthData();
+  window.location.href = "/login";
+}
 
 // Custom hook to check if user is authenticated
-export function useAuth(requiredRole?: RoleName | RoleName[]) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const initialized = useRef(false);
+
   useEffect(() => {
-    let isMounted = true;
+    if (initialized.current) return;
+    initialized.current = true;
 
-    // Check if the user is logged in
-    const checkAuth = async () => {
-      try {
-        if (!isClient) {
-          if (isMounted) setLoading(false);
-          return;
-        }
+    const authData = getAuthData();
+    if (!authData) {
+      router.push("/login");
+      setLoading(false);
+      return;
+    }
 
-        const storedUser = localStorage.getItem("user");
-        const token =
-          localStorage.getItem("access_token") || localStorage.getItem("token");
-
-        if (!storedUser || !token) {
-          // Not logged in, redirect to login page
-          if (isMounted) {
-            setLoading(false);
-            setUser(null);
-          }
-          return;
-        }
-
-        try {
-          const userData = JSON.parse(storedUser) as AuthUser;
-
-          console.log("Đã đọc thông tin người dùng từ localStorage:", userData); // Cập nhật state ngay lập tức với dữ liệu từ localStorage
-          if (isMounted) {
-            setUser(userData);
-          }
-
-          // Check if the user has the required role
-          if (requiredRole) {
-            const requiredRoles = Array.isArray(requiredRole)
-              ? requiredRole
-              : [requiredRole];
-
-            if (!hasPermission(userData.role, requiredRoles)) {
-              console.log("Người dùng không có quyền cần thiết:", requiredRole);
-              // User doesn't have the required role
-              if (isMounted) {
-                setLoading(false);
-              }
-              return;
-            }
-          }
-
-          // Kết thúc loading
-          if (isMounted) {
-            setLoading(false);
-          }
-        } catch (parseError) {
-          console.error("Error parsing user data:", parseError);
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
-          localStorage.removeItem("access_token");
-
-          if (isMounted) {
-            setUser(null);
-            setLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        if (isMounted) {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    };
-
-    checkAuth();
-
-    // Cleanup function để tránh memory leak
-    return () => {
-      isMounted = false;
-    };
-  }, [router, requiredRole]);
+    setUser(authData.user);
+    setLoading(false);
+  }, [router]);
 
   return { user, loading };
-}
-
-// Function to log out the user
-export function logout() {
-  if (isClient) {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-
-    // Sử dụng setTimeout để đảm bảo localStorage đã được xóa
-    setTimeout(() => {
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-    }, 100);
-  }
-}
-
-// Function to get the authentication token
-export function getAuthToken() {
-  if (!isClient) return null;
-  return localStorage.getItem("access_token") || localStorage.getItem("token");
-}
-
-// Function to check if the user is logged in
-export function isLoggedIn() {
-  if (!isClient) return false;
-  return !!(
-    localStorage.getItem("access_token") || localStorage.getItem("token")
-  );
 }

@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Child, HealthRecord, VaccinationRecord } from "@/lib/models";
+import type { Child, HealthRecord } from "@/lib/models";
 import { getChildById, getHealthRecordByChildId } from "@/lib/api";
 import Link from "next/link";
 
@@ -37,17 +37,6 @@ export default function ChildDetailsPage({ params }: ChildDetailsPageProps) {
         // Fetch child data
         const childData = await getChildById(params.id);
         setChild(childData);
-
-        // If child has a health record, fetch it
-        if (childData.healthRecordId) {
-          try {
-            const healthData = await getHealthRecordByChildId(childData.id);
-            setHealthRecord(healthData);
-          } catch (healthError) {
-            console.error("Error fetching health record:", healthError);
-            // Don't set an error, just leave healthRecord as null
-          }
-        }
 
         setLoading(false);
       } catch (error) {

@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getUsers, User } from "@/lib/api";
+import { getUsers } from "@/lib/api";
 import { Users, ShieldCheck, UserCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -20,19 +20,25 @@ export default function AdminDashboardPage() {
     adminUsers: 0,
   });
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth("admin");
+  const { user } = useAuth();
+
+  // Define a type for user objects
+  type User = {
+    role: string;
+    // add other fields if needed
+  };
 
   useEffect(() => {
     async function fetchStats() {
       try {
         setLoading(true);
-        const users = await getUsers();
+        const users = (await getUsers()) as User[];
 
         setStats({
           totalUsers: users.length,
-          parentUsers: users.filter((user) => user.role === "parent").length,
-          staffUsers: users.filter((user) => user.role === "staff").length,
-          adminUsers: users.filter((user) => user.role === "admin").length,
+          parentUsers: users.filter((user: User) => user.role === "parent").length,
+          staffUsers: users.filter((user: User) => user.role === "staff").length,
+          adminUsers: users.filter((user: User) => user.role === "admin").length,
         });
       } catch (error) {
         console.error("Không thể tải thống kê:", error);

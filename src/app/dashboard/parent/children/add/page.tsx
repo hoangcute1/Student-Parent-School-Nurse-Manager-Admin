@@ -22,10 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { addChild } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Child } from "@/lib/models";
 import { useToast } from "@/components/ui/use-toast";
+
 
 export default function AddChildPage() {
   const router = useRouter();
@@ -80,8 +80,6 @@ export default function AddChildPage() {
         class: formData.class,
         parentId: user.id,
       };
-
-      const result = await addChild(childData);
 
       toast({
         title: "Thành công",

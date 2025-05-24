@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAuth, logout, type AuthUser } from "@/lib/auth";
+import { useAuth, logout } from "@/lib/auth";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -60,22 +60,6 @@ export default function DashboardPage() {
           <p className="text-gray-500">
             Xem tổng quan về các hoạt động y tế học đường
           </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="font-medium">{user?.email}</p>
-            <p className="text-xs text-blue-500">
-              {user?.role === "parent" ? "Phụ huynh" : "Nhân viên y tế"}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={logout}
-            title="Đăng xuất"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
