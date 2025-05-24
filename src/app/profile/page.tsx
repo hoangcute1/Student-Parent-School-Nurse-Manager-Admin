@@ -83,12 +83,12 @@ export default function ProfilePage() {
           <div className="flex gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
             <span>
-              Tham gia ngày{" "}
+              Tham gia ngày:{" "}
               {new Date(profile.createdAt).toLocaleDateString("vi-VN")}
             </span>
           </div>
         </CardContent>
-      </Card>{" "}
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Thông tin cá nhân</CardTitle>

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { User as AppUser, UserProfile } from "@/lib/types";
 import { getAuthToken } from "@/lib/auth";
 import CheckAuth from "./check-auth";
-import Header from "@/components/layout/header/header";
+import User from "@/components/layout/header/user";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -104,7 +104,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             })}
           </nav>
         </aside>
-
         {/* Main content */}
         <div
           className={cn(
@@ -112,11 +111,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             isSidebarOpen ? "lg:ml-64" : "lg:ml-0"
           )}
         >
-          <Header />
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background  pl-2 pr-4 md:pr-6">
+            <div className="flex items-center gap-4">
+              <div
+                onClick={toggleSidebar}
+                className=" size-10 flex justify-center items-center hover:bg-slate-100 rounded-md"
+              >
+                {isSidebarOpen ? <ChevronLeft size={25} /> : <Menu size={25} />}
+              </div>
+            </div>
 
+            <div className="flex items-center gap-4">
+              {user && profile ? <User /> : null}
+            </div>
+          </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
         </div>
-
         {/* Mobile overlay */}
         {isSidebarOpen && (
           <div
