@@ -13,7 +13,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ParentModule } from './parent.module';
 import { StaffModule } from './staff.module';
 
-@Module({  imports: [
+@Module({
+  imports: [
     UserModule,
     ProfileModule,
     TokenBlacklistModule,
@@ -33,11 +34,7 @@ import { StaffModule } from './staff.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    LocalStrategy,
-  ],
+  providers: [AuthService, JwtStrategy, LocalStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

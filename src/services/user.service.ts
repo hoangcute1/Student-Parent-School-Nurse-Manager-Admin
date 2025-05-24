@@ -79,7 +79,7 @@ export class UserService {
       if (!user) {
         throw new NotFoundException(`User với ID "${id}" không tìm thấy`);
       }
-      return user
+      return user;
     } catch (error) {
       if (error.name === 'CastError') {
         throw new BadRequestException(`Invalid ID format: ${id}`);

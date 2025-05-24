@@ -27,7 +27,7 @@ export class AuthService {
     }
     return null;
   }
-  
+
   async login(user: any) {
     let permissions: string[] = [];
     if (
@@ -78,7 +78,7 @@ export class AuthService {
       },
     };
   }
-  
+
   async register(registerDto: RegisterDto) {
     // Create user
     const user = await this.userService.create(
@@ -114,14 +114,14 @@ export class AuthService {
 
     return { success: true, message: 'Đăng xuất thành công' };
   }
-  
+
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.userService.findById(userId);
 
     if (!user || !user.refreshToken || user.refreshToken !== refreshToken) {
       throw new UnauthorizedException('Refresh token không hợp lệ');
-    } 
-    
+    }
+
     // Get permissions from role if available
     // Use optional chaining and check if roleId is populated
     let permissions: string[] = [];

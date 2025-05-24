@@ -1,6 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { ProfileService } from '../services/profile.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
 import { UpdateProfileDto } from '@/decorations/dto/update-profile.dto';
@@ -48,7 +64,10 @@ export class ProfileController {
   @ApiParam({ name: 'id', description: 'ID của profile' })
   @ApiBody({ type: UpdateProfileDto })
   @ApiResponse({ status: 200, description: 'Profile đã được cập nhật.' })
-  async update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
     return this.profileService.updateById(id, updateProfileDto);
   }
 

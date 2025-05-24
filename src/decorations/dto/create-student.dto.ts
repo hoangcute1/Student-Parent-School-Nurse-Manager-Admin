@@ -26,13 +26,15 @@ export class CreateStudentDto {
   @IsDate({ message: 'Ngày sinh không hợp lệ' })
   birth?: Date;
 
-  @ApiProperty({ 
-    example: 'male', 
-    description: 'Giới tính', 
-    enum: ['male', 'female', 'other'] 
+  @ApiProperty({
+    example: 'male',
+    description: 'Giới tính',
+    enum: ['male', 'female', 'other'],
   })
   @IsOptional()
-  @IsEnum(['male', 'female', 'other'], { message: 'Giới tính phải là male, female hoặc other' })
+  @IsEnum(['male', 'female', 'other'], {
+    message: 'Giới tính phải là male, female hoặc other',
+  })
   gender?: string;
 
   @ApiProperty({ example: '10', description: 'Khối lớp' })
@@ -44,10 +46,10 @@ export class CreateStudentDto {
   @IsOptional()
   @IsString({ message: 'Lớp phải là chuỗi' })
   class?: string;
-  @ApiProperty({ 
-    example: '60d0fe4f5311236168a109ca', 
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109ca',
     description: 'ID của phụ huynh (MongoDB ObjectID)',
-    required: false 
+    required: false,
   })
   @IsOptional()
   @IsMongoId({ message: 'ID phụ huynh không hợp lệ' })

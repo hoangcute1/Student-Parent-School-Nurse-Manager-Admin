@@ -46,18 +46,26 @@ export class StudentController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
   async findOne(@Param('id') id: string) {
     return this.studentService.findById(id);
-  }  @Post()
+  }
+  @Post()
   @ApiOperation({ summary: 'Tạo sinh viên mới' })
   @ApiResponse({ status: 201, description: 'Sinh viên đã được tạo.' })
   @ApiResponse({ status: 403, description: 'Không có quyền tạo sinh viên.' })
   async create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentService.create(createStudentDto);
-  }  @Put(':id')
+  }
+  @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin sinh viên' })
   @ApiParam({ name: 'id', description: 'ID của sinh viên' })
-  @ApiResponse({ status: 200, description: 'Thông tin sinh viên đã được cập nhật.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin sinh viên đã được cập nhật.',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
-  async update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateStudentDto: UpdateStudentDto,
+  ) {
     return this.studentService.update(id, updateStudentDto);
   }
 
@@ -70,5 +78,4 @@ export class StudentController {
   async remove(@Param('id') id: string) {
     return this.studentService.remove(id);
   }
-
 }

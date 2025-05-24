@@ -81,7 +81,10 @@ export class UserController {
   @ApiOperation({ summary: 'Cập nhật vai trò của user' })
   @ApiParam({ name: 'id', description: 'ID của user' })
   @ApiBody({
-    schema: { type: 'object', properties: { roleName: { type: 'string', example: 'parent' } } },
+    schema: {
+      type: 'object',
+      properties: { roleName: { type: 'string', example: 'parent' } },
+    },
   })
   @ApiResponse({
     status: 200,
@@ -119,7 +122,10 @@ export class UserController {
   @ApiOperation({ summary: 'Lấy thông tin profile của user' })
   @ApiParam({ name: 'id', description: 'ID của user' })
   @ApiResponse({ status: 200, description: 'Thông tin profile của user.' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy user hoặc profile.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy user hoặc profile.',
+  })
   @ApiResponse({
     status: 403,
     description: 'Không có quyền thực hiện thao tác này.',

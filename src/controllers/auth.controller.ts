@@ -12,7 +12,8 @@ import { RefreshTokenDto } from '@/decorations/dto/refresh-token.dto';
 
 @ApiTags('auth')
 @Controller('auth')
-export class AuthController {  constructor(
+export class AuthController {
+  constructor(
     private authService: AuthService,
     private userService: UserService,
     private profileService: ProfileService,
@@ -29,7 +30,8 @@ export class AuthController {  constructor(
   })
   async login(@Req() req) {
     return this.authService.login(req.user);
-  }  @Post('register')
+  }
+  @Post('register')
   @ApiOperation({ summary: 'Đăng ký người dùng mới' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
@@ -40,7 +42,7 @@ export class AuthController {  constructor(
   async register(@Body() registerDto: RegisterDto) {
     // Register the user
     const user = await this.authService.register(registerDto);
-    
+
     // Determine the userId safely
     let userId: string;
     if (user._id) {
@@ -50,12 +52,12 @@ export class AuthController {  constructor(
     } else {
       throw new Error('User ID not available after registration');
     }
-    
+
     // Create an empty profile automatically
     await this.profileService.create({
       userId: userId,
     });
-    
+
     // Login the user to get tokens
     return this.authService.login(user);
   }
@@ -100,16 +102,16 @@ export class AuthController {  constructor(
   async getMe(@Req() req) {
     // Get detailed user information from the database using the ID in the JWT
     const user = await this.userService.findById(req.user.userId);
-    
+
     // Get user's profile
     const profile = await this.profileService.findByUserId(req.user.userId);
-    
+
     // Remove sensitive information
     const { password, refreshToken, ...userResult } = user.toObject();
-    
+
     return {
       user: userResult,
-      profile: profile
+      profile: profile,
     };
   }
 }

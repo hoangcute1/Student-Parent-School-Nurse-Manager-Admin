@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { 
-  IsString, 
-  IsOptional, 
-  IsEnum, 
-  IsDate, 
-  IsMongoId 
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsDate,
+  IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -18,20 +18,22 @@ export class UpdateProfileDto {
   @IsString()
   readonly name?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'male',
-    description: 'Giới tính', 
+    description: 'Giới tính',
     enum: ['male', 'female', 'other'],
-    required: false 
+    required: false,
   })
   @IsOptional()
-  @IsEnum(['male', 'female', 'other'], { message: 'Giới tính phải là male, female hoặc other' })
+  @IsEnum(['male', 'female', 'other'], {
+    message: 'Giới tính phải là male, female hoặc other',
+  })
   readonly gender?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '2000-01-01',
     description: 'Ngày sinh',
-    required: false 
+    required: false,
   })
   @IsOptional()
   @Type(() => Date)

@@ -58,9 +58,15 @@ export class StaffController {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin nhân viên' })
   @ApiParam({ name: 'id', description: 'ID của nhân viên' })
-  @ApiResponse({ status: 200, description: 'Thông tin nhân viên đã được cập nhật.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin nhân viên đã được cập nhật.',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy nhân viên.' })
-  async update(@Param('id') id: string, @Body() updateStaffDto: UpdateStaffDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateStaffDto: UpdateStaffDto,
+  ) {
     return this.staffService.update(id, updateStaffDto);
   }
 

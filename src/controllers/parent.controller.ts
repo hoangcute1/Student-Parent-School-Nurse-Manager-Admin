@@ -58,9 +58,15 @@ export class ParentController {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin phụ huynh' })
   @ApiParam({ name: 'id', description: 'ID của phụ huynh' })
-  @ApiResponse({ status: 200, description: 'Thông tin phụ huynh đã được cập nhật.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin phụ huynh đã được cập nhật.',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy phụ huynh.' })
-  async update(@Param('id') id: string, @Body() updateParentDto: UpdateParentDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateParentDto: UpdateParentDto,
+  ) {
     return this.parentService.update(id, updateParentDto);
   }
 

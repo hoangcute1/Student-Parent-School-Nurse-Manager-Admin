@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parent, ParentDocument } from '@/schemas/parent.schema';
@@ -14,7 +18,10 @@ export class ParentService {
   }
 
   async findById(id: string): Promise<Parent> {
-    const parent = await this.parentModel.findById(id).populate('userId').exec();
+    const parent = await this.parentModel
+      .findById(id)
+      .populate('userId')
+      .exec();
     if (!parent) {
       throw new NotFoundException(`Parent with ID "${id}" not found`);
     }
@@ -30,7 +37,7 @@ export class ParentService {
     const existingParent = await this.parentModel
       .findOne({ userId: createParentDto.userId })
       .exec();
-      
+
     if (existingParent) {
       throw new ConflictException('A parent with this user ID already exists');
     }
@@ -41,23 +48,27 @@ export class ParentService {
 
   async update(id: string, updateParentDto: any): Promise<Parent> {
     const updatedParent = await this.parentModel
-      .findByIdAndUpdate(id, { ...updateParentDto, updatedAt: new Date() }, { new: true })
+      .findByIdAndUpdate(
+        id,
+        { ...updateParentDto, updatedAt: new Date() },
+        { new: true },
+      )
       .exec();
-      
+
     if (!updatedParent) {
       throw new NotFoundException(`Parent with ID "${id}" not found`);
     }
-    
+
     return updatedParent;
   }
 
   async remove(id: string): Promise<any> {
     const deletedParent = await this.parentModel.findByIdAndDelete(id).exec();
-    
+
     if (!deletedParent) {
       throw new NotFoundException(`Parent with ID "${id}" not found`);
     }
-    
+
     return { id, deleted: true };
   }
 }

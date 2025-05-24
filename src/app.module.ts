@@ -17,7 +17,8 @@ import { StaffModule } from './modules/staff.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
 
-@Module({  imports: [
+@Module({
+  imports: [
     ConfigModule.forRoot({
       load: [configuration],
     }),

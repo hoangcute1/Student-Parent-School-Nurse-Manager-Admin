@@ -20,7 +20,7 @@ import { ParentService } from '@/services/parent.service';
 export class StudentService {
   constructor(
     @InjectModel(Student.name) private studentModel: Model<Student>,
-    private parentService: ParentService
+    private parentService: ParentService,
   ) {}
 
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
@@ -40,7 +40,9 @@ export class StudentService {
       try {
         await this.parentService.findById(createStudentDto.parentId);
       } catch (error) {
-        throw new BadRequestException(`Phụ huynh với ID "${createStudentDto.parentId}" không tồn tại`);
+        throw new BadRequestException(
+          `Phụ huynh với ID "${createStudentDto.parentId}" không tồn tại`,
+        );
       }
     }
 
@@ -103,7 +105,8 @@ export class StudentService {
   }
   async findAll(
     filterDto?: FilterStudentDto,
-  ): Promise<{ data: Student[]; total: number; page: number; limit: number }> {    const {
+  ): Promise<{ data: Student[]; total: number; page: number; limit: number }> {
+    const {
       page = 1,
       limit = 10,
       sortBy,
