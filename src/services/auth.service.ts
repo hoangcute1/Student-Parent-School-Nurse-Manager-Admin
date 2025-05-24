@@ -104,6 +104,9 @@ export class AuthService {
 
     await this.userService.updateRefreshToken(user._id, refreshToken);
 
+    // Lấy thông tin profile
+    const profile = await this.profileService.findByUserId(user._id);
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -114,6 +117,7 @@ export class AuthService {
         permissions: permissions,
         userType: userType,
       },
+      profile: profile
     };
   }
 
