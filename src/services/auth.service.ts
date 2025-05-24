@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { ProfileService } from './profile.service';
+import { ParentService } from './parent.service';
+import { StaffService } from './staff.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '@/decorations/dto/register.dto';
 
@@ -13,6 +15,8 @@ export class AuthService {
     private jwtService: JwtService,
     private tokenBlacklistService: TokenBlacklistService,
     private profileService: ProfileService,
+    private parentService: ParentService,
+    private staffService: StaffService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -25,8 +29,6 @@ export class AuthService {
   }
   
   async login(user: any) {
-    // Get permissions from role if available
-    // Use optional chaining and ensure roleId is an object with permissions
     let permissions: string[] = [];
     if (
       user.roleId &&
@@ -39,12 +41,24 @@ export class AuthService {
       }
     }
 
-    // Create payload with role and permissions
+    // Xác định loại user: parent hay staff
+    let userType = 'user';
+    const parent = await this.parentService.findByUserId(user._id.toString());
+    if (parent) {
+      userType = 'parent';
+    } else {
+      const staff = await this.staffService.findByUserId(user._id.toString());
+      if (staff) {
+        userType = 'staff';
+      }
+    }
+
     const payload = {
       email: user.email,
       sub: user._id,
       role: user.role,
       permissions: permissions,
+      userType: userType,
     };
 
     const accessToken = this.jwtService.sign(payload);
@@ -60,6 +74,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         permissions: permissions,
+        userType: userType,
       },
     };
   }

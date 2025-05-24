@@ -10,6 +10,8 @@ import { JwtStrategy } from '@/strategies/jwt.strategy';
 import { LocalStrategy } from '@/strategies/local.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ParentModule } from './parent.module';
+import { StaffModule } from './staff.module';
 
 @Module({  imports: [
     UserModule,
@@ -17,6 +19,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     TokenBlacklistModule,
     PassportModule,
     ConfigModule,
+    ParentModule,
+    StaffModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
