@@ -82,7 +82,7 @@ export default function Home() {
                 <CardHeader className="flex flex-row items-center gap-4">
                   <FileText className="h-8 w-8 text-blue-500" />
                   <div>
-                    <CardTitle>Hồ sơ sức khỏe</CardTitle>
+                    <CardTitle>Khai báo hồ sơ sức khỏe</CardTitle>
                     <CardDescription>
                       Quản lý thông tin sức khỏe học sinh
                     </CardDescription>
@@ -100,14 +100,13 @@ export default function Home() {
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Shield className="h-8 w-8 text-red-500" />
                   <div>
-                    <CardTitle>Xử lý sự kiện y tế</CardTitle>
-                    <CardDescription>Ghi nhận và quản lý sự cố</CardDescription>
+                    <CardTitle>Gửi thuốc</CardTitle>
+                    <CardDescription>aaaaa</CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Nhân viên y tế có thể ghi nhận và xử lý các sự kiện như tai
-                    nạn, sốt, té ngã, dịch bệnh và các tình huống y tế khác.
+                    Phụ huynh có thể gửi thuốc cho học sinh abcdef.
                   </p>
                 </CardContent>
               </Card>
@@ -115,14 +114,13 @@ export default function Home() {
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Calendar className="h-8 w-8 text-green-500" />
                   <div>
-                    <CardTitle>Tiêm chủng & Kiểm tra</CardTitle>
-                    <CardDescription>Quản lý quy trình y tế</CardDescription>
+                    <CardTitle>Nhận kết quả</CardTitle>
+                    <CardDescription>aaaa</CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p>
-                    Quản lý toàn bộ quy trình tiêm chủng và kiểm tra y tế định
-                    kỳ từ thông báo đến theo dõi kết quả.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
                   </p>
                 </CardContent>
               </Card>
@@ -130,7 +128,7 @@ export default function Home() {
                 <CardHeader className="flex flex-row items-center gap-4">
                   <BookOpen className="h-8 w-8 text-purple-500" />
                   <div>
-                    <CardTitle>Tài liệu sức khỏe</CardTitle>
+                    <CardTitle>Lịch sử bệnh án</CardTitle>
                     <CardDescription>Thông tin và hướng dẫn</CardDescription>
                   </div>
                 </CardHeader>
@@ -145,7 +143,7 @@ export default function Home() {
                 <CardHeader className="flex flex-row items-center gap-4">
                   <MessageSquare className="h-8 w-8 text-yellow-500" />
                   <div>
-                    <CardTitle>Tư vấn & Liên lạc</CardTitle>
+                    <CardTitle>Sự kiện y tế</CardTitle>
                     <CardDescription>
                       Kết nối phụ huynh và nhà trường
                     </CardDescription>
@@ -162,7 +160,7 @@ export default function Home() {
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Users className="h-8 w-8 text-orange-500" />
                   <div>
-                    <CardTitle>Quản lý thuốc</CardTitle>
+                    <CardTitle>Xem phản hồi</CardTitle>
                     <CardDescription>
                       Theo dõi và cấp phát thuốc
                     </CardDescription>

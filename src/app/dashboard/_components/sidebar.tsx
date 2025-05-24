@@ -11,7 +11,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const navLinks = [
-    { href: "/dashboard", icon: Home, label: "Trang chủ" },
+    { href: "/dashboard", icon: Home, label: "Tổng quát" },
     { href: "/dashboard/health-records", icon: Heart, label: "Hồ sơ sức khỏe" },
     { href: "/dashboard/users", icon: Users, label: "Người dùng" },
   ];
