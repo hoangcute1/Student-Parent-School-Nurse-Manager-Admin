@@ -11,14 +11,10 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const navLinks = [
-    { href: "/dashboard", icon: Home, label: "Tổng quát" },
-    { href: "/dashboard/health-records", icon: Heart, label: "Hồ sơ sức khỏe" },
-    { href: "/dashboard/medications", icon: Heart, label: "Gui thuoc" },
-    { href: "/dashboard/health-results", icon: Heart, label: "Ket qua kham" },
-    { href: "/dashboard/resources", icon: Users, label: "Lich su benh an" },
-    { href: "/dashboard/events", icon: Heart, label: "Su kien y te" },
-    { href: "/dashboard/feedback", icon: Heart, label: "Phan hoi" },
-    
+    { href: "/cms", icon: Home, label: "Tổng quát" },
+    { href: "/cms/health-records", icon: Heart, label: "Hồ sơ sức khỏe" },
+    { href: "/cms/events", icon: Users, label: "Su kien y te" },
+    { href: "/cms/vaccinations", icon: Heart, label: "Su kien tiem chung" },
   ];
   return (
     <aside
@@ -28,7 +24,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       )}
     >
       <div className="flex h-16 items-center justify-between gap-2 border-b px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+        <Link href="/cms" className="flex items-center gap-2 font-semibold">
           <Heart className="h-6 w-6" />
           <span>HEALTH CARE</span>
         </Link>

@@ -5,7 +5,6 @@ import type { User as AppUser, UserProfile } from "@/lib/types";
 import Header from "@/components/layout/header/header";
 import { getAuthData } from "@/lib/auth";
 import { PublicHomePage } from "./_components/public-home";
-import { ParentDashboard } from "./_components/parent-dashboard";
 
 export default function Home() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -29,13 +28,6 @@ export default function Home() {
           <div className="flex items-center justify-center h-screen">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
           </div>
-        ) : user ? (
-          user.userType === "parent" ? (
-            <ParentDashboard user={user} profile={profile} />
-          ) : (
-            // Redirect staff/admin users to their dashboard
-            window.location.href = "/dashboard" as any
-          )
         ) : (
           <PublicHomePage />
         )}

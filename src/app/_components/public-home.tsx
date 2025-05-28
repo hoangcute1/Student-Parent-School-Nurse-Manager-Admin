@@ -22,6 +22,85 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const features = [
+  {
+    title: "Khai báo hồ sơ sức khỏe",
+    description: "Quản lý thông tin sức khỏe học sinh",
+    content:
+      "Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều trị, thị lực, thính lực, tiêm chủng và các thông tin sức khỏe khác.",
+    icon: FileText,
+    iconColor: "text-blue-500",
+    href: "/dashboard/health-records",
+  },
+  {
+    title: "Gửi thuốc",
+    description: "Quản lý thuốc cho học sinh",
+    content:
+      "Phụ huynh có thể gửi thuốc cho trường, theo dõi việc sử dụng thuốc của con.",
+    icon: Shield,
+    iconColor: "text-red-500",
+    href: "/dashboard/medications",
+  },
+  {
+    title: "Nhận kết quả",
+    description: "Xem kết quả khám sức khỏe",
+    content:
+      "Xem kết quả khám sức khỏe định kỳ và các chỉ số sức khỏe của học sinh.",
+    icon: Calendar,
+    iconColor: "text-green-500",
+    href: "/dashboard/health-results",
+  },
+  {
+    title: "Lịch sử bệnh án",
+    description: "Thông tin và hướng dẫn",
+    content:
+      "Truy cập tài liệu về sức khỏe học đường, hướng dẫn phòng bệnh và các thông tin y tế quan trọng khác.",
+    icon: BookOpen,
+    iconColor: "text-purple-500",
+    href: "/dashboard/resources",
+  },
+  {
+    title: "Sự kiện y tế",
+    description: "Kết nối phụ huynh và nhà trường",
+    content:
+      "Hệ thống liên lạc giữa phụ huynh và nhân viên y tế, đặt lịch tư vấn và thông báo kết quả kiểm tra.",
+    icon: MessageSquare,
+    iconColor: "text-yellow-500",
+    href: "/dashboard/events",
+  },
+  {
+    title: "Xem phản hồi",
+    description: "Theo dõi và cấp phát thuốc",
+    content:
+      "Phụ huynh có thể gửi thuốc cho trường, nhân viên y tế quản lý và cấp phát thuốc theo chỉ định.",
+    icon: Users,
+    iconColor: "text-orange-500",
+    href: "/dashboard/feedback",
+  },
+];
+
+const resources = [
+  {
+    title: "Hướng dẫn phòng bệnh mùa học",
+    description: "Các biện pháp phòng ngừa bệnh tật trong năm học mới",
+    icon: Shield,
+    iconColor: "text-blue-500",
+  },
+  {
+    title: "Dinh dưỡng học đường",
+    description: "Chế độ dinh dưỡng cân đối cho học sinh các cấp",
+    icon: Heart,
+    iconColor: "text-blue-500",
+  },
+  {
+    title: "Sức khỏe tâm lý học sinh",
+    description:
+      "Nhận biết và hỗ trợ vấn đề tâm lý ở trẻ em và thanh thiếu niên",
+    icon: Info,
+    iconColor: "text-blue-500",
+  },
+];
+
 export function PublicHomePage() {
   return (
     <>
@@ -75,97 +154,22 @@ export function PublicHomePage() {
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <FileText className="h-8 w-8 text-blue-500" />
-                <div>
-                  <CardTitle>Khai báo hồ sơ sức khỏe</CardTitle>
-                  <CardDescription>
-                    Quản lý thông tin sức khỏe học sinh
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều
-                  trị, thị lực, thính lực, tiêm chủng và các thông tin sức khỏe
-                  khác.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Shield className="h-8 w-8 text-red-500" />
-                <div>
-                  <CardTitle>Gửi thuốc</CardTitle>
-                  <CardDescription>aaaaa</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p>Phụ huynh có thể gửi thuốc cho học sinh abcdef.</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Calendar className="h-8 w-8 text-green-500" />
-                <div>
-                  <CardTitle>Nhận kết quả</CardTitle>
-                  <CardDescription>aaaa</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <BookOpen className="h-8 w-8 text-purple-500" />
-                <div>
-                  <CardTitle>Lịch sử bệnh án</CardTitle>
-                  <CardDescription>Thông tin và hướng dẫn</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Truy cập tài liệu về sức khỏe học đường, hướng dẫn phòng bệnh
-                  và các thông tin y tế quan trọng khác.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <MessageSquare className="h-8 w-8 text-yellow-500" />
-                <div>
-                  <CardTitle>Sự kiện y tế</CardTitle>
-                  <CardDescription>
-                    Kết nối phụ huynh và nhà trường
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Hệ thống liên lạc giữa phụ huynh và nhân viên y tế, đặt lịch
-                  tư vấn và thông báo kết quả kiểm tra.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <Users className="h-8 w-8 text-orange-500" />
-                <div>
-                  <CardTitle>Xem phản hồi</CardTitle>
-                  <CardDescription>Theo dõi và cấp phát thuốc</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Phụ huynh có thể gửi thuốc cho trường, nhân viên y tế quản lý
-                  và cấp phát thuốc theo chỉ định.
-                </p>
-              </CardContent>
-            </Card>
+            {features.map((feature, index) => (
+              <Link href={feature.href} key={index}>
+                <Card className='h-full w-full'>
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    <feature.icon className={`h-8 w-8 ${feature.iconColor}`} />
+                    <div>
+                      <CardTitle>{feature.title}</CardTitle>
+                      <CardDescription>{feature.description}</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p>{feature.content}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -186,31 +190,13 @@ export function PublicHomePage() {
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
-            {[
-              {
-                title: "Hướng dẫn phòng bệnh mùa học",
-                description:
-                  "Các biện pháp phòng ngừa bệnh tật trong năm học mới",
-                icon: Shield,
-              },
-              {
-                title: "Dinh dưỡng học đường",
-                description: "Chế độ dinh dưỡng cân đối cho học sinh các cấp",
-                icon: Heart,
-              },
-              {
-                title: "Sức khỏe tâm lý học sinh",
-                description:
-                  "Nhận biết và hỗ trợ vấn đề tâm lý ở trẻ em và thanh thiếu niên",
-                icon: Info,
-              },
-            ].map((item, index) => (
+            {resources.map((resource, index) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center gap-4">
-                  <item.icon className="h-8 w-8 text-blue-500" />
+                  <resource.icon className={`h-8 w-8 ${resource.iconColor}`} />
                   <div>
-                    <CardTitle>{item.title}</CardTitle>
-                    <CardDescription>{item.description}</CardDescription>
+                    <CardTitle>{resource.title}</CardTitle>
+                    <CardDescription>{resource.description}</CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
