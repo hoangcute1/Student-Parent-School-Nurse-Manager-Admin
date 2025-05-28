@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Calendar,
@@ -19,16 +20,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAuth, logout } from "@/lib/auth";
+import { useAuth, logout, getAuthData } from "@/lib/auth";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
   const [stats, setStats] = useState({
     records: 128,
     events: 24,
     vaccinations: 56,
     medicalChecks: 32,
   });
+
+  // Check user type and redirect if needed
+  useEffect(() => {
+    const authData = getAuthData();
+    if (authData) {
+      // Redirect based on user type
+      if (authData.user.userType === "parent") {
+        router.push("/"); // Parent users go to home page with parent dashboard
+      }
+      // Staff users stay on this dashboard page
+    }
+  }, [router]);
 
   // Lấy thông tin thống kê (trong ứng dụng thực tế sẽ gọi API)
   useEffect(() => {
@@ -49,8 +63,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-
 
   return (
     <div className="grid gap-6">

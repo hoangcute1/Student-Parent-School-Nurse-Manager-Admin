@@ -21,15 +21,13 @@ export default function User() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
   useEffect(() => {
     // Get user data from localStorage
     const authData = localStorage.getItem("authData");
     if (!authData) {
-      router.push("/login");
+      // Don't redirect, just leave user as null
       return;
     }
-
     try {
       const data = JSON.parse(authData);
       if (data.user && data.profile) {
@@ -38,12 +36,19 @@ export default function User() {
       }
     } catch (error) {
       console.error("Error parsing auth data:", error);
-      router.push("/login");
+      // Don't redirect, just log the error
     }
   }, [router]);
-
   if (!user || !profile) {
-    return null;
+    return (
+      <div className="flex items-center gap-2">
+        <Link href="/login">
+          <Button variant="outline" size="sm">
+            Đăng nhập
+          </Button>
+        </Link>
+      </div>
+    );
   }
   return (
     <DropdownMenu>

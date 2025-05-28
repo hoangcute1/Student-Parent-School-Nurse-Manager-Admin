@@ -15,7 +15,7 @@ export default function LoginPage() {
   // Check if user is already logged in
   useEffect(() => {
     if (getAuthToken()) {
-      router.replace("/dashboard");
+      router.replace("/");
     }
   }, [router]);
 

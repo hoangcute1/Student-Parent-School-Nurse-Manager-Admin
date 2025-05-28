@@ -55,7 +55,7 @@ export function clearAuthData() {
 // Function to logout
 export async function logout() {
   clearAuthData();
-  window.location.href = "/login";
+  window.location.href = "/";
 }
 
 // Custom hook to check if user is authenticated
@@ -64,14 +64,13 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const initialized = useRef(false);
-
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
     const authData = getAuthData();
     if (!authData) {
-      router.push("/login");
+      // Don't redirect, just set loading to false
       setLoading(false);
       return;
     }

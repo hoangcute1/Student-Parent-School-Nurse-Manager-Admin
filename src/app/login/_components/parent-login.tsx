@@ -98,7 +98,16 @@ export function ParentLoginForm() {
         description: "Đang chuyển hướng...",
       });
 
-      router.push("/dashboard");
+      // Redirect based on user type
+      if (
+        response.user.userType === "staff" ||
+        response.user.userType === "admin"
+      ) {
+        router.push("/dashboard");
+      } else {
+        // Ensure parent users are redirected to home page
+        window.location.href = "/";
+      }
     } catch (error) {
       console.error("Login error:", error);
       let message = "Có lỗi xảy ra khi đăng nhập";

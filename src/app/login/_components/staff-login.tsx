@@ -92,12 +92,12 @@ export function StaffLoginForm() {
       const credentials = { ...formData, role: "staff" as const };
       const response = await loginUser(credentials);
       storeAuthData(response);
-
       toast({
         title: "Đăng nhập thành công",
         description: "Đang chuyển hướng...",
       });
 
+      // Staff and admin users go to dashboard
       router.push("/dashboard");
     } catch (error) {
       console.error("Login error:", error);

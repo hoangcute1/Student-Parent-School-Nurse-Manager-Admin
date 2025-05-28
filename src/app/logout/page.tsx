@@ -27,7 +27,6 @@ export default function LogoutPage() {
       handleLogout();
     }
   }, []);
-
   const handleLogout = () => {
     setIsLoggingOut(true);
     // Perform logout
@@ -35,7 +34,7 @@ export default function LogoutPage() {
 
     // Redirect after a short delay to show the logout animation
     setTimeout(() => {
-      router.push("/login");
+      router.push("/");
     }, 1500);
   };
 
