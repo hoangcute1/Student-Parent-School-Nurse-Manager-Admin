@@ -23,7 +23,7 @@ export function ParentDashboard({ user }: ParentDashboardProps) {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Bảng điều khiển dành cho phụ huynh
+            Bảng điều khiển
           </h1>
           <p className="text-gray-500">
             Quản lý thông tin sức khỏe của con bạn
