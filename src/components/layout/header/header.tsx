@@ -31,4 +31,5 @@ export default function Header() {
       </nav>
       <User />
     </header>
-  ) }
+  );
+}
