@@ -1,5 +1,5 @@
-import DashboardPage from "./_components/dashboard";
+import DashboardPage from "@/app/dashboard/_components/dashboard";
 
-export default function CMSPage() {
+export default function Dashboard() {
   return <DashboardPage />;
 }
