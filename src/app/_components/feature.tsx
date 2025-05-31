@@ -2,6 +2,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,16 +18,19 @@ import {
 import { useEffect, useState } from "react";
 import LoginPopup from "./login-popup";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const features = [
   {
-    title: "Khai báo hồ sơ sức khỏe",
+    title: "Hồ sơ sức khỏe",
     description: "Quản lý thông tin sức khỏe học sinh",
     content:
       "Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều trị, thị lực, thính lực, tiêm chủng và các thông tin sức khỏe khác.",
     icon: FileText,
     iconColor: "text-blue-500",
     href: "/dashboard/health-records",
+    color: "blue",
   },
   {
     title: "Gửi thuốc",
@@ -36,6 +40,7 @@ const features = [
     icon: Shield,
     iconColor: "text-red-500",
     href: "/dashboard/medications",
+    color: "red",
   },
   {
     title: "Nhận kết quả",
@@ -45,6 +50,7 @@ const features = [
     icon: Calendar,
     iconColor: "text-green-500",
     href: "/dashboard/health-results",
+    color: "green",
   },
   {
     title: "Lịch sử bệnh án",
@@ -54,6 +60,7 @@ const features = [
     icon: BookOpen,
     iconColor: "text-purple-500",
     href: "/dashboard/resources",
+    color: "purple",
   },
   {
     title: "Sự kiện y tế",
@@ -63,6 +70,7 @@ const features = [
     icon: MessageSquare,
     iconColor: "text-yellow-500",
     href: "/dashboard/events",
+    color: "yellow",
   },
   {
     title: "Xem phản hồi",
@@ -72,6 +80,7 @@ const features = [
     icon: Users,
     iconColor: "text-orange-500",
     href: "/dashboard/feedback",
+    color: "orange",
   },
 ];
 
@@ -119,10 +128,22 @@ export default function Feature() {
               <div
                 key={index}
                 onClick={(e) => handleFeatureClick(e, feature)}
-                className="cursor-pointer"
+                className="cursor-pointer select-none hover:scale-105 transition-all duration-300"
               >
-                <Card className="h-full w-full">
-                  <CardHeader className="flex flex-row items-center gap-4">
+                <Card
+                  className={cn(
+                    "h-full cursor-pointer border-2 transition-all duration-300 hover:shadow-lg flex flex-col",
+                    {
+                      "hover:border-blue-500": feature.color === "blue",
+                      "hover:border-red-500": feature.color === "red",
+                      "hover:border-green-500": feature.color === "green",
+                      "hover:border-purple-500": feature.color === "purple",
+                      "hover:border-yellow-500": feature.color === "yellow",
+                      "hover:border-orange-500": feature.color === "orange",
+                    }
+                  )}
+                >
+                  <CardHeader className="flex flex-row items-center gap-4 h-24">
                     <feature.icon className={`h-8 w-8 ${feature.iconColor}`} />
                     <div>
                       <CardTitle>{feature.title}</CardTitle>
@@ -132,6 +153,33 @@ export default function Feature() {
                   <CardContent>
                     <p>{feature.content}</p>
                   </CardContent>
+                  <CardFooter className="pt-0 mt-auto">
+                    <div className={cn("flex items-center font-medium transition-all duration-300 group", {
+                      "text-blue-500": feature.color === "blue",
+                      "text-red-500": feature.color === "red",
+                      "text-green-500": feature.color === "green",
+                      "text-purple-500": feature.color === "purple",
+                      "text-yellow-500": feature.color === "yellow",
+                      "text-orange-500": feature.color === "orange",
+                    })}>
+                      Xem chi tiết
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                      </svg>
+                    </div>
+                  </CardFooter>
                 </Card>
               </div>
             ))}
