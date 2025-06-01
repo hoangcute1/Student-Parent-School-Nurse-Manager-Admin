@@ -1,34 +1,86 @@
-import { Heart } from "lucide-react";
+import { Heart, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import User from "@/components/layout/header/user";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+
+const features = [
+  {
+    title: "Khai báo hồ sơ sức khỏe",
+    href: "/dashboard/health-records",
+  },
+  {
+    title: "Gửi thuốc",
+    href: "/dashboard/medications",
+  },
+  {
+    title: "Nhận kết quả",
+    href: "/dashboard/health-results",
+  },
+  {
+    title: "Lịch sử bệnh án",
+    href: "/dashboard/resources",
+  },
+  {
+    title: "Sự kiện y tế",
+    href: "/dashboard/events",
+  },
+  {
+    title: "Xem phản hồi",
+    href: "/dashboard/feedback",
+  },
+];
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4">
-      <div className="flex items-center gap-2 pl-4">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-gradient-to-r from-blue-100 to-white px-4">
+      <div className="flex items-center gap-2">
         <Heart className="h-6 w-6 text-red-500" />
-        <span className="text-xl font-bold">Y Tế Học Đường</span>
+        <span className="text-xl font-bold text-blue-900">Y Tế Học Đường</span>
       </div>
+
       <nav className="hidden md:flex items-center gap-6">
-        <Link
-          href="/"
-          className="text-sm font-medium transition-colors hover:text-primary"
-        >
+        <Link href="/" className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
           Trang chủ
         </Link>
-        <Link
-          href="#features"
-          className="text-sm font-medium transition-colors hover:text-primary"
-        >
-          Tính năng
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
+            Tính năng
+            <ChevronDown className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="start" 
+            className="w-48 bg-white/95 backdrop-blur-sm border-blue-100"
+          >
+            {features.map((feature, index) => (
+              <DropdownMenuItem key={index}>
+                <Link href={feature.href} className="w-full text-blue-800 hover:text-blue-600">
+                  {feature.title}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Link href="/#resources" className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
+          Tài liệu
         </Link>
-        <Link
-          href="#resources"
-          className="text-sm font-medium transition-colors hover:text-primary"
-        >
-          Tài nguyên
+
+        <Link href="/#blog" className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
+          Blog
         </Link>
       </nav>
-      <User />
+
+      <Link href="/login">
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+          Đăng nhập
+        </Button>
+      </Link>
     </header>
-  ) }
+  );
+}
