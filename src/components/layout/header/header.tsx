@@ -82,5 +82,4 @@ export default function Header() {
         </Button>
       </Link>
     </header>
-  );
-}
+  ) }
