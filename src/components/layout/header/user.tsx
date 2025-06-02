@@ -79,6 +79,13 @@ export default function User() {
         <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
+          <Link href="/" className="flex w-full items-center">
+            <UserCircle className="mr-2 h-4 w-4" />
+            <span>Trang chủ</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
           <Link href="/profile" className="flex w-full items-center">
             <UserCircle className="mr-2 h-4 w-4" />
             <span>Thông tin cá nhân</span>

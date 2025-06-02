@@ -43,7 +43,7 @@ const studentNav = [
   {
     href: "/dashboard/feedback",
     icon: Heart,
-    label: "Phan hoi",
+    label: "Phản hồi",
     description: "Gửi phản hồi và ý kiến",
   },
 ];

@@ -16,13 +16,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out bg-blue-50 overflow-y-auto",
-        isOpen ? "translate-x-0" : "-translate-x-full",
-        "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]"
+        "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out bg-blue-50 overflow-y-auto scrollbar-none",
+        isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
-      <div className="flex h-full flex-col gap-2 p-4">
-        <div className="flex items-center gap-3 border-blue-200 pb-4">
+      <div className="flex h-full flex-col gap-2 p-4 ">
+        <div className="flex items-center gap-3 border-blue-200 pb-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <Heart className="h-7 w-7 text-white" />
           </div>
@@ -38,18 +37,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           </div>
         </div>
         <div className="border-b border-blue-200">
-          <p className="text-blue-400 text-md">Chung</p>
+          <p className="text-blue-400 text-sm">Chung</p>
         </div>
 
-        <nav className="border-b border-blue-200 ">
+        <nav className="grid gap-1 text-sm font-medium border-b border-blue-200">
           {parentNav.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 rounded-lg px-4 py-3  transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent text-blue-700 hover:border-blue-200 ${
-                  isActive ? "bg-blue-200 " : ""
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
+                  isActive ? "bg-blue-100" : ""
                 }`}
               >
                 <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -62,7 +61,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               </Link>
             );
           })}
-          <p className="text-blue-400 text-md">Student</p>
+          <p className="text-blue-400 text-md">Học sinh</p>
         </nav>
 
         <div className="bg-white rounded-lg border border-blue-200 p-3">
@@ -84,21 +83,26 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </div>
 
         <nav className="grid gap-1 text-sm font-medium">
-          {studentNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200"
-            >
-              <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-              <div className="flex-1">
-                <div className="font-medium">{item.label}</div>
-                <div className="text-xs text-blue-600 mt-0.5">
-                  {item.description}
+          {studentNav.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
+                  isActive ? "bg-blue-100" : ""
+                }`}
+              >
+                <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                <div className="flex-1">
+                  <div className="font-medium">{item.label}</div>
+                  <div className="text-xs text-blue-600 mt-0.5">
+                    {item.description}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="mt-auto space-y-4">
