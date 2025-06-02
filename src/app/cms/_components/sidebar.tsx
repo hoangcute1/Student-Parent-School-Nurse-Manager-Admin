@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Heart, Home, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { navLinks } from "../_constants/sidebar";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -10,12 +11,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
-  const navLinks = [
-    { href: "/cms", icon: Home, label: "Tổng quát" },
-    { href: "/cms/health-records", icon: Heart, label: "Hồ sơ sức khỏe" },
-    { href: "/cms/events", icon: Users, label: "Su kien y te" },
-    { href: "/cms/vaccinations", icon: Heart, label: "Su kien tiem chung" },
-  ];
+
   return (
     <aside
       className={cn(

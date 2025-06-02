@@ -5,65 +5,25 @@ import {
   Home,
   LogOut,
   MessageSquare,
-  Settings,
-  User,
-  Users,
+
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { parentNav, studentNav } from "../_constants/sidebar";
 
 interface SidebarProps {
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  
 }
 
-export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
-  const navLinks = [
-    { href: "/dashboard", icon: Home, label: "Tổng quát" },
-    {
-      href: "/dashboard/health-records",
-      icon: Heart,
-      label: "Hồ sơ sức khỏe",
-      description: "Trang chủ và thông tin con em",
-    },
-    {
-      href: "/dashboard/medications",
-      icon: Heart,
-      label: "Gui thuoc",
-      description: "Gửi thuốc cho con em",
-    },
-    {
-      href: "/dashboard/health-results",
-      icon: Heart,
-      label: "Ket qua kham",
-      description: "kết quả khám của con em",
-    },
-    // {
-    //   href: "/dashboard/resources",
-    //   icon: Users,
-    //   label: "Lich su benh an",
-    //   description: "Thông tin và hướng dẫn sức khỏe",
-    // },
-    // {
-    //   href: "/dashboard/events",
-    //   icon: Heart,
-    //   label: "Su kien y te",
-    //   description: "Sự kiện y tế và thông báo",
-    // },
-    // {
-    //   href: "/dashboard/feedback",
-    //   icon: Heart,
-    //   label: "Phan hoi",
-    //   description: "Gửi phản hồi và ý kiến",
-    // },
-  ];
+export default function Sidebar({ isOpen }: SidebarProps) {
   return (
     <aside
       className={cn(
-      "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out bg-blue-50 overflow-y-auto",
-      isOpen ? "translate-x-0" : "-translate-x-full",
-      "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]"
+        "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out bg-blue-50 overflow-y-auto",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]"
       )}
     >
       <div className="flex h-full flex-col gap-2 p-4">
@@ -87,27 +47,21 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </div>
 
         <nav className="border-b border-blue-200 ">
-          <Link
-            href="/"
-            className="flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200"
-          >
-            <Heart className="h-5 w-5 group-hover:scale-110 transition-transform" />
-            <div className="flex-1">
-              <div className="font-medium">AAAA</div>
-              <div className="text-xs text-blue-600 mt-0.5">BBBB</div>
-            </div>
-          </Link>
-
-          <Link
-            href="/"
-            className="flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200"
-          >
-            <Heart className="h-5 w-5 group-hover:scale-110 transition-transform" />
-            <div className="flex-1">
-              <div className="font-medium">AAAA</div>
-              <div className="text-xs text-blue-600 mt-0.5">BBBB</div>
-            </div>
-          </Link>
+          {parentNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200"
+            >
+              <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              <div className="flex-1">
+                <div className="font-medium">{item.label}</div>
+                <div className="text-xs text-blue-600 mt-0.5">
+                  {item.description}
+                </div>
+              </div>
+            </Link>
+          ))}
           <p className="text-blue-400 text-md">Student</p>
         </nav>
 
@@ -130,7 +84,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         </div>
 
         <nav className="grid gap-1 text-sm font-medium">
-          {navLinks.map((item) => (
+          {studentNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}

@@ -19,70 +19,7 @@ import { useEffect, useState } from "react";
 import LoginPopup from "./login-popup";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-
-const features = [
-  {
-    title: "Hồ sơ sức khỏe",
-    description: "Quản lý thông tin sức khỏe học sinh",
-    content:
-      "Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều trị, thị lực, thính lực, tiêm chủng và các thông tin sức khỏe khác.",
-    icon: FileText,
-    iconColor: "text-blue-500",
-    href: "/dashboard/health-records",
-    color: "blue",
-  },
-  {
-    title: "Gửi thuốc",
-    description: "Quản lý thuốc cho học sinh",
-    content:
-      "Phụ huynh có thể gửi thuốc cho trường, theo dõi việc sử dụng thuốc của con.",
-    icon: Shield,
-    iconColor: "text-red-500",
-    href: "/dashboard/medications",
-    color: "red",
-  },
-  {
-    title: "Nhận kết quả",
-    description: "Xem kết quả khám sức khỏe",
-    content:
-      "Xem kết quả khám sức khỏe định kỳ và các chỉ số sức khỏe của học sinh.",
-    icon: Calendar,
-    iconColor: "text-green-500",
-    href: "/dashboard/health-results",
-    color: "green",
-  },
-  {
-    title: "Lịch sử bệnh án",
-    description: "Thông tin và hướng dẫn",
-    content:
-      "Truy cập tài liệu về sức khỏe học đường, hướng dẫn phòng bệnh và các thông tin y tế quan trọng khác.",
-    icon: BookOpen,
-    iconColor: "text-purple-500",
-    href: "/dashboard/resources",
-    color: "purple",
-  },
-  {
-    title: "Sự kiện y tế",
-    description: "Kết nối phụ huynh và nhà trường",
-    content:
-      "Hệ thống liên lạc giữa phụ huynh và nhân viên y tế, đặt lịch tư vấn và thông báo kết quả kiểm tra.",
-    icon: MessageSquare,
-    iconColor: "text-yellow-500",
-    href: "/dashboard/events",
-    color: "yellow",
-  },
-  {
-    title: "Xem phản hồi",
-    description: "Theo dõi và cấp phát thuốc",
-    content:
-      "Phụ huynh có thể gửi thuốc cho trường, nhân viên y tế quản lý và cấp phát thuốc theo chỉ định.",
-    icon: Users,
-    iconColor: "text-orange-500",
-    href: "/dashboard/feedback",
-    color: "orange",
-  },
-];
+import { features } from "../_constants/feature";
 
 export default function Feature() {
   const router = useRouter();
@@ -130,21 +67,9 @@ export default function Feature() {
                 onClick={(e) => handleFeatureClick(e, feature)}
                 className="cursor-pointer select-none hover:scale-105 transition-all duration-300"
               >
-                <Card
-                  className={cn(
-                    "h-full cursor-pointer border-2 transition-all duration-300 hover:shadow-lg flex flex-col",
-                    {
-                      "hover:border-blue-500": feature.color === "blue",
-                      "hover:border-red-500": feature.color === "red",
-                      "hover:border-green-500": feature.color === "green",
-                      "hover:border-purple-500": feature.color === "purple",
-                      "hover:border-yellow-500": feature.color === "yellow",
-                      "hover:border-orange-500": feature.color === "orange",
-                    }
-                  )}
-                >
+                <Card className={`h-full cursor-pointer border-2 transition-all duration-300 hover:shadow-lg hover:${feature.borderColor} flex flex-col`}>
                   <CardHeader className="flex flex-row items-center gap-4 h-24">
-                    <feature.icon className={`h-8 w-8 ${feature.iconColor}`} />
+                    <feature.icon className={`h-8 w-8 ${feature.textColor}`} />
                     <div>
                       <CardTitle>{feature.title}</CardTitle>
                       <CardDescription>{feature.description}</CardDescription>
@@ -154,14 +79,12 @@ export default function Feature() {
                     <p>{feature.content}</p>
                   </CardContent>
                   <CardFooter className="pt-0 mt-auto">
-                    <div className={cn("flex items-center font-medium transition-all duration-300 group", {
-                      "text-blue-500": feature.color === "blue",
-                      "text-red-500": feature.color === "red",
-                      "text-green-500": feature.color === "green",
-                      "text-purple-500": feature.color === "purple",
-                      "text-yellow-500": feature.color === "yellow",
-                      "text-orange-500": feature.color === "orange",
-                    })}>
+                    <div
+                      className={cn(
+                        "flex items-center font-medium transition-all duration-300 group",
+                        feature.textColor
+                      )}
+                    >
                       Xem chi tiết
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

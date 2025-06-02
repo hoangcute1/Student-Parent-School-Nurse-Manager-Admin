@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <CheckAuth>
       <div className="flex min-h-screen">
-        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <Sidebar isOpen={isSidebarOpen} />
         <div
           className={cn(
             "flex min-h-screen flex-1 flex-col transition-all duration-200 ease-in-out",
