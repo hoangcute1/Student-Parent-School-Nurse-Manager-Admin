@@ -1,23 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  Heart,
-  Home,
-  LogOut,
-  MessageSquare,
-
-} from "lucide-react";
+import { Heart, Home, LogOut, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { parentNav, studentNav } from "../_constants/sidebar";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   isOpen: boolean;
-  
 }
 
 export default function Sidebar({ isOpen }: SidebarProps) {
+  const pathname = usePathname();
   return (
     <aside
       className={cn(
@@ -47,21 +42,26 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </div>
 
         <nav className="border-b border-blue-200 ">
-          {parentNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200"
-            >
-              <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-              <div className="flex-1">
-                <div className="font-medium">{item.label}</div>
-                <div className="text-xs text-blue-600 mt-0.5">
-                  {item.description}
+          {parentNav.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-4 rounded-lg px-4 py-3  transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent text-blue-700 hover:border-blue-200 ${
+                  isActive ? "bg-blue-200 " : ""
+                }`}
+              >
+                <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                <div className="flex-1">
+                  <div className="font-medium">{item.label}</div>
+                  <div className="text-xs text-blue-600 mt-0.5">
+                    {item.description}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
           <p className="text-blue-400 text-md">Student</p>
         </nav>
 
