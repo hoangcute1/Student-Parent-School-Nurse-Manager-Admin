@@ -5,6 +5,7 @@ import type { User as AppUser, UserProfile } from "@/lib/types";
 import Header from "@/components/layout/header/header";
 import { getAuthData } from "@/lib/auth";
 import { PublicHomePage } from "./_components/public-home";
+import { Footer } from "@/components/layout/footer/footer";
 
 export default function Home() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -32,6 +33,7 @@ export default function Home() {
           <PublicHomePage />
         )}
       </main>
+      <Footer />
     </div>
   );
 }
