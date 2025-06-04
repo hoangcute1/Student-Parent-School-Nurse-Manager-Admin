@@ -43,7 +43,7 @@ export default function User() {
     return (
       <div className="flex items-center gap-2">
         <Link href="/login">
-          <Button variant="outline" size="sm">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
             Đăng nhập
           </Button>
         </Link>

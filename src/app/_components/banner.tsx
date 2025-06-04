@@ -7,7 +7,11 @@ import { motion } from "framer-motion";
 import "swiper/css";
 
 export default function Banner() {
-  const images = ["/image1.jpg", "/image2.jpg", "/image3.jpg"];
+  const images = [
+    "/banner/banner1.jpg",
+    "/banner/banner2.jpg",
+    "/banner/banner3.jpg",
+  ];
 
   return (
     <section className="flex justify-center items-center w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-blue-50 to-white">
@@ -19,7 +23,8 @@ export default function Banner() {
                 Hệ thống Quản lý Y tế Học đường
               </p>
               <p className="max-w-[600px] text-gray-500 md:text-xl">
-                Giải pháp toàn diện để quản lý sức khỏe học sinh, theo dõi sự kiện y tế, và đảm bảo môi trường học tập an toàn.
+                Giải pháp toàn diện để quản lý sức khỏe học sinh, theo dõi sự
+                kiện y tế, và đảm bảo môi trường học tập an toàn.
               </p>
             </div>
 

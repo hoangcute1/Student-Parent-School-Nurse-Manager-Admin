@@ -7,14 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getAuthData } from "@/lib/auth";
-import {
-  BookOpen,
-  Calendar,
-  FileText,
-  MessageSquare,
-  Shield,
-  Users,
-} from "lucide-react";
 import { useEffect, useState } from "react";
 import LoginPopup from "./login-popup";
 import { useRouter } from "next/navigation";

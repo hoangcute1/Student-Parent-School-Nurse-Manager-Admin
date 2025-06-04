@@ -13,7 +13,7 @@ const parentNav = [
     label: "Gửi thuốc",
     description: "Mục gửi thuốc",
   },
-    {
+  {
     href: "/dashboard/events",
     icon: Heart,
     label: "Sự kiện y tế",

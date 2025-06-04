@@ -1,513 +1,309 @@
-"use client";
+import { Search, Filter, Download, Plus, Eye, Edit, MoreHorizontal, Users, AlertTriangle } from "lucide-react"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import {
-  Plus,
-  Search,
-  Filter,
-  Download,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  Pencil,
-  Trash,
-  ChevronUp,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  SelectValue,
-  SelectTrigger,
-  SelectItem,
-  SelectContent,
-  Select,
-} from "@/components/ui/select";
-import { getStudents } from "@/lib/api";
-import type { Student } from "@/lib/types";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function HealthRecordsPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalStudents, setTotalStudents] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<
-    "all" | "allergies" | "chronic" | "vaccinations"
-  >("all");
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchStudents();
-  }, [page, pageSize, searchQuery, activeFilter]);
-
-  const fetchStudents = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await getStudents(page, pageSize);
-      setStudents(response.data); // Changed from response.students to response.data
-      setTotalStudents(response.total);
-    } catch (err) {
-      let errorMessage = "Không thể tải dữ liệu sinh viên.";
-      if (err instanceof Error) {
-        if (err.message.includes("401")) {
-          errorMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
-        } else if (err.message.includes("403")) {
-          errorMessage = "Bạn không có quyền truy cập dữ liệu này.";
-        } else if (err.message.includes("404")) {
-          errorMessage = "Không tìm thấy dữ liệu sinh viên.";
-        }
-      }
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const totalPages = Math.ceil(totalStudents / pageSize);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setPage(1); // Reset to first page when searching
-  };
-
-  const handleFilterChange = (
-    value: "all" | "allergies" | "chronic" | "vaccinations"
-  ) => {
-    setActiveFilter(value);
-    setPage(1); // Reset to first page when changing filters
-  };
-
-  const handleDelete = async (studentId: string) => {
-    // TODO: Implement delete functionality
-    if (window.confirm("Bạn có chắc chắn muốn xóa hồ sơ này?")) {
-      console.log("Delete student:", studentId);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex h-[200px] items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
-          <p className="text-sm text-muted-foreground">Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-[200px] items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500">{error}</p>
-          <Button onClick={fetchStudents} variant="outline" className="mt-4">
-            Thử lại
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+export default function StudentsPage() {
   return (
-    <div className="grid gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hồ sơ sức khỏe</h1>
-          <p className="text-gray-500">
-            Quản lý thông tin sức khỏe của học sinh
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/health-records/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm hồ sơ mới
-            </Button>
-          </Link>
-        </div>
+    <div className="space-y-8">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">Quản lý học sinh</h1>
+        <p className="text-blue-600">Danh sách tất cả học sinh và thông tin sức khỏe của các em</p>
       </div>
-      <Tabs
-        value={activeFilter}
-        onValueChange={(v: any) => handleFilterChange(v)}
-        className="w-full"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <TabsList>
-            <TabsTrigger value="all">Tất cả</TabsTrigger>
-            <TabsTrigger value="allergies">Dị ứng</TabsTrigger>
-            <TabsTrigger value="chronic">Bệnh mãn tính</TabsTrigger>
-            <TabsTrigger value="vaccinations">Tiêm chủng</TabsTrigger>
-          </TabsList>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+
+      {/* Thống kê nhanh */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-blue-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Users className="h-8 w-8 text-blue-600" />
+              <div>
+                <div className="text-2xl font-bold text-blue-800">248</div>
+                <div className="text-sm text-blue-600">Tổng học sinh</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-green-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-600 font-bold">✓</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-800">236</div>
+                <div className="text-sm text-green-600">Sức khỏe tốt</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-yellow-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-yellow-600" />
+              <div>
+                <div className="text-2xl font-bold text-yellow-800">12</div>
+                <div className="text-sm text-yellow-600">Cần theo dõi</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-red-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-red-600 font-bold">!</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-red-800">0</div>
+                <div className="text-sm text-red-600">Khẩn cấp</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bộ lọc và tìm kiếm */}
+      <Card className="border-blue-100">
+        <CardHeader>
+          <CardTitle className="text-blue-800">Danh sách học sinh</CardTitle>
+          <CardDescription className="text-blue-600">
+            Quản lý thông tin và sức khỏe của tất cả học sinh trong trường
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
               <Input
                 type="search"
-                placeholder="Tìm kiếm..."
-                className="w-full rounded-lg pl-8 md:w-[300px]"
-                value={searchQuery}
-                onChange={handleSearch}
+                placeholder="Tìm kiếm theo tên, mã học sinh..."
+                className="pl-8 border-blue-200 focus:border-blue-500"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Select>
+              <SelectTrigger className="w-[180px] border-blue-200">
+                <SelectValue placeholder="Chọn lớp" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả lớp</SelectItem>
+                <SelectItem value="1A">Lớp 1A</SelectItem>
+                <SelectItem value="1B">Lớp 1B</SelectItem>
+                <SelectItem value="2A">Lớp 2A</SelectItem>
+                <SelectItem value="2B">Lớp 2B</SelectItem>
+                <SelectItem value="3A">Lớp 3A</SelectItem>
+                <SelectItem value="3B">Lớp 3B</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger className="w-[180px] border-blue-200">
+                <SelectValue placeholder="Tình trạng sức khỏe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="good">Sức khỏe tốt</SelectItem>
+                <SelectItem value="monitor">Cần theo dõi</SelectItem>
+                <SelectItem value="urgent">Khẩn cấp</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon" className="border-blue-200 text-blue-700 hover:bg-blue-50">
               <Filter className="h-4 w-4" />
-              <span className="sr-only">Lọc</span>
             </Button>
-            <Button variant="outline" size="icon">
-              <Download className="h-4 w-4" />
-              <span className="sr-only">Xuất</span>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Download className="mr-2 h-4 w-4" />
+              Xuất danh sách
             </Button>
           </div>
-        </div>
-        <TabsContent value={activeFilter} className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách hồ sơ sức khỏe</CardTitle>
-              <CardDescription>
-                Hiển thị {students.length} / {totalStudents} hồ sơ
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Họ tên</TableHead>
-                    <TableHead>Lớp</TableHead>
-                    <TableHead >Dị ứng</TableHead>
-                    <TableHead>Bệnh mãn tính</TableHead>
-                    <TableHead>Thị lực</TableHead>
-                    <TableHead>Cập nhật lần cuối</TableHead>
-                    <TableHead></TableHead>
+
+          <div className="rounded-md border border-blue-200">
+            <Table>
+              <TableHeader className="bg-blue-50">
+                <TableRow>
+                  <TableHead className="text-blue-800">Học sinh</TableHead>
+                  <TableHead className="text-blue-800">Lớp</TableHead>
+                  <TableHead className="text-blue-800">Ngày sinh</TableHead>
+                  <TableHead className="text-blue-800">Phụ huynh</TableHead>
+                  <TableHead className="text-blue-800">Tình trạng sức khỏe</TableHead>
+                  <TableHead className="text-blue-800">Dị ứng</TableHead>
+                  <TableHead className="text-blue-800">Cập nhật cuối</TableHead>
+                  <TableHead className="text-right text-blue-800">Thao tác</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.map((student, index) => (
+                  <TableRow key={index} className="hover:bg-blue-50 cursor-pointer">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8 border border-blue-200">
+                          <AvatarImage src={`/placeholder.svg?height=32&width=32&text=${student.name.charAt(0)}`} />
+                          <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
+                            {student.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-blue-800">{student.name}</div>
+                          <div className="text-sm text-blue-600">{student.studentId}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-blue-700">{student.class}</TableCell>
+                    <TableCell className="text-blue-700">{student.birthDate}</TableCell>
+                    <TableCell className="text-blue-700">{student.parent}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={getHealthStatusVariant(student.healthStatus)}
+                        className={getHealthStatusColor(student.healthStatus)}
+                      >
+                        {student.healthStatus}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-blue-700">{student.allergies || "Không"}</TableCell>
+                    <TableCell className="text-blue-700">{student.lastUpdate}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-blue-700 hover:bg-blue-100">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem className="text-blue-700">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Xem hồ sơ
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-blue-700">
+                            <Edit className="mr-2 h-4 w-4" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-blue-700">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Thêm sự kiện y tế
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student._id}>
-                      <TableCell className="font-medium">
-                        {student.name}
-                      </TableCell>
-                      <TableCell>{student.class}</TableCell>
-                      <TableCell>{student.allergies || "Không"}</TableCell>
-                      <TableCell>
-                        {student.chronicDiseases || "Không"}
-                      </TableCell>
-                      <TableCell>{student.vision || "Chưa cập nhật"}</TableCell>
-                      <TableCell>
-                        {new Date(student.updatedAt).toLocaleDateString('vi-VN')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu onOpenChange={(open) => setOpenMenuId(open ? student._id : null)}>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                              <span>Chi tiết</span>
-                              {openMenuId === student._id ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link href={`/dashboard/health-records/${student._id}/edit`} className="flex items-center">
-                                <Pencil className="mr-2 h-4 w-4" />
-                                <span>Chỉnh sửa</span>
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(student._id)}
-                              className="text-red-600 focus:text-red-600 cursor-pointer"
-                            >
-                              <Trash className="mr-2 h-4 w-4" />
-                              <span>Xóa</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {students.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center">
-                        Không có dữ liệu
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-500">Số mục mỗi trang</p>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(v) => setPageSize(Number(v))}
-                  >
-                    <SelectTrigger className="w-[70px]">
-                      <SelectValue>{pageSize}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-gray-500">Trang</span>
-                    <span className="font-medium">{page}</span>
-                    <span className="text-sm text-gray-500">
-                      / {totalPages}
-                    </span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="allergies" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách học sinh có dị ứng</CardTitle>
-              <CardDescription>
-                Thông tin về các loại dị ứng của học sinh
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Họ tên</TableHead>
-                    <TableHead>Lớp</TableHead>
-                    <TableHead>Loại dị ứng</TableHead>
-                    <TableHead>Mức độ</TableHead>
-                    <TableHead>Biểu hiện</TableHead>
-                    <TableHead>Xử lý khi phát sinh</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      name: "Nguyễn Văn An",
-                      class: "1A",
-                      type: "Hải sản",
-                      severity: "Trung bình",
-                      symptoms: "Nổi mề đay, ngứa",
-                      treatment: "Uống thuốc kháng histamine",
-                    },
-                    {
-                      name: "Lê Hoàng Cường",
-                      class: "3C",
-                      type: "Phấn hoa",
-                      severity: "Nhẹ",
-                      symptoms: "Hắt hơi, chảy nước mũi",
-                      treatment: "Uống thuốc kháng histamine",
-                    },
-                    {
-                      name: "Hoàng Thị Lan",
-                      class: "5B",
-                      type: "Đậu phộng",
-                      severity: "Nặng",
-                      symptoms: "Khó thở, sưng mặt",
-                      treatment: "Tiêm EpiPen, đưa đến bệnh viện ngay",
-                    },
-                  ].map((record, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {record.name}
-                      </TableCell>
-                      <TableCell>{record.class}</TableCell>
-                      <TableCell>{record.type}</TableCell>
-                      <TableCell>{record.severity}</TableCell>
-                      <TableCell>{record.symptoms}</TableCell>
-                      <TableCell>{record.treatment}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          Chi tiết
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="chronic" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách học sinh có bệnh mãn tính</CardTitle>
-              <CardDescription>
-                Thông tin về các bệnh mãn tính của học sinh
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Họ tên</TableHead>
-                    <TableHead>Lớp</TableHead>
-                    <TableHead>Bệnh mãn tính</TableHead>
-                    <TableHead>Thuốc điều trị</TableHead>
-                    <TableHead>Lưu ý đặc biệt</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      name: "Trần Thị Bình",
-                      class: "2B",
-                      condition: "Hen suyễn",
-                      medication: "Ventolin (khi cần)",
-                      notes: "Tránh hoạt động thể chất quá sức",
-                    },
-                    {
-                      name: "Hoàng Thị Lan",
-                      class: "5B",
-                      condition: "Tiểu đường type 1",
-                      medication: "Insulin",
-                      notes: "Theo dõi đường huyết, có thể cần tiêm insulin",
-                    },
-                  ].map((record, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {record.name}
-                      </TableCell>
-                      <TableCell>{record.class}</TableCell>
-                      <TableCell>{record.condition}</TableCell>
-                      <TableCell>{record.medication}</TableCell>
-                      <TableCell>{record.notes}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          Chi tiết
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="vaccinations" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Lịch sử tiêm chủng</CardTitle>
-              <CardDescription>
-                Thông tin về các mũi tiêm chủng của học sinh
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Họ tên</TableHead>
-                    <TableHead>Lớp</TableHead>
-                    <TableHead>Loại vắc-xin</TableHead>
-                    <TableHead>Ngày tiêm</TableHead>
-                    <TableHead>Nơi tiêm</TableHead>
-                    <TableHead>Phản ứng sau tiêm</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      name: "Nguyễn Văn An",
-                      class: "1A",
-                      vaccine: "Sởi-Quai bị-Rubella",
-                      date: "15/01/2025",
-                      location: "Trung tâm Y tế Quận 1",
-                      reaction: "Không",
-                    },
-                    {
-                      name: "Trần Thị Bình",
-                      class: "2B",
-                      vaccine: "Viêm não Nhật Bản",
-                      date: "20/02/2025",
-                      location: "Bệnh viện Nhi Đồng",
-                      reaction: "Sốt nhẹ",
-                    },
-                    {
-                      name: "Lê Hoàng Cường",
-                      class: "3C",
-                      vaccine: "Cúm mùa",
-                      date: "10/03/2025",
-                      location: "Trường học",
-                      reaction: "Không",
-                    },
-                  ].map((record, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {record.name}
-                      </TableCell>
-                      <TableCell>{record.class}</TableCell>
-                      <TableCell>{record.vaccine}</TableCell>
-                      <TableCell>{record.date}</TableCell>
-                      <TableCell>{record.location}</TableCell>
-                      <TableCell>{record.reaction}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          Chi tiết
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
+
+function getHealthStatusVariant(status: string) {
+  switch (status) {
+    case "Sức khỏe tốt":
+      return "default"
+    case "Cần theo dõi":
+      return "secondary"
+    case "Khẩn cấp":
+      return "destructive"
+    default:
+      return "outline"
+  }
+}
+
+function getHealthStatusColor(status: string) {
+  switch (status) {
+    case "Sức khỏe tốt":
+      return "bg-green-100 text-green-800"
+    case "Cần theo dõi":
+      return "bg-yellow-100 text-yellow-800"
+    case "Khẩn cấp":
+      return "bg-red-100 text-red-800"
+    default:
+      return "bg-gray-100 text-gray-800"
+  }
+}
+
+const students = [
+  {
+    name: "Nguyễn Văn An",
+    studentId: "HS2025001",
+    class: "1A",
+    birthDate: "15/01/2018",
+    parent: "Nguyễn Thị Hương",
+    healthStatus: "Sức khỏe tốt",
+    allergies: "Hải sản",
+    lastUpdate: "15/05/2025",
+  },
+  {
+    name: "Trần Thị Bình",
+    studentId: "HS2025002",
+    class: "1A",
+    birthDate: "22/03/2018",
+    parent: "Trần Văn Minh",
+    healthStatus: "Cần theo dõi",
+    allergies: null,
+    lastUpdate: "14/05/2025",
+  },
+  {
+    name: "Lê Hoàng Cường",
+    studentId: "HS2025003",
+    class: "1B",
+    birthDate: "08/07/2018",
+    parent: "Lê Thị Mai",
+    healthStatus: "Sức khỏe tốt",
+    allergies: "Phấn hoa",
+    lastUpdate: "13/05/2025",
+  },
+  {
+    name: "Phạm Minh Dương",
+    studentId: "HS2025004",
+    class: "2A",
+    birthDate: "12/11/2017",
+    parent: "Phạm Thị Lan",
+    healthStatus: "Sức khỏe tốt",
+    allergies: null,
+    lastUpdate: "12/05/2025",
+  },
+  {
+    name: "Hoàng Thị Lan",
+    studentId: "HS2025005",
+    class: "2A",
+    birthDate: "05/09/2017",
+    parent: "Hoàng Văn Nam",
+    healthStatus: "Cần theo dõi",
+    allergies: "Đậu phộng",
+    lastUpdate: "11/05/2025",
+  },
+  {
+    name: "Vũ Đình Khang",
+    studentId: "HS2025006",
+    class: "2B",
+    birthDate: "18/04/2017",
+    parent: "Vũ Thị Hoa",
+    healthStatus: "Sức khỏe tốt",
+    allergies: null,
+    lastUpdate: "10/05/2025",
+  },
+  {
+    name: "Đỗ Thị Linh",
+    studentId: "HS2025007",
+    class: "3A",
+    birthDate: "25/12/2016",
+    parent: "Đỗ Văn Tùng",
+    healthStatus: "Cần theo dõi",
+    allergies: "Bụi nhà",
+    lastUpdate: "09/05/2025",
+  },
+  {
+    name: "Bùi Văn Minh",
+    studentId: "HS2025008",
+    class: "3A",
+    birthDate: "14/06/2016",
+    parent: "Bùi Thị Nga",
+    healthStatus: "Sức khỏe tốt",
+    allergies: null,
+    lastUpdate: "08/05/2025",
+  },
+]

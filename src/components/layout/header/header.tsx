@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import User from "./user";
 
 const features = [
   {
@@ -44,22 +44,28 @@ export default function Header() {
       </div>
 
       <nav className="hidden md:flex items-center gap-6">
-        <Link href="/" className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
+        <Link
+          href="/"
+          className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors"
+        >
           Trang chủ
         </Link>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
             Tính năng
             <ChevronDown className="h-4 w-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="start" 
+          <DropdownMenuContent
+            align="start"
             className="w-48 bg-white/95 backdrop-blur-sm border-blue-100"
           >
             {features.map((feature, index) => (
               <DropdownMenuItem key={index}>
-                <Link href={feature.href} className="w-full text-blue-800 hover:text-blue-600">
+                <Link
+                  href={feature.href}
+                  className="w-full text-blue-800 hover:text-blue-600"
+                >
                   {feature.title}
                 </Link>
               </DropdownMenuItem>
@@ -67,19 +73,22 @@ export default function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Link href="/#resources" className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
+        <Link
+          href="/#resources"
+          className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors"
+        >
           Tài liệu
         </Link>
 
-        <Link href="/#blog" className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors">
+        <Link
+          href="/#blog"
+          className="text-sm font-medium text-blue-800 hover:text-blue-600 transition-colors"
+        >
           Blog
         </Link>
       </nav>
 
-      <Link href="/login">
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-          Đăng nhập
-        </Button>
-      </Link>
+      <User />
     </header>
-  ) }
+  );
+}
