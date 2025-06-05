@@ -3,8 +3,9 @@
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { hasPermission } from "@/lib/roles";
 
-// Kiểm tra trạng thái đăng nhập
+// Kiểm tra trạng thái đăng nhập và phân quyền - Chỉ cho phép Parent
 export default function CheckAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const [localUser, setLocalUser] = useState<any>(null);
@@ -19,21 +20,39 @@ export default function CheckAuth({ children }: { children: React.ReactNode }) {
         
         if (storedUser && token) {
           console.log("Đã tìm thấy thông tin người dùng trong localStorage");
-          setLocalUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setLocalUser(parsedUser);
+          
+          // Kiểm tra quyền ngay khi có thông tin từ localStorage
+          const userType = parsedUser.userType || 'parent'; // Mặc định là parent nếu không có userType
+          if (!hasPermission(userType, ["parent"])) {
+            console.log("Người dùng không có quyền truy cập Dashboard, chuyển hướng về trang chủ");
+            router.replace("/");
+          }
         }
       } catch (error) {
         console.error("Lỗi khi đọc dữ liệu từ localStorage:", error);
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
+    // Kiểm tra quyền từ API
+    if (!loading && user) {
+      if (!hasPermission(user.userType, ["parent"])) {
+        console.log("Người dùng không có quyền truy cập Dashboard, chuyển hướng về trang chủ");
+        router.replace("/");
+        return;
+      }
+    }
+    
     // Chỉ redirect khi đã kiểm tra xong, không có user từ API và không có user từ localStorage
     if (!loading && !user && !localUser) {
       console.log("Không có người dùng đã đăng nhập, chuyển hướng về login");
       router.replace("/login");
     }
   }, [user, loading, router, localUser]);
+  
   // Hiển thị loading state khi đang kiểm tra xác thực
   if (loading && !localUser) {
     return (
@@ -48,13 +67,16 @@ export default function CheckAuth({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Nếu có localUser, hiển thị nội dung ngay lập tức mà không cần đợi API
-  if (localUser) {
+  // Nếu có localUser với quyền phù hợp, hiển thị nội dung ngay lập tức
+  if (localUser && hasPermission(localUser.userType || 'parent', ["parent"])) {
     return <>{children}</>;
   }
 
-  // Nếu không có localUser và không có user từ API
-  if (!user) return null;
+  // Nếu có user từ API với quyền phù hợp
+  if (user && hasPermission(user.userType, ["parent"])) {
+    return <>{children}</>;
+  }
 
-  return <>{children}</>;
+  // Nếu không có quyền phù hợp hoặc không có user
+  return null;
 }

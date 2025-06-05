@@ -13,16 +13,25 @@ export default function Banner() {
     "/banner/banner3.jpg",
   ];
 
+  // Thêm ảnh nền mới ở đây
+  const backgroundImageUrl = "/banner/banner4.jpg"; 
+
   return (
-    <section className="flex justify-center items-center w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-blue-50 to-white">
-      <div className="container px-4 md:px-6">
+    <section
+      className="flex justify-center items-center w-full py-12 md:py-24 lg:py-32 bg-cover bg-no-repeat"
+      style={{
+        backgroundImage: `url(${backgroundImageUrl})`, 
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="container px-4 md:px-6 relative z-10">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
           <div className="flex flex-col justify-center space-y-4">
-            <div className="space-y-2">
-              <p className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+            <div className="space-y-2  p-4 rounded-lg">
+              <p className="text-3xl font-bold text-white tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
                 Hệ thống Quản lý Y tế Học đường
               </p>
-              <p className="max-w-[600px] text-gray-500 md:text-xl">
+              <p className="max-w-[600px] text-white md:text-xl drop-shadow-lg">
                 Giải pháp toàn diện để quản lý sức khỏe học sinh, theo dõi sự
                 kiện y tế, và đảm bảo môi trường học tập an toàn.
               </p>
@@ -37,7 +46,12 @@ export default function Banner() {
               className="flex flex-col gap-2 min-[400px]:flex-row"
             >
               <Link href="#features">
-                <Button size="lg">Tìm hiểu thêm</Button>
+                <Button
+                  size="lg"
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Tìm hiểu thêm
+                </Button>
               </Link>
             </motion.div>
           </div>

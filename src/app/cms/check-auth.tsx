@@ -3,8 +3,9 @@
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { hasPermission } from "@/lib/roles";
 
-// Kiểm tra trạng thái đăng nhập
+// Kiểm tra trạng thái đăng nhập và phân quyền - Chỉ cho phép Staff và Admin
 export default function CheckAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const [localUser, setLocalUser] = useState<any>(null);
@@ -19,22 +20,38 @@ export default function CheckAuth({ children }: { children: React.ReactNode }) {
         
         if (storedUser && token) {
           console.log("Đã tìm thấy thông tin người dùng trong localStorage");
-          setLocalUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setLocalUser(parsedUser);
+            // Kiểm tra quyền ngay khi có thông tin từ localStorage
+          const userType = parsedUser.userType || parsedUser.role || 'parent'; // Mặc định là parent nếu không có userType hoặc role
+          console.log("User type from localStorage:", userType);
+          if (!hasPermission(userType, ["staff", "admin"])) {
+            console.log("Người dùng không có quyền truy cập CMS, chuyển hướng về trang chủ");
+            router.replace("/");
+          }
         }
       } catch (error) {
         console.error("Lỗi khi đọc dữ liệu từ localStorage:", error);
       }
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
+    // Kiểm tra quyền từ API
+    if (!loading && user) {
+      if (!hasPermission(user.userType, ["staff", "admin"])) {
+        console.log("Người dùng không có quyền truy cập CMS, chuyển hướng về trang chủ");
+        router.replace("/");
+        return;
+      }
+    }
+    
     // Chỉ redirect khi đã kiểm tra xong, không có user từ API và không có user từ localStorage
     if (!loading && !user && !localUser) {
       console.log("Không có người dùng đã đăng nhập, chuyển hướng về login");
       router.replace("/login");
     }
-  }, [user, loading, router, localUser]);
-  // Hiển thị loading state khi đang kiểm tra xác thực
+  }, [user, loading, router, localUser]);  // Hiển thị loading state khi đang kiểm tra xác thực
   if (loading && !localUser) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -47,14 +64,24 @@ export default function CheckAuth({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  // Nếu có localUser, hiển thị nội dung ngay lập tức mà không cần đợi API
+  // Nếu có localUser với quyền phù hợp, hiển thị nội dung ngay lập tức
   if (localUser) {
+    const userType = localUser.userType || localUser.role || 'parent';
+    console.log("Checking permissions for local user type:", userType);
+    if (hasPermission(userType, ["staff", "admin"])) {
+      return <>{children}</>;
+    } else {
+      console.log("Local user does not have permission:", userType);
+      router.replace("/");
+      return null;
+    }
+  }
+
+  // Nếu có user từ API với quyền phù hợp
+  if (user && hasPermission(user.userType, ["staff", "admin"])) {
     return <>{children}</>;
   }
 
-  // Nếu không có localUser và không có user từ API
-  if (!user) return null;
-
-  return <>{children}</>;
+  // Nếu không có quyền phù hợp hoặc không có user
+  return null;
 }

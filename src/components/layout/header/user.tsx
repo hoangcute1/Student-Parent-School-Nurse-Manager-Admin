@@ -95,6 +95,17 @@ export default function User() {
         {(user.userType === "admin" || user.userType === "staff") && (
           <>
             <DropdownMenuItem asChild>
+              <Link href="/cms" className="flex w-full items-center">
+                <Settings2 className="mr-2 h-4 w-4" />
+                <span>Bảng quản lý</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        {user.userType === "parent" && (
+          <>
+            <DropdownMenuItem asChild>
               <Link href="/dashboard" className="flex w-full items-center">
                 <Settings2 className="mr-2 h-4 w-4" />
                 <span>Bảng điều khiển</span>

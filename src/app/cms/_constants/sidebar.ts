@@ -14,7 +14,7 @@ const navLinks = [
   {
     href: "/cms/events",
     icon: Users,
-    label: "Su kien y te",
+    label: "Sự kiện y tế",
     description: "Sự kiện y tế",
   },
   {
@@ -23,6 +23,19 @@ const navLinks = [
     label: "Sự kiện tiêm chủng",
     description: "Sự kiện tiêm chủng",
   },
+  {
+    href: "/cms/medications",
+    icon: Heart,
+    label: "Sự kiện thuốc",
+    description: "Sự kiện thuốc",
+  },
+  {
+    href: "/cms/responses",
+    icon: Heart,
+    label: "Quản lý phản hổi",
+    description: "Quản lý phản hồi",
+  },
+
 ];
 
 export { navLinks };

@@ -86,12 +86,29 @@ export function StaffLoginForm() {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
-    setIsLoading(true);
-
-    try {
+    setIsLoading(true);    try {
       const credentials = { ...formData, role: "staff" as const };
       const response = await loginUser(credentials);
-      storeAuthData(response);
+      console.log("Staff login response:", response);
+
+      // Make sure the user object has the staff role explicitly set
+      const userData = response.user || {};
+      const userWithRole = {
+        ...userData,
+        role: "staff", // Set role explicitly
+        userType: userData.userType || "staff" // Ensure userType is set too
+      };
+      
+      // Store enhanced user data
+      localStorage.setItem("user", JSON.stringify(userWithRole));
+      
+      // Store auth data with the enhanced user object
+      const enhancedResponse = {
+        ...response,
+        user: userWithRole
+      };
+      
+      storeAuthData(enhancedResponse);
       toast({
         title: "Đăng nhập thành công",
         description: "Đang chuyển hướng...",
