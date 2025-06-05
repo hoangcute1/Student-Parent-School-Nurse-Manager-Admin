@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import User from "./user";
+import Notification from "./noti";
 
 const features = [
   {
@@ -87,8 +88,10 @@ export default function Header() {
           Blog
         </Link>
       </nav>
-
-      <User />
+      <div className="">
+        <Notification />
+        <User />
+      </div>
     </header>
   );
 }

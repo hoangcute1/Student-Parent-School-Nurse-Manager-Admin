@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -30,21 +30,23 @@ const feedbacks = [
     type: "Chương trình KS57",
     purpose: "Đăng ký chương trình KS57",
     createDate: "11/05/2025",
-    processNote: "Chào em, em sẽ được xếp lớp môn DXE291c theo chương trình KS57 trên FAP và thư mời coursera sẽ được gửi vào email của em trước ngày 20/5, em vui lòng xem sylabus trên FAP và vào coursera để học nhé. Chúc em học tốt.",
+    processNote:
+      "Chào em, em sẽ được xếp lớp môn DXE291c theo chương trình KS57 trên FAP và thư mời coursera sẽ được gửi vào email của em trước ngày 20/5, em vui lòng xem sylabus trên FAP và vào coursera để học nhé. Chúc em học tốt.",
     file: "",
     status: "Approved",
-    updateDate: "13/05/2025 17:19:19"
+    updateDate: "13/05/2025 17:19:19",
   },
   {
     id: 2,
     type: "Hoãn nghĩa vụ quân sự",
     purpose: "em xin hoãn nghĩ vụ quân sự",
     createDate: "10/11/2024",
-    processNote: "Sinh viên vui lòng đến P.202 nhận giấy xác nhận sinh viên từ 14h00 ngày 11/11 nhé. Thân ái.",
+    processNote:
+      "Sinh viên vui lòng đến P.202 nhận giấy xác nhận sinh viên từ 14h00 ngày 11/11 nhé. Thân ái.",
     file: "",
     status: "Approved",
-    updateDate: "11/11/2024 11:28:11"
-  }
+    updateDate: "11/11/2024 11:28:11",
+  },
 ];
 
 export default function FeedbackDashboard() {
@@ -62,22 +64,24 @@ export default function FeedbackDashboard() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">phan hoi y kien</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-blue-800">
+            Phản hồi ý kiến
+          </h1>
+          <p className="text-blue-600">
             Theo dõi trạng thái xử lý đơn từ của bạn
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-blue-600 hover:bg-blue-700">
               <MessageCircle className="w-4 h-4 mr-2" />
               Tạo đơn mới
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="border-blue-100">
             <DialogHeader>
-              <DialogTitle>Tạo đơn mới</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-blue-800">Tạo đơn mới</DialogTitle>
+              <DialogDescription className="text-blue-600">
                 Vui lòng điền đầy đủ thông tin đơn của bạn
               </DialogDescription>
             </DialogHeader>
@@ -86,14 +90,21 @@ export default function FeedbackDashboard() {
                 placeholder="Nhập nội dung đơn của bạn..."
                 value={newFeedback}
                 onChange={(e) => setNewFeedback(e.target.value)}
-                className="min-h-[150px]"
+                className="min-h-[150px] border-blue-200 focus:border-blue-500"
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="border-blue-200 text-blue-700 hover:bg-blue-50"
+              >
                 Hủy
               </Button>
-              <Button onClick={handleSubmitFeedback}>
+              <Button
+                onClick={handleSubmitFeedback}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 <Send className="w-4 h-4 mr-2" />
                 Gửi đơn
               </Button>
@@ -102,38 +113,52 @@ export default function FeedbackDashboard() {
         </Dialog>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg border-blue-100">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-blue-50">
             <TableRow>
-              <TableHead>TYPE</TableHead>
-              <TableHead>PURPOSE</TableHead>
-              <TableHead>CREATEDATE</TableHead>
-              <TableHead className="max-w-[400px]">PROCESSNOTE</TableHead>
-              <TableHead>FILE</TableHead>
-              <TableHead>STATUS</TableHead>
-              <TableHead>...</TableHead>
+              <TableHead className="text-blue-800">TYPE</TableHead>
+              <TableHead className="text-blue-800">PURPOSE</TableHead>
+              <TableHead className="text-blue-800">CREATEDATE</TableHead>
+              <TableHead className="max-w-[400px] text-blue-800">
+                PROCESSNOTE
+              </TableHead>
+              <TableHead className="text-blue-800">FILE</TableHead>
+              <TableHead className="text-blue-800">STATUS</TableHead>
+              <TableHead className="text-blue-800">...</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {feedbacks.map((feedback) => (
-              <TableRow key={feedback.id}>
-                <TableCell>{feedback.type}</TableCell>
-                <TableCell>{feedback.purpose}</TableCell>
-                <TableCell>{feedback.createDate}</TableCell>
-                <TableCell className="max-w-[400px] whitespace-normal">
+              <TableRow key={feedback.id} className="hover:bg-blue-50">
+                <TableCell className="text-blue-700">{feedback.type}</TableCell>
+                <TableCell className="text-blue-700">
+                  {feedback.purpose}
+                </TableCell>
+                <TableCell className="text-blue-700">
+                  {feedback.createDate}
+                </TableCell>
+                <TableCell className="max-w-[400px] whitespace-normal text-blue-700">
                   {feedback.processNote}
                 </TableCell>
-                <TableCell>{feedback.file}</TableCell>
+                <TableCell className="text-blue-700">{feedback.file}</TableCell>
                 <TableCell>
-                  <Badge 
-                    variant={feedback.status === "Approved" ? "default" : "destructive"}
-                    className="whitespace-nowrap"
+                  <Badge
+                    variant={
+                      feedback.status === "Approved" ? "default" : "destructive"
+                    }
+                    className={
+                      feedback.status === "Approved"
+                        ? "whitespace-nowrap bg-green-100 text-green-800 border-green-200"
+                        : "whitespace-nowrap bg-red-100 text-red-800 border-red-200"
+                    }
                   >
                     {feedback.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{feedback.updateDate}</TableCell>
+                <TableCell className="text-blue-700">
+                  {feedback.updateDate}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

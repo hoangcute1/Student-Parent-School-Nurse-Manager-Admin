@@ -9,6 +9,7 @@ import { getAuthToken } from "@/lib/auth";
 import CheckAuth from "./check-auth";
 import User from "@/components/layout/header/user";
 import Sidebar from "./_components/sidebar";
+import Notification from "@/components/layout/header/noti";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -75,7 +76,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
 
             <div className="flex items-center gap-4">
-              {user && profile ? <User /> : null}
+              {user && profile ? (
+                <div className="flex gap-2">
+                  <Notification />
+                  <User />
+                </div>
+              ) : null}
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>

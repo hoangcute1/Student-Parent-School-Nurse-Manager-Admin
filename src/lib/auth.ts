@@ -23,11 +23,11 @@ export function storeAuthData(response: any) {
   // Handle different token property names
   const accessToken = response.access_token || response.token;
   const refreshToken = response.refresh_token || response.token;
-  
+
   if (accessToken) {
     localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
   }
-  
+
   if (refreshToken) {
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   }
@@ -38,9 +38,9 @@ export function storeAuthData(response: any) {
       user: response.user,
       profile: response.profile || {},
     };
-    
+
     localStorage.setItem(AUTH_DATA_KEY, JSON.stringify(userData));
-    
+
     // Also store the user directly for broader compatibility
     localStorage.setItem("user", JSON.stringify(response.user));
   }
@@ -86,7 +86,7 @@ export function useAuth() {
     // Try getting user data in order of preference
     const authData = getAuthData();
     const directUser = localStorage.getItem("user");
-    
+
     if (authData) {
       console.log("Found auth data:", authData);
       setUser(authData.user);

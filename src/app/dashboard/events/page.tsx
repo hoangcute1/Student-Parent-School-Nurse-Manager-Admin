@@ -13,12 +13,12 @@ export default function EventsPage() {
     <div className="grid gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Sự kiện y tế</h1>
-          <p className="text-gray-500">Quản lý các sự kiện y tế trong trường học</p>
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">Sự kiện y tế</h1>
+          <p className="text-blue-600">Quản lý các sự kiện y tế trong trường học</p>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/dashboard/events/new">
-            <Button>
+            <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="mr-2 h-4 w-4" />
               Thêm sự kiện mới
             </Button>
@@ -26,10 +26,66 @@ export default function EventsPage() {
         </div>
       </div>
 
+      {/* Thống kê nhanh */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-blue-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-blue-600 font-bold">✓</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-blue-800">156</div>
+                <div className="text-sm text-blue-600">Tổng sự kiện</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-green-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-600 font-bold">✓</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-800">124</div>
+                <div className="text-sm text-green-600">Đã giải quyết</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-yellow-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <span className="text-yellow-600 font-bold">!</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-yellow-800">18</div>
+                <div className="text-sm text-yellow-600">Đang theo dõi</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-red-100">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-red-600 font-bold">!</span>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-red-800">14</div>
+                <div className="text-sm text-red-600">Đang xử lý</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] border-blue-200">
               <SelectValue placeholder="Loại sự kiện" />
             </SelectTrigger>
             <SelectContent>
@@ -41,7 +97,7 @@ export default function EventsPage() {
             </SelectContent>
           </Select>
           <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] border-blue-200">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
@@ -54,38 +110,38 @@ export default function EventsPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input type="search" placeholder="Tìm kiếm..." className="w-full rounded-lg pl-8 md:w-[300px]" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
+            <Input type="search" placeholder="Tìm kiếm..." className="w-full rounded-lg pl-8 md:w-[300px] border-blue-200 focus:border-blue-500" />
           </div>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="border-blue-200 text-blue-700 hover:bg-blue-50">
             <Filter className="h-4 w-4" />
             <span className="sr-only">Lọc</span>
           </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="border-blue-200 text-blue-700 hover:bg-blue-50">
             <Download className="h-4 w-4" />
             <span className="sr-only">Xuất</span>
           </Button>
         </div>
       </div>
 
-      <Card>
+      <Card className="border-blue-100">
         <CardHeader>
-          <CardTitle>Danh sách sự kiện y tế</CardTitle>
-          <CardDescription>Tổng hợp các sự kiện y tế đã xảy ra trong trường học</CardDescription>
+          <CardTitle className="text-blue-800">Danh sách sự kiện y tế</CardTitle>
+          <CardDescription className="text-blue-600">Tổng hợp các sự kiện y tế đã xảy ra trong trường học</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-blue-50">
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Học sinh</TableHead>
-                <TableHead>Lớp</TableHead>
-                <TableHead>Loại sự kiện</TableHead>
-                <TableHead>Mô tả</TableHead>
-                <TableHead>Thời gian</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Người xử lý</TableHead>
-                <TableHead></TableHead>
+                <TableHead className="text-blue-800">ID</TableHead>
+                <TableHead className="text-blue-800">Học sinh</TableHead>
+                <TableHead className="text-blue-800">Lớp</TableHead>
+                <TableHead className="text-blue-800">Loại sự kiện</TableHead>
+                <TableHead className="text-blue-800">Mô tả</TableHead>
+                <TableHead className="text-blue-800">Thời gian</TableHead>
+                <TableHead className="text-blue-800">Trạng thái</TableHead>
+                <TableHead className="text-blue-800">Người xử lý</TableHead>
+                <TableHead className="text-blue-800"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -141,13 +197,13 @@ export default function EventsPage() {
                   handler: "Nguyễn Thị Y Tá",
                 },
               ].map((event, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{event.id}</TableCell>
-                  <TableCell>{event.student}</TableCell>
-                  <TableCell>{event.class}</TableCell>
-                  <TableCell>{event.type}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{event.description}</TableCell>
-                  <TableCell>{event.time}</TableCell>
+                <TableRow key={index} className="hover:bg-blue-50">
+                  <TableCell className="font-medium text-blue-800">{event.id}</TableCell>
+                  <TableCell className="text-blue-700">{event.student}</TableCell>
+                  <TableCell className="text-blue-700">{event.class}</TableCell>
+                  <TableCell className="text-blue-700">{event.type}</TableCell>
+                  <TableCell className="max-w-[200px] truncate text-blue-700">{event.description}</TableCell>
+                  <TableCell className="text-blue-700">{event.time}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
@@ -157,13 +213,20 @@ export default function EventsPage() {
                             ? "destructive"
                             : "secondary"
                       }
+                      className={
+                        event.status === "Đã giải quyết"
+                          ? "bg-green-100 text-green-800 border-green-200"
+                          : event.status === "Đang xử lý"
+                            ? "bg-red-100 text-red-800 border-red-200"
+                            : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                      }
                     >
                       {event.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{event.handler}</TableCell>
+                  <TableCell className="text-blue-700">{event.handler}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="text-blue-700 hover:bg-blue-100 hover:text-blue-900">
                       Chi tiết
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>

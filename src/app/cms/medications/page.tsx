@@ -1,366 +1,491 @@
-import { Clock, Download, Filter, Plus, Search, Pill } from "lucide-react"
-import Link from "next/link"
+"use client"
+
+import { useState } from "react"
+import { Plus, Search, Package, AlertTriangle, TrendingDown, TrendingUp, Edit, Trash2, Eye } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 
-export default function MedicationsPage() {
+export default function Medicine() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Quản lý thuốc</h1>
-        <p className="text-muted-foreground">
-          Theo dõi thuốc của học sinh, quản lý kho thuốc và yêu cầu cấp phát thuốc.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">Quản lý Kho thuốc</h1>
+        <p className="text-blue-600">Theo dõi tồn kho, nhập xuất và hạn sử dụng thuốc</p>
       </div>
 
-      <Tabs defaultValue="student" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="student">Thuốc học sinh</TabsTrigger>
-          <TabsTrigger value="inventory">Kho thuốc</TabsTrigger>
-          <TabsTrigger value="requests">Yêu cầu cấp thuốc</TabsTrigger>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="border-blue-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-blue-700">Tổng loại thuốc</CardTitle>
+            <Package className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-800">45</div>
+            <p className="text-xs text-blue-600">Đang quản lý</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-red-700">Sắp hết hạn</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-800">8</div>
+            <p className="text-xs text-red-600">Trong 30 ngày tới</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-orange-700">Tồn kho thấp</CardTitle>
+            <TrendingDown className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-800">12</div>
+            <p className="text-xs text-orange-600">Cần nhập thêm</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-green-700">Xuất tháng này</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-800">156</div>
+            <p className="text-xs text-green-600">Lượt cấp phát</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="inventory" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 bg-blue-50">
+          <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Tồn kho
+          </TabsTrigger>
+          <TabsTrigger value="import" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Nhập kho
+          </TabsTrigger>
+          <TabsTrigger value="export" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Xuất kho
+          </TabsTrigger>
+          <TabsTrigger value="expiry" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Hạn sử dụng
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="student" className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Tìm kiếm thuốc..." className="w-[300px] pl-8" />
-              </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-            <Link href="/dashboard/medications/add">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Thêm thuốc mới
-              </Button>
-            </Link>
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tên học sinh</TableHead>
-                  <TableHead>Tên thuốc</TableHead>
-                  <TableHead>Liều lượng</TableHead>
-                  <TableHead>Thời gian dùng</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {studentMedications.map((med, index) => (
-                  <TableRow key={index} className="cursor-pointer hover:bg-muted/50">
-                    <TableCell className="font-medium">{med.studentName}</TableCell>
-                    <TableCell>{med.medicationName}</TableCell>
-                    <TableCell>{med.dosage}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Clock className="mr-2 h-4 w-4 text-orange-500" />
-                        {med.schedule}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={med.status === "Đang dùng" ? "default" : "outline"}>{med.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Chi tiết
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="inventory" className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Tìm kiếm thuốc trong kho..." className="w-[300px] pl-8" />
-              </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="outline">
-                <Download className="mr-2 h-4 w-4" /> Xuất báo cáo
-              </Button>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Nhập thuốc
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {inventoryStats.map((stat, index) => (
-              <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:border-orange-500">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{stat.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{stat.value}</div>
-                  <p className="text-sm text-muted-foreground">{stat.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tên thuốc</TableHead>
-                  <TableHead>Loại</TableHead>
-                  <TableHead>Số lượng</TableHead>
-                  <TableHead>Hạn sử dụng</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {inventoryItems.map((item, index) => (
-                  <TableRow key={index} className="cursor-pointer hover:bg-muted/50">
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.type}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{item.expiry}</TableCell>
-                    <TableCell>
-                      <Badge variant={getInventoryStatusVariant(item.status)}>{item.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Chi tiết
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="requests" className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Yêu cầu cấp thuốc</h2>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Tạo yêu cầu mới
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {medicationRequests.map((request, index) => (
-              <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:border-orange-500 group">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between">
-                    <CardTitle>{request.studentName}</CardTitle>
-                    <Badge variant={getRequestStatusVariant(request.status)}>{request.status}</Badge>
-                  </div>
-                  <CardDescription>
-                    Yêu cầu #{request.id} • {request.date}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Pill className="mr-2 h-4 w-4 text-orange-500" />
-                      <span className="font-medium">{request.medicationName}</span>
-                    </div>
-                    <p className="text-sm">
-                      {request.dosage} • {request.schedule}
-                    </p>
-                    {request.notes && <p className="text-sm text-muted-foreground mt-2">{request.notes}</p>}
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" size="sm">
-                    Chi tiết
-                  </Button>
-                  {request.status === "Chờ xử lý" && (
-                    <Button size="sm" className="transition-all duration-300 group-hover:bg-orange-500">
-                      Xử lý
+        <TabsContent value="inventory" className="mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <CardTitle className="text-blue-800">Danh sách thuốc trong kho</CardTitle>
+                  <CardDescription className="text-blue-600">Theo dõi số lượng và tình trạng thuốc</CardDescription>
+                </div>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Thêm thuốc mới
                     </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Thêm thuốc mới</DialogTitle>
+                      <DialogDescription>Nhập thông tin thuốc vào kho</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="medicineName">Tên thuốc</Label>
+                        <Input id="medicineName" placeholder="Nhập tên thuốc" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Loại thuốc</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn loại thuốc" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="painkiller">Thuốc giảm đau</SelectItem>
+                            <SelectItem value="antibiotic">Kháng sinh</SelectItem>
+                            <SelectItem value="vitamin">Vitamin</SelectItem>
+                            <SelectItem value="antiseptic">Thuốc sát trùng</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quantity">Số lượng</Label>
+                        <Input id="quantity" type="number" placeholder="Nhập số lượng" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="expiryDate">Hạn sử dụng</Label>
+                        <Input id="expiryDate" type="date" />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                          Hủy
+                        </Button>
+                        <Button className="bg-blue-600 hover:bg-blue-700">Thêm thuốc</Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Tìm kiếm thuốc..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Loại thuốc" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="painkiller">Thuốc giảm đau</SelectItem>
+                    <SelectItem value="antibiotic">Kháng sinh</SelectItem>
+                    <SelectItem value="vitamin">Vitamin</SelectItem>
+                    <SelectItem value="antiseptic">Thuốc sát trùng</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên thuốc</TableHead>
+                      <TableHead>Loại</TableHead>
+                      <TableHead>Số lượng</TableHead>
+                      <TableHead>Đơn vị</TableHead>
+                      <TableHead>Hạn sử dụng</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead className="text-right">Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {medicineInventoryData.map((medicine) => (
+                      <TableRow key={medicine.id}>
+                        <TableCell className="font-medium">{medicine.name}</TableCell>
+                        <TableCell>{medicine.category}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span>{medicine.quantity}</span>
+                            <Progress value={(medicine.quantity / medicine.maxQuantity) * 100} className="w-16 h-2" />
+                          </div>
+                        </TableCell>
+                        <TableCell>{medicine.unit}</TableCell>
+                        <TableCell>{medicine.expiryDate}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              medicine.status === "Đầy đủ"
+                                ? "default"
+                                : medicine.status === "Sắp hết"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                            className={
+                              medicine.status === "Đầy đủ"
+                                ? "bg-green-100 text-green-800"
+                                : medicine.status === "Sắp hết"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-orange-100 text-orange-800"
+                            }
+                          >
+                            {medicine.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="import" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-blue-800">Lịch sử nhập kho</CardTitle>
+              <CardDescription className="text-blue-600">Theo dõi các lần nhập thuốc vào kho</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {importHistory.map((record, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 rounded-lg border border-blue-100 hover:bg-blue-50"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                        <TrendingUp className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-blue-800">{record.medicine}</h4>
+                        <p className="text-sm text-blue-600">
+                          Số lượng: {record.quantity} {record.unit}
+                        </p>
+                        <p className="text-xs text-gray-500">Ngày nhập: {record.date}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">Nhà cung cấp</p>
+                      <p className="text-xs text-gray-500">{record.supplier}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="export" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-blue-800">Lịch sử xuất kho</CardTitle>
+              <CardDescription className="text-blue-600">Theo dõi việc cấp phát thuốc cho học sinh</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {exportHistory.map((record, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 rounded-lg border border-blue-100 hover:bg-blue-50"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                        <TrendingDown className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-blue-800">{record.medicine}</h4>
+                        <p className="text-sm text-blue-600">Học sinh: {record.student}</p>
+                        <p className="text-xs text-gray-500">Thời gian: {record.time}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">
+                        {record.quantity} {record.unit}
+                      </p>
+                      <p className="text-xs text-gray-500">Lý do: {record.reason}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="expiry" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-blue-800">Thuốc sắp hết hạn</CardTitle>
+              <CardDescription className="text-blue-600">Danh sách thuốc cần chú ý về hạn sử dụng</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {expiringMedicines.map((medicine, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border-l-4 ${
+                      medicine.daysLeft <= 7
+                        ? "border-l-red-500 bg-red-50"
+                        : medicine.daysLeft <= 30
+                          ? "border-l-orange-500 bg-orange-50"
+                          : "border-l-yellow-500 bg-yellow-50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-gray-900">{medicine.name}</h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Số lượng: {medicine.quantity} {medicine.unit}
+                        </p>
+                        <p className="text-xs text-gray-500">Hạn sử dụng: {medicine.expiryDate}</p>
+                      </div>
+                      <div className="text-right">
+                        <Badge
+                          variant={medicine.daysLeft <= 7 ? "destructive" : "secondary"}
+                          className={
+                            medicine.daysLeft <= 7
+                              ? "bg-red-100 text-red-800"
+                              : medicine.daysLeft <= 30
+                                ? "bg-orange-100 text-orange-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }
+                        >
+                          Còn {medicine.daysLeft} ngày
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   )
 }
 
-function getInventoryStatusVariant(status: string): "default" | "destructive" | "outline" | "secondary" {
-  switch (status) {
-    case "Đầy đủ":
-      return "default"
-    case "Sắp hết":
-      return "secondary"
-    case "Cần nhập thêm":
-      return "destructive"
-    case "Sắp hết hạn":
-      return "secondary"
-    default:
-      return "outline"
-  }
-}
-
-function getRequestStatusVariant(status: string) {
-  switch (status) {
-    case "Đã xử lý":
-      return "default"
-    case "Chờ xử lý":
-      return "secondary"
-    case "Từ chối":
-      return "destructive"
-    default:
-      return "outline"
-  }
-}
-
-const studentMedications = [
+const medicineInventoryData = [
   {
-    studentName: "Nguyễn Văn An",
-    medicationName: "Paracetamol",
-    dosage: "500mg, 1 viên",
-    schedule: "Sau bữa trưa",
-    status: "Đang dùng",
-  },
-  {
-    studentName: "Trần Thị Bình",
-    medicationName: "Cetirizine",
-    dosage: "10mg, 1 viên",
-    schedule: "Sáng và tối",
-    status: "Đang dùng",
-  },
-  {
-    studentName: "Lê Hoàng Cường",
-    medicationName: "Salbutamol",
-    dosage: "2 nhát xịt",
-    schedule: "Khi có triệu chứng",
-    status: "Khi cần",
-  },
-  {
-    studentName: "Phạm Minh Đức",
-    medicationName: "Vitamin D",
-    dosage: "400 IU, 1 viên",
-    schedule: "Sau bữa sáng",
-    status: "Đang dùng",
-  },
-  {
-    studentName: "Hoàng Thị Lan",
-    medicationName: "Ibuprofen",
-    dosage: "200mg, 1 viên",
-    schedule: "Khi đau đầu",
-    status: "Khi cần",
-  },
-]
-
-const inventoryStats = [
-  {
-    title: "Tổng số thuốc",
-    value: "28",
-    description: "Loại thuốc trong kho",
-  },
-  {
-    title: "Sắp hết hạn",
-    value: "5",
-    description: "Loại thuốc cần thay thế",
-  },
-  {
-    title: "Cần nhập thêm",
-    value: "7",
-    description: "Loại thuốc sắp hết",
-  },
-]
-
-const inventoryItems = [
-  {
+    id: 1,
     name: "Paracetamol 500mg",
-    type: "Giảm đau, hạ sốt",
-    quantity: "120 viên",
-    expiry: "12/2025",
+    category: "Thuốc giảm đau",
+    quantity: 120,
+    maxQuantity: 200,
+    unit: "viên",
+    expiryDate: "15/06/2025",
     status: "Đầy đủ",
   },
   {
+    id: 2,
     name: "Cetirizine 10mg",
-    type: "Kháng histamine",
-    quantity: "45 viên",
-    expiry: "10/2025",
+    category: "Thuốc dị ứng",
+    quantity: 15,
+    maxQuantity: 100,
+    unit: "viên",
+    expiryDate: "20/01/2025",
     status: "Sắp hết",
   },
   {
+    id: 3,
     name: "Salbutamol xịt",
-    type: "Giãn phế quản",
-    quantity: "8 ống",
-    expiry: "08/2025",
-    status: "Cần nhập thêm",
+    category: "Thuốc hen suyễn",
+    quantity: 3,
+    maxQuantity: 10,
+    unit: "ống",
+    expiryDate: "10/03/2025",
+    status: "Tồn kho thấp",
   },
   {
-    name: "Vitamin D 400 IU",
-    type: "Vitamin",
-    quantity: "200 viên",
-    expiry: "06/2025",
-    status: "Sắp hết hạn",
-  },
-  {
-    name: "Ibuprofen 200mg",
-    type: "Giảm đau, kháng viêm",
-    quantity: "80 viên",
-    expiry: "11/2025",
+    id: 4,
+    name: "Vitamin C",
+    category: "Vitamin",
+    quantity: 200,
+    maxQuantity: 300,
+    unit: "viên",
+    expiryDate: "30/08/2025",
     status: "Đầy đủ",
   },
 ]
 
-const medicationRequests = [
+const importHistory = [
   {
-    id: "REQ-2025-001",
-    studentName: "Nguyễn Văn An",
-    medicationName: "Paracetamol 500mg",
-    dosage: "1 viên",
-    schedule: "Sau bữa trưa",
-    date: "15/05/2025",
-    status: "Chờ xử lý",
-    notes: "Học sinh bị sốt nhẹ, cần uống thuốc sau bữa trưa.",
+    medicine: "Paracetamol 500mg",
+    quantity: 100,
+    unit: "viên",
+    date: "10/12/2024",
+    supplier: "Công ty Dược phẩm ABC",
   },
   {
-    id: "REQ-2025-002",
-    studentName: "Trần Thị Bình",
-    medicationName: "Cetirizine 10mg",
-    dosage: "1 viên",
-    schedule: "Sáng và tối",
-    date: "14/05/2025",
-    status: "Đã xử lý",
+    medicine: "Vitamin C",
+    quantity: 150,
+    unit: "viên",
+    date: "08/12/2024",
+    supplier: "Công ty Dược phẩm XYZ",
   },
   {
-    id: "REQ-2025-003",
-    studentName: "Lê Hoàng Cường",
-    medicationName: "Salbutamol",
-    dosage: "2 nhát xịt",
-    schedule: "Khi có triệu chứng",
-    date: "13/05/2025",
-    status: "Từ chối",
-    notes: "Cần có đơn thuốc mới từ bác sĩ.",
+    medicine: "Cetirizine 10mg",
+    quantity: 50,
+    unit: "viên",
+    date: "05/12/2024",
+    supplier: "Công ty Dược phẩm ABC",
+  },
+]
+
+const exportHistory = [
+  {
+    medicine: "Paracetamol 500mg",
+    student: "Nguyễn Văn An",
+    quantity: 2,
+    unit: "viên",
+    time: "14:30 - 15/12/2024",
+    reason: "Đau đầu",
   },
   {
-    id: "REQ-2025-004",
-    studentName: "Phạm Minh Đức",
-    medicationName: "Vitamin D",
-    dosage: "1 viên",
-    schedule: "Sau bữa sáng",
-    date: "12/05/2025",
-    status: "Đã xử lý",
+    medicine: "Cetirizine 10mg",
+    student: "Trần Thị Bình",
+    quantity: 1,
+    unit: "viên",
+    time: "11:15 - 14/12/2024",
+    reason: "Dị ứng thức ăn",
+  },
+  {
+    medicine: "Vitamin C",
+    student: "Lê Hoàng Cường",
+    quantity: 1,
+    unit: "viên",
+    time: "09:45 - 13/12/2024",
+    reason: "Bổ sung vitamin",
+  },
+]
+
+const expiringMedicines = [
+  {
+    name: "Cetirizine 10mg",
+    quantity: 15,
+    unit: "viên",
+    expiryDate: "20/01/2025",
+    daysLeft: 25,
+  },
+  {
+    name: "Salbutamol xịt",
+    quantity: 3,
+    unit: "ống",
+    expiryDate: "10/03/2025",
+    daysLeft: 75,
+  },
+  {
+    name: "Thuốc sát trùng",
+    quantity: 5,
+    unit: "chai",
+    expiryDate: "05/01/2025",
+    daysLeft: 10,
   },
 ]

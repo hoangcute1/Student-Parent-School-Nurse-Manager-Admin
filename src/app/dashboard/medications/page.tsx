@@ -12,43 +12,43 @@ export default function MedicationsPage() {
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Quản lý thuốc</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">Quản lý thuốc</h1>
+        <p className="text-blue-600">
           Theo dõi thuốc của học sinh, quản lý kho thuốc và yêu cầu cấp phát thuốc.
         </p>
       </div>
 
       <Tabs defaultValue="student" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="student">Thuốc học sinh</TabsTrigger>
-          <TabsTrigger value="inventory">Kho thuốc</TabsTrigger>
-          <TabsTrigger value="requests">Yêu cầu cấp thuốc</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-blue-50">
+          <TabsTrigger value="student" className="data-[state=active]:bg-white data-[state=active]:text-blue-800">Thuốc học sinh</TabsTrigger>
+          <TabsTrigger value="inventory" className="data-[state=active]:bg-white data-[state=active]:text-blue-800">Kho thuốc</TabsTrigger>
+          <TabsTrigger value="requests" className="data-[state=active]:bg-white data-[state=active]:text-blue-800">Yêu cầu cấp thuốc</TabsTrigger>
         </TabsList>
 
         <TabsContent value="student" className="mt-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Tìm kiếm thuốc..." className="w-[300px] pl-8" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
+                <Input type="search" placeholder="Tìm kiếm thuốc..." className="w-[300px] pl-8 border-blue-200 focus:border-blue-500" />
               </div>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
             <Link href="/dashboard/medications/add">
-              <Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="mr-2 h-4 w-4" /> Thêm thuốc mới
               </Button>
             </Link>
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md border border-blue-200">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-blue-50">
                 <TableRow>
-                  <TableHead>Tên học sinh</TableHead>
-                  <TableHead>Tên thuốc</TableHead>
+                  <TableHead className="text-blue-800">Tên học sinh</TableHead>
+                  <TableHead className="text-blue-800">Tên thuốc</TableHead>
                   <TableHead>Liều lượng</TableHead>
                   <TableHead>Thời gian dùng</TableHead>
                   <TableHead>Trạng thái</TableHead>
