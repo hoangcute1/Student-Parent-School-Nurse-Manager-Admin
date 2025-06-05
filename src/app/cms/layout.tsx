@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
 
             <div className="flex items-center gap-4">
-              {user && profile ? <div className="flex gap-2"><Notification/><User /></div> : null}
+              {user && profile ? <User /> : null}
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
