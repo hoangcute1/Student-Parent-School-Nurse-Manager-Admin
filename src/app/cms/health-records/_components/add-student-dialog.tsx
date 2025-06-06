@@ -38,17 +38,13 @@ import {
 const studentFormSchema = z.object({
   name: z.string().min(1, { message: "Họ và tên không được để trống" }),
   studentId: z.string().min(1, { message: "Mã học sinh không được để trống" }),
-  birthDate: z.string().min(1, { message: "Ngày sinh không được để trống" }),
+  birth: z.string().min(1, { message: "Ngày sinh không được để trống" }),
   gender: z.enum(["male", "female"], {
     required_error: "Vui lòng chọn giới tính",
   }),
+  grade: z.string().min(1, { message: "Vui lòng chọn khối" }),
   class: z.string().min(1, { message: "Vui lòng chọn lớp" }),
   parentId: z.string().optional(),
-  allergies: z.string().optional(),
-  chronicDiseases: z.string().optional(),
-  vision: z
-    .enum(["normal", "myopia", "hyperopia", "astigmatism", "other"])
-    .optional(),
 });
 
 export type StudentFormValues = z.infer<typeof studentFormSchema>;
@@ -65,13 +61,11 @@ export function AddStudentDialog({ onSubmit }: AddStudentDialogProps) {
     defaultValues: {
       name: "",
       studentId: "",
-      birthDate: "",
+      birth: "",
       gender: "male",
+      grade: "",
       class: "",
       parentId: "",
-      allergies: "",
-      chronicDiseases: "",
-      vision: "normal",
     },
   });
 
@@ -80,8 +74,13 @@ export function AddStudentDialog({ onSubmit }: AddStudentDialogProps) {
       await onSubmit(data);
       setOpen(false);
       form.reset();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to submit form:", err);
+      // Set form error
+      form.setError("root", {
+        type: "serverError",
+        message: err.message || "Failed to create student",
+      });
     }
   };
 
@@ -93,202 +92,158 @@ export function AddStudentDialog({ onSubmit }: AddStudentDialogProps) {
           <Plus className="ml-2 h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Thêm học sinh mới</DialogTitle>
-          <DialogDescription>
-            Nhập thông tin của học sinh cần thêm vào hệ thống.
-          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Họ và tên</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nguyễn Văn A" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="studentId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mã học sinh</FormLabel>
-                      <FormControl>
-                        <Input placeholder="HS12345" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Họ và tên</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nguyễn Văn A" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="birthDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ngày sinh</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Giới tính</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex gap-4"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="male" id="male" />
-                            <Label htmlFor="male">Nam</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="female" id="female" />
-                            <Label htmlFor="female">Nữ</Label>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <FormField
+              control={form.control}
+              name="studentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mã học sinh</FormLabel>
+                  <FormControl>
+                    <Input placeholder="SV001" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="class"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Lớp</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn lớp" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1A">Lớp 1A</SelectItem>
-                          <SelectItem value="1B">Lớp 1B</SelectItem>
-                          <SelectItem value="2A">Lớp 2A</SelectItem>
-                          <SelectItem value="2B">Lớp 2B</SelectItem>
-                          <SelectItem value="3A">Lớp 3A</SelectItem>
-                          <SelectItem value="3B">Lớp 3B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="parentId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID phụ huynh</FormLabel>
-                      <FormControl>
-                        <Input placeholder="PH12345" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <FormField
+              control={form.control}
+              name="birth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ngày sinh</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="allergies"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dị ứng</FormLabel>
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Giới tính</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <Input
-                        placeholder="Nhập các loại dị ứng (nếu có)"
-                        {...field}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn giới tính" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <SelectContent>
+                      <SelectItem value="male">Nam</SelectItem>
+                      <SelectItem value="female">Nữ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="chronicDiseases"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bệnh mãn tính</FormLabel>
+            <FormField
+              control={form.control}
+              name="grade"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Khối</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <Input
-                        placeholder="Nhập các bệnh mãn tính (nếu có)"
-                        {...field}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn khối" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <SelectContent>
+                      <SelectItem value="10">Khối 10</SelectItem>
+                      <SelectItem value="11">Khối 11</SelectItem>
+                      <SelectItem value="12">Khối 12</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="vision"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Thị lực</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn tình trạng" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="normal">Bình thường</SelectItem>
-                        <SelectItem value="myopia">Cận thị</SelectItem>
-                        <SelectItem value="hyperopia">Viễn thị</SelectItem>
-                        <SelectItem value="astigmatism">Loạn thị</SelectItem>
-                        <SelectItem value="other">Khác</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="class"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lớp</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn lớp" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {form.watch("grade") === "10" && (
+                        <>
+                          <SelectItem value="10A1">10A1</SelectItem>
+                          <SelectItem value="10A2">10A2</SelectItem>
+                          <SelectItem value="10A3">10A3</SelectItem>
+                        </>
+                      )}
+                      {form.watch("grade") === "11" && (
+                        <>
+                          <SelectItem value="11A1">11A1</SelectItem>
+                          <SelectItem value="11A2">11A2</SelectItem>
+                          <SelectItem value="11A3">11A3</SelectItem>
+                        </>
+                      )}
+                      {form.watch("grade") === "12" && (
+                        <>
+                          <SelectItem value="12A1">12A1</SelectItem>
+                          <SelectItem value="12A2">12A2</SelectItem>
+                          <SelectItem value="12A3">12A3</SelectItem>
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem>                  <FormLabel>ID phụ huynh (không bắt buộc)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Để trống nếu chưa có" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <DialogFooter>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setOpen(false)}
-              >
-                Hủy
-              </Button>
-              <Button type="submit">Thêm học sinh</Button>
+              <Button type="submit">Lưu</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -1,4 +1,8 @@
-import { HealthRecordResponse, StudentResponse } from "@/lib/type/students";
+import {
+  HealthRecordResponse,
+  StudentResponse,
+  Student,
+} from "@/lib/type/students";
 import { fetchData } from "./api";
 
 export const getHealthRecords = (
@@ -20,9 +24,9 @@ export const getStudents = (
 };
 
 export const createStudent = (
-  data: Omit<StudentResponse, "_id" | "createdAt" | "updatedAt">
-): Promise<StudentResponse> => {
-  return fetchData<StudentResponse>("/students", {
+  data: Omit<Student, "_id" | "createdAt" | "updatedAt">
+): Promise<Student> => {
+  return fetchData<Student>("/students", {
     method: "POST",
     body: JSON.stringify(data),
   });

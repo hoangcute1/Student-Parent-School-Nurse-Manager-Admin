@@ -26,9 +26,6 @@ export interface Student {
   grade?: string;
   class?: string;
   parentId?: string;
-  allergies?: string | null;
-  chronicDiseases?: string | null;
-  vision?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,10 +35,10 @@ export interface StudentResponse {
   total: number;
   page: number;
   limit: number;
-};
+}
 export interface HealthRecordResponse {
   data: HealthRecord[];
   total: number;
   page: number;
   limit: number;
-};
+}

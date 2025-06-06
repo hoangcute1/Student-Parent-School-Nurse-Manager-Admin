@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Filter, Download, Users, AlertTriangle } from "lucide-react";
-import { getStudents } from "@/lib/api";
+import { getStudents, createStudent } from "@/lib/api/students";
+import type {
+  Student as ApiStudent,
+  StudentResponse,
+} from "@/lib/type/students";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,20 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { StudentTable } from "./_components/student-table";
-import { AddStudentDialog } from "./_components/add-student-dialog";
+import { StatsCards } from "./_components/stats-cards";
+import { FilterBar } from "./_components/filter-bar";
 import type { StudentFormValues } from "./_components/add-student-dialog";
 
-interface Student {
+// Local interface for UI display
+interface DisplayStudent {
   name: string;
   studentId: string;
   class: string;
@@ -43,8 +39,19 @@ interface StatsData {
   urgent: number;
 }
 
+const mapToDisplayStudent = (apiStudent: ApiStudent): DisplayStudent => ({
+  name: apiStudent.name,
+  studentId: apiStudent.studentId,
+  class: apiStudent.class || "N/A",
+  birthDate: apiStudent.birth || "N/A",
+  parent: "Parent Information",
+  healthStatus: "Sức khỏe tốt", // Default value
+  allergies: apiStudent.allergies || null,
+  lastUpdate: new Date(apiStudent.updatedAt).toLocaleDateString("vi-VN"),
+});
+
 export default function StudentsPage() {
-  const [studentData, setStudentData] = useState<Student[]>([]);
+  const [studentData, setStudentData] = useState<DisplayStudent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsData>({
@@ -53,6 +60,9 @@ export default function StudentsPage() {
     monitoring: 0,
     urgent: 0,
   });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [classFilter, setClassFilter] = useState("all");
+  const [healthFilter, setHealthFilter] = useState("all");
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -62,17 +72,8 @@ export default function StudentsPage() {
         const response = await getStudents();
         console.log("API response:", response);
 
-        // Map API response to the local Student interface format
-        const students = response.data.map((student: any) => ({
-          name: student.name,
-          studentId: student.studentId,
-          class: student.class || "N/A",
-          birthDate: student.birth || "N/A",
-          parent: "Parent Information", // Add default or get from API if available
-          healthStatus: student.healthStatus || "Sức khỏe tốt", // Default value
-          allergies: student.allergies,
-          lastUpdate: new Date(student.updatedAt).toLocaleDateString("vi-VN"),
-        }));
+        // Map API response to the local display format
+        const students = response.data.map(mapToDisplayStudent);
 
         console.log("Transformed student data:", students);
         setStudentData(students);
@@ -80,21 +81,16 @@ export default function StudentsPage() {
         // Calculate statistics
         const total = students.length;
         const healthy = students.filter(
-          (student: Student) => student.healthStatus === "Sức khỏe tốt"
+          (student) => student.healthStatus === "Sức khỏe tốt"
         ).length;
         const monitoring = students.filter(
-          (student: Student) => student.healthStatus === "Cần theo dõi"
+          (student) => student.healthStatus === "Cần theo dõi"
         ).length;
         const urgent = students.filter(
-          (student: Student) => student.healthStatus === "Khẩn cấp"
+          (student) => student.healthStatus === "Khẩn cấp"
         ).length;
 
-        setStats({
-          total,
-          healthy,
-          monitoring,
-          urgent,
-        });
+        setStats({ total, healthy, monitoring, urgent });
       } catch (err: any) {
         console.error("Failed to fetch students:", err);
         setError(err.message);
@@ -118,13 +114,40 @@ export default function StudentsPage() {
 
   const onSubmit = async (data: StudentFormValues) => {
     try {
-      // TODO: Implement API call to create student
-      console.log("Form submitted:", data);
-      // After successful submission, refresh student list
-      // await fetchStudents();
-    } catch (err) {
+      setIsLoading(true);
+      setError(null); // Clear any previous errors
+
+      // Create new student with the exact props required by API
+      const newStudent = await createStudent({
+        name: data.name,
+        studentId: data.studentId,
+        birth: data.birth,
+        gender: data.gender,
+        grade: data.grade,
+        class: data.class,
+        parentId: data.parentId || undefined,
+      });
+
+      // Add the new student to the list without needing a full refresh
+      const newDisplayStudent = mapToDisplayStudent(newStudent);
+      setStudentData((prev) => [...prev, newDisplayStudent]);
+
+      // Update stats
+      setStats((prev) => ({
+        ...prev,
+        total: prev.total + 1,
+        healthy: prev.healthy + 1, // Assuming new students start as healthy
+      }));
+    } catch (err: any) {
       console.error("Failed to create student:", err);
-      // Show error to user
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to create student";
+      setError(errorMessage);
+      throw new Error(errorMessage); // Re-throw to be caught by the form
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,65 +162,7 @@ export default function StudentsPage() {
         </p>
       </div>
 
-      {/* Thống kê nhanh */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-600" />
-              <div>
-                <div className="text-2xl font-bold text-blue-800">
-                  {stats.total}
-                </div>
-                <div className="text-sm text-blue-600">Tổng học sinh</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-green-100">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                <span className="text-green-600 font-bold">✓</span>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-800">
-                  {stats.healthy}
-                </div>
-                <div className="text-sm text-green-600">Sức khỏe tốt</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-yellow-100">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-8 w-8 text-yellow-600" />
-              <div>
-                <div className="text-2xl font-bold text-yellow-800">
-                  {stats.monitoring}
-                </div>
-                <div className="text-sm text-yellow-600">Cần theo dõi</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-red-100">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-                <span className="text-red-600 font-bold">!</span>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-red-800">
-                  {stats.urgent}
-                </div>
-                <div className="text-sm text-red-600">Khẩn cấp</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatsCards stats={stats} />
 
       {/* Bộ lọc và tìm kiếm */}
       <Card className="border-blue-100">
@@ -208,52 +173,12 @@ export default function StudentsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
-              <Input
-                type="search"
-                placeholder="Tìm kiếm theo tên, mã học sinh..."
-                className="pl-8 border-blue-200 focus:border-blue-500"
-              />
-            </div>
-            <Select>
-              <SelectTrigger className="w-[180px] border-blue-200">
-                <SelectValue placeholder="Chọn lớp" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả lớp</SelectItem>
-                <SelectItem value="1A">Lớp 1A</SelectItem>
-                <SelectItem value="1B">Lớp 1B</SelectItem>
-                <SelectItem value="2A">Lớp 2A</SelectItem>
-                <SelectItem value="2B">Lớp 2B</SelectItem>
-                <SelectItem value="3A">Lớp 3A</SelectItem>
-                <SelectItem value="3B">Lớp 3B</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger className="w-[180px] border-blue-200">
-                <SelectValue placeholder="Tình trạng sức khỏe" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="good">Sức khỏe tốt</SelectItem>
-                <SelectItem value="monitor">Cần theo dõi</SelectItem>
-                <SelectItem value="urgent">Khẩn cấp</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="icon"
-              className="border-blue-200 text-blue-700 hover:bg-blue-50"
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Download className="h-4 w-4" />
-            </Button>
-            <AddStudentDialog onSubmit={onSubmit} />
-          </div>
+          <FilterBar
+            onSearchChange={setSearchQuery}
+            onClassFilterChange={setClassFilter}
+            onHealthStatusChange={setHealthFilter}
+            onAddStudent={onSubmit}
+          />
           <StudentTable
             students={studentData}
             isLoading={isLoading}
