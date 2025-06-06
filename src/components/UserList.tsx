@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { API_URL } from "@/lib/env";
 
 interface User {
   id: number;
@@ -12,20 +13,19 @@ export default function UserList() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/users');
-        
+        const response = await fetch(`${API_URL}/users`);
+
         if (!response.ok) {
-          throw new Error('Failed to fetch users');
+          throw new Error("Failed to fetch users");
         }
-        
+
         const data = await response.json();
         setUsers(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }

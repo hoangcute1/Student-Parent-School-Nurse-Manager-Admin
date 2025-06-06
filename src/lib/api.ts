@@ -1,5 +1,7 @@
 // API utility functions for making HTTP requests
+import { get } from "http";
 import { getAuthToken } from "./auth";
+import { API_URL } from "./env";
 import type {
   AuthResponse,
   StudentResponse,
@@ -7,9 +9,6 @@ import type {
   HealthRecord,
   UserProfile,
 } from "./types";
-
-// Lấy API URL từ biến môi trường hoặc sử dụng giá trị mặc định
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 // Generic fetch function with error handling
 async function fetchData<T>(
@@ -88,7 +87,6 @@ export const getUsers = () => {
   return fetchData("/users");
 };
 
-// Student related API calls
 export const getStudents = (
   page: number = 1,
   pageSize: number = 10
