@@ -1,5 +1,4 @@
 // API utility functions for making HTTP requests
-import { get } from "http";
 import { getAuthToken } from "./auth";
 import { API_URL } from "./env";
 import type {
@@ -67,7 +66,6 @@ async function fetchData<T>(
 export type LoginCredentials = {
   email: string;
   password: string;
-  role?: string;
 };
 
 export type LoginResponse = AuthResponse;

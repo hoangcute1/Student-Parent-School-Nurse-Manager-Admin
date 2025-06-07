@@ -92,31 +92,23 @@ export function StaffLoginForm() {
       const response = await loginUser(credentials);
       console.log("Staff login response:", response);
 
-      // Make sure the user object has the staff role explicitly set
-      const userData = response.user || {};
-      const userWithRole = {
-        ...userData,
-        role: "staff", // Set role explicitly
-        userType: userData.userType || "staff", // Ensure userType is set too
-      };
-
-      // Store enhanced user data
-      localStorage.setItem("user", JSON.stringify(userWithRole));
-
-      // Store auth data with the enhanced user object
-      const enhancedResponse = {
-        ...response,
-        user: userWithRole,
-      };
-
-      storeAuthData(enhancedResponse);
+      storeAuthData(response);
       toast({
         title: "Đăng nhập thành công",
         description: "Đang chuyển hướng...",
       });
 
-      // Staff and admin users go to dashboard
-      router.push("/cms");
+      // Check userType to allow both staff and admin
+      const userType = response.user.userType;
+      if (userType === "staff" || userType === "admin") {
+        router.push("/cms");
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Lỗi đăng nhập",
+          description: "Tài khoản không có quyền truy cập",
+        });
+      }
     } catch (error) {
       console.error("Login error:", error);
       let message = "Có lỗi xảy ra khi đăng nhập";

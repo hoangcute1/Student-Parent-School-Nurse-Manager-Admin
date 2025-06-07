@@ -3,8 +3,10 @@ import { Database, Heart, LogOut, Settings, Shield, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navLinks } from "../_constants/sidebar";
+import { navLinks, adminNavLinks } from "../_constants/sidebar";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import type { User as AppUser } from "@/lib/types";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,6 +14,23 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
+  const [user, setUser] = useState<AppUser | null>(null);
+
+  useEffect(() => {
+    // Get user data from localStorage
+    const authData = localStorage.getItem("authData");
+    if (!authData) return;
+
+    try {
+      const data = JSON.parse(authData);
+      if (data.user) {
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error("Error parsing auth data:", error);
+    }
+  }, []);
+
   return (
     <aside
       className={cn(
@@ -33,12 +52,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               variant="outline"
               className="bg-blue-100 text-blue-700 text-xs mt-1"
             >
+              {" "}
               <Shield className="mr-1 h-3 w-3" />
-              Nhân viên y tế
+              {user?.userType === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
             </Badge>
           </div>
         </div>
-
         {/* Thống kê nhanh */}
         <div className="bg-white rounded-lg border border-blue-200 p-3 mb-4">
           <div className="grid grid-cols-2 gap-2 text-center">
@@ -51,9 +70,39 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               <div className="text-xs text-blue-600">Cần theo dõi</div>
             </div>
           </div>
-        </div>
-
+        </div>{" "}
         <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
+          {/* Admin navigation links */}
+          {user?.userType === "admin" && (
+            <>
+              <div className="text-xs font-medium text-blue-500 uppercase tracking-wider mb-2 mt-2">
+                Quản lý hệ thống
+              </div>
+              {adminNavLinks.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
+                      isActive ? "bg-blue-100" : ""
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                    <div className="flex-1">
+                      <div className="font-medium">{item.label}</div>
+                      <div className="text-xs text-blue-600 mt-0.5">
+                        {item.description}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+              <div className="border-t border-blue-200 my-2" />
+            </>
+          )}
+
+          {/* Standard navigation links */}
           {navLinks.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -75,7 +124,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             );
           })}
         </nav>
-
         <div className="mt-auto space-y-4">
           <div className="rounded-lg border border-blue-200 bg-white p-4">
             <div className="flex items-center gap-2 mb-2">
