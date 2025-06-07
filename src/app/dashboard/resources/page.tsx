@@ -1,33 +1,66 @@
-import { Calendar, Download, Filter, Search, FileText, AlertTriangle, Clock, User } from "lucide-react"
+import {
+  Calendar,
+  Download,
+  Filter,
+  Search,
+  FileText,
+  AlertTriangle,
+  Clock,
+  User,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function MedicalHistoryPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">Lịch sử bệnh án</h1>
-        <p className="text-blue-600">Theo dõi toàn bộ lịch sử bệnh án, điều trị và chăm sóc sức khỏe của học sinh.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+          Lịch sử bệnh án
+        </h1>
+        <p className="text-blue-600">
+          Theo dõi toàn bộ lịch sử bệnh án, điều trị và chăm sóc sức khỏe của
+          học sinh.
+        </p>
       </div>
 
       <Tabs defaultValue="timeline" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-blue-50">
-          <TabsTrigger value="timeline" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+        <TabsList className="grid w-full grid-cols-3 bg-blue-50">
+          <TabsTrigger
+            value="timeline"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Dòng thời gian
           </TabsTrigger>
-          <TabsTrigger value="chronic" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="chronic"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Bệnh mãn tính
           </TabsTrigger>
-          <TabsTrigger value="allergies" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="allergies"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Dị ứng
-          </TabsTrigger>
-          <TabsTrigger value="family" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Tiền sử gia đình
           </TabsTrigger>
         </TabsList>
 
@@ -42,7 +75,11 @@ export default function MedicalHistoryPage() {
                   className="w-[300px] pl-8 border-blue-200 focus:border-blue-500"
                 />
               </div>
-              <Button variant="outline" size="icon" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-blue-200 text-blue-700 hover:bg-blue-50"
+              >
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
@@ -66,7 +103,9 @@ export default function MedicalHistoryPage() {
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg text-blue-800">{entry.title}</CardTitle>
+                          <CardTitle className="text-lg text-blue-800">
+                            {entry.title}
+                          </CardTitle>
                           <CardDescription className="flex items-center gap-2 text-blue-600">
                             <Calendar className="h-4 w-4" />
                             {entry.date}
@@ -75,7 +114,10 @@ export default function MedicalHistoryPage() {
                             {entry.doctor}
                           </CardDescription>
                         </div>
-                        <Badge variant={getSeverityVariant(entry.severity)} className="ml-2">
+                        <Badge
+                          variant={getSeverityVariant(entry.severity)}
+                          className="ml-2"
+                        >
                           {entry.severity}
                         </Badge>
                       </div>
@@ -85,13 +127,19 @@ export default function MedicalHistoryPage() {
                         <p className="text-blue-700">{entry.description}</p>
                         {entry.treatment && (
                           <div className="bg-blue-50 rounded-lg p-3">
-                            <h4 className="font-medium text-blue-800 mb-1">Điều trị:</h4>
-                            <p className="text-sm text-blue-700">{entry.treatment}</p>
+                            <h4 className="font-medium text-blue-800 mb-1">
+                              Điều trị:
+                            </h4>
+                            <p className="text-sm text-blue-700">
+                              {entry.treatment}
+                            </p>
                           </div>
                         )}
                         {entry.medications && entry.medications.length > 0 && (
                           <div>
-                            <h4 className="font-medium text-blue-800 mb-2">Thuốc đã sử dụng:</h4>
+                            <h4 className="font-medium text-blue-800 mb-2">
+                              Thuốc đã sử dụng:
+                            </h4>
                             <div className="flex flex-wrap gap-2">
                               {entry.medications.map((med, medIndex) => (
                                 <Badge
@@ -123,12 +171,21 @@ export default function MedicalHistoryPage() {
         <TabsContent value="chronic" className="mt-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {chronicConditions.map((condition, index) => (
-              <Card key={index} className="border-blue-100 hover:border-blue-300 transition-all duration-300">
+              <Card
+                key={index}
+                className="border-blue-100 hover:border-blue-300 transition-all duration-300"
+              >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg text-blue-800">{condition.name}</CardTitle>
+                    <CardTitle className="text-lg text-blue-800">
+                      {condition.name}
+                    </CardTitle>
                     <Badge
-                      variant={condition.status === "Đang điều trị" ? "default" : "secondary"}
+                      variant={
+                        condition.status === "Đang điều trị"
+                          ? "default"
+                          : "secondary"
+                      }
                       className={
                         condition.status === "Đang điều trị"
                           ? "bg-orange-100 text-orange-800"
@@ -138,22 +195,32 @@ export default function MedicalHistoryPage() {
                       {condition.status}
                     </Badge>
                   </div>
-                  <CardDescription className="text-blue-600">Chẩn đoán: {condition.diagnosedDate}</CardDescription>
+                  <CardDescription className="text-blue-600">
+                    Chẩn đoán: {condition.diagnosedDate}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-blue-700">{condition.description}</p>
                   <div className="space-y-2">
-                    <h4 className="font-medium text-blue-800">Thuốc hiện tại:</h4>
+                    <h4 className="font-medium text-blue-800">
+                      Thuốc hiện tại:
+                    </h4>
                     <div className="flex flex-wrap gap-2">
                       {condition.currentMedications.map((med, medIndex) => (
-                        <Badge key={medIndex} variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
+                        <Badge
+                          key={medIndex}
+                          variant="outline"
+                          className="bg-blue-50 border-blue-200 text-blue-700"
+                        >
                           {med}
                         </Badge>
                       ))}
                     </div>
                   </div>
                   <div className="bg-blue-50 rounded-lg p-3">
-                    <h4 className="font-medium text-blue-800 mb-1">Lưu ý đặc biệt:</h4>
+                    <h4 className="font-medium text-blue-800 mb-1">
+                      Lưu ý đặc biệt:
+                    </h4>
                     <p className="text-sm text-blue-700">{condition.notes}</p>
                   </div>
                 </CardContent>
@@ -165,32 +232,48 @@ export default function MedicalHistoryPage() {
         <TabsContent value="allergies" className="mt-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {allergies.map((allergy, index) => (
-              <Card key={index} className="border-red-100 hover:border-red-300 transition-all duration-300">
+              <Card
+                key={index}
+                className="border-red-100 hover:border-red-300 transition-all duration-300"
+              >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg text-red-800 flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-red-600" />
                       {allergy.allergen}
                     </CardTitle>
-                    <Badge variant="destructive" className="bg-red-100 text-red-800">
+                    <Badge
+                      variant="destructive"
+                      className="bg-red-100 text-red-800"
+                    >
                       {allergy.severity}
                     </Badge>
                   </div>
-                  <CardDescription className="text-red-600">Phát hiện: {allergy.discoveredDate}</CardDescription>
+                  <CardDescription className="text-red-600">
+                    Phát hiện: {allergy.discoveredDate}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <h4 className="font-medium text-red-800 mb-1">Triệu chứng:</h4>
+                    <h4 className="font-medium text-red-800 mb-1">
+                      Triệu chứng:
+                    </h4>
                     <p className="text-sm text-red-700">{allergy.symptoms}</p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-red-800 mb-1">Cách xử lý:</h4>
+                    <h4 className="font-medium text-red-800 mb-1">
+                      Cách xử lý:
+                    </h4>
                     <p className="text-sm text-red-700">{allergy.treatment}</p>
                   </div>
                   {allergy.emergencyMedication && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <h4 className="font-medium text-red-800 mb-1">Thuốc cấp cứu:</h4>
-                      <p className="text-sm text-red-700">{allergy.emergencyMedication}</p>
+                      <h4 className="font-medium text-red-800 mb-1">
+                        Thuốc cấp cứu:
+                      </h4>
+                      <p className="text-sm text-red-700">
+                        {allergy.emergencyMedication}
+                      </p>
                     </div>
                   )}
                 </CardContent>
@@ -198,57 +281,21 @@ export default function MedicalHistoryPage() {
             ))}
           </div>
         </TabsContent>
-
-        <TabsContent value="family" className="mt-6 space-y-4">
-          <div className="rounded-md border border-blue-200">
-            <Table>
-              <TableHeader className="bg-blue-50">
-                <TableRow>
-                  <TableHead className="text-blue-800">Mối quan hệ</TableHead>
-                  <TableHead className="text-blue-800">Bệnh lý</TableHead>
-                  <TableHead className="text-blue-800">Tuổi phát bệnh</TableHead>
-                  <TableHead className="text-blue-800">Tình trạng</TableHead>
-                  <TableHead className="text-blue-800">Ghi chú</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {familyHistory.map((history, index) => (
-                  <TableRow key={index} className="hover:bg-blue-50">
-                    <TableCell className="font-medium text-blue-800">{history.relationship}</TableCell>
-                    <TableCell className="text-blue-700">{history.condition}</TableCell>
-                    <TableCell className="text-blue-700">{history.ageOfOnset}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={history.status === "Đã khỏi" ? "default" : "secondary"}
-                        className={
-                          history.status === "Đã khỏi" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                        }
-                      >
-                        {history.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-blue-700">{history.notes}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
 function getSeverityVariant(severity: string) {
   switch (severity) {
     case "Nghiêm trọng":
-      return "destructive"
+      return "destructive";
     case "Trung bình":
-      return "secondary"
+      return "secondary";
     case "Nhẹ":
-      return "outline"
+      return "outline";
     default:
-      return "outline"
+      return "outline";
   }
 }
 
@@ -258,7 +305,8 @@ const medicalTimeline = [
     title: "Khám sức khỏe định kỳ",
     doctor: "BS. Nguyễn Thị Hương",
     severity: "Nhẹ",
-    description: "Khám sức khỏe tổng quát định kỳ. Học sinh có sức khỏe tốt, phát triển bình thường theo độ tuổi.",
+    description:
+      "Khám sức khỏe tổng quát định kỳ. Học sinh có sức khỏe tốt, phát triển bình thường theo độ tuổi.",
     treatment: "Không cần điều trị đặc biệt, tiếp tục theo dõi phát triển.",
     medications: [],
     followUp: "6 tháng",
@@ -268,7 +316,8 @@ const medicalTimeline = [
     title: "Viêm họng cấp",
     doctor: "BS. Trần Văn Minh",
     severity: "Trung bình",
-    description: "Học sinh bị viêm họng cấp do virus, có triệu chứng đau họng, sốt nhẹ 37.8°C.",
+    description:
+      "Học sinh bị viêm họng cấp do virus, có triệu chứng đau họng, sốt nhẹ 37.8°C.",
     treatment: "Nghỉ ngơi, uống nhiều nước, súc miệng nước muối.",
     medications: ["Paracetamol 250mg", "Vitamin C"],
     followUp: "1 tuần",
@@ -293,16 +342,18 @@ const medicalTimeline = [
     medications: ["Betadine", "Băng gạc"],
     followUp: "3 ngày",
   },
-]
+];
 
 const chronicConditions = [
   {
     name: "Hen suyễn",
     diagnosedDate: "10/01/2024",
     status: "Đang điều trị",
-    description: "Hen suyễn nhẹ, thường xuyên tái phát khi thời tiết thay đổi hoặc tiếp xúc với bụi.",
+    description:
+      "Hen suyễn nhẹ, thường xuyên tái phát khi thời tiết thay đổi hoặc tiếp xúc với bụi.",
     currentMedications: ["Salbutamol xịt", "Vitamin D"],
-    notes: "Tránh hoạt động thể chất quá sức, luôn mang theo thuốc xịt khi cần thiết.",
+    notes:
+      "Tránh hoạt động thể chất quá sức, luôn mang theo thuốc xịt khi cần thiết.",
   },
   {
     name: "Cận thị",
@@ -310,9 +361,10 @@ const chronicConditions = [
     status: "Đang theo dõi",
     description: "Cận thị nhẹ -0.5 độ ở cả hai mắt, có xu hướng tăng dần.",
     currentMedications: ["Vitamin A", "Lutein"],
-    notes: "Hạn chế thời gian sử dụng thiết bị điện tử, tăng cường hoạt động ngoài trời.",
+    notes:
+      "Hạn chế thời gian sử dụng thiết bị điện tử, tăng cường hoạt động ngoài trời.",
   },
-]
+];
 
 const allergies = [
   {
@@ -339,35 +391,5 @@ const allergies = [
     treatment: "Vệ sinh môi trường sống, sử dụng máy lọc không khí",
     emergencyMedication: null,
   },
-]
+];
 
-const familyHistory = [
-  {
-    relationship: "Mẹ",
-    condition: "Hen suyễn",
-    ageOfOnset: "25 tuổi",
-    status: "Đang điều trị",
-    notes: "Hen suyễn do dị ứng, được kiểm soát tốt bằng thuốc",
-  },
-  {
-    relationship: "Ông nội",
-    condition: "Tiểu đường type 2",
-    ageOfOnset: "55 tuổi",
-    status: "Đang điều trị",
-    notes: "Cần theo dõi đường huyết định kỳ cho học sinh",
-  },
-  {
-    relationship: "Bà ngoại",
-    condition: "Cao huyết áp",
-    ageOfOnset: "60 tuổi",
-    status: "Đang điều trị",
-    notes: "Kiểm soát tốt bằng thuốc và chế độ ăn",
-  },
-  {
-    relationship: "Bố",
-    condition: "Cận thị",
-    ageOfOnset: "12 tuổi",
-    status: "Ổn định",
-    notes: "Cận thị cao -6.0 độ, cần theo dõi thị lực của con",
-  },
-]

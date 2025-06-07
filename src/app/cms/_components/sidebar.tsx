@@ -124,32 +124,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             );
           })}
         </nav>
-        <div className="mt-auto space-y-4">
-          <div className="rounded-lg border border-blue-200 bg-white p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Database className="h-4 w-4 text-blue-600" />
-              <h3 className="text-sm font-medium text-blue-800">Hệ thống</h3>
-            </div>
-            <p className="text-xs text-blue-600">
-              Phiên bản 2.1.0 • Cập nhật lần cuối: 15/05/2025
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full mt-3 border-blue-200 text-blue-700"
-            >
-              Kiểm tra cập nhật
-            </Button>
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 border-blue-200 text-blue-700 hover:bg-blue-100 focus:outline-none focus:bg-blue-100 focus:border-blue-400"
-          >
-            <LogOut className="h-4 w-4" />
-            Đăng xuất
-          </Button>
-        </div>
       </div>
     </aside>
   );

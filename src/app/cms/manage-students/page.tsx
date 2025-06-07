@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getStudents, createStudent } from "@/lib/api/students";
-import type {
-  Student as ApiStudent,
-  StudentResponse,
-} from "@/lib/type/students";
+import type { Student as ApiStudent } from "@/lib/type/students";
 
 import {
   Card,
@@ -46,7 +43,6 @@ const mapToDisplayStudent = (apiStudent: ApiStudent): DisplayStudent => ({
   healthStatus: "Sức khỏe tốt", // Default value
   lastUpdate: new Date(apiStudent.updatedAt).toLocaleDateString("vi-VN"),
 });
-
 
 export default function StudentsPage() {
   const [studentData, setStudentData] = useState<DisplayStudent[]>([]);

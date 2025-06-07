@@ -115,21 +115,15 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               Cần hỗ trợ? Liên hệ với nhân viên y tế qua tin nhắn hoặc gọi số
               hotline.
             </p>
-            <Button
-              size="sm"
-              className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
-            >
-              Liên hệ hỗ trợ
-            </Button>
+            <Link href="/dashboard/feedback">
+              <Button
+                size="sm"
+                className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
+              >
+                Liên hệ hỗ trợ
+              </Button>
+            </Link>
           </div>
-
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 border-blue-200 text-blue-700 hover:bg-blue-100"
-          >
-            <LogOut className="h-4 w-4" />
-            Đăng xuất
-          </Button>
         </div>
       </div>
     </aside>
