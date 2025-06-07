@@ -19,7 +19,11 @@ export class AuthService {
     private staffService: StaffService,
   ) {}
 
-  async validateUser(email: string, password: string, role: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+    role: string,
+  ): Promise<any> {
     const user = await this.userService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
@@ -38,20 +42,33 @@ export class AuthService {
     // Get user with populated role information
     const userWithRole = await this.userService.findByEmailWithRole(email);
     const userRole = userWithRole?.roleId as any;
-    const roleName = userRole?.name;
-
-    // For staff login
+    const roleName = userRole?.name; // For staff login
     if (role === 'staff') {
       // Allow both admin and staff roles to log in as staff
       if (!roleName || (roleName !== 'admin' && roleName !== 'staff')) {
-        throw new UnauthorizedException('Tài khoản không có quyền truy cập với vai trò staff');
+        throw new UnauthorizedException(
+          'Tài khoản không có quyền truy cập với vai trò staff',
+        );
       }
-      
+
       const staffProfile = await this.staffService.findByUserId(userId);
       if (!staffProfile) {
         throw new UnauthorizedException('Không tìm thấy thông tin nhân viên');
       }
-    } 
+    }
+    // For admin login
+    else if (role === 'admin') {
+      if (!roleName || roleName !== 'admin') {
+        throw new UnauthorizedException(
+          'Tài khoản không có quyền truy cập với vai trò admin',
+        );
+      }
+
+      const staffProfile = await this.staffService.findByUserId(userId);
+      if (!staffProfile) {
+        throw new UnauthorizedException('Không tìm thấy thông tin nhân viên');
+      }
+    }
     // For parent login
     else if (role === 'parent') {
       const parentProfile = await this.parentService.findByUserId(userId);
@@ -79,7 +96,7 @@ export class AuthService {
       }
     }
 
-    // Xác định loại user: parent hay staff
+    // Xác định loại user: parent, staff, hoặc admin
     let userType = 'user';
     const parent = await this.parentService.findByUserId(user._id.toString());
     if (parent) {
@@ -87,7 +104,13 @@ export class AuthService {
     } else {
       const staff = await this.staffService.findByUserId(user._id.toString());
       if (staff) {
-        userType = 'staff';
+        // Check if user has admin role
+        const userWithRole = await this.userService.findByEmailWithRole(
+          user.email,
+        );
+        const userRole = userWithRole?.roleId as any;
+        const roleName = userRole?.name;
+        userType = roleName === 'admin' ? 'admin' : 'staff';
       }
     }
 
@@ -117,7 +140,7 @@ export class AuthService {
         permissions: permissions,
         userType: userType,
       },
-      profile: profile
+      profile: profile,
     };
   }
 
