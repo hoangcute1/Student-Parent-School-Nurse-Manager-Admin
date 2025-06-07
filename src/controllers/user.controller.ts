@@ -38,6 +38,27 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Tạo mới user' })
+  @ApiBody({
+    type: CreateUserDto,
+    description: 'Thông tin của user mới',
+    required: true,
+  })
+  @ApiResponse({ status: 201, description: 'User đã được tạo thành công.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Thông tin không hợp lệ hoặc đã tồn tại.',
+  })
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Lấy thông tin user theo ID' })

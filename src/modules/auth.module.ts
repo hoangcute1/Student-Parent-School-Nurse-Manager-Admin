@@ -12,6 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ParentModule } from './parent.module';
 import { StaffModule } from './staff.module';
+import { AdminModule } from './admin.module';
 
 @Module({
   imports: [
@@ -22,6 +23,8 @@ import { StaffModule } from './staff.module';
     ConfigModule,
     ParentModule,
     StaffModule,
+    AdminModule,
+    AdminModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

@@ -5,6 +5,7 @@ import { TokenBlacklistService } from './token-blacklist.service';
 import { ProfileService } from './profile.service';
 import { ParentService } from './parent.service';
 import { StaffService } from './staff.service';
+import { AdminService } from './admin.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '@/decorations/dto/register.dto';
 
@@ -17,6 +18,7 @@ export class AuthService {
     private profileService: ProfileService,
     private parentService: ParentService,
     private staffService: StaffService,
+    private adminService: AdminService,
   ) {}
 
   async validateUser(
@@ -143,14 +145,29 @@ export class AuthService {
       profile: profile,
     };
   }
-
   async register(registerDto: RegisterDto) {
     // Create user
-    const user = await this.userService.create(
+    const user = await this.userService.create(registerDto);
+
+    // Get role information
+    const userWithRole = await this.userService.findByEmailWithRole(
       registerDto.email,
-      registerDto.password,
-      registerDto.role,
     );
+    const userRole = userWithRole?.roleId as any;
+    const roleName = userRole?.name;
+
+    if (roleName === 'admin') {
+      // Create admin record
+      await this.adminService.create({
+        userId: user._id,
+      } as any);
+    } else if (roleName === 'staff') {
+      // Create staff record
+      await this.staffService.create({
+        userId: user._id,
+        position: 'staff',
+      });
+    }
 
     return user;
   }

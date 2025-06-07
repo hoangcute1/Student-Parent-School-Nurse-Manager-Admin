@@ -14,6 +14,7 @@ import { ThrottlerModule } from './modules/throttler.module';
 import { TokenBlacklistModule } from './modules/token-blacklist.module';
 import { ParentModule } from './modules/parent.module';
 import { StaffModule } from './modules/staff.module';
+import { AdminModule } from './modules/admin.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
 
@@ -33,6 +34,8 @@ import { AppThrottlerGuard } from './guards/throttler.guard';
     RoleModule,
     ParentModule,
     StaffModule,
+    AdminModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

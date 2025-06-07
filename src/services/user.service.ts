@@ -10,6 +10,7 @@ import { User, UserDocument } from '@/schemas/user.schema';
 import { RoleService } from './role.service';
 import { ProfileService } from './profile.service';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from '@/decorations/dto/create-user.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -18,7 +19,7 @@ export class UserService {
     private profileService: ProfileService,
   ) {}
 
-  async create(email: string, password: string, role?: string): Promise<User> {
+  async create({ email, password, role }: CreateUserDto): Promise<User> {
     // Check if user with this email already exists
     const existingUser = await this.userModel.findOne({ email }).exec();
     if (existingUser) {
