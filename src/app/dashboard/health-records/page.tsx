@@ -15,14 +15,7 @@ export default function HealthRecordsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">Hồ sơ sức khỏe</h1>
           <p className="text-blue-600">Quản lý thông tin sức khỏe của học sinh</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/health-records/new">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm hồ sơ mới
-            </Button>
-          </Link>
-        </div>
+         
       </div>
       <Tabs defaultValue="all" className="w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

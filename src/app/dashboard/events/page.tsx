@@ -16,14 +16,7 @@ export default function EventsPage() {
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">Sự kiện y tế</h1>
           <p className="text-blue-600">Quản lý các sự kiện y tế trong trường học</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/events/new">
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm sự kiện mới
-            </Button>
-          </Link>
-        </div>
+        
       </div>
 
       {/* Thống kê nhanh */}

@@ -38,7 +38,7 @@ export default function MedicationsPage() {
             </div>
             <Link href="/dashboard/medications/add">
               <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="mr-2 h-4 w-4" /> Thêm thuốc mới
+                <Plus className="mr-2 h-4 w-4" /> Gửi thuốc mới
               </Button>
             </Link>
           </div>
