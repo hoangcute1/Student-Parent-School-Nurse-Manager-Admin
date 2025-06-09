@@ -126,6 +126,10 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                         <Edit className="mr-2 h-4 w-4" />
                         Chỉnh sửa
                       </DropdownMenuItem>
+                      <DropdownMenuItem className="text-blue-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Thêm sự kiện y tế
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

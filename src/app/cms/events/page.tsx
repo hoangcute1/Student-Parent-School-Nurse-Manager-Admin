@@ -275,9 +275,7 @@ export default function MedicalEvents() {
                       <Button size="sm" className="bg-red-600 hover:bg-red-700">
                         Xử lý ngay
                       </Button>
-                      <Button size="sm" variant="outline" className="border-red-200 text-red-700">
-                        Gọi 115
-                      </Button>
+
                       <Button size="sm" variant="outline" className="border-red-200 text-red-700">
                         Liên hệ PH
                       </Button>
