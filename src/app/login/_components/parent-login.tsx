@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { OTPDialog } from "./otp-dialog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,14 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
-import { loginUser, type LoginCredentials } from "@/lib/api";
+import { requestLoginOTP, verifyLoginOTP, type LoginRequestCredentials } from "@/lib/api";
 import { storeAuthData } from "@/lib/auth";
 
 export function ParentLoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<LoginCredentials>({
+  const [isLoading, setIsLoading] = useState(false);  const [formData, setFormData] = useState<LoginRequestCredentials>({
     email: "",
     password: "",
+    role: "parent"
   });
   const [errors, setErrors] = useState<{
     email?: string;
@@ -33,6 +34,7 @@ export function ParentLoginForm() {
     general?: string;
   }>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +57,7 @@ export function ParentLoginForm() {
     setShowPassword(!showPassword);
   };
 
-  const validateForm = (data: LoginCredentials): boolean => {
+  const validateForm = (data: LoginRequestCredentials): boolean => {
     const newErrors: {
       email?: string;
       password?: string;
@@ -80,23 +82,21 @@ export function ParentLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm(formData)) return;
-
-    setIsLoading(true);
-
+  };  const verifyOTP = async (otp: string) => {
     try {
-      const credentials = { ...formData, role: "parent" as const };
-      const response = await loginUser(credentials);
+      const response = await verifyLoginOTP({
+        email: formData.email,
+        otp
+      });
+      
       storeAuthData(response);
 
       toast({
         title: "Đăng nhập thành công",
         description: "Đang chuyển hướng...",
       });
+
+      setShowOTP(false);
 
       // Redirect based on user type
       if (
@@ -108,6 +108,43 @@ export function ParentLoginForm() {
         // Ensure parent users are redirected to home page
         window.location.href = "/";
       }
+    } catch (error) {
+      throw error; // Let OTPDialog handle the error
+    }
+  };
+
+  const resendOTP = async () => {
+    try {
+      await requestLoginOTP({
+        ...formData,
+        role: "parent"
+      });
+      toast({
+        title: "Đã gửi lại mã OTP",
+        description: "Vui lòng kiểm tra email của bạn"
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateForm(formData)) return;
+
+    setIsLoading(true);
+
+    try {
+      // First step: request OTP
+      await requestLoginOTP({
+        ...formData,
+        role: "parent"
+      });
+      setShowOTP(true);
+      toast({
+        title: "Thành công",
+        description: "Mã OTP đã được gửi đến email của bạn"
+      });
     } catch (error) {
       console.error("Login error:", error);
       let message = "Có lỗi xảy ra khi đăng nhập";
@@ -198,11 +235,15 @@ export function ParentLoginForm() {
             {errors.password && (
               <p className="text-xs text-red-500 mt-1">{errors.password}</p>
             )}
-          </div>
+          </div>{" "}
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <div className="flex w-full gap-2">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" type="submit" disabled={isLoading}>
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              type="submit"
+              disabled={isLoading}
+            >
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
             <Button
@@ -214,8 +255,15 @@ export function ParentLoginForm() {
               Quay lại
             </Button>
           </div>
+
+          <OTPDialog
+            open={showOTP}
+            onOpenChange={setShowOTP}
+            onVerify={verifyOTP}
+            onResend={resendOTP}
+          />
           <div className="text-center text-sm">
-            Chưa có tài khoản?{" "}
+            Chưa có tài khoản?
             <Link href="/register" className="text-blue-500 hover:underline">
               Đăng ký
             </Link>

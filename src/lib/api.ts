@@ -63,18 +63,34 @@ async function fetchData<T>(
   }
 }
 
-export type LoginCredentials = {
+export type LoginRequestCredentials = {
   email: string;
   password: string;
+  role?: string;
+};
+
+export type LoginVerifyCredentials = {
+  email: string;
+  otp: string;
 };
 
 export type LoginResponse = AuthResponse;
 
-// Login user
-export const loginUser = (
-  credentials: LoginCredentials
+// Request OTP for login
+export const requestLoginOTP = (
+  credentials: LoginRequestCredentials
+): Promise<{ message: string }> => {
+  return fetchData<{ message: string }>("/auth/login-request", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+};
+
+// Verify OTP and login
+export const verifyLoginOTP = (
+  credentials: LoginVerifyCredentials
 ): Promise<LoginResponse> => {
-  return fetchData<LoginResponse>("/auth/login", {
+  return fetchData<LoginResponse>("/auth/login-verify", {
     method: "POST",
     body: JSON.stringify(credentials),
   });

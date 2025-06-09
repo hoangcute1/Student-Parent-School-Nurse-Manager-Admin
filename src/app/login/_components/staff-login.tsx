@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { OTPDialog } from "./otp-dialog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,14 +19,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
-import { loginUser, type LoginCredentials } from "@/lib/api";
+import {
+  requestLoginOTP,
+  verifyLoginOTP,
+  type LoginRequestCredentials,
+} from "@/lib/api";
 import { storeAuthData } from "@/lib/auth";
 
 export function StaffLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<LoginCredentials>({
+  const [formData, setFormData] = useState<LoginRequestCredentials>({
     email: "",
     password: "",
+    role: "staff",
   });
   const [errors, setErrors] = useState<{
     email?: string;
@@ -33,6 +39,7 @@ export function StaffLoginForm() {
     general?: string;
   }>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +62,7 @@ export function StaffLoginForm() {
     setShowPassword(!showPassword);
   };
 
-  const validateForm = (data: LoginCredentials): boolean => {
+  const validateForm = (data: LoginRequestCredentials): boolean => {
     const newErrors: {
       email?: string;
       password?: string;
@@ -81,22 +88,21 @@ export function StaffLoginForm() {
     setErrors(newErrors);
     return isValid;
   };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm(formData)) return;
-
-    setIsLoading(true);
+  const verifyOTP = async (otp: string) => {
     try {
-      const credentials = { ...formData, role: "staff" as const };
-      const response = await loginUser(credentials);
-      console.log("Staff login response:", response);
+      const response = await verifyLoginOTP({
+        email: formData.email,
+        otp,
+      });
 
       storeAuthData(response);
+
       toast({
         title: "Đăng nhập thành công",
         description: "Đang chuyển hướng...",
       });
+
+      setShowOTP(false);
 
       // Check userType to allow both staff and admin
       const userType = response.user.userType;
@@ -109,6 +115,42 @@ export function StaffLoginForm() {
           description: "Tài khoản không có quyền truy cập",
         });
       }
+    } catch (error) {
+      throw error; // Let OTPDialog handle the error
+    }
+  };
+
+  const resendOTP = async () => {
+    try {
+      await requestLoginOTP({
+        ...formData,
+        role: "staff",
+      });
+      toast({
+        title: "Đã gửi lại mã OTP",
+        description: "Vui lòng kiểm tra email của bạn",
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateForm(formData)) return;
+
+    setIsLoading(true);
+    try {
+      // First step: request OTP
+      await requestLoginOTP({
+        ...formData,
+        role: "staff",
+      });
+      setShowOTP(true);
+      toast({
+        title: "Thành công",
+        description: "Mã OTP đã được gửi đến email của bạn",
+      });
     } catch (error) {
       console.error("Login error:", error);
       let message = "Có lỗi xảy ra khi đăng nhập";
@@ -206,7 +248,7 @@ export function StaffLoginForm() {
             </p>
             <p>Email: staff@example.com</p>
             <p>Mật khẩu: staffpass</p>
-          </div>
+          </div>{" "}
         </CardContent>
         <CardFooter>
           <div className="flex w-full gap-2">
@@ -222,6 +264,13 @@ export function StaffLoginForm() {
               Quay lại
             </Button>
           </div>
+
+          <OTPDialog
+            open={showOTP}
+            onOpenChange={setShowOTP}
+            onVerify={verifyOTP}
+            onResend={resendOTP}
+          />
         </CardFooter>
       </form>
     </Card>
