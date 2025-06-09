@@ -9,6 +9,7 @@ interface SlotProps {
   char?: string | null;
   hasFakeCaret?: boolean;
   isActive?: boolean;
+  placeholderChar?: string;
 }
 
 const InputOTP = React.forwardRef<
@@ -34,7 +35,7 @@ InputOTPGroup.displayName = "InputOTPGroup";
 const InputOTPSlot = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SlotProps
->(({ char, hasFakeCaret, isActive, className, ...props }, ref) => {
+>(({ char, hasFakeCaret, isActive, className, placeholderChar, ...props }, ref) => {
   return (
     <div
       ref={ref}
