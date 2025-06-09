@@ -15,12 +15,59 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Link from "next/link";
 import scrollContent from "./scrollContent";
 
 export default function Blog() {
   const blogScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = blogScrollRef.current;
+    let scrollInterval: NodeJS.Timeout;
+
+    const startAutoScroll = () => {
+      scrollInterval = setInterval(() => {
+        if (scrollContainer) {
+          const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+          const newScrollPosition = scrollContainer.scrollLeft + 350; // One card width
+
+          if (scrollContainer.scrollLeft >= maxScroll) {
+            scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            scrollContainer.scrollTo({
+              left: newScrollPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 5000); // Scroll every 5 seconds
+    };
+
+    const stopAutoScroll = () => {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+      }
+    };
+
+    // Start auto-scrolling
+    startAutoScroll();
+
+    // Pause on hover/touch
+    scrollContainer?.addEventListener('mouseenter', stopAutoScroll);
+    scrollContainer?.addEventListener('touchstart', stopAutoScroll);
+    scrollContainer?.addEventListener('mouseleave', startAutoScroll);
+    scrollContainer?.addEventListener('touchend', startAutoScroll);
+
+    // Cleanup
+    return () => {
+      stopAutoScroll();
+      scrollContainer?.removeEventListener('mouseenter', stopAutoScroll);
+      scrollContainer?.removeEventListener('touchstart', stopAutoScroll);
+      scrollContainer?.removeEventListener('mouseleave', startAutoScroll);
+      scrollContainer?.removeEventListener('touchend', startAutoScroll);
+    };
+  }, []);
 
   return (
     <section
