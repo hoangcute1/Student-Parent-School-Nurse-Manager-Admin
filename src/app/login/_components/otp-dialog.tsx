@@ -36,25 +36,6 @@ export function OTPDialog({
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleVerify = async () => {
-    if (otp.length !== 6) {
-      setError("Vui lòng nhập đủ 6 chữ số");
-      return;
-    }
-
-    setIsVerifying(true);
-    setError(null);
-
-    try {
-      await onVerify(otp);
-      // OTP verification successful will be handled by parent component
-    } catch (err) {
-      setError("Mã OTP không chính xác. Vui lòng thử lại.");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
   const handleResend = async () => {
     try {
       await onResend();
@@ -92,10 +73,22 @@ export function OTPDialog({
           <InputOTP
             maxLength={6}
             value={otp}
-            onChange={(value) => {
+            onChange={async (value) => {
               setOtp(value);
               setError(null);
-            }}            render={({ slots }) => (
+
+              // Auto verify when all 6 digits are entered
+              if (value.length === 6) {
+                setIsVerifying(true);
+                try {
+                  await onVerify(value);
+                } catch (err) {
+                  setError("Mã OTP không chính xác. Vui lòng thử lại.");
+                  setIsVerifying(false);
+                }
+              }
+            }}
+            render={({ slots }) => (
               <InputOTPGroup className="gap-2">
                 {slots.map((slot, idx) => (
                   <InputOTPSlot key={idx} {...slot} />
@@ -109,16 +102,10 @@ export function OTPDialog({
           <Button
             onClick={handleResend}
             variant="outline"
+            disabled={isVerifying}
             className="w-full sm:w-auto"
           >
             Gửi lại mã
-          </Button>
-          <Button
-            onClick={handleVerify}
-            className="w-full sm:w-auto"
-            disabled={isVerifying}
-          >
-            {isVerifying ? "Đang xác thực..." : "Xác thực"}
           </Button>
         </DialogFooter>
       </DialogContent>
