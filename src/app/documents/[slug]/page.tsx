@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { notFound } from "next/navigation";
 
 import { Facebook, Twitter, Share2, Clock, User, ChevronRight } from "lucide-react";
@@ -554,11 +555,12 @@ const documents = {
 type DocumentSlug = keyof typeof documents;
 
 type Params = {
-  params: { slug: DocumentSlug }
+  params: Promise<{ slug: DocumentSlug }>
 };
 
 export default function DocumentPage({ params }: Params) {
-  const document = documents[params.slug];
+  const { slug } = React.use(params) as { slug: DocumentSlug };
+  const document = documents[slug];
 
   if (!document) {
     notFound();
@@ -647,7 +649,7 @@ export default function DocumentPage({ params }: Params) {
                     <CardTitle>Bài viết liên quan</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {document.relatedDocs?.map((doc, index) => (
+                    {document.relatedDocs?.map((doc: { title: string; href: string; image: string }, index: number) => (
                       <Link href={doc.href} key={index} className="block group">
                         <div className="flex gap-4">
                           <div className="relative w-20 h-20 rounded-lg overflow-hidden">
