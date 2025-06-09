@@ -8,6 +8,7 @@ import { StaffService } from './staff.service';
 import { AdminService } from './admin.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '@/decorations/dto/register.dto';
+import { OtpService } from './otp.service';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,16 @@ export class AuthService {
     private parentService: ParentService,
     private staffService: StaffService,
     private adminService: AdminService,
+    private otpService: OtpService,
   ) {}
+
+  async sendLoginOTP(email: string): Promise<void> {
+    await this.otpService.createOTP(email);
+  }
+
+  async verifyLoginOTP(email: string, otp: string): Promise<boolean> {
+    return this.otpService.verifyOTP(email, otp);
+  }
 
   async validateUser(
     email: string,

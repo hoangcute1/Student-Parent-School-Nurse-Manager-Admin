@@ -9,6 +9,9 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '@/schemas/user.schema';
 import { RoleService } from './role.service';
 import { ProfileService } from './profile.service';
+import { AdminService } from './admin.service';
+import { StaffService } from './staff.service';
+import { ParentService } from './parent.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '@/decorations/dto/create-user.dto';
 @Injectable()
@@ -17,29 +20,59 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     private roleService: RoleService,
     private profileService: ProfileService,
+    private adminService: AdminService,
+    private staffService: StaffService,
+    private parentService: ParentService,
   ) {}
-
-  async create({ email, password, role }: CreateUserDto): Promise<User> {
+  async create({
+    email,
+    password,
+    role,
+  }: CreateUserDto): Promise<UserDocument> {
     // Check if user with this email already exists
     const existingUser = await this.userModel.findOne({ email }).exec();
     if (existingUser) {
       throw new ConflictException('Email đã tồn tại');
     }
+
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const foundRole = role ? await this.roleService.findByName(role) : null;
+
       const createdUser = new this.userModel({
         email,
         password: hashedPassword,
         roleId: foundRole ? foundRole._id : null,
       });
-      return createdUser.save();
+
+      const savedUser = (await createdUser.save()) as UserDocument;
+
+      if (foundRole && savedUser._id) {
+        const userId = savedUser._id.toString();
+        // Create corresponding record based on role
+        switch (foundRole.name) {
+          case 'admin':
+            await this.adminService.create({ userId });
+            break;
+          case 'staff':
+            await this.staffService.create({
+              userId,
+              position: 'staff',
+            });
+            break;
+          case 'parent':
+            await this.parentService.create({ userId });
+            break;
+        }
+      }
+
+      return savedUser;
     } catch (error) {
       // If role not found, fallback to creating without role reference
       if (error instanceof NotFoundException) {
         const createdUser = new this.userModel({
           email,
-          password,
+          password: await bcrypt.hash(password, 10),
         });
         return createdUser.save();
       }

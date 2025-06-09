@@ -6,6 +6,7 @@ import { AuthController } from '@/controllers/auth.controller';
 import { UserModule } from './user.module';
 import { ProfileModule } from './profile.module';
 import { TokenBlacklistModule } from './token-blacklist.module';
+import { OtpModule } from './otp.module';
 import { JwtStrategy } from '@/strategies/jwt.strategy';
 import { LocalStrategy } from '@/strategies/local.strategy';
 import { APP_GUARD } from '@nestjs/core';
@@ -24,7 +25,7 @@ import { AdminModule } from './admin.module';
     ParentModule,
     StaffModule,
     AdminModule,
-    AdminModule,
+    OtpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
