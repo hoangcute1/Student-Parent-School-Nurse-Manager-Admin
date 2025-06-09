@@ -9,13 +9,58 @@ import {
 } from "@/components/ui/card";
 import { resources } from "../_constants/resource";
 import scrollContent from "./scrollContent";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { ArrowRight, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Resource() {
   const resourcesScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = resourcesScrollRef.current;
+    let scrollInterval: NodeJS.Timeout;
+
+    const startAutoScroll = () => {
+      scrollInterval = setInterval(() => {
+        if (scrollContainer) {
+          const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+          const newScrollPosition = scrollContainer.scrollLeft + 350;
+
+          if (scrollContainer.scrollLeft >= maxScroll) {
+            scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            scrollContainer.scrollTo({
+              left: newScrollPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 5000);
+    };
+
+    const stopAutoScroll = () => {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+      }
+    };
+
+    startAutoScroll();
+
+    scrollContainer?.addEventListener('mouseenter', stopAutoScroll);
+    scrollContainer?.addEventListener('touchstart', stopAutoScroll);
+    scrollContainer?.addEventListener('mouseleave', startAutoScroll);
+    scrollContainer?.addEventListener('touchend', startAutoScroll);
+
+    return () => {
+      stopAutoScroll();
+      scrollContainer?.removeEventListener('mouseenter', stopAutoScroll);
+      scrollContainer?.removeEventListener('touchstart', stopAutoScroll);
+      scrollContainer?.removeEventListener('mouseleave', startAutoScroll);
+      scrollContainer?.removeEventListener('touchend', startAutoScroll);
+    };
+  }, []);
+
   return (
     <section
       id="resources"
@@ -62,9 +107,7 @@ export default function Resource() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <CalendarIcon className="h-4 w-4" />
-                          <span>{resource.date}</span>
-                          <span>•</span>
-                          <span>{resource.author}</span>
+                          <span>{resource.author.replace('https://', '').split('/')[0]}</span>
                         </div>
                         <CardTitle className="text-xl font-bold">
                           {resource.title}
