@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { parentNav, studentNav } from "../_constants/sidebar";
+import { studentList } from "../_constants/students";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -21,8 +22,9 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const [showStudentSection, setShowStudentSection] = useState(true);
-  const [showStudentDetails, setShowStudentDetails] = useState(true);
+  const [showStudentList, setShowStudentList] = useState(false);
   const [showParentSection, setShowParentSection] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState(studentList[0]);
   const pathname = usePathname();
 
   return (
@@ -33,7 +35,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
-      {/* Header section - fixed size */}
+      {/* Header section */}
       <div className="p-4 border-b border-blue-200">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
@@ -52,22 +54,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </div>
       </div>
 
-      {/* Main navigation section - với custom scrollbar */}
-      <div
-        className="overflow-y-auto 
-        [&::-webkit-scrollbar]:w-2
-        [&::-webkit-scrollbar-track]:bg-transparent
-        [&::-webkit-scrollbar-track]:rounded-lg
-        [&::-webkit-scrollbar-thumb]:bg-blue-200
-        [&::-webkit-scrollbar-thumb]:rounded
-        [&::-webkit-scrollbar-thumb]:border-2
-        [&::-webkit-scrollbar-thumb]:border-blue-50
-        hover:[&::-webkit-scrollbar-thumb]:bg-blue-300
-        [&::-webkit-scrollbar-thumb]:transition-colors
-        [&::-webkit-scrollbar]:hover:w-2"
-      >
+      {/* Main navigation section */}
+      <div className="overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-blue-200 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-blue-50 hover:[&::-webkit-scrollbar-thumb]:bg-blue-300 [&::-webkit-scrollbar-thumb]:transition-colors [&::-webkit-scrollbar]:hover:w-2">
         <div className="p-4 space-y-4">
-          {/* Parent navigation with animation */}
+          {/* Parent navigation */}
           <div className="space-y-4">
             <button
               onClick={() => setShowParentSection(!showParentSection)}
@@ -100,9 +90,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
-                          isActive ? "bg-blue-100" : ""
-                        }`}
+                        className={cn(
+                          "flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200",
+                          isActive && "bg-blue-100"
+                        )}
                       >
                         <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <div className="flex-1">
@@ -119,7 +110,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             </div>
           </div>
 
-          {/* Student section with improved animations */}
+          {/* Student section */}
           <div className="space-y-4">
             <button
               onClick={() => setShowStudentSection(!showStudentSection)}
@@ -145,79 +136,133 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               )}
             >
               <div className="overflow-hidden">
-                {/* Student info card with improved animations */}
-                <div className="space-y-4">
+                <div className="space-y-1">
+                  {/* Student info card */}
                   <div className="bg-white rounded-lg border border-blue-200 p-3">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-blue-200">
                         <AvatarImage
-                          src="/placeholder.svg?height=40&width=40"
-                          alt="Nguyễn Văn An"
+                          src={selectedStudent.avatar}
+                          alt={selectedStudent.name}
                         />
                         <AvatarFallback className="bg-blue-100 text-blue-700">
-                          NA
+                          {selectedStudent.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <button
-                        onClick={() =>
-                          setShowStudentDetails(!showStudentDetails)
-                        }
-                        className="flex items-center gap-2 group transition-all duration-300"
-                      >
-                        <div>
-                          <div className="font-medium text-blue-800">
-                            Nguyễn Văn An
+                      <div className="flex-1">
+                        {studentList.length > 1 ? (
+                          <button
+                            onClick={() => setShowStudentList(!showStudentList)}
+                            className="flex items-center gap-2 group transition-all duration-300 hover:text-blue-600 w-full"
+                          >
+                            <div className="flex-1 text-left">
+                              <div className="text-sm text-blue-800">
+                                {selectedStudent.name}
+                              </div>
+                              <div className="text-xs text-blue-600">
+                                Lớp {selectedStudent.class} •{" "}
+                                {selectedStudent.id}
+                              </div>
+                            </div>
+                            <ChevronDown
+                              className={cn(
+                                "h-4 w-3 transition-transform duration-300",
+                                showStudentList ? "rotate-180" : "rotate-0"
+                              )}
+                            />
+                          </button>
+                        ) : (
+                          <div className="text-left">
+                            <div className="font-medium text-blue-800">
+                              {selectedStudent.name}
+                            </div>
+                            <div className="text-xs text-blue-600">
+                              Lớp {selectedStudent.class} • {selectedStudent.id}
+                            </div>
                           </div>
-                          <div className="text-xs text-blue-600">
-                            Lớp 1A • HS2025001
-                          </div>
-                        </div>
-                        <div
-                          className={cn(
-                            "transform transition-transform duration-300",
-                            showStudentDetails ? "rotate-180" : "rotate-0"
-                          )}
-                        >
-                          <ChevronDown className="h-4 w-4" />
-                        </div>
-                      </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Student nav with improved animations */}
-                  <div
-                    className={cn(
-                      "grid transition-all duration-300 ease-in-out",
-                      showStudentDetails
-                        ? "grid-rows-[1fr] opacity-100 translate-y-0"
-                        : "grid-rows-[0fr] opacity-0 -translate-y-2"
-                    )}
-                  >
-                    <div className="overflow-hidden">
-                      <nav className="grid gap-1">
-                        {studentNav.map((item) => {
-                          const isActive = pathname === item.href;
-                          return (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
-                                isActive ? "bg-blue-100" : ""
-                              }`}
-                            >
-                              <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                              <div className="flex-1">
-                                <div className="font-medium">{item.label}</div>
-                                <div className="text-xs text-blue-600 mt-0.5">
-                                  {item.description}
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </nav>
+                  {/* Student list */}
+                  {studentList.length > 1 && (
+                    <div
+                      className={cn(
+                        "grid transition-all duration-300 ease-in-out",
+                        showStudentList
+                          ? "grid-rows-[1fr] opacity-100"
+                          : "grid-rows-[0fr] opacity-0"
+                      )}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="space-y-2 p-2 bg-white rounded-lg border border-blue-200">
+                          {studentList.map(
+                            (student) =>
+                              student.id !== selectedStudent.id && (
+                                <button
+                                  key={student.id}
+                                  onClick={() => {
+                                    setSelectedStudent(student);
+                                    setShowStudentList(false);
+                                  }}
+                                  className="flex items-center gap-2 w-full p-2 rounded-md hover:bg-blue-50 transition-colors"
+                                >
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage
+                                      src={student.avatar}
+                                      alt={student.name}
+                                    />
+                                    <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
+                                      {student.name
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .join("")}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col text-left">
+                                    <span className="font-medium text-sm text-blue-800">
+                                      {student.name}
+                                    </span>
+                                    <span className="text-xs text-blue-600">
+                                      Lớp {student.class} • {student.id}
+                                    </span>
+                                  </div>
+                                </button>
+                              )
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Student navigation - always visible */}
+                  <nav className="grid gap-1">
+                    {studentNav.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={cn(
+                            "flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200",
+                            isActive && "bg-blue-100"
+                          )}
+                        >
+                          <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <div className="flex-1">
+                            <div className="font-medium">{item.label}</div>
+                            <div className="text-xs text-blue-600 mt-0.5">
+                              {item.description}
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </nav>
                 </div>
               </div>
             </div>
@@ -225,10 +270,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </div>
       </div>
 
-      {/* Footer section - fixed size */}
+      {/* Footer section */}
       <div className="sticky bottom-0 border-t border-blue-200 p-4 bg-blue-50">
         <div className="space-y-4">
-          {/* Support card */}
           <div className="rounded-lg border border-blue-200 bg-white p-4">
             <div className="flex items-center gap-2 mb-2">
               <MessageSquare className="h-4 w-4 text-blue-600" />

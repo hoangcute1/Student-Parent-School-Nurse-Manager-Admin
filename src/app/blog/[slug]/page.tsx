@@ -15,7 +15,7 @@ type Params = {
 
 export default function BlogDetailPage({ params }: Params) {
   const { slug } = React.use(params);
-  const post = blogPosts.find(post => post.href === `/blog/${slug}`);
+  const post = blogPosts.find((post) => post.href === `/blog/${slug}`);
 
   if (!post) {
     notFound();
@@ -25,16 +25,20 @@ export default function BlogDetailPage({ params }: Params) {
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-600 mb-8">
-        <Link href="/" className="hover:text-blue-600">Trang chủ</Link>
+        <Link href="/" className="hover:text-blue-600">
+          Trang chủ
+        </Link>
         <ChevronRight className="h-4 w-4" />
-        <Link href="/blog" className="hover:text-blue-600">Blog</Link>
+        <Link href="/blog" className="hover:text-blue-600">
+          Blog
+        </Link>
         <ChevronRight className="h-4 w-4" />
         <span>{post.title}</span>
       </div>
 
       <article className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">{post.title}</h1>
-        
+
         <div className="aspect-video relative rounded-lg overflow-hidden mb-6">
           <Image
             src={post.image}
