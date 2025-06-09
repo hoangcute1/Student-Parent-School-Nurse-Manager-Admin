@@ -262,12 +262,7 @@ export function ParentLoginForm() {
             onVerify={verifyOTP}
             onResend={resendOTP}
           />
-          <div className="text-center text-sm">
-            Chưa có tài khoản?
-            <Link href="/register" className="text-blue-500 hover:underline">
-              Đăng ký
-            </Link>
-          </div>
+        
         </CardFooter>
       </form>
     </Card>
