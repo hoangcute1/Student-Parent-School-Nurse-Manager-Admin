@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { notFound } from "next/navigation";
 import { blogPosts } from "@/app/_constants/blog";
 import Image from "next/image";
@@ -9,11 +10,12 @@ import { ChevronRight } from "lucide-react";
 type BlogSlug = string;
 
 type Params = {
-  params: { slug: BlogSlug };
+  params: Promise<{ slug: BlogSlug }>;
 };
 
 export default function BlogDetailPage({ params }: Params) {
-  const post = blogPosts.find(post => post.href === `/blog/${params.slug}`);
+  const { slug } = React.use(params);
+  const post = blogPosts.find(post => post.href === `/blog/${slug}`);
 
   if (!post) {
     notFound();
