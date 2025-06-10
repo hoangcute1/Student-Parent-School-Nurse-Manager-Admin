@@ -1,16 +1,45 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, Search, Package, AlertTriangle, TrendingDown, TrendingUp, Edit, Trash2, Eye } from "lucide-react"
+import { useState } from "react";
+import {
+  Plus,
+  Search,
+  Package,
+  AlertTriangle,
+  TrendingDown,
+  TrendingUp,
+  Edit,
+  Trash2,
+  Eye,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -18,26 +47,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Medicine() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">Quản lý Kho thuốc</h1>
-        <p className="text-blue-600">Theo dõi tồn kho, nhập xuất và hạn sử dụng thuốc</p>
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+          Quản lý Kho thuốc
+        </h1>
+        <p className="text-blue-600">
+          Theo dõi tồn kho, nhập xuất và hạn sử dụng thuốc
+        </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Tổng loại thuốc</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Tổng loại thuốc
+            </CardTitle>
             <Package className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -48,7 +85,9 @@ export default function Medicine() {
 
         <Card className="border-red-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Sắp hết hạn</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-700">
+              Sắp hết hạn
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
@@ -59,7 +98,9 @@ export default function Medicine() {
 
         <Card className="border-orange-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">Tồn kho thấp</CardTitle>
+            <CardTitle className="text-sm font-medium text-orange-700">
+              Tồn kho thấp
+            </CardTitle>
             <TrendingDown className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -70,7 +111,9 @@ export default function Medicine() {
 
         <Card className="border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Xuất tháng này</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-700">
+              Xuất tháng này
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -82,16 +125,28 @@ export default function Medicine() {
 
       <Tabs defaultValue="inventory" className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-blue-50">
-          <TabsTrigger value="inventory" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="inventory"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Tồn kho
           </TabsTrigger>
-          <TabsTrigger value="import" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="import"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Nhập kho
           </TabsTrigger>
-          <TabsTrigger value="export" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="export"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Xuất kho
           </TabsTrigger>
-          <TabsTrigger value="expiry" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="expiry"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Hạn sử dụng
           </TabsTrigger>
         </TabsList>
@@ -101,10 +156,17 @@ export default function Medicine() {
             <CardHeader>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-blue-800">Danh sách thuốc trong kho</CardTitle>
-                  <CardDescription className="text-blue-600">Theo dõi số lượng và tình trạng thuốc</CardDescription>
+                  <CardTitle className="text-blue-800">
+                    Danh sách thuốc trong kho
+                  </CardTitle>
+                  <CardDescription className="text-blue-600">
+                    Theo dõi số lượng và tình trạng thuốc
+                  </CardDescription>
                 </div>
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <Dialog
+                  open={isAddDialogOpen}
+                  onOpenChange={setIsAddDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                       <Plus className="h-4 w-4 mr-2" />
@@ -114,7 +176,9 @@ export default function Medicine() {
                   <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>Thêm thuốc mới</DialogTitle>
-                      <DialogDescription>Nhập thông tin thuốc vào kho</DialogDescription>
+                      <DialogDescription>
+                        Nhập thông tin thuốc vào kho
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -128,26 +192,41 @@ export default function Medicine() {
                             <SelectValue placeholder="Chọn loại thuốc" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="painkiller">Thuốc giảm đau</SelectItem>
-                            <SelectItem value="antibiotic">Kháng sinh</SelectItem>
+                            <SelectItem value="painkiller">
+                              Thuốc giảm đau
+                            </SelectItem>
+                            <SelectItem value="antibiotic">
+                              Kháng sinh
+                            </SelectItem>
                             <SelectItem value="vitamin">Vitamin</SelectItem>
-                            <SelectItem value="antiseptic">Thuốc sát trùng</SelectItem>
+                            <SelectItem value="antiseptic">
+                              Thuốc sát trùng
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="quantity">Số lượng</Label>
-                        <Input id="quantity" type="number" placeholder="Nhập số lượng" />
+                        <Input
+                          id="quantity"
+                          type="number"
+                          placeholder="Nhập số lượng"
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="expiryDate">Hạn sử dụng</Label>
                         <Input id="expiryDate" type="date" />
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsAddDialogOpen(false)}
+                        >
                           Hủy
                         </Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700">Thêm thuốc</Button>
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                          Thêm thuốc
+                        </Button>
                       </div>
                     </div>
                   </DialogContent>
@@ -165,7 +244,10 @@ export default function Medicine() {
                     className="pl-10"
                   />
                 </div>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
                   <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="Loại thuốc" />
                   </SelectTrigger>
@@ -195,12 +277,19 @@ export default function Medicine() {
                   <TableBody>
                     {medicineInventoryData.map((medicine) => (
                       <TableRow key={medicine.id}>
-                        <TableCell className="font-medium">{medicine.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {medicine.name}
+                        </TableCell>
                         <TableCell>{medicine.category}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <span>{medicine.quantity}</span>
-                            <Progress value={(medicine.quantity / medicine.maxQuantity) * 100} className="w-16 h-2" />
+                            <Progress
+                              value={
+                                (medicine.quantity / medicine.maxQuantity) * 100
+                              }
+                              className="w-16 h-2"
+                            />
                           </div>
                         </TableCell>
                         <TableCell>{medicine.unit}</TableCell>
@@ -211,15 +300,15 @@ export default function Medicine() {
                               medicine.status === "Đầy đủ"
                                 ? "default"
                                 : medicine.status === "Sắp hết"
-                                  ? "destructive"
-                                  : "secondary"
+                                ? "destructive"
+                                : "secondary"
                             }
                             className={
                               medicine.status === "Đầy đủ"
                                 ? "bg-green-100 text-green-800"
                                 : medicine.status === "Sắp hết"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-orange-100 text-orange-800"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-orange-100 text-orange-800"
                             }
                           >
                             {medicine.status}
@@ -251,7 +340,9 @@ export default function Medicine() {
           <Card>
             <CardHeader>
               <CardTitle className="text-blue-800">Lịch sử nhập kho</CardTitle>
-              <CardDescription className="text-blue-600">Theo dõi các lần nhập thuốc vào kho</CardDescription>
+              <CardDescription className="text-blue-600">
+                Theo dõi các lần nhập thuốc vào kho
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -265,15 +356,21 @@ export default function Medicine() {
                         <TrendingUp className="h-6 w-6 text-green-600" />
                       </div>
                       <div>
-                        <h4 className="font-medium text-blue-800">{record.medicine}</h4>
+                        <h4 className="font-medium text-blue-800">
+                          {record.medicine}
+                        </h4>
                         <p className="text-sm text-blue-600">
                           Số lượng: {record.quantity} {record.unit}
                         </p>
-                        <p className="text-xs text-gray-500">Ngày nhập: {record.date}</p>
+                        <p className="text-xs text-gray-500">
+                          Ngày nhập: {record.date}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">Nhà cung cấp</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        Nhà cung cấp
+                      </p>
                       <p className="text-xs text-gray-500">{record.supplier}</p>
                     </div>
                   </div>
@@ -286,8 +383,129 @@ export default function Medicine() {
         <TabsContent value="export" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-blue-800">Lịch sử xuất kho</CardTitle>
-              <CardDescription className="text-blue-600">Theo dõi việc cấp phát thuốc cho học sinh</CardDescription>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <CardTitle className="text-blue-800">
+                    Lịch sử xuất kho
+                  </CardTitle>
+                  <CardDescription className="text-blue-600">
+                    Theo dõi việc cấp phát thuốc cho học sinh
+                  </CardDescription>
+                </div>
+                <Dialog
+                  open={isExportDialogOpen}
+                  onOpenChange={setIsExportDialogOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Xuất kho
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Xuất thuốc khỏi kho</DialogTitle>
+                      <DialogDescription>
+                        Ghi nhận việc cấp phát thuốc cho học sinh
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="medicine-select">Chọn thuốc</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn thuốc cần xuất" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="paracetamol">
+                              Paracetamol 500mg (120 viên)
+                            </SelectItem>
+                            <SelectItem value="cetirizine">
+                              Cetirizine 10mg (15 viên)
+                            </SelectItem>
+                            <SelectItem value="salbutamol">
+                              Salbutamol xịt (3 ống)
+                            </SelectItem>
+                            <SelectItem value="vitamin-c">
+                              Vitamin C (200 viên)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="student-select">Học sinh</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn học sinh" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="student1">
+                              Nguyễn Văn An - Lớp 1A
+                            </SelectItem>
+                            <SelectItem value="student2">
+                              Trần Thị Bình - Lớp 2B
+                            </SelectItem>
+                            <SelectItem value="student3">
+                              Lê Hoàng Cường - Lớp 3A
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quantity">Số lượng xuất</Label>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          placeholder="Nhập số lượng"
+                          min="1"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="reason">Lý do sử dụng</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn lý do" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="headache">Đau đầu</SelectItem>
+                            <SelectItem value="fever">Sốt</SelectItem>
+                            <SelectItem value="allergy">Dị ứng</SelectItem>
+                            <SelectItem value="stomachache">
+                              Đau bụng
+                            </SelectItem>
+                            <SelectItem value="other">Khác</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="notes">Ghi chú</Label>
+                        <Textarea
+                          id="notes"
+                          placeholder="Ghi chú thêm (nếu có)"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsExportDialogOpen(false)}
+                        >
+                          Hủy
+                        </Button>
+                        <Button
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={() => {
+                            setIsExportDialogOpen(false);
+                            alert("Đã xuất thuốc thành công!");
+                          }}
+                        >
+                          Xuất kho
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -301,16 +519,24 @@ export default function Medicine() {
                         <TrendingDown className="h-6 w-6 text-blue-600" />
                       </div>
                       <div>
-                        <h4 className="font-medium text-blue-800">{record.medicine}</h4>
-                        <p className="text-sm text-blue-600">Học sinh: {record.student}</p>
-                        <p className="text-xs text-gray-500">Thời gian: {record.time}</p>
+                        <h4 className="font-medium text-blue-800">
+                          {record.medicine}
+                        </h4>
+                        <p className="text-sm text-blue-600">
+                          Học sinh: {record.student}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Thời gian: {record.time}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium text-gray-900">
                         {record.quantity} {record.unit}
                       </p>
-                      <p className="text-xs text-gray-500">Lý do: {record.reason}</p>
+                      <p className="text-xs text-gray-500">
+                        Lý do: {record.reason}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -323,7 +549,9 @@ export default function Medicine() {
           <Card>
             <CardHeader>
               <CardTitle className="text-blue-800">Thuốc sắp hết hạn</CardTitle>
-              <CardDescription className="text-blue-600">Danh sách thuốc cần chú ý về hạn sử dụng</CardDescription>
+              <CardDescription className="text-blue-600">
+                Danh sách thuốc cần chú ý về hạn sử dụng
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -334,27 +562,33 @@ export default function Medicine() {
                       medicine.daysLeft <= 7
                         ? "border-l-red-500 bg-red-50"
                         : medicine.daysLeft <= 30
-                          ? "border-l-orange-500 bg-orange-50"
-                          : "border-l-yellow-500 bg-yellow-50"
+                        ? "border-l-orange-500 bg-orange-50"
+                        : "border-l-yellow-500 bg-yellow-50"
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-medium text-gray-900">{medicine.name}</h4>
+                        <h4 className="font-medium text-gray-900">
+                          {medicine.name}
+                        </h4>
                         <p className="text-sm text-gray-600 mt-1">
                           Số lượng: {medicine.quantity} {medicine.unit}
                         </p>
-                        <p className="text-xs text-gray-500">Hạn sử dụng: {medicine.expiryDate}</p>
+                        <p className="text-xs text-gray-500">
+                          Hạn sử dụng: {medicine.expiryDate}
+                        </p>
                       </div>
                       <div className="text-right">
                         <Badge
-                          variant={medicine.daysLeft <= 7 ? "destructive" : "secondary"}
+                          variant={
+                            medicine.daysLeft <= 7 ? "destructive" : "secondary"
+                          }
                           className={
                             medicine.daysLeft <= 7
                               ? "bg-red-100 text-red-800"
                               : medicine.daysLeft <= 30
-                                ? "bg-orange-100 text-orange-800"
-                                : "bg-yellow-100 text-yellow-800"
+                              ? "bg-orange-100 text-orange-800"
+                              : "bg-yellow-100 text-yellow-800"
                           }
                         >
                           Còn {medicine.daysLeft} ngày
@@ -369,7 +603,7 @@ export default function Medicine() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
 const medicineInventoryData = [
@@ -413,7 +647,7 @@ const medicineInventoryData = [
     expiryDate: "30/08/2025",
     status: "Đầy đủ",
   },
-]
+];
 
 const importHistory = [
   {
@@ -437,7 +671,7 @@ const importHistory = [
     date: "05/12/2024",
     supplier: "Công ty Dược phẩm ABC",
   },
-]
+];
 
 const exportHistory = [
   {
@@ -464,7 +698,7 @@ const exportHistory = [
     time: "09:45 - 13/12/2024",
     reason: "Bổ sung vitamin",
   },
-]
+];
 
 const expiringMedicines = [
   {
@@ -488,4 +722,4 @@ const expiringMedicines = [
     expiryDate: "05/01/2025",
     daysLeft: 10,
   },
-]
+];
