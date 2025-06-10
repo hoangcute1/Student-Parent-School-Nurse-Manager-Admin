@@ -12,9 +12,20 @@ export class ParentService {
   constructor(
     @InjectModel(Parent.name) private parentModel: Model<ParentDocument>,
   ) {}
-
-  async findAll(): Promise<Parent[]> {
-    return this.parentModel.find().populate('userId').exec();
+  async findAll(): Promise<any[]> {
+    const parents = await this.parentModel
+      .find()
+      .populate<{ userId: { id: String; email: string } }>('userId')
+      .exec();
+    return parents.map((parent) => ({
+      userId: parent.userId?.id,
+      name: parent.name,
+      phone: parent.phone,
+      address: parent.address,
+      email: parent.userId?.email,
+      createdAt: parent.createdAt,
+      updatedAt: parent.updatedAt,
+    }));
   }
 
   async findById(id: string): Promise<Parent> {
