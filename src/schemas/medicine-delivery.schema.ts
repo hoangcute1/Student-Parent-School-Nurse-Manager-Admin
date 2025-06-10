@@ -12,7 +12,7 @@ export enum MedicineDeliveryStatus {
   CANCELLED = 'cancelled'
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class MedicineDelivery extends Document {
   @Prop({ required: true })
   medicine_name: string;

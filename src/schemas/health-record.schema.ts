@@ -4,7 +4,7 @@ import { Student } from './student.schema';
 
 export type HealthRecordDocument = HealthRecord & Document;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class HealthRecord {
   @Prop({ required: true })
   allergies: string;
