@@ -40,33 +40,10 @@ export default function FeedbackPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Loại phản hồi</Label>
-                  <Select>
-                    <SelectTrigger className="border-blue-200">
-                      <SelectValue placeholder="Chọn loại phản hồi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="service">Chất lượng dịch vụ</SelectItem>
-                      <SelectItem value="staff">Nhân viên y tế</SelectItem>
-                      <SelectItem value="facility">Cơ sở vật chất</SelectItem>
-                      <SelectItem value="communication">Giao tiếp thông tin</SelectItem>
-                      <SelectItem value="system">Hệ thống website</SelectItem>
-                      <SelectItem value="other">Khác</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="rating">Đánh giá tổng thể</Label>
-                  <div className="flex items-center gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className="h-6 w-6 cursor-pointer text-yellow-400 fill-yellow-400 hover:text-yellow-500"
-                      />
-                    ))}
-                    <span className="text-sm text-blue-600 ml-2">5/5 - Rất hài lòng</span>
-                  </div>
+                  
                 </div>
               </div>
 
@@ -86,17 +63,7 @@ export default function FeedbackPage() {
                   placeholder="Chia sẻ chi tiết về trải nghiệm của bạn..."
                   className="min-h-[120px] border-blue-200 focus:border-blue-500"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="suggestions">Đề xuất cải thiện (tùy chọn)</Label>
-                <Textarea
-                  id="suggestions"
-                  placeholder="Bạn có đề xuất gì để cải thiện dịch vụ không?"
-                  className="min-h-[80px] border-blue-200 focus:border-blue-500"
-                />
-              </div>
-
+              </div>             
               <div className="flex justify-end">
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   <Send className="mr-2 h-4 w-4" />
@@ -120,16 +87,7 @@ export default function FeedbackPage() {
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < feedback.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
+                      
                       <Badge variant={getStatusVariant(feedback.status)} className={getStatusColor(feedback.status)}>
                         {feedback.status}
                       </Badge>

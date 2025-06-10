@@ -2,10 +2,10 @@ import { BookmarkCheck, ContactRound, Heart, Home, House, MessageCircle, Pill, U
 
 const parentNav = [
   {
-    href: "/dashboard/health-records",
-    icon: House,
-    label: "Tổng hợp hồ sơ",
-    description: "Tổng hợp thông tin con em",
+    href: "/dashboard/health-declaration",
+    icon: UserRoundPen,
+    label: "Khai báo sức khoẻ ",
+    description: " khái báo sức khoẻ học sinh",
   },
   {
     href: "/dashboard/medications",
@@ -19,26 +19,15 @@ const parentNav = [
     label: "Sự kiện y tế",
     description: "Sự kiện y tế và thông báo",
   },
-  {
-    href: "/dashboard/health-declaration",
-    icon: UserRoundPen,
-    label: "Khai báo sức khoẻ ",
-    description: " khái báo sức khoẻ học sinh",
-  },
+  
 
 ];
 const studentNav = [
   {
-    href: "/dashboard",
+    href: "/dashboard/profile",
     icon: ContactRound,
     label: "Thông tin cá nhân",
     description: "Trang sức khoẻ cá nhân",
-  },
-  {
-    href: "/dashboard/health-results",
-    icon: Heart,
-    label: "Kết quả khám",
-    description: "kết quả khám của con em",
   },
   {
     href: "/dashboard/resources",
