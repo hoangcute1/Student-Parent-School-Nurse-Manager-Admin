@@ -81,6 +81,15 @@ export class CreateMedicineStorageDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiProperty({
+    example: 'https://example.com/medicine-image.jpg',
+    description: 'Link ảnh thuốc',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  image?: string;
 }
 
 export class UpdateMedicineStorageDto
@@ -121,6 +130,10 @@ export class UpdateMedicineStorageDto
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  image?: string;
 }
 
 export class UpdateStockDto {
