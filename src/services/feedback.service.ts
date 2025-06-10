@@ -25,7 +25,6 @@ export class FeedbackService {
   }
 
   async findAll(): Promise<Feedback[]> {
-
     return this.feedbackModel
       .find()
       .select('-__v')
@@ -56,12 +55,15 @@ export class FeedbackService {
       .exec();
   }
 
-  async update(id: string, updateFeedbackDto: UpdateFeedbackDto): Promise<Feedback> {
+  async update(
+    id: string,
+    updateFeedbackDto: UpdateFeedbackDto,
+  ): Promise<Feedback> {
     const feedback = await this.feedbackModel
       .findByIdAndUpdate(
         id,
         { response: updateFeedbackDto.response },
-        { new: true }
+        { new: true },
       )
       .select('-__v')
       .populate('parent')

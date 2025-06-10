@@ -9,7 +9,7 @@ export enum MedicineDeliveryStatus {
   APPROVED = 'approved',
   REJECTED = 'rejected',
   COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 @Schema({ timestamps: true, versionKey: false })
@@ -26,7 +26,7 @@ export class MedicineDelivery extends Document {
   @Prop({
     required: true,
     enum: MedicineDeliveryStatus,
-    default: MedicineDeliveryStatus.PENDING
+    default: MedicineDeliveryStatus.PENDING,
   })
   status: MedicineDeliveryStatus;
 
@@ -52,4 +52,5 @@ export class MedicineDelivery extends Document {
   student: Student;
 }
 
-export const MedicineDeliverySchema = SchemaFactory.createForClass(MedicineDelivery);
+export const MedicineDeliverySchema =
+  SchemaFactory.createForClass(MedicineDelivery);

@@ -20,6 +20,7 @@ import { AppThrottlerGuard } from './guards/throttler.guard';
 import { MedicineStorageModule } from './modules/medicine-storage.module';
 import { MedicineDeliveryModule } from './modules/medicine-delivery.module';
 import { FeedbackModule } from './modules/feedback.module';
+import { SuggestionModule } from './modules/suggestion.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { FeedbackModule } from './modules/feedback.module';
     MedicineStorageModule,
     MedicineDeliveryModule,
     FeedbackModule,
+    SuggestionModule,
   ],
   controllers: [AppController],
   providers: [

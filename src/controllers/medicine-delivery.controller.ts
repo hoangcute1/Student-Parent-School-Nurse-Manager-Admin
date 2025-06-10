@@ -14,7 +14,12 @@ import {
   CreateMedicineDeliveryDto,
   UpdateMedicineDeliveryDto,
 } from '@/decorations/dto/medicine-delivery.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
 @ApiTags('medicine-deliveries')
@@ -22,7 +27,9 @@ import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class MedicineDeliveryController {
-  constructor(private readonly medicineDeliveryService: MedicineDeliveryService) {}
+  constructor(
+    private readonly medicineDeliveryService: MedicineDeliveryService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Tạo lịch giao thuốc mới' })

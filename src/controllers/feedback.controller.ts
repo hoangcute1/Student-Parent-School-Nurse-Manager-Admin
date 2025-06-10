@@ -15,7 +15,12 @@ import {
   UpdateFeedbackDto,
   FilterFeedbackDto,
 } from '@/decorations/dto/feedback.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
 @ApiTags('feedbacks')

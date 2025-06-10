@@ -24,11 +24,17 @@ export class MedicineDeliveryService {
   async create(
     createMedicineDeliveryDto: CreateMedicineDeliveryDto,
   ): Promise<MedicineDelivery> {
-    const createdDelivery = new this.medicineDeliveryModel(createMedicineDeliveryDto);
+    const createdDelivery = new this.medicineDeliveryModel(
+      createMedicineDeliveryDto,
+    );
     return createdDelivery.save();
   }
   async findAll(): Promise<MedicineDelivery[]> {
-    return this.medicineDeliveryModel.find().select('-__v').populate('student').exec();
+    return this.medicineDeliveryModel
+      .find()
+      .select('-__v')
+      .populate('student')
+      .exec();
   }
   async findByStudent(studentId: string): Promise<MedicineDelivery[]> {
     return this.medicineDeliveryModel
@@ -45,7 +51,9 @@ export class MedicineDeliveryService {
       .exec();
 
     if (!delivery) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+      throw new NotFoundException(
+        `Medicine delivery with ID "${id}" not found`,
+      );
     }
     return delivery;
   }
@@ -60,7 +68,9 @@ export class MedicineDeliveryService {
       .exec();
 
     if (!updatedDelivery) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+      throw new NotFoundException(
+        `Medicine delivery with ID "${id}" not found`,
+      );
     }
     return updatedDelivery;
   }
@@ -70,7 +80,9 @@ export class MedicineDeliveryService {
       .deleteOne({ _id: id })
       .exec();
     if (result.deletedCount === 0) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+      throw new NotFoundException(
+        `Medicine delivery with ID "${id}" not found`,
+      );
     }
   }
 }
