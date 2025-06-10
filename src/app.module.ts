@@ -17,6 +17,7 @@ import { StaffModule } from './modules/staff.module';
 import { AdminModule } from './modules/admin.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
+import { MedicineStorageModule } from './modules/medicine-storage.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AppThrottlerGuard } from './guards/throttler.guard';
     StaffModule,
     AdminModule,
     AdminModule,
+    MedicineStorageModule,
   ],
   controllers: [AppController],
   providers: [

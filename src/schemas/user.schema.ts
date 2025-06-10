@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Role } from './role.schema';
 
 export type UserDocument = User & Document;
 @Schema({ versionKey: false })
