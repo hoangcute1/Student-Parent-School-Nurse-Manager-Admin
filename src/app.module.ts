@@ -18,6 +18,7 @@ import { AdminModule } from './modules/admin.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
 import { MedicineStorageModule } from './modules/medicine-storage.module';
+import { MedicineDeliveryModule } from './modules/medicine-delivery.module';
 
 @Module({
   imports: [
@@ -36,8 +37,8 @@ import { MedicineStorageModule } from './modules/medicine-storage.module';
     ParentModule,
     StaffModule,
     AdminModule,
-    AdminModule,
     MedicineStorageModule,
+    MedicineDeliveryModule,
   ],
   controllers: [AppController],
   providers: [

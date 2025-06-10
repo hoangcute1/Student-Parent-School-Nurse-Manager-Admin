@@ -19,8 +19,14 @@ import {
   UpdateMedicineStorageDto,
 } from '@/decorations/dto/medicine-storage.dto';
 import { MedicineStorage } from '@/schemas/medicine-storage.schema';
-import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('medicine-storage')
 @Controller('medicine-storage')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -74,7 +80,7 @@ export class MedicineStorageController {
   ): Promise<MedicineStorage> {
     return this.medicineStorageService.create(createMedicineDto);
   }
-  
+
   @Get('expiring')
   async getExpiringMedicines(
     @Query('days', ParseIntPipe) days?: number,
