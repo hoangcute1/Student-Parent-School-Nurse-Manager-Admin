@@ -1,38 +1,163 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Bell, Send, CheckCircle, Clock, AlertTriangle, Plus, Search } from "lucide-react"
+import { useState } from "react";
+import {
+  Bell,
+  Send,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Plus,
+  Search,
+} from "lucide-react";
+import {
+  notificationsList,
+  checkupSchedule,
+  responseStats,
+  channelEffectiveness,
+  notificationResponses,
+  type Notification,
+  type CheckupSchedule,
+  type ResponseStat,
+  type ChannelEffectiveness,
+  type NotificationResponse,
+} from "./_constants/data";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function HealthCheckupNotifications() {
-  const [isCreateNotificationOpen, setIsCreateNotificationOpen] = useState(false)
-  const [selectedNotification, setSelectedNotification] = useState(null)
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
+  const [isCreateNotificationOpen, setIsCreateNotificationOpen] =
+    useState(false);
+  const [selectedNotification, setSelectedNotification] =
+    useState<Notification | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<string>("");
+
+  const filteredNotifications = notificationsList.filter((notification) => {
+    const matchesSearch =
+      notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      notification.target.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      selectedStatus === "all" || notification.status === selectedStatus;
+    const matchesDate =
+      !dateFilter || notification.checkupDate.includes(dateFilter);
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
+  const handleSendNotification = async (notification: Notification) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Simulating an API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // TODO: Replace with actual API call
+      if (Math.random() > 0.1) {
+        // 90% success rate for demo
+        // Update notification status
+        notification.status = "Đã gửi";
+        notification.sentDate = new Date().toLocaleDateString("vi-VN");
+
+        // Show success message using toast or alert
+        alert(`Đã gửi thông báo thành công: ${notification.title}`);
+      } else {
+        throw new Error("Có lỗi khi gửi thông báo");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+      alert("Lỗi: " + (err instanceof Error ? err.message : "Có lỗi xảy ra"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateNotification = async (draft: boolean = false) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Simulating an API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // TODO: Replace with actual API call
+      if (Math.random() > 0.1) {
+        // 90% success rate for demo
+        setIsCreateNotificationOpen(false);
+        alert(
+          draft
+            ? "Đã lưu bản nháp thành công"
+            : "Đã tạo và gửi thông báo khám định kỳ thành công!"
+        );
+      } else {
+        throw new Error(
+          draft ? "Có lỗi khi lưu bản nháp" : "Có lỗi khi tạo thông báo"
+        );
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+      alert("Lỗi: " + (err instanceof Error ? err.message : "Có lỗi xảy ra"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-purple-800">Thông báo Khám định kỳ</h1>
-        <p className="text-purple-600">Quản lý và gửi thông báo khám sức khỏe định kỳ cho học sinh</p>
+        <h1 className="text-3xl font-bold tracking-tight text-purple-800">
+          Thông báo Khám định kỳ
+        </h1>
+        <p className="text-purple-600">
+          Quản lý và gửi thông báo khám sức khỏe định kỳ cho học sinh
+        </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Tổng thông báo</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Tổng thông báo
+            </CardTitle>
             <Bell className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -43,7 +168,9 @@ export default function HealthCheckupNotifications() {
 
         <Card className="border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Đã gửi</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-700">
+              Đã gửi
+            </CardTitle>
             <Send className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -54,7 +181,9 @@ export default function HealthCheckupNotifications() {
 
         <Card className="border-orange-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">Đang chờ</CardTitle>
+            <CardTitle className="text-sm font-medium text-orange-700">
+              Đang chờ
+            </CardTitle>
             <Clock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -65,7 +194,9 @@ export default function HealthCheckupNotifications() {
 
         <Card className="border-red-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Khẩn cấp</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-700">
+              Khẩn cấp
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
@@ -76,17 +207,23 @@ export default function HealthCheckupNotifications() {
       </div>
 
       <Tabs defaultValue="notifications" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-purple-50">
+        <TabsList className="grid w-full grid-cols-3 bg-blue-50">
           <TabsTrigger
             value="notifications"
-            className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
             Danh sách thông báo
           </TabsTrigger>
-          <TabsTrigger value="schedule" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="schedule"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Lịch khám định kỳ
           </TabsTrigger>
-          <TabsTrigger value="reports" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="reports"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
             Báo cáo
           </TabsTrigger>
         </TabsList>
@@ -96,14 +233,16 @@ export default function HealthCheckupNotifications() {
             <CardHeader>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-purple-800">Danh sách thông báo khám định kỳ</CardTitle>
-                  <CardDescription className="text-purple-600">
+                  <CardTitle className="text-blue-800">
+                    Danh sách thông báo khám định kỳ
+                  </CardTitle>
+                  <CardDescription className="text-blue-600">
                     Quản lý các thông báo khám sức khỏe định kỳ
                   </CardDescription>
                 </div>
                 <Button
                   size="sm"
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => setIsCreateNotificationOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -112,6 +251,15 @@ export default function HealthCheckupNotifications() {
               </div>
             </CardHeader>
             <CardContent>
+              {error && (
+                <div
+                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative"
+                  role="alert"
+                >
+                  <span className="block sm:inline">{error}</span>
+                </div>
+              )}
+
               <div className="flex flex-col md:flex-row gap-4 mb-6">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -122,7 +270,10 @@ export default function HealthCheckupNotifications() {
                     className="pl-10"
                   />
                 </div>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={setSelectedStatus}
+                >
                   <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="Trạng thái" />
                   </SelectTrigger>
@@ -133,6 +284,15 @@ export default function HealthCheckupNotifications() {
                     <SelectItem value="scheduled">Đã lên lịch</SelectItem>
                   </SelectContent>
                 </Select>
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Tìm theo ngày khám..."
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               <Table>
@@ -148,21 +308,27 @@ export default function HealthCheckupNotifications() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {notificationsList.map((notification) => (
+                  {filteredNotifications.map((notification) => (
                     <TableRow key={notification.id}>
-                      <TableCell className="font-medium">{notification.title}</TableCell>
+                      <TableCell className="font-medium">
+                        {notification.title}
+                      </TableCell>
                       <TableCell>{notification.target}</TableCell>
                       <TableCell>{notification.checkupDate}</TableCell>
                       <TableCell>{notification.sentDate}</TableCell>
                       <TableCell>
                         <Badge
-                          variant={notification.status === "Đã gửi" ? "default" : "secondary"}
+                          variant={
+                            notification.status === "Đã gửi"
+                              ? "default"
+                              : "secondary"
+                          }
                           className={
                             notification.status === "Đã gửi"
                               ? "bg-green-100 text-green-800"
                               : notification.status === "Đã lên lịch"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-800"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
                           }
                         >
                           {notification.status}
@@ -170,7 +336,8 @@ export default function HealthCheckupNotifications() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm">
-                          {notification.responses}/{notification.totalRecipients}
+                          {notification.responses}/
+                          {notification.totalRecipients}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -178,9 +345,10 @@ export default function HealthCheckupNotifications() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="hover:bg-blue-50"
                             onClick={() => {
-                              setSelectedNotification(notification)
-                              setIsDetailOpen(true)
+                              setSelectedNotification(notification);
+                              setIsDetailOpen(true);
                             }}
                           >
                             Chi tiết
@@ -188,8 +356,10 @@ export default function HealthCheckupNotifications() {
                           {notification.status === "Bản nháp" && (
                             <Button
                               size="sm"
-                              className="bg-purple-600 hover:bg-purple-700"
-                              onClick={() => alert(`Đã gửi thông báo: ${notification.title}`)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                              onClick={() =>
+                                handleSendNotification(notification)
+                              }
                             >
                               Gửi
                             </Button>
@@ -207,28 +377,34 @@ export default function HealthCheckupNotifications() {
         <TabsContent value="schedule" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-purple-800">Lịch khám định kỳ</CardTitle>
-              <CardDescription className="text-purple-600">
+              <CardTitle className="text-blue-800">
+                Lịch khám định kỳ
+              </CardTitle>
+              <CardDescription className="text-blue-600">
                 Kế hoạch khám sức khỏe định kỳ theo từng khối lớp
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {checkupSchedule.map((schedule, index) => (
-                  <Card key={index} className="border-purple-100">
+                  <Card key={index} className="border-blue-100">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg text-purple-800">{schedule.grade}</CardTitle>
-                          <CardDescription className="text-purple-600">{schedule.period}</CardDescription>
+                          <CardTitle className="text-lg text-blue-800">
+                            {schedule.grade}
+                          </CardTitle>
+                          <CardDescription className="text-blue-600">
+                            {schedule.period}
+                          </CardDescription>
                         </div>
                         <Badge
                           className={
                             schedule.status === "Hoàn thành"
                               ? "bg-green-100 text-green-800"
                               : schedule.status === "Đang tiến hành"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-orange-100 text-orange-800"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-orange-100 text-orange-800"
                           }
                         >
                           {schedule.status}
@@ -243,7 +419,9 @@ export default function HealthCheckupNotifications() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Địa điểm:</span>
-                          <span className="font-medium">{schedule.location}</span>
+                          <span className="font-medium">
+                            {schedule.location}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Đã thông báo:</span>
@@ -264,26 +442,38 @@ export default function HealthCheckupNotifications() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-800">Thống kê phản hồi</CardTitle>
-                <CardDescription className="text-purple-600">Tỷ lệ phản hồi thông báo khám định kỳ</CardDescription>
+                <CardTitle className="text-blue-800">
+                  Thống kê phản hồi
+                </CardTitle>
+                <CardDescription className="text-blue-600">
+                  Tỷ lệ phản hồi thông báo khám định kỳ
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {responseStats.map((stat, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border border-purple-100"
+                      className="flex items-center justify-between p-3 rounded-lg border border-blue-100"
                     >
                       <div className="flex items-center gap-3">
-                        <stat.icon className="h-5 w-5 text-purple-600" />
+                        <stat.icon className="h-5 w-5 text-blue-600" />
                         <div>
-                          <div className="font-medium text-purple-800">{stat.label}</div>
-                          <div className="text-sm text-purple-600">{stat.description}</div>
+                          <div className="font-medium text-blue-800">
+                            {stat.label}
+                          </div>
+                          <div className="text-sm text-blue-600">
+                            {stat.description}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-purple-800">{stat.value}</div>
-                        <div className="text-xs text-gray-500">{stat.percentage}%</div>
+                        <div className="text-xl font-bold text-blue-800">
+                          {stat.value}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {stat.percentage}%
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -293,19 +483,28 @@ export default function HealthCheckupNotifications() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-purple-800">Hiệu quả thông báo</CardTitle>
-                <CardDescription className="text-purple-600">Đánh giá hiệu quả các kênh thông báo</CardDescription>
+                <CardTitle className="text-blue-800">
+                  Hiệu quả thông báo
+                </CardTitle>
+                <CardDescription className="text-blue-600">
+                  Đánh giá hiệu quả các kênh thông báo
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {channelEffectiveness.map((channel, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-purple-700 font-medium">{channel.name}</span>
-                        <span className="text-purple-800">{channel.rate}%</span>
+                        <span className="text-blue-700 font-medium">
+                          {channel.name}
+                        </span>
+                        <span className="text-blue-800">{channel.rate}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="h-2 rounded-full bg-purple-500" style={{ width: `${channel.rate}%` }}></div>
+                        <div
+                          className="h-2 rounded-full bg-blue-500"
+                          style={{ width: `${channel.rate}%` }}
+                        ></div>
                       </div>
                       <div className="text-xs text-gray-500">
                         Đã gửi: {channel.sent} | Phản hồi: {channel.responses}
@@ -320,17 +519,25 @@ export default function HealthCheckupNotifications() {
       </Tabs>
 
       {/* Dialog tạo thông báo */}
-      <Dialog open={isCreateNotificationOpen} onOpenChange={setIsCreateNotificationOpen}>
+      <Dialog
+        open={isCreateNotificationOpen}
+        onOpenChange={setIsCreateNotificationOpen}
+      >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Tạo thông báo khám định kỳ</DialogTitle>
-            <DialogDescription>Tạo và gửi thông báo khám sức khỏe định kỳ cho học sinh</DialogDescription>
+            <DialogTitle className="text-blue-800">Tạo thông báo khám định kỳ</DialogTitle>
+            <DialogDescription className="text-blue-600">
+              Tạo và gửi thông báo khám sức khỏe định kỳ cho học sinh
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="notification-title">Tiêu đề thông báo *</Label>
-                <Input id="notification-title" placeholder="VD: Thông báo khám sức khỏe định kỳ học kỳ I" />
+                <Input
+                  id="notification-title"
+                  placeholder="VD: Thông báo khám sức khỏe định kỳ học kỳ I"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="checkup-type">Loại khám *</Label>
@@ -381,13 +588,19 @@ export default function HealthCheckupNotifications() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="checkup-location">Địa điểm khám *</Label>
-                <Input id="checkup-location" placeholder="VD: Phòng y tế trường" />
+                <Input
+                  id="checkup-location"
+                  placeholder="VD: Phòng y tế trường"
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="doctor-info">Thông tin bác sĩ</Label>
-              <Input id="doctor-info" placeholder="VD: BS. Nguyễn Văn A - Bệnh viện Nhi Trung ương" />
+              <Input
+                id="doctor-info"
+                placeholder="VD: BS. Nguyễn Văn A - Bệnh viện Nhi Trung ương"
+              />
             </div>
 
             <div className="space-y-2">
@@ -422,12 +635,21 @@ Trân trọng cảm ơn!"
             <div className="space-y-2">
               <Label>Kênh gửi thông báo</Label>
               <div className="grid grid-cols-2 gap-2">
-                {["SMS", "Email", "Zalo", "Thông báo trường", "Giấy mời", "Website"].map((channel) => (
+                {[
+                  "SMS",
+                  "Email",
+                  "Zalo",
+                  "Thông báo trường",
+                  "Giấy mời",
+                  "Website",
+                ].map((channel) => (
                   <label key={channel} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       className="rounded"
-                      defaultChecked={["SMS", "Thông báo trường"].includes(channel)}
+                      defaultChecked={["SMS", "Thông báo trường"].includes(
+                        channel
+                      )}
                     />
                     <span className="text-sm">{channel}</span>
                   </label>
@@ -464,19 +686,19 @@ Trân trọng cảm ơn!"
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsCreateNotificationOpen(false)}>
+            <div className="flex justify-end gap-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateNotificationOpen(false)}
+              >
                 Hủy
               </Button>
-              <Button variant="outline">Lưu nháp</Button>
               <Button
-                className="bg-purple-600 hover:bg-purple-700"
-                onClick={() => {
-                  setIsCreateNotificationOpen(false)
-                  alert("Đã tạo và gửi thông báo khám định kỳ thành công!")
-                }}
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => handleCreateNotification(false)}
+                disabled={isLoading}
               >
-                Tạo & Gửi
+                Tạo và gửi
               </Button>
             </div>
           </div>
@@ -487,8 +709,12 @@ Trân trọng cảm ơn!"
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Chi tiết thông báo: {selectedNotification?.title}</DialogTitle>
-            <DialogDescription>Thông tin chi tiết và thống kê phản hồi</DialogDescription>
+            <DialogTitle>
+              Chi tiết thông báo: {selectedNotification?.title}
+            </DialogTitle>
+            <DialogDescription>
+              Thông tin chi tiết và thống kê phản hồi
+            </DialogDescription>
           </DialogHeader>
           {selectedNotification && (
             <div className="space-y-6">
@@ -500,19 +726,27 @@ Trân trọng cảm ơn!"
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Đối tượng:</span>
-                      <span className="font-medium">{selectedNotification.target}</span>
+                      <span className="font-medium">
+                        {selectedNotification.target}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Ngày khám:</span>
-                      <span className="font-medium">{selectedNotification.checkupDate}</span>
+                      <span className="font-medium">
+                        {selectedNotification.checkupDate}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Ngày gửi:</span>
-                      <span className="font-medium">{selectedNotification.sentDate}</span>
+                      <span className="font-medium">
+                        {selectedNotification.sentDate}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Trạng thái:</span>
-                      <Badge className="bg-green-100 text-green-800">{selectedNotification.status}</Badge>
+                      <Badge className="bg-green-100 text-green-800">
+                        {selectedNotification.status}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -526,17 +760,25 @@ Trân trọng cảm ơn!"
                       <div className="flex justify-between text-sm">
                         <span>Tỷ lệ phản hồi</span>
                         <span className="font-medium">
-                          {Math.round((selectedNotification.responses / selectedNotification.totalRecipients) * 100)}%
+                          {Math.round(
+                            (selectedNotification.responses /
+                              selectedNotification.totalRecipients) *
+                              100
+                          )}
+                          %
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="text-center p-2 bg-green-50 rounded">
-                          <div className="font-bold text-green-800">{selectedNotification.responses}</div>
+                          <div className="font-bold text-green-800">
+                            {selectedNotification.responses}
+                          </div>
                           <div className="text-green-600">Đã phản hồi</div>
                         </div>
                         <div className="text-center p-2 bg-orange-50 rounded">
                           <div className="font-bold text-orange-800">
-                            {selectedNotification.totalRecipients - selectedNotification.responses}
+                            {selectedNotification.totalRecipients -
+                              selectedNotification.responses}
                           </div>
                           <div className="text-orange-600">Chưa phản hồi</div>
                         </div>
@@ -565,7 +807,9 @@ Trân trọng cảm ơn!"
                     <TableBody>
                       {notificationResponses.map((response, index) => (
                         <TableRow key={index}>
-                          <TableCell className="font-medium">{response.studentName}</TableCell>
+                          <TableCell className="font-medium">
+                            {response.studentName}
+                          </TableCell>
                           <TableCell>{response.class}</TableCell>
                           <TableCell>{response.parentName}</TableCell>
                           <TableCell>
@@ -574,8 +818,8 @@ Trân trọng cảm ơn!"
                                 response.status === "Đồng ý"
                                   ? "bg-green-100 text-green-800"
                                   : response.status === "Từ chối"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-gray-100 text-gray-800"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
                               }
                             >
                               {response.status}
@@ -594,134 +838,5 @@ Trân trọng cảm ơn!"
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
-
-const notificationsList = [
-  {
-    id: 1,
-    title: "Khám sức khỏe định kỳ học kỳ I",
-    target: "Khối lớp 1",
-    checkupDate: "25/12/2024",
-    sentDate: "18/12/2024",
-    status: "Đã gửi",
-    responses: 45,
-    totalRecipients: 50,
-  },
-  {
-    id: 2,
-    title: "Khám răng miệng định kỳ",
-    target: "Tất cả học sinh",
-    checkupDate: "30/12/2024",
-    sentDate: "20/12/2024",
-    status: "Đã gửi",
-    responses: 180,
-    totalRecipients: 250,
-  },
-  {
-    id: 3,
-    title: "Khám mắt cho học sinh cận thị",
-    target: "Học sinh có vấn đề về mắt",
-    checkupDate: "28/12/2024",
-    sentDate: "Chưa gửi",
-    status: "Bản nháp",
-    responses: 0,
-    totalRecipients: 25,
-  },
-]
-
-const checkupSchedule = [
-  {
-    grade: "Khối lớp 1",
-    period: "Học kỳ I",
-    date: "25/12/2024",
-    location: "Phòng y tế trường",
-    status: "Đang tiến hành",
-    notified: 45,
-    total: 50,
-  },
-  {
-    grade: "Khối lớp 2",
-    period: "Học kỳ I",
-    date: "26/12/2024",
-    location: "Phòng y tế trường",
-    status: "Chưa bắt đầu",
-    notified: 0,
-    total: 55,
-  },
-  {
-    grade: "Khối lớp 3",
-    period: "Học kỳ I",
-    date: "20/12/2024",
-    location: "Phòng y tế trường",
-    status: "Hoàn thành",
-    notified: 48,
-    total: 48,
-  },
-]
-
-const responseStats = [
-  {
-    label: "Đồng ý tham gia",
-    description: "Phụ huynh đồng ý cho con khám",
-    value: "195",
-    percentage: 78,
-    icon: CheckCircle,
-  },
-  {
-    label: "Từ chối tham gia",
-    description: "Phụ huynh từ chối hoặc có lý do",
-    value: "25",
-    percentage: 10,
-    icon: AlertTriangle,
-  },
-  {
-    label: "Chưa phản hồi",
-    description: "Chưa nhận được phản hồi",
-    value: "30",
-    percentage: 12,
-    icon: Clock,
-  },
-]
-
-const channelEffectiveness = [
-  { name: "SMS", rate: 85, sent: 250, responses: 213 },
-  { name: "Thông báo trường", rate: 92, sent: 250, responses: 230 },
-  { name: "Email", rate: 65, sent: 200, responses: 130 },
-  { name: "Zalo", rate: 78, sent: 180, responses: 140 },
-]
-
-const notificationResponses = [
-  {
-    studentName: "Nguyễn Văn An",
-    class: "1A",
-    parentName: "Nguyễn Thị B",
-    status: "Đồng ý",
-    responseTime: "19/12/2024 08:30",
-    note: "Con em sẽ tham gia đầy đủ",
-  },
-  {
-    studentName: "Trần Thị Bình",
-    class: "1A",
-    parentName: "Trần Văn C",
-    status: "Từ chối",
-    responseTime: "19/12/2024 10:15",
-    note: "Con đang ốm, xin hoãn",
-  },
-  {
-    studentName: "Lê Hoàng Cường",
-    class: "1B",
-    parentName: "Lê Thị D",
-    status: "Đồng ý",
-    responseTime: "19/12/2024 14:20",
-    note: "Cảm ơn thông báo của trường",
-  },
-  {
-    studentName: "Phạm Thị Dung",
-    class: "1B",
-    parentName: "Phạm Văn E",
-    status: "Chưa phản hồi",
-    responseTime: "",
-    note: "",
-  },
-]
