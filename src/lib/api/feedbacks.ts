@@ -1,20 +1,22 @@
 import {
+  CreateFeedbackParams,
   Feedback,
-  CreateFeedbackDTO,
-  UpdateFeedbackDTO,
   FeedbackResponse,
-} from "../type/feedbacks";
+  UpdateFeedbackParams,
+} from "../../type/feedbacks";
 import { fetchData } from "./api";
 
 export const getFeedbacks = (): Promise<FeedbackResponse> => {
   return fetchData<FeedbackResponse>(`/feedbacks`);
 };
 
-export const getFeedbackById = (id: number): Promise<Feedback> => {
+export const getFeedbackById = (id: string): Promise<Feedback> => {
   return fetchData<Feedback>(`/feedbacks/${id}`);
 };
 
-export const createFeedback = (data: CreateFeedbackDTO): Promise<Feedback> => {
+export const createFeedback = (
+  data: CreateFeedbackParams
+): Promise<Feedback> => {
   return fetchData<Feedback>(`/feedbacks`, {
     method: "POST",
     body: JSON.stringify(data),
@@ -22,8 +24,8 @@ export const createFeedback = (data: CreateFeedbackDTO): Promise<Feedback> => {
 };
 
 export const updateFeedback = (
-  id: number,
-  data: UpdateFeedbackDTO
+  id: string,
+  data: UpdateFeedbackParams
 ): Promise<Feedback> => {
   return fetchData<Feedback>(`/feedbacks/${id}`, {
     method: "PATCH",
@@ -31,7 +33,7 @@ export const updateFeedback = (
   });
 };
 
-export const deleteFeedback = (id: number): Promise<void> => {
+export const deleteFeedback = (id: string): Promise<void> => {
   return fetchData(`/feedbacks/${id}`, {
     method: "DELETE",
   });

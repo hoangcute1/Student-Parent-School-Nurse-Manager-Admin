@@ -1,23 +1,9 @@
 import { create } from "zustand";
 import { getParents, createParent } from "@/lib/api/parents";
-import type { Parent as ApiParent } from "@/lib/type/parents";
+import type { Parent as ApiParent, DisplayParent, ParentStore } from "../type/parents";
 import type { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
 
-interface DisplayParent {
-  name: string;
-  phone: string;
-  address: string;
-  email: string;
-  createdAt: string;
-}
 
-interface ParentStore {
-  parents: DisplayParent[];
-  isLoading: boolean;
-  error: string | null;
-  fetchParents: () => Promise<void>;
-  addParent: (data: ParentFormValues) => Promise<void>;
-}
 
 const mapToDisplayParent = (apiParent: ApiParent): DisplayParent => ({
   name: apiParent.name,
@@ -31,16 +17,25 @@ export const useParentStore = create<ParentStore>((set) => ({
   parents: [],
   isLoading: false,
   error: null,
-
   fetchParents: async () => {
     try {
       set({ isLoading: true, error: null });
-      const data = await getParents();
-      const parentsList = Array.isArray(data) ? data : data.data || [];
-      set({ parents: parentsList.map(mapToDisplayParent) });
+      console.log("Fetching parents...");
+      const response = await getParents();
+      console.log("Parents response:", response);
+
+      // Kiểm tra nếu response là array thì dùng luôn, không thì check response.data
+      const parentsList = Array.isArray(response)
+        ? response
+        : response?.data || [];
+      set({
+        parents: parentsList.map(mapToDisplayParent),
+        error: null,
+      });
     } catch (err: any) {
-      set({ error: err.message });
+      const errorMessage = err.message || "Failed to fetch parents";
       console.error("Failed to fetch parents:", err);
+      set({ error: errorMessage, parents: [] });
     } finally {
       set({ isLoading: false });
     }

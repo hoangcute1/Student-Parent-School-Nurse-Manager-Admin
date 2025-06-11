@@ -2,7 +2,7 @@ import {
   HealthRecordResponse,
   StudentResponse,
   Student,
-} from "@/lib/type/students";
+} from "../../type/students";
 import { fetchData } from "./api";
 
 export const getHealthRecords = (

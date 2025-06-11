@@ -6,7 +6,7 @@ import type {
   Child,
   HealthRecord,
   UserProfile,
-} from "../type/types";
+} from "../../type/types";
 
 // Generic fetch function with error handling
 export async function fetchData<T>(
@@ -84,8 +84,6 @@ export const loginUser = (
 export const getUsers = () => {
   return fetchData("/users");
 };
-
-
 
 // Get child by ID
 export const getChildById = (id: string): Promise<Child> => {

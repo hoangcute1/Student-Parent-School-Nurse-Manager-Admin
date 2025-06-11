@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Parent as ApiParent } from "@/lib/type/parents";
+import type { Parent as ApiParent } from "../../../type/parents";
 import {
   Card,
   CardContent,
@@ -56,7 +56,7 @@ export default function ParentsPage() {
           console.log("Transformed parent data:", parents);
           setParentData(parents);
         } else {
-          throw new Error("Invalid response format")
+          throw new Error("Invalid response format");
         }
       } catch (err: any) {
         console.error("Failed to fetch parents:", err);
@@ -101,7 +101,9 @@ export default function ParentsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col space-y-2">        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+      <div className="flex flex-col space-y-2">
+        {" "}
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
           Quản lý phụ huynh
         </h1>
         <p className="text-blue-600">

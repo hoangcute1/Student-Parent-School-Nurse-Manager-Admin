@@ -1,5 +1,5 @@
 import { fetchData } from "./api";
-import { Parent, ParentResponse } from "../type/parents";
+import { Parent, ParentResponse } from "../../type/parents";
 
 export const getParents = (
   page: number = 1,

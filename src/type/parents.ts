@@ -1,3 +1,5 @@
+import { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
+
 export interface Parent {
   name: string;
   phone: string;
@@ -30,3 +32,10 @@ export interface DisplayParent {
   createdAt: string;
 }
 
+export interface ParentStore {
+  parents: DisplayParent[];
+  isLoading: boolean;
+  error: string | null;
+  fetchParents: () => Promise<void>;
+  addParent: (data: ParentFormValues) => Promise<void>;
+}
