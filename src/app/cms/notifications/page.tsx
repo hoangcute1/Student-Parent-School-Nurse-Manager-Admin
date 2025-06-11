@@ -377,9 +377,7 @@ export default function HealthCheckupNotifications() {
         <TabsContent value="schedule" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-blue-800">
-                Lịch khám định kỳ
-              </CardTitle>
+              <CardTitle className="text-blue-800">Lịch khám định kỳ</CardTitle>
               <CardDescription className="text-blue-600">
                 Kế hoạch khám sức khỏe định kỳ theo từng khối lớp
               </CardDescription>
@@ -525,7 +523,9 @@ export default function HealthCheckupNotifications() {
       >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-blue-800">Tạo thông báo khám định kỳ</DialogTitle>
+            <DialogTitle className="text-blue-800">
+              Tạo thông báo khám định kỳ
+            </DialogTitle>
             <DialogDescription className="text-blue-600">
               Tạo và gửi thông báo khám sức khỏe định kỳ cho học sinh
             </DialogDescription>
