@@ -10,21 +10,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AddParentDialog } from "./add-parent-dialog";
-import type { ParentFormValues } from "./add-parent-dialog";
+import { AddStaffDialog } from "./add-staff-dialog";
+import type { StaffFormValues } from "./add-staff-dialog";
 
 interface FilterBarProps {
   onSearchChange?: (value: string) => void;
   onClassFilterChange?: (value: string) => void;
   onHealthStatusChange?: (value: string) => void;
-  onAddParent: (data: ParentFormValues) => Promise<void>;
+  onAddStaff: (data: StaffFormValues) => Promise<void>;
 }
 
 export function FilterBar({
   onSearchChange,
   onClassFilterChange,
   onHealthStatusChange,
-  onAddParent,
+  onAddStaff,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -72,7 +72,7 @@ export function FilterBar({
       <Button className="bg-blue-600 hover:bg-blue-700">
         <Download className="h-4 w-4" />
       </Button>
-      <AddParentDialog onSubmit={onAddParent} />
+      <AddStaffDialog onSubmit={onAddStaff} />
     </div>
   );
 }

@@ -1,21 +1,5 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -23,22 +7,32 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@radix-ui/react-dialog";
+import { useEffect, useState } from "react";
+import { Form, useForm } from "react-hook-form";
+import * as z from "zod";
 import type { User as AppUser } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
-const parentFormSchema = z.object({
+const staffFormSchema = z.object({
   name: z.string().min(1, { message: "Họ và tên không được để trống" }),
   phone: z.string().min(1, { message: "Số điện thoại không được để trống" }),
   address: z.string().min(1, { message: "Địa chỉ không được để trống" }),
   email: z.string().email({ message: "Email không hợp lệ" }),
 });
 
-export type ParentFormValues = z.infer<typeof parentFormSchema>;
+export type StaffFormValues = z.infer<typeof staffFormSchema>;
 
-interface AddParentDialogProps {
-  onSubmit: (data: ParentFormValues) => Promise<void>;
+interface AddStaffDialogProps {
+  onSubmit: (data: StaffFormValues) => Promise<void>;
 }
-
-export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
+export function AddStaffDialog({ onSubmit }: AddStaffDialogProps) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<AppUser | null>(null);
 
@@ -56,8 +50,9 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
       console.error("Error parsing auth data:", error);
     }
   }, []);
-  const form = useForm<ParentFormValues>({
-    resolver: zodResolver(parentFormSchema),
+
+  const form = useForm<StaffFormValues>({
+    resolver: zodResolver(staffFormSchema),
     defaultValues: {
       name: "",
       phone: "",
@@ -66,7 +61,7 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
     },
   });
 
-  const handleSubmit = async (data: ParentFormValues) => {
+  const handleSubmit = async (data: StaffFormValues) => {
     try {
       await onSubmit(data);
       setOpen(false);
@@ -76,7 +71,7 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
       // Set form error
       form.setError("root", {
         type: "serverError",
-        message: err.message || "Failed to create student",
+        message: err.message || "Failed to create staff",
       });
     }
   };
@@ -85,9 +80,8 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
     user?.userType == "admin" && (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="ml-2 h-4 w-4" />
-            Thêm phụ huynh
+          <Button className="btn btn-primary" onClick={() => setOpen(true)}>
+            Thêm nhân viên
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-[500px] max-h-[90vh] overflow-y-auto">
