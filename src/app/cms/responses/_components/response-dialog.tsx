@@ -50,7 +50,7 @@ export function ResponseDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-blue-800">{title}</DialogTitle>
+          <DialogTitle className="text-blue-800 ">{title}</DialogTitle>
           <DialogDescription className="text-blue-600">
             {description}
           </DialogDescription>

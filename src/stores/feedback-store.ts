@@ -4,7 +4,7 @@ import {
   FeedbackStore,
   UpdateFeedbackParams,
 } from "../type/feedbacks";
-import { getFeedbacks } from "@/lib/api/feedbacks";
+import { createFeedback, deleteFeedback, getFeedbacks, updateFeedback } from "@/lib/api/feedbacks";
 
 export const useFeedbackStore = create<FeedbackStore>((set) => ({
   feedbacks: [],
@@ -40,7 +40,7 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
   createFeedback: async (data: CreateFeedbackParams) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await feedbackAPI.createFeedback(data);
+      const response = await createFeedback(data);
       if (!response) throw new Error("Failed to create feedback");
 
       set((state) => ({
@@ -60,7 +60,7 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
   updateFeedback: async (id: string, data: UpdateFeedbackParams) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await feedbackAPI.updateFeedback(id, data);
+      const response = await updateFeedback(id, data);
       if (response) {
         set((state) => ({
           feedbacks: state.feedbacks.map((feedback) =>
@@ -81,7 +81,7 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
   deleteFeedback: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      await feedbackAPI.deleteFeedback(id);
+      await deleteFeedback(id);
       set((state) => ({
         feedbacks: state.feedbacks.filter((feedback) => feedback._id !== id),
         total: state.total - 1,

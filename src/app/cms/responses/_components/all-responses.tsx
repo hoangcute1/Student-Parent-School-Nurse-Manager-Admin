@@ -85,10 +85,6 @@ export function AllResponses({
               Danh sách phản hồi từ phụ huynh và học sinh
             </CardDescription>
           </div>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-            <Send className="h-4 w-4 mr-2" />
-            Gửi thông báo
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -132,7 +128,7 @@ export function AllResponses({
                       <User className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-blue-800">
+                      <h4 className="font-semibold text-blue-800">
                         {feedback.title}
                       </h4>
                       <p className="text-sm text-blue-600">
