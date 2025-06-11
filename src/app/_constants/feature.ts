@@ -14,7 +14,7 @@ const features = [
     content:
       "Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều trị, thị lực, thính lực, tiêm chủng và các thông tin sức khỏe khác.",
     icon: FileText,
-    href: "/dashboard/health-records",
+    href: "/dashboard/profile",
     textColor: "text-blue-500",
     borderColor: "border-blue-500",
   },
