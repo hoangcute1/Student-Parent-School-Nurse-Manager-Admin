@@ -9,19 +9,18 @@ export class User extends Document {
 
   @Prop({ required: true })
   password: string;
-
-  // Remove the direct role field and only use roleId reference
+  
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Role', required: true })
-  roleId: MongooseSchema.Types.ObjectId;
+  role: MongooseSchema.Types.ObjectId;
 
   @Prop({ default: null, type: String })
-  refreshToken: string;
+  refresh_token: string;
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  created_at: Date;
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updated_at: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

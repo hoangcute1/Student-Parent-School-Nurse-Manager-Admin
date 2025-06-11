@@ -1,3 +1,4 @@
+import { FeedbackStatus } from './../enums/feedback.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Parent } from './parent.schema';
@@ -18,8 +19,11 @@ export class Feedback extends Document {
   @Prop({ trim: true, default: null })
   response: string;
 
+  @Prop({ enum: FeedbackStatus, default: FeedbackStatus.PENDING })
+  status : boolean;
+
   @Prop({ default: Date.now })
-  createdAt: Date;
+  created_at: Date;
 }
 
 export const FeedbackSchema = SchemaFactory.createForClass(Feedback);

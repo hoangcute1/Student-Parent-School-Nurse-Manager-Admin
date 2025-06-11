@@ -15,8 +15,8 @@ export class Suggestion extends Document {
   @Prop({ required: true, trim: true })
   description: string;
 
-  @Prop({ required: true, min: 1, max: 5 })
-  rating: number;
+  @Prop({ default: Date.now })
+  created_at: Date;
 }
 
 export const SuggestionSchema = SchemaFactory.createForClass(Suggestion);

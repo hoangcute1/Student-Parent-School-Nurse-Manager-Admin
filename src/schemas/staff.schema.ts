@@ -6,17 +6,8 @@ export type StaffDocument = Staff & Document;
 
 @Schema({ versionKey: false })
 export class Staff extends Document {
-  @Prop()
-  position: string;
-
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
-  userId: MongooseSchema.Types.ObjectId;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
-
-  @Prop({ default: Date.now })
-  updatedAt: Date;
+  user: MongooseSchema.Types.ObjectId;
 }
 
 export const StaffSchema = SchemaFactory.createForClass(Staff);
