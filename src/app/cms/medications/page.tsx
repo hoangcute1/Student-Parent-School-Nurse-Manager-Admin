@@ -129,7 +129,7 @@ export default function Medicine() {
             value="inventory"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Tồn kho
+            Tổng số lượng thuốc
           </TabsTrigger>
           <TabsTrigger
             value="import"
