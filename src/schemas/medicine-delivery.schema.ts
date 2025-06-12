@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Student } from './student.schema';
 
 export type MedicineDeliveryDocument = MedicineDelivery & Document;
 
@@ -15,10 +14,10 @@ export enum MedicineDeliveryStatus {
 @Schema({ timestamps: true, versionKey: false })
 export class MedicineDelivery extends Document {
   @Prop({ required: true })
-  medicine_name: string;
+  name: string;
 
   @Prop({ required: true })
-  delivery_date: Date;
+  date: Date;
 
   @Prop({ required: true, min: 0 })
   total: number;
@@ -31,25 +30,25 @@ export class MedicineDelivery extends Document {
   status: MedicineDeliveryStatus;
 
   @Prop({ required: true })
-  perDose: string; // Ví dụ: "2 tablets"
+  per_dose: string; // Ví dụ: "2 tablets"
 
   @Prop({ required: true })
-  perDay: string; // Ví dụ: "3 times a day"
+  per_day: string; // Ví dụ: "3 times a day"
 
-  @Prop({ trim: true })
-  note?: string;
+  @Prop({ trim: true, required: false, default: null })
+  note: string;
 
   @Prop({ required: true })
   reason: string;
 
   @Prop({ required: true })
-  sentAt: Date;
+  sent_at: Date;
 
   @Prop({ required: true })
-  endAt: Date;
+  end_at: Date;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Student', required: true })
-  student: Student;
+  student: MongooseSchema.Types.ObjectId;
 }
 
 export const MedicineDeliverySchema =

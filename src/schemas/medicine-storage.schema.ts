@@ -43,7 +43,7 @@ export class MedicineStorage extends Document {
   unit: MedicineUnit;
 
   @Prop({ required: true, min: 0 })
-  amountLeft: number;
+  amount_left: number;
 
   @Prop({ required: true, min: 0 })
   total: number;
@@ -61,11 +61,8 @@ export class MedicineStorage extends Document {
   @Prop({ required: true })
   expired: Date;
 
-  @Prop({ trim: true })
+  @Prop({ trim: true, required: false, default: null })
   description?: string;
-
-  @Prop({ trim: true })
-  image?: string;
 }
 
 export const MedicineStorageSchema =

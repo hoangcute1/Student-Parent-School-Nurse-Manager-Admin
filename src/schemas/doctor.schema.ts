@@ -1,7 +1,7 @@
 import { DoctorPosition } from '@/enums/doctor.enum';
 import { Gender } from '@/enums/gender.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document } from 'mongoose';
 
 export type DoctorDocument = Doctor & Document;
 
