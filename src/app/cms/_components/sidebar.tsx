@@ -39,7 +39,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       )}
     >
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
-        <Link href="/" className="flex items-center gap-3 border-b border-blue-200 pb-4">
+        <div className="flex items-center gap-3 border-b border-blue-200 pb-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <Heart className="h-7 w-7 text-white" />
           </div>
@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               {user?.userType === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
             </Badge>
           </div>
-        </Link>
+        </div>
         {/* Thống kê nhanh */}
         <div className="bg-white rounded-lg border border-blue-200 p-3 mb-4">
           <div className="grid grid-cols-2 gap-2 text-center">

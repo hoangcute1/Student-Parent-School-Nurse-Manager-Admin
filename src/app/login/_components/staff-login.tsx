@@ -242,15 +242,17 @@ export function StaffLoginForm() {
               <p className="text-xs text-red-500 mt-1">{errors.password}</p>
             )}
           </div>
-          
+          <div className="pt-2 text-sm text-muted-foreground">
+            <p>
+              <strong>Đăng nhập mẫu cho nhân viên y tế:</strong>
+            </p>
+            <p>Email: staff@example.com</p>
+            <p>Mật khẩu: staffpass</p>
+          </div>{" "}
         </CardContent>
         <CardFooter>
           <div className="flex w-full gap-2">
-          <Button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              type="submit"
-              disabled={isLoading}
-            >
+            <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
             <Button

@@ -37,7 +37,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     >
       {/* Header section */}
       <div className="p-4 border-b border-blue-200">
-        <Link href="/" className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <Heart className="h-7 w-7 text-white" />
           </div>
@@ -51,7 +51,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               Phụ huynh
             </Badge>
           </div>
-        </Link>
+        </div>
       </div>
 
       {/* Main navigation section */}
