@@ -115,6 +115,8 @@ export default function Blog() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <CalendarIcon className="h-4 w-4" />
+                          <span>{post.date}</span>
+                          <span>•</span>
                           <span>{post.author}</span>
                         </div>
                         <CardTitle className="text-xl font-bold">
