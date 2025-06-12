@@ -39,14 +39,10 @@ const features = [
 export default function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-gradient-to-r from-blue-100 to-white px-4">
-      {/* <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <Heart className="h-6 w-6 text-red-500" />
         <span className="text-xl font-bold text-blue-900">Y Tế Học Đường</span>
-      </div> */}
-      <Link href="/" className="flex items-center gap-2">
-        <Heart className="h-6 w-6 text-red-500" />
-        <span className="text-xl font-bold text-blue-900">Y Tế Học Đường</span>
-      </Link>
+      </div>
 
       <nav className="hidden md:flex items-center gap-6">
         <Link
