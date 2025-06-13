@@ -17,7 +17,7 @@ export class MedicineTreatment extends Document {
     required: false,
     default: null,
   })
-  medicine?: MongooseSchema.Types.ObjectId;
+  medicine: MongooseSchema.Types.ObjectId;
 }
 
 export const MedicineTreatmentSchema =

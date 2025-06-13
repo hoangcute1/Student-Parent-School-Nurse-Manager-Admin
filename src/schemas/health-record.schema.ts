@@ -18,10 +18,10 @@ export class HealthRecord {
   weight: string;
 
   @Prop({ required: false })
-  vision_left: string;
+  vision: string;
 
   @Prop({ required: false })
-  vision_right: string;
+  hearing: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Student', required: true })
   student: MongooseSchema.Types.ObjectId;

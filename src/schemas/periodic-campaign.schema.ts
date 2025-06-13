@@ -6,8 +6,8 @@ export type PeriodicCampaignDocument = PeriodicCampaign & Document;
 
 @Schema({ timestamps: true })
 export class PeriodicCampaign extends Document {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Doctor', required: true })
-  doctor: MongooseSchema.Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Staff', required: true })
+  staff: MongooseSchema.Types.ObjectId;
 
   @Prop({ trim: true, required: true })
   name: string;

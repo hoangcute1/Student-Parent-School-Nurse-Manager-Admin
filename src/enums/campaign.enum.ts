@@ -5,7 +5,7 @@ export enum CampaignStatus {
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
-
+ 
 export enum CampaignType {
   VACCINE = 'VaccineCampaign',
   PERIODIC = 'PeriodicCampaign',

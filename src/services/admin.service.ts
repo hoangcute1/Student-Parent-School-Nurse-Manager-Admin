@@ -15,11 +15,11 @@ export class AdminService {
   ) {}
 
   async findAll(): Promise<Admin[]> {
-    return this.adminModel.find().populate('userId').exec();
+    return this.adminModel.find().populate('user').exec();
   }
 
   async findById(id: string): Promise<Admin> {
-    const admin = await this.adminModel.findById(id).populate('userId').exec();
+    const admin = await this.adminModel.findById(id).populate('user').exec();
     if (!admin) {
       throw new NotFoundException(`Admin with ID "${id}" not found`);
     }

@@ -15,8 +15,6 @@ export class Student extends Document {
   @Prop({ enum: Gender, default: Gender.OTHER })
   gender: string;
 
-  @Prop()
-  grade: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Class' })
   class: MongooseSchema.Types.ObjectId;
