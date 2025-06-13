@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './modules/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { ConditionModule } from './modules/condition.module';
+
 import configuration from './configuration';
 import { ProfileModule } from './modules/profile.module';
 import { AuthModule } from './modules/auth.module';
@@ -31,7 +31,6 @@ import { SuggestionModule } from './modules/suggestion.module';
     ThrottlerModule,
     TokenBlacklistModule,
     UserModule,
-    ConditionModule,
     ProfileModule,
     AuthModule,
     StudentModule,

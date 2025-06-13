@@ -145,7 +145,7 @@ export class RoleService {
 
     if (!role.permissions.includes(permission)) {
       role.permissions.push(permission);
-      role.updatedAt = new Date();
+      role.updated_at = new Date();
       return role.save();
     }
 
@@ -160,7 +160,7 @@ export class RoleService {
     }
 
     role.permissions = role.permissions.filter((p) => p !== permission);
-    role.updatedAt = new Date();
+    role.updated_at = new Date();
     return role.save();
   }
 }

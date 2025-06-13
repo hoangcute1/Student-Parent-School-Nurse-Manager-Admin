@@ -46,7 +46,7 @@ export class AuthService {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
     }
 
-    const userId = user._id?.toString();
+    const userId = user.userId.toString(); // Assuming '_id' is the correct property name
     if (!userId) {
       throw new UnauthorizedException('Lỗi xác thực người dùng');
     }
@@ -91,7 +91,7 @@ export class AuthService {
       throw new UnauthorizedException('Vai trò không hợp lệ');
     }
 
-    const { password: _, ...result } = user.toObject();
+    const { password: _, ...result } = user;
     return result;
   }
 
@@ -210,7 +210,7 @@ export class AuthService {
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.userService.findById(userId);
 
-    if (!user || !user.refreshToken || user.refreshToken !== refreshToken) {
+    if (!user || !user.refresh_token || user.refresh_token !== refreshToken) {
       throw new UnauthorizedException('Refresh token không hợp lệ');
     }
 
@@ -241,5 +241,12 @@ export class AuthService {
         email: user.email,
       },
     };
+  }
+
+  async validateRefreshToken(refreshToken: string) {
+    const user = await this.userService.findByRefreshToken(refreshToken);
+    if (!user || !user.refresh_token || user.refresh_token !== refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 }

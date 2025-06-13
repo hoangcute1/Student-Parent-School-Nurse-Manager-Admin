@@ -101,8 +101,8 @@ export class UserService {
           'name' in user.roleId
             ? (user.roleId as any).name
             : null,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at,
       };
     });
   }
@@ -134,6 +134,13 @@ export class UserService {
     return this.userModel.findOne({ email }).populate('roleId').exec();
   }
 
+  async findByRefreshToken(refreshToken: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({ refresh_token: refreshToken })
+      .populate('roleId')
+      .exec();
+  }
+
   async updateRefreshToken(
     id: string,
     refreshToken: string | null,
@@ -163,7 +170,7 @@ export class UserService {
 
       // Update user's role
       user.roleId = role.id as any;
-      user.updatedAt = new Date();
+      user.updated_at = new Date();
 
       return user.save();
     } catch (error) {
