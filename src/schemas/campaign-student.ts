@@ -21,6 +21,9 @@ export class CampaignStudent extends Document {
 
   @Prop({ default: Date.now })
   date: Date;
+  
+  @Prop({ default: false })
+  after_campaign: string;
 }
 
 export const CampaignStudentSchema =
