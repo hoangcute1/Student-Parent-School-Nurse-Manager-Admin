@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Param,
   Body,
@@ -17,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateAdminDto } from '@/decorations/dto/create-admin.dto';
+import { UpdateAdminDto } from '../decorations/dto/update-admin.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -45,8 +47,25 @@ export class AdminController {
     return this.adminService.findById(id);
   }
 
+  @Post()
+  @ApiOperation({ summary: 'Tạo mới admin' })
+  @ApiResponse({ status: 201, description: 'Admin đã được tạo.' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ.' })
+  async create(@Body() createAdminDto: CreateAdminDto) {
+    return this.adminService.create(createAdminDto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Cập nhật thông tin admin' })
+  @ApiParam({ name: 'id', description: 'ID của admin' })
+  @ApiResponse({ status: 200, description: 'Admin đã được cập nhật.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy admin.' })
+  async update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
+    return this.adminService.update(id, updateAdminDto);
+  }
+
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa admin' })
+  @ApiOperation({ summary: 'Xóa admin theo id' })
   @ApiParam({ name: 'id', description: 'ID của admin' })
   @ApiResponse({ status: 200, description: 'Admin đã được xóa.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy admin.' })

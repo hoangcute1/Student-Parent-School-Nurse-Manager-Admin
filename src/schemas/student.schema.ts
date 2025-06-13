@@ -6,6 +6,9 @@ export type StudentDocument = Student & Document;
 
 @Schema({ versionKey: false })
 export class Student extends Document {
+  @Prop({ required: true, unique: true })
+  studentId: string;
+
   @Prop({ required: true })
   name: string;
 
@@ -14,7 +17,6 @@ export class Student extends Document {
 
   @Prop({ enum: Gender, default: Gender.OTHER })
   gender: string;
-
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Class' })
   class: MongooseSchema.Types.ObjectId;
