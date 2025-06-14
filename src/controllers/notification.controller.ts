@@ -8,12 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { NotificationService } from '@/services/notification.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CreateNotificationDto } from '@/decorations/dto/create-notification.dto';
 import { UpdateNotificationDto } from '@/decorations/dto/update-notification.dto';
 

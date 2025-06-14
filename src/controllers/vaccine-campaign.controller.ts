@@ -25,7 +25,9 @@ import { UpdateVaccineCampaignDto } from '@/decorations/dto/update-vaccine-campa
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class VaccineCampaignController {
-  constructor(private readonly vaccineCampaignService: VaccineCampaignService) {}
+  constructor(
+    private readonly vaccineCampaignService: VaccineCampaignService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all vaccine campaigns' })
@@ -46,7 +48,10 @@ export class VaccineCampaignController {
   @Get('vaccine/:vaccineId')
   @ApiOperation({ summary: 'Get vaccine campaigns by vaccine ID' })
   @ApiParam({ name: 'vaccineId', description: 'Vaccine ID' })
-  @ApiResponse({ status: 200, description: 'Return vaccine campaigns for a vaccine.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return vaccine campaigns for a vaccine.',
+  })
   async findByVaccineId(@Param('vaccineId') vaccineId: string) {
     return this.vaccineCampaignService.findByVaccineId(vaccineId);
   }
@@ -54,14 +59,20 @@ export class VaccineCampaignController {
   @Get('staff/:staffId')
   @ApiOperation({ summary: 'Get vaccine campaigns by staff ID' })
   @ApiParam({ name: 'staffId', description: 'Staff ID' })
-  @ApiResponse({ status: 200, description: 'Return vaccine campaigns for a staff member.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return vaccine campaigns for a staff member.',
+  })
   async findByStaffId(@Param('staffId') staffId: string) {
     return this.vaccineCampaignService.findByStaffId(staffId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new vaccine campaign' })
-  @ApiResponse({ status: 201, description: 'The vaccine campaign has been created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The vaccine campaign has been created.',
+  })
   async create(@Body() createVaccineCampaignDto: CreateVaccineCampaignDto) {
     return this.vaccineCampaignService.create(createVaccineCampaignDto);
   }
@@ -69,7 +80,10 @@ export class VaccineCampaignController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a vaccine campaign' })
   @ApiParam({ name: 'id', description: 'Vaccine campaign ID' })
-  @ApiResponse({ status: 200, description: 'The vaccine campaign has been updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vaccine campaign has been updated.',
+  })
   @ApiResponse({ status: 404, description: 'Vaccine campaign not found.' })
   async update(
     @Param('id') id: string,
@@ -81,7 +95,10 @@ export class VaccineCampaignController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a vaccine campaign' })
   @ApiParam({ name: 'id', description: 'Vaccine campaign ID' })
-  @ApiResponse({ status: 200, description: 'The vaccine campaign has been deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vaccine campaign has been deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Vaccine campaign not found.' })
   async remove(@Param('id') id: string) {
     return this.vaccineCampaignService.remove(id);

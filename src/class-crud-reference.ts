@@ -67,7 +67,7 @@ export class ClassService {
     // Check if a class with the same name already exists
     const exists = await this.classModel.findOne({ name: createClassDto.name });
     if (exists) throw new ConflictException('Tên lớp đã tồn tại');
-    
+
     // Create and save the new class
     const created = new this.classModel({
       ...createClassDto,

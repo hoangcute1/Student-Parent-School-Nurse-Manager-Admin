@@ -25,7 +25,9 @@ import { UpdateMedicineTreatmentDto } from '@/decorations/dto/update-medicine-tr
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class MedicineTreatmentController {
-  constructor(private readonly medicineTreatmentService: MedicineTreatmentService) {}
+  constructor(
+    private readonly medicineTreatmentService: MedicineTreatmentService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all medicine treatments' })
@@ -46,14 +48,20 @@ export class MedicineTreatmentController {
   @Get('treatment/:treatmentId')
   @ApiOperation({ summary: 'Get medicine treatments by treatment ID' })
   @ApiParam({ name: 'treatmentId', description: 'Treatment ID' })
-  @ApiResponse({ status: 200, description: 'Return the medicine treatments for a treatment.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the medicine treatments for a treatment.',
+  })
   async findByTreatmentId(@Param('treatmentId') treatmentId: string) {
     return this.medicineTreatmentService.findByTreatmentId(treatmentId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new medicine treatment' })
-  @ApiResponse({ status: 201, description: 'The medicine treatment has been created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The medicine treatment has been created.',
+  })
   async create(@Body() createMedicineTreatmentDto: CreateMedicineTreatmentDto) {
     return this.medicineTreatmentService.create(createMedicineTreatmentDto);
   }
@@ -61,7 +69,10 @@ export class MedicineTreatmentController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a medicine treatment' })
   @ApiParam({ name: 'id', description: 'Medicine treatment ID' })
-  @ApiResponse({ status: 200, description: 'The medicine treatment has been updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The medicine treatment has been updated.',
+  })
   @ApiResponse({ status: 404, description: 'Medicine treatment not found.' })
   async update(
     @Param('id') id: string,
@@ -73,7 +84,10 @@ export class MedicineTreatmentController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a medicine treatment' })
   @ApiParam({ name: 'id', description: 'Medicine treatment ID' })
-  @ApiResponse({ status: 200, description: 'The medicine treatment has been deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The medicine treatment has been deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Medicine treatment not found.' })
   async remove(@Param('id') id: string) {
     return this.medicineTreatmentService.remove(id);

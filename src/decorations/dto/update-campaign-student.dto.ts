@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsMongoId,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { StudentCampaignStatus } from '@/enums/campaign.enum';
 import { Type } from 'class-transformer';
 

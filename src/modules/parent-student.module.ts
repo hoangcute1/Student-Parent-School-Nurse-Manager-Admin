@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ParentStudent, ParentStudentSchema } from '@/schemas/parent-student.schema';
+import {
+  ParentStudent,
+  ParentStudentSchema,
+} from '@/schemas/parent-student.schema';
 import { ParentStudentService } from '@/services/parent-student.service';
 import { ParentStudentController } from '@/controllers/parent-student.controller';
 

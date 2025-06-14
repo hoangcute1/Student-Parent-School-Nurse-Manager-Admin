@@ -32,7 +32,9 @@ import { StudentCampaignStatus } from '@/enums/campaign.enum';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class CampaignStudentController {
-  constructor(private readonly campaignStudentService: CampaignStudentService) {}
+  constructor(
+    private readonly campaignStudentService: CampaignStudentService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new campaign-student association' })
@@ -42,13 +44,16 @@ export class CampaignStudentController {
   })
   @ApiResponse({
     status: 201,
-    description: 'The campaign-student association has been successfully created',
+    description:
+      'The campaign-student association has been successfully created',
     type: SuccessResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Association already exists' })
   async create(@Body() createCampaignStudentDto: CreateCampaignStudentDto) {
-    const result = await this.campaignStudentService.create(createCampaignStudentDto);
+    const result = await this.campaignStudentService.create(
+      createCampaignStudentDto,
+    );
     return new SuccessResponseDto(
       'Campaign-Student association created successfully',
       result,
@@ -63,12 +68,17 @@ export class CampaignStudentController {
   })
   @ApiResponse({
     status: 201,
-    description: 'The campaign-student associations have been successfully created',
+    description:
+      'The campaign-student associations have been successfully created',
     type: SuccessResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  async batchCreate(@Body() createCampaignStudentDtos: CreateCampaignStudentDto[]) {
-    const result = await this.campaignStudentService.batchCreate(createCampaignStudentDtos);
+  async batchCreate(
+    @Body() createCampaignStudentDtos: CreateCampaignStudentDto[],
+  ) {
+    const result = await this.campaignStudentService.batchCreate(
+      createCampaignStudentDtos,
+    );
     return new SuccessResponseDto(
       `${result.created} Campaign-Student associations created successfully`,
       result,
@@ -99,15 +109,19 @@ export class CampaignStudentController {
   }
 
   @Get('class-campaign/:classCampaignId')
-  @ApiOperation({ summary: 'Get campaign-student associations by class campaign ID' })
+  @ApiOperation({
+    summary: 'Get campaign-student associations by class campaign ID',
+  })
   @ApiParam({ name: 'classCampaignId', description: 'Class Campaign ID' })
   @ApiResponse({
     status: 200,
-    description: 'List of campaign-student associations for the specified class campaign',
+    description:
+      'List of campaign-student associations for the specified class campaign',
     type: PaginatedResponseDto,
   })
   async findByClassCampaign(@Param('classCampaignId') classCampaignId: string) {
-    const results = await this.campaignStudentService.findByClassCampaign(classCampaignId);
+    const results =
+      await this.campaignStudentService.findByClassCampaign(classCampaignId);
     return new PaginatedResponseDto(
       results,
       {
@@ -127,7 +141,8 @@ export class CampaignStudentController {
   @ApiParam({ name: 'studentId', description: 'Student ID' })
   @ApiResponse({
     status: 200,
-    description: 'List of campaign-student associations for the specified student',
+    description:
+      'List of campaign-student associations for the specified student',
     type: PaginatedResponseDto,
   })
   async findByStudent(@Param('studentId') studentId: string) {
@@ -148,10 +163,15 @@ export class CampaignStudentController {
 
   @Get('status/:status')
   @ApiOperation({ summary: 'Get campaign-student associations by status' })
-  @ApiParam({ name: 'status', description: 'Status', enum: StudentCampaignStatus })
+  @ApiParam({
+    name: 'status',
+    description: 'Status',
+    enum: StudentCampaignStatus,
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of campaign-student associations with the specified status',
+    description:
+      'List of campaign-student associations with the specified status',
     type: PaginatedResponseDto,
   })
   async findByStatus(@Param('status') status: string) {
@@ -196,7 +216,8 @@ export class CampaignStudentController {
   })
   @ApiResponse({
     status: 200,
-    description: 'The campaign-student association has been successfully updated',
+    description:
+      'The campaign-student association has been successfully updated',
     type: SuccessResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -205,7 +226,10 @@ export class CampaignStudentController {
     @Param('id') id: string,
     @Body() updateCampaignStudentDto: UpdateCampaignStudentDto,
   ) {
-    const result = await this.campaignStudentService.update(id, updateCampaignStudentDto);
+    const result = await this.campaignStudentService.update(
+      id,
+      updateCampaignStudentDto,
+    );
     return new SuccessResponseDto(
       'Campaign-Student association updated successfully',
       result,
@@ -215,17 +239,18 @@ export class CampaignStudentController {
   @Patch(':id/status/:status')
   @ApiOperation({ summary: 'Update status of a campaign-student association' })
   @ApiParam({ name: 'id', description: 'Campaign-Student association ID' })
-  @ApiParam({ name: 'status', description: 'New status', enum: StudentCampaignStatus })
+  @ApiParam({
+    name: 'status',
+    description: 'New status',
+    enum: StudentCampaignStatus,
+  })
   @ApiResponse({
     status: 200,
     description: 'The campaign-student status has been successfully updated',
     type: SuccessResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Association not found' })
-  async updateStatus(
-    @Param('id') id: string,
-    @Param('status') status: string,
-  ) {
+  async updateStatus(@Param('id') id: string, @Param('status') status: string) {
     const result = await this.campaignStudentService.updateStatus(id, status);
     return new SuccessResponseDto(
       'Campaign-Student status updated successfully',
@@ -238,7 +263,8 @@ export class CampaignStudentController {
   @ApiParam({ name: 'id', description: 'Campaign-Student association ID' })
   @ApiResponse({
     status: 200,
-    description: 'The campaign-student association has been successfully deleted',
+    description:
+      'The campaign-student association has been successfully deleted',
     type: SuccessResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Association not found' })
@@ -251,15 +277,21 @@ export class CampaignStudentController {
   }
 
   @Delete('class-campaign/:classCampaignId')
-  @ApiOperation({ summary: 'Delete all campaign-student associations for a class campaign' })
+  @ApiOperation({
+    summary: 'Delete all campaign-student associations for a class campaign',
+  })
   @ApiParam({ name: 'classCampaignId', description: 'Class Campaign ID' })
   @ApiResponse({
     status: 200,
-    description: 'All campaign-student associations for the class campaign have been deleted',
+    description:
+      'All campaign-student associations for the class campaign have been deleted',
     type: SuccessResponseDto,
   })
-  async removeByClassCampaign(@Param('classCampaignId') classCampaignId: string) {
-    const result = await this.campaignStudentService.removeByClassCampaign(classCampaignId);
+  async removeByClassCampaign(
+    @Param('classCampaignId') classCampaignId: string,
+  ) {
+    const result =
+      await this.campaignStudentService.removeByClassCampaign(classCampaignId);
     return new SuccessResponseDto(
       `${result.count} Campaign-Student associations deleted successfully for class campaign`,
       result,
@@ -267,11 +299,14 @@ export class CampaignStudentController {
   }
 
   @Delete('student/:studentId')
-  @ApiOperation({ summary: 'Delete all campaign-student associations for a student' })
+  @ApiOperation({
+    summary: 'Delete all campaign-student associations for a student',
+  })
   @ApiParam({ name: 'studentId', description: 'Student ID' })
   @ApiResponse({
     status: 200,
-    description: 'All campaign-student associations for the student have been deleted',
+    description:
+      'All campaign-student associations for the student have been deleted',
     type: SuccessResponseDto,
   })
   async removeByStudent(@Param('studentId') studentId: string) {

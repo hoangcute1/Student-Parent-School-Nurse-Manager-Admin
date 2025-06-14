@@ -10,7 +10,6 @@ export class VaccineCampaign extends Document {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Vaccine', required: true })
   vaccine: MongooseSchema.Types.ObjectId;
 
-
   @Prop({ required: true, trim: true })
   place: string;
 
@@ -22,7 +21,7 @@ export class VaccineCampaign extends Document {
 
   @Prop({ enum: CampaignStatus, default: CampaignStatus.PENDING })
   status: string;
-  
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Staff', required: true })
   staff: MongooseSchema.Types.ObjectId;
 
@@ -33,4 +32,5 @@ export class VaccineCampaign extends Document {
   created_at: Date;
 }
 
-export const VaccineCampaignSchema = SchemaFactory.createForClass(VaccineCampaign);
+export const VaccineCampaignSchema =
+  SchemaFactory.createForClass(VaccineCampaign);

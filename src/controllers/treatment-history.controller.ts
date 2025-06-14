@@ -25,7 +25,9 @@ import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-hi
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class TreatmentHistoryController {
-  constructor(private readonly treatmentHistoryService: TreatmentHistoryService) {}
+  constructor(
+    private readonly treatmentHistoryService: TreatmentHistoryService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all treatment histories' })
@@ -46,7 +48,10 @@ export class TreatmentHistoryController {
   @Get('student/:studentId')
   @ApiOperation({ summary: 'Get treatment histories by student ID' })
   @ApiParam({ name: 'studentId', description: 'Student ID' })
-  @ApiResponse({ status: 200, description: 'Return treatment histories for a student.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return treatment histories for a student.',
+  })
   async findByStudentId(@Param('studentId') studentId: string) {
     return this.treatmentHistoryService.findByStudentId(studentId);
   }
@@ -54,14 +59,20 @@ export class TreatmentHistoryController {
   @Get('staff/:staffId')
   @ApiOperation({ summary: 'Get treatment histories by staff ID' })
   @ApiParam({ name: 'staffId', description: 'Staff ID' })
-  @ApiResponse({ status: 200, description: 'Return treatment histories for a staff member.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return treatment histories for a staff member.',
+  })
   async findByStaffId(@Param('staffId') staffId: string) {
     return this.treatmentHistoryService.findByStaffId(staffId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new treatment history' })
-  @ApiResponse({ status: 201, description: 'The treatment history has been created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The treatment history has been created.',
+  })
   async create(@Body() createTreatmentHistoryDto: CreateTreatmentHistoryDto) {
     return this.treatmentHistoryService.create(createTreatmentHistoryDto);
   }
@@ -69,7 +80,10 @@ export class TreatmentHistoryController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a treatment history' })
   @ApiParam({ name: 'id', description: 'Treatment history ID' })
-  @ApiResponse({ status: 200, description: 'The treatment history has been updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The treatment history has been updated.',
+  })
   @ApiResponse({ status: 404, description: 'Treatment history not found.' })
   async update(
     @Param('id') id: string,
@@ -81,7 +95,10 @@ export class TreatmentHistoryController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a treatment history' })
   @ApiParam({ name: 'id', description: 'Treatment history ID' })
-  @ApiResponse({ status: 200, description: 'The treatment history has been deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The treatment history has been deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Treatment history not found.' })
   async remove(@Param('id') id: string) {
     return this.treatmentHistoryService.remove(id);

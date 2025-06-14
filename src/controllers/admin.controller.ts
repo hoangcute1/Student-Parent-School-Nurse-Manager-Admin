@@ -91,7 +91,10 @@ export class AdminController {
   @ApiParam({ name: 'id', description: 'ID của admin' })
   @ApiResponse({ status: 200, description: 'Admin đã được cập nhật.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy admin.' })
-  async update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateAdminDto: UpdateAdminDto,
+  ) {
     return this.adminService.update(id, updateAdminDto);
   }
 

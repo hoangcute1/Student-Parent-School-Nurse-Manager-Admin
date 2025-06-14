@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CampaignClassController } from '@/controllers/campaign-class.controller';
 import { CampaignClassService } from '@/services/campaign-class.service';
-import { CampaignClass, CampaignClassSchema } from '@/schemas/campaign-class.schema';
+import {
+  CampaignClass,
+  CampaignClassSchema,
+} from '@/schemas/campaign-class.schema';
 
 @Module({
   imports: [

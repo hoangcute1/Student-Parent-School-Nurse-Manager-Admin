@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PeriodicCampaign, PeriodicCampaignSchema } from '@/schemas/periodic-campaign.schema';
+import {
+  PeriodicCampaign,
+  PeriodicCampaignSchema,
+} from '@/schemas/periodic-campaign.schema';
 import { PeriodicCampaignService } from '@/services/periodic-campaign.service';
 import { PeriodicCampaignController } from '@/controllers/periodic-campaign.controller';
 

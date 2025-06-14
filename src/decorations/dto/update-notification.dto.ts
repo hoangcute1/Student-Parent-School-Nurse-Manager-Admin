@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsEnum } from 'class-validator';
-import { NotificationType, NotificationStatus } from '@/schemas/notification.schema';
+import {
+  NotificationType,
+  NotificationStatus,
+} from '@/schemas/notification.schema';
 
 export class UpdateNotificationDto {
   @ApiProperty({

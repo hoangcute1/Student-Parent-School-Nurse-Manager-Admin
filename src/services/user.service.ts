@@ -75,9 +75,7 @@ export class UserService {
   }
 
   async findByRefreshToken(refreshToken: string): Promise<UserDocument | null> {
-    return this.userModel
-      .findOne({ refresh_token: refreshToken })
-      .exec();
+    return this.userModel.findOne({ refresh_token: refreshToken }).exec();
   }
 
   async updateRefreshToken(
@@ -169,7 +167,7 @@ export class UserService {
   async findAllAdmins(): Promise<any[]> {
     const admins = await this.adminService.findAll();
     const adminUsers: any[] = [];
-    
+
     for (const admin of admins) {
       const user = admin.user as any;
       if (user && user._id) {
@@ -182,7 +180,7 @@ export class UserService {
         });
       }
     }
-    
+
     return adminUsers;
   }
 
@@ -193,7 +191,7 @@ export class UserService {
   async findAllParents(): Promise<any[]> {
     const parents = await this.parentService.findAll();
     const parentUsers: any[] = [];
-    
+
     for (const parent of parents) {
       const user = parent.user as any;
       if (user && user._id) {
@@ -206,7 +204,7 @@ export class UserService {
         });
       }
     }
-    
+
     return parentUsers;
   }
 
@@ -217,7 +215,7 @@ export class UserService {
   async findAllStaff(): Promise<any[]> {
     const staffList = await this.staffService.findAll();
     const staffUsers: any[] = [];
-    
+
     for (const staff of staffList) {
       const user = staff.user as any;
       if (user && user._id) {
@@ -230,9 +228,9 @@ export class UserService {
         });
       }
     }
-    
+
     return staffUsers;
-  }  /**
+  } /**
    * Create a new admin user
    * @param createUserAdminDto DTO containing admin user data
    * @returns The created admin user with admin document

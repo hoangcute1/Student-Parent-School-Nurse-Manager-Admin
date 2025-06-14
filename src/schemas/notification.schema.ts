@@ -2,13 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export enum NotificationType {
-    VACCINE = 'VaccineNotification',
-    PERIODIC = 'PeriodicNotification',
+  VACCINE = 'VaccineNotification',
+  PERIODIC = 'PeriodicNotification',
 }
 
 export enum NotificationStatus {
-    AGREE = 'Agree',
-    DISAGREE = 'Disagree',
+  AGREE = 'Agree',
+  DISAGREE = 'Disagree',
 }
 
 export type NotificationDocument = Notification & Document;
@@ -24,7 +24,7 @@ export class Notification extends Document {
   @Prop({
     type: String,
     required: true,
-    enum:   NotificationType,
+    enum: NotificationType,
   })
   campaign_type: string;
 
@@ -45,7 +45,7 @@ export class Notification extends Document {
   @Prop({
     type: String,
     required: true,
-    enum:   NotificationStatus,
+    enum: NotificationStatus,
   })
   confirmation_status: string;
 

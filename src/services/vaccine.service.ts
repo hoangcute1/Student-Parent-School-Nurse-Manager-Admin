@@ -23,33 +23,36 @@ export class VaccineService {
 
   async findById(id: string): Promise<Vaccine> {
     const vaccine = await this.vaccineModel.findById(id).exec();
-    
+
     if (!vaccine) {
       throw new NotFoundException(`Vaccine with ID ${id} not found`);
     }
-    
+
     return vaccine;
   }
 
-  async update(id: string, updateVaccineDto: UpdateVaccineDto): Promise<Vaccine> {
+  async update(
+    id: string,
+    updateVaccineDto: UpdateVaccineDto,
+  ): Promise<Vaccine> {
     const updatedVaccine = await this.vaccineModel
       .findByIdAndUpdate(id, updateVaccineDto, { new: true })
       .exec();
-    
+
     if (!updatedVaccine) {
       throw new NotFoundException(`Vaccine with ID ${id} not found`);
     }
-    
+
     return updatedVaccine;
   }
 
   async remove(id: string): Promise<Vaccine> {
     const deletedVaccine = await this.vaccineModel.findByIdAndDelete(id).exec();
-    
+
     if (!deletedVaccine) {
       throw new NotFoundException(`Vaccine with ID ${id} not found`);
     }
-    
+
     return deletedVaccine;
   }
 }

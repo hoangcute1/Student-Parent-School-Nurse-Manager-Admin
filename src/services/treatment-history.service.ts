@@ -12,13 +12,18 @@ export class TreatmentHistoryService {
     private treatmentHistoryModel: Model<TreatmentHistory>,
   ) {}
 
-  async create(createTreatmentHistoryDto: CreateTreatmentHistoryDto): Promise<TreatmentHistory> {
-    const createdTreatmentHistory = new this.treatmentHistoryModel(createTreatmentHistoryDto);
+  async create(
+    createTreatmentHistoryDto: CreateTreatmentHistoryDto,
+  ): Promise<TreatmentHistory> {
+    const createdTreatmentHistory = new this.treatmentHistoryModel(
+      createTreatmentHistoryDto,
+    );
     return createdTreatmentHistory.save();
   }
 
   async findAll(): Promise<TreatmentHistory[]> {
-    return this.treatmentHistoryModel.find()
+    return this.treatmentHistoryModel
+      .find()
       .populate('student')
       .populate('staff')
       .populate('record')
@@ -26,55 +31,63 @@ export class TreatmentHistoryService {
   }
 
   async findById(id: string): Promise<TreatmentHistory> {
-    const treatmentHistory = await this.treatmentHistoryModel.findById(id)
+    const treatmentHistory = await this.treatmentHistoryModel
+      .findById(id)
       .populate('student')
       .populate('staff')
       .populate('record')
       .exec();
-    
+
     if (!treatmentHistory) {
       throw new NotFoundException(`Treatment history with ID ${id} not found`);
     }
-    
+
     return treatmentHistory;
   }
 
   async findByStudentId(studentId: string): Promise<TreatmentHistory[]> {
-    return this.treatmentHistoryModel.find({ student: studentId })
+    return this.treatmentHistoryModel
+      .find({ student: studentId })
       .populate('staff')
       .populate('record')
       .exec();
   }
 
   async findByStaffId(staffId: string): Promise<TreatmentHistory[]> {
-    return this.treatmentHistoryModel.find({ staff: staffId })
+    return this.treatmentHistoryModel
+      .find({ staff: staffId })
       .populate('student')
       .populate('record')
       .exec();
   }
 
-  async update(id: string, updateTreatmentHistoryDto: UpdateTreatmentHistoryDto): Promise<TreatmentHistory> {
+  async update(
+    id: string,
+    updateTreatmentHistoryDto: UpdateTreatmentHistoryDto,
+  ): Promise<TreatmentHistory> {
     const updatedTreatmentHistory = await this.treatmentHistoryModel
       .findByIdAndUpdate(id, updateTreatmentHistoryDto, { new: true })
       .populate('student')
       .populate('staff')
       .populate('record')
       .exec();
-    
+
     if (!updatedTreatmentHistory) {
       throw new NotFoundException(`Treatment history with ID ${id} not found`);
     }
-    
+
     return updatedTreatmentHistory;
   }
 
   async remove(id: string): Promise<TreatmentHistory> {
-    const deletedTreatmentHistory = await this.treatmentHistoryModel.findByIdAndDelete(id).exec();
-    
+    const deletedTreatmentHistory = await this.treatmentHistoryModel
+      .findByIdAndDelete(id)
+      .exec();
+
     if (!deletedTreatmentHistory) {
       throw new NotFoundException(`Treatment history with ID ${id} not found`);
     }
-    
+
     return deletedTreatmentHistory;
   }
 }

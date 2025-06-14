@@ -25,7 +25,9 @@ import { UpdatePeriodicCampaignDto } from '@/decorations/dto/update-periodic-cam
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class PeriodicCampaignController {
-  constructor(private readonly periodicCampaignService: PeriodicCampaignService) {}
+  constructor(
+    private readonly periodicCampaignService: PeriodicCampaignService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all periodic campaigns' })
@@ -46,14 +48,20 @@ export class PeriodicCampaignController {
   @Get('staff/:staffId')
   @ApiOperation({ summary: 'Get periodic campaigns by staff ID' })
   @ApiParam({ name: 'staffId', description: 'Staff ID' })
-  @ApiResponse({ status: 200, description: 'Return periodic campaigns for a staff member.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return periodic campaigns for a staff member.',
+  })
   async findByStaffId(@Param('staffId') staffId: string) {
     return this.periodicCampaignService.findByStaffId(staffId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new periodic campaign' })
-  @ApiResponse({ status: 201, description: 'The periodic campaign has been created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The periodic campaign has been created.',
+  })
   async create(@Body() createPeriodicCampaignDto: CreatePeriodicCampaignDto) {
     return this.periodicCampaignService.create(createPeriodicCampaignDto);
   }
@@ -61,7 +69,10 @@ export class PeriodicCampaignController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a periodic campaign' })
   @ApiParam({ name: 'id', description: 'Periodic campaign ID' })
-  @ApiResponse({ status: 200, description: 'The periodic campaign has been updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The periodic campaign has been updated.',
+  })
   @ApiResponse({ status: 404, description: 'Periodic campaign not found.' })
   async update(
     @Param('id') id: string,
@@ -73,7 +84,10 @@ export class PeriodicCampaignController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a periodic campaign' })
   @ApiParam({ name: 'id', description: 'Periodic campaign ID' })
-  @ApiResponse({ status: 200, description: 'The periodic campaign has been deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The periodic campaign has been deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Periodic campaign not found.' })
   async remove(@Param('id') id: string) {
     return this.periodicCampaignService.remove(id);

@@ -46,7 +46,9 @@ export class CampaignClassController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Association already exists' })
   async create(@Body() createCampaignClassDto: CreateCampaignClassDto) {
-    const result = await this.campaignClassService.create(createCampaignClassDto);
+    const result = await this.campaignClassService.create(
+      createCampaignClassDto,
+    );
     return new SuccessResponseDto(
       'Campaign-Class association created successfully',
       result,
@@ -81,7 +83,8 @@ export class CampaignClassController {
   @ApiParam({ name: 'campaignId', description: 'Campaign ID' })
   @ApiResponse({
     status: 200,
-    description: 'List of campaign-class associations for the specified campaign',
+    description:
+      'List of campaign-class associations for the specified campaign',
     type: PaginatedResponseDto,
   })
   async findByCampaign(@Param('campaignId') campaignId: string) {
@@ -159,7 +162,10 @@ export class CampaignClassController {
     @Param('id') id: string,
     @Body() updateCampaignClassDto: UpdateCampaignClassDto,
   ) {
-    const result = await this.campaignClassService.update(id, updateCampaignClassDto);
+    const result = await this.campaignClassService.update(
+      id,
+      updateCampaignClassDto,
+    );
     return new SuccessResponseDto(
       'Campaign-Class association updated successfully',
       result,
@@ -184,11 +190,14 @@ export class CampaignClassController {
   }
 
   @Delete('campaign/:campaignId')
-  @ApiOperation({ summary: 'Delete all campaign-class associations for a campaign' })
+  @ApiOperation({
+    summary: 'Delete all campaign-class associations for a campaign',
+  })
   @ApiParam({ name: 'campaignId', description: 'Campaign ID' })
   @ApiResponse({
     status: 200,
-    description: 'All campaign-class associations for the campaign have been deleted',
+    description:
+      'All campaign-class associations for the campaign have been deleted',
     type: SuccessResponseDto,
   })
   async removeByCampaign(@Param('campaignId') campaignId: string) {
@@ -200,11 +209,14 @@ export class CampaignClassController {
   }
 
   @Delete('class/:classId')
-  @ApiOperation({ summary: 'Delete all campaign-class associations for a class' })
+  @ApiOperation({
+    summary: 'Delete all campaign-class associations for a class',
+  })
   @ApiParam({ name: 'classId', description: 'Class ID' })
   @ApiResponse({
     status: 200,
-    description: 'All campaign-class associations for the class have been deleted',
+    description:
+      'All campaign-class associations for the class have been deleted',
     type: SuccessResponseDto,
   })
   async removeByClass(@Param('classId') classId: string) {

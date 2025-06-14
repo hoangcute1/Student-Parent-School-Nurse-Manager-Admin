@@ -263,7 +263,8 @@ export class UserController {
     description: 'Không có quyền thực hiện thao tác này.',
   })
   async findAllStaff() {
-    const staffUsers = await this.userService.findAllStaff();    return new PaginatedResponseDto(
+    const staffUsers = await this.userService.findAllStaff();
+    return new PaginatedResponseDto(
       staffUsers,
       {
         page: 1,

@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsDate, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsDate,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { CampaignStatus } from '@/enums/campaign.enum';
 import { Type } from 'class-transformer';
 

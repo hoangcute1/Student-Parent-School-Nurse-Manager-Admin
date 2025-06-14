@@ -52,14 +52,15 @@ export class ParentController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy phụ huynh.' })
   async findOne(@Param('id') id: string) {
     return this.parentService.findById(id);
-  }  @Post()
+  }
+  @Post()
   @ApiOperation({ summary: 'Tạo phụ huynh mới' })
   @ApiResponse({ status: 201, description: 'Phụ huynh đã được tạo.' })
   @ApiResponse({ status: 403, description: 'Không có quyền tạo phụ huynh.' })
   async create(@Body() createParentDto: CreateParentDto) {
     return this.parentService.create(createParentDto);
   }
-  
+
   @Post('/create-with-user')
   @ApiOperation({ summary: 'Tạo mới user phụ huynh' })
   @ApiBody({
@@ -82,7 +83,10 @@ export class ParentController {
   })
   async createWithUser(@Body() createUserParentDto: CreateUserParentDto) {
     const result = await this.userService.createParent(createUserParentDto);
-    return new SuccessResponseDto('User phụ huynh đã được tạo thành công', result);
+    return new SuccessResponseDto(
+      'User phụ huynh đã được tạo thành công',
+      result,
+    );
   }
 
   @Put(':id')

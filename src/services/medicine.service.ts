@@ -29,25 +29,30 @@ export class MedicineService {
     return medicine;
   }
 
-  async update(id: string, updateMedicineDto: UpdateMedicineDto): Promise<Medicine> {
+  async update(
+    id: string,
+    updateMedicineDto: UpdateMedicineDto,
+  ): Promise<Medicine> {
     const updatedMedicine = await this.medicineModel
       .findByIdAndUpdate(id, updateMedicineDto, { new: true })
       .exec();
-    
+
     if (!updatedMedicine) {
       throw new NotFoundException(`Medicine with ID ${id} not found`);
     }
-    
+
     return updatedMedicine;
   }
 
   async remove(id: string): Promise<Medicine> {
-    const deletedMedicine = await this.medicineModel.findByIdAndDelete(id).exec();
-    
+    const deletedMedicine = await this.medicineModel
+      .findByIdAndDelete(id)
+      .exec();
+
     if (!deletedMedicine) {
       throw new NotFoundException(`Medicine with ID ${id} not found`);
     }
-    
+
     return deletedMedicine;
   }
 }

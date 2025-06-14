@@ -29,7 +29,10 @@ export class ParentStudentController {
 
   @Get()
   @ApiOperation({ summary: 'Get all parent-student relationships' })
-  @ApiResponse({ status: 200, description: 'Return all parent-student relationships.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return all parent-student relationships.',
+  })
   async findAll() {
     return this.parentStudentService.findAll();
   }
@@ -37,8 +40,14 @@ export class ParentStudentController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a parent-student relationship by ID' })
   @ApiParam({ name: 'id', description: 'Parent-Student relationship ID' })
-  @ApiResponse({ status: 200, description: 'Return the parent-student relationship.' })
-  @ApiResponse({ status: 404, description: 'Parent-Student relationship not found.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return the parent-student relationship.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Parent-Student relationship not found.',
+  })
   async findOne(@Param('id') id: string) {
     return this.parentStudentService.findById(id);
   }
@@ -46,7 +55,10 @@ export class ParentStudentController {
   @Get('parent/:parentId')
   @ApiOperation({ summary: 'Get parent-student relationships by parent ID' })
   @ApiParam({ name: 'parentId', description: 'Parent ID' })
-  @ApiResponse({ status: 200, description: 'Return parent-student relationships for a parent.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return parent-student relationships for a parent.',
+  })
   async findByParentId(@Param('parentId') parentId: string) {
     return this.parentStudentService.findByParentId(parentId);
   }
@@ -54,14 +66,20 @@ export class ParentStudentController {
   @Get('student/:studentId')
   @ApiOperation({ summary: 'Get parent-student relationships by student ID' })
   @ApiParam({ name: 'studentId', description: 'Student ID' })
-  @ApiResponse({ status: 200, description: 'Return parent-student relationships for a student.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return parent-student relationships for a student.',
+  })
   async findByStudentId(@Param('studentId') studentId: string) {
     return this.parentStudentService.findByStudentId(studentId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new parent-student relationship' })
-  @ApiResponse({ status: 201, description: 'The parent-student relationship has been created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The parent-student relationship has been created.',
+  })
   async create(@Body() createParentStudentDto: CreateParentStudentDto) {
     return this.parentStudentService.create(createParentStudentDto);
   }
@@ -69,8 +87,14 @@ export class ParentStudentController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a parent-student relationship' })
   @ApiParam({ name: 'id', description: 'Parent-Student relationship ID' })
-  @ApiResponse({ status: 200, description: 'The parent-student relationship has been updated.' })
-  @ApiResponse({ status: 404, description: 'Parent-Student relationship not found.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The parent-student relationship has been updated.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Parent-Student relationship not found.',
+  })
   async update(
     @Param('id') id: string,
     @Body() updateParentStudentDto: UpdateParentStudentDto,
@@ -81,8 +105,14 @@ export class ParentStudentController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a parent-student relationship' })
   @ApiParam({ name: 'id', description: 'Parent-Student relationship ID' })
-  @ApiResponse({ status: 200, description: 'The parent-student relationship has been deleted.' })
-  @ApiResponse({ status: 404, description: 'Parent-Student relationship not found.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The parent-student relationship has been deleted.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Parent-Student relationship not found.',
+  })
   async remove(@Param('id') id: string) {
     return this.parentStudentService.remove(id);
   }

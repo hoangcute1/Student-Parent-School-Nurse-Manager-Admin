@@ -52,14 +52,15 @@ export class StaffController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy nhân viên.' })
   async findOne(@Param('id') id: string) {
     return this.staffService.findById(id);
-  }  @Post()
+  }
+  @Post()
   @ApiOperation({ summary: 'Tạo nhân viên mới' })
   @ApiResponse({ status: 201, description: 'Nhân viên đã được tạo.' })
   @ApiResponse({ status: 403, description: 'Không có quyền tạo nhân viên.' })
   async create(@Body() createStaffDto: CreateStaffDto) {
     return this.staffService.create(createStaffDto);
   }
-  
+
   @Post('/create-with-user')
   @ApiOperation({ summary: 'Tạo mới user nhân viên' })
   @ApiBody({
@@ -82,7 +83,10 @@ export class StaffController {
   })
   async createWithUser(@Body() createUserStaffDto: CreateUserStaffDto) {
     const result = await this.userService.createStaff(createUserStaffDto);
-    return new SuccessResponseDto('User nhân viên đã được tạo thành công', result);
+    return new SuccessResponseDto(
+      'User nhân viên đã được tạo thành công',
+      result,
+    );
   }
 
   @Put(':id')

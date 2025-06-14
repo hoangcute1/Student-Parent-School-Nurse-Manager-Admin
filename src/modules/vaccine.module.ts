@@ -6,9 +6,7 @@ import { VaccineController } from '@/controllers/vaccine.controller';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Vaccine.name, schema: VaccineSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Vaccine.name, schema: VaccineSchema }]),
   ],
   controllers: [VaccineController],
   providers: [VaccineService],
