@@ -21,13 +21,13 @@ export class AdminService {
 
   /**
    * Create a new admin record
-   * @param createAdminDto DTO containing userId that will be mapped to user field
+   * @param createAdminDto DTO containing user that will be mapped to user field
    * @returns The created admin document
    */
   async create(createAdminDto: CreateAdminDto): Promise<AdminDocument> {
     // Check if admin with this user already exists
     const existingAdmin = await this.adminModel
-      .findOne({ user: createAdminDto.userId })
+      .findOne({ user: createAdminDto.user })
       .exec();
 
     if (existingAdmin) {
@@ -35,7 +35,7 @@ export class AdminService {
     }
 
     const createdAdmin = new this.adminModel({
-      user: createAdminDto.userId, // Map userId from DTO to user in schema
+      user: createAdminDto.user, // Map user from DTO to user in schema
     });
     return createdAdmin.save();
   }
@@ -61,13 +61,13 @@ export class AdminService {
     return admin;
   }
 
-  async validateAdmin(userId: string): Promise<AdminDocument | null> {
-    return this.findByUserId(userId);
+  async validateAdmin(user: string): Promise<AdminDocument | null> {
+    return this.findByuser(user);
   }
 
-  async findByUserId(userId: string): Promise<AdminDocument | null> {
-    console.log('Finding admin by userId:', userId);
-    return this.adminModel.findOne({ user: userId }).exec();
+  async findByuser(user: string): Promise<AdminDocument | null> {
+    console.log('Finding admin by user:', user);
+    return this.adminModel.findOne({ user: user }).exec();
   }
 
   /**
@@ -82,10 +82,10 @@ export class AdminService {
   ): Promise<AdminDocument> {
     const updateData = { ...updateAdminDto };
 
-    // Map userId to user field if provided
-    if (updateAdminDto.userId) {
-      updateData['user'] = updateAdminDto.userId;
-      delete updateData['userId'];
+    // Map user to user field if provided
+    if (updateAdminDto.user) {
+      updateData['user'] = updateAdminDto.user;
+      delete updateData['user'];
     }
 
     const updatedAdmin = await this.adminModel
@@ -114,7 +114,7 @@ export class AdminService {
 
   /**
    * Validate if user is an admin
-   * @param userId The user ID to check
+   * @param user The user ID to check
    * @returns The admin document if valid, null otherwise
    */
 }

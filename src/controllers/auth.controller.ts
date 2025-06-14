@@ -50,10 +50,53 @@ export class AuthController {
   async loginStaff(@Body() loginDto: LoginDto) {
     return this.authService.loginStaff(loginDto.email, loginDto.password);
   }
-
   @Post('login-admin')
   @ApiOperation({ summary: 'Đăng nhập admin' })
-  @ApiResponse({ status: 200, description: 'Đăng nhập admin thành công.' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Đăng nhập admin thành công. Trả về access token, refresh token và thông tin admin.',
+    schema: {
+      properties: {
+        tokens: {
+          type: 'object',
+          properties: {
+            accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+            refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+          },
+        },
+        user: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '60d0fe4f5311236168a109ca' },
+            email: { type: 'string', example: 'admin@example.com' },
+            role: { type: 'string', example: 'admin' },
+          },
+        },
+        admin: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '60d0fe4f5311236168a109cb' },
+          },
+        },
+        profile: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '60d0fe4f5311236168a109cd' },
+            name: { type: 'string', example: 'Admin Name' },
+            phone: { type: 'string', example: '0912345678' },
+            gender: { type: 'string', example: 'male' },
+            birth: { type: 'string', format: 'date-time' },
+            address: { type: 'string', example: 'Hà Nội' },
+            avatar: {
+              type: 'string',
+              example: 'https://example.com/avatar.jpg',
+            },
+          },
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 401,
     description: 'Email hoặc mật khẩu không chính xác.',
@@ -71,17 +114,25 @@ export class AuthController {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
-    return this.authService.logout(req.user.userId, token);
+    return this.authService.logout(req.user.user, token);
   }
-
   @Post('refresh')
-  @ApiOperation({ summary: 'Làm mới access token' })
+  @ApiOperation({ summary: 'Làm mới access token và refresh token' })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ status: 200, description: 'Token đã được làm mới.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens đã được làm mới.',
+    schema: {
+      properties: {
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+      },
+    },
+  })
   @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(
-      refreshTokenDto.userId,
+      refreshTokenDto.user,
       refreshTokenDto.refresh_token,
     );
   }
@@ -102,10 +153,10 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Chưa xác thực.' })
   async getMe(@Req() req) {
     // Get detailed user information from the database using the ID in the JWT
-    const user = await this.userService.findById(req.user.userId);
+    const user = await this.userService.findById(req.user.user);
 
     // Get user's profile
-    const profile = await this.profileService.findByUserId(req.user.userId);
+    const profile = await this.profileService.findByuser(req.user.user);
 
     // Remove sensitive information
     const { password, refreshToken, ...userResult } = user.toObject();

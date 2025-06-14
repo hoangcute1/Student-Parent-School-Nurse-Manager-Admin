@@ -40,8 +40,8 @@ export class ParentService {
     return parent;
   }
 
-  async findByUserId(userId: string): Promise<ParentDocument | null> {
-    return this.parentModel.findOne({ user: userId }).exec();
+  async findByuser(user: string): Promise<ParentDocument | null> {
+    return this.parentModel.findOne({ user: user }).exec();
   }
 
   async create(createParentDto: CreateParentDto): Promise<ParentDocument> {

@@ -120,68 +120,149 @@ export class AuthService {
     return user;
   }
 
-  async logout(userId: string, token: string): Promise<void> {
+  async logout(user: string, token: string): Promise<void> {
     // Đảm bảo chỉ xóa refresh_token nếu token khớp
     await this.userModel
-      .updateOne({ _id: userId, refresh_token: token }, { refresh_token: null })
+      .updateOne({ _id: user, refresh_token: token }, { refresh_token: null })
       .exec();
   }
-
-  async loginParent(email: string, password: string) {
+  async loginParent(email: string, password: string): Promise<any> {
     const user = await this.validateUser(email, password);
-    const userId = (user as any)._id?.toString();
-    const parent = await this.parentService.validateParent(userId);
+    const user_id = (user as any)._id?.toString();
+    const parent = await this.parentService.validateParent(user_id);
     if (!parent)
       throw new UnauthorizedException(
         'Email này không được đăng ký làm tài khoản phụ huynh',
       );
-    const parent_profile = await this.profileService.findByUserId(userId);
-    const response = {
-      _id: parent_profile?._id,
-      phone: parent_profile?.phone,
-      fullName: parent_profile?.name, // Changed from 'name' to 'fullName' to avoid deprecation
-      gender: parent_profile?.gender,
-      birth: parent_profile?.birth,
-      address: parent_profile?.address,
-      avatar: parent_profile?.avatar,
-      created_at: parent_profile?.created_at,
-      updated_at: parent_profile?.updated_at,
-    };
-    return response;
-  }
 
-  async loginStaff(email: string, password: string): Promise<Staff | null> {
+    // Generate tokens
+    const tokens = await this.generateTokens(user_id, user.email);
+
+    // Get parent profile
+    const parent_profile = await this.profileService.findByuser(user_id);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'parent',
+      },
+      parent: {
+        _id: parent._id,
+      },
+      profile: parent_profile
+        ? {
+            _id: parent_profile._id,
+            name: parent_profile.name,
+            phone: parent_profile.phone,
+            gender: parent_profile.gender,
+            birth: parent_profile.birth,
+            address: parent_profile.address,
+            avatar: parent_profile.avatar,
+            created_at: parent_profile.created_at,
+            updated_at: parent_profile.updated_at,
+          }
+        : null,
+    };
+  }
+  async loginStaff(email: string, password: string): Promise<any> {
     const user = await this.validateUser(email, password);
-    const userId = (user as any)._id?.toString();
-    const staff = await this.staffService.findByUserId(userId);
-    console.log(staff);
+    const user_id = (user as any)._id?.toString();
+    const staff = await this.staffService.findByuser(user_id);
     if (!staff)
       throw new UnauthorizedException('Không phải tài khoản nhân viên');
-    return staff;
+
+    // Generate tokens
+    const tokens = await this.generateTokens(user_id, user.email);
+
+    // Get staff profile
+    const staff_profile = await this.profileService.findByuser(user_id);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'staff',
+      },
+      staff: {
+        _id: staff._id,
+      },
+      profile: staff_profile
+        ? {
+            _id: staff_profile._id,
+            name: staff_profile.name,
+            phone: staff_profile.phone,
+            gender: staff_profile.gender,
+            birth: staff_profile.birth,
+            address: staff_profile.address,
+            avatar: staff_profile.avatar,
+          }
+        : null,
+    };
   }
-  async loginAdmin(email: string, password: string): Promise<Admin | null> {
+  async loginAdmin(email: string, password: string): Promise<any> {
     const user = await this.validateUser(email, password);
-    const userId = (user as any)._id?.toString();
-    const admin = await this.adminService.validateAdmin(userId);
+    const user_id = (user as any)._id?.toString();
+    const admin = await this.adminService.validateAdmin(user_id);
     if (!admin) {
       throw new UnauthorizedException('Không phải tài khoản admin');
     }
-    return admin;
-  }
 
+    // Generate tokens
+    const tokens = await this.generateTokens(user_id, user.email);
+
+    // Get admin profile
+    const admin_profile = await this.profileService.findByuser(user_id);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'admin',
+      },
+      admin: {
+        _id: admin._id,
+      },
+      profile: admin_profile
+        ? {
+            _id: admin_profile._id,
+            name: admin_profile.name,
+            phone: admin_profile.phone,
+            gender: admin_profile.gender,
+            birth: admin_profile.birth,
+            address: admin_profile.address,
+            avatar: admin_profile.avatar,
+          }
+        : null,
+    };
+  }
   async refreshTokens(
-    userId: string,
+    user_id: string,
     refreshToken: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.userModel.findOne({
-      _id: userId,
+      _id: user_id,
       refresh_token: refreshToken,
     });
     if (!user) throw new UnauthorizedException('Refresh token không hợp lệ');
-    // Sinh access token mới
-    const payload = { sub: userId, email: user.email };
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
+
+    // Generate new tokens
+    return this.generateTokens(user_id, user.email);
   }
 
   async sendOtp(email: string): Promise<void> {
@@ -190,5 +271,41 @@ export class AuthService {
 
   async verifyOtp(email: string, otp: string): Promise<void> {
     await this.otpService.verifyOTP(email, otp);
+  }
+
+  /**
+   * Generate JWT tokens (access and refresh)
+   * @param user User's ID
+   * @param email User's email
+   * @returns Object containing access and refresh tokens
+   */
+  async generateTokens(
+    user: string,
+    email: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { sub: user, email };
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+
+    // Store refresh token
+    await this.updateRefreshToken(user, refreshToken);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  /**
+   * Update user's refresh token in database
+   * @param user User's ID
+   * @param refreshToken New refresh token
+   */
+  async updateRefreshToken(user: string, refreshToken: string): Promise<void> {
+    await this.userModel
+      .updateOne({ _id: user }, { refresh_token: refreshToken })
+      .exec();
   }
 }

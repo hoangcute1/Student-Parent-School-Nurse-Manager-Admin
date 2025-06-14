@@ -64,5 +64,5 @@ export class UpdateProfileDto {
   })
   @IsOptional()
   @IsMongoId()
-  readonly userId?: string;
+  readonly user?: string;
 }

@@ -19,7 +19,7 @@ export class ProfileService {
     // Check if a profile already exists for this user
     const existingProfile = await this.profileModel
       .findOne({
-        user: createProfileDto.userId,
+        user: createProfileDto.user,
       })
       .exec();
 
@@ -29,7 +29,7 @@ export class ProfileService {
 
     const createdProfile = new this.profileModel({
       ...createProfileDto,
-      user: createProfileDto.userId, // Map userId from DTO to user in schema
+      user: createProfileDto.user, // Map user from DTO to user in schema
       created_at: new Date(),
       updated_at: new Date(),
     });
@@ -44,8 +44,8 @@ export class ProfileService {
     return this.profileModel.findById(id).exec();
   }
 
-  async findByUserId(userId: string): Promise<ProfileDocument | null> {
-    return this.profileModel.findOne({ user: userId }).populate('user').exec();
+  async findByuser(user: string): Promise<ProfileDocument | null> {
+    return this.profileModel.findOne({ user: user }).populate('user').exec();
   }
 
   async updateById(
@@ -54,10 +54,10 @@ export class ProfileService {
   ): Promise<ProfileDocument | null> {
     const updateData = { ...updateProfileDto, updated_at: new Date() };
 
-    // If userId is provided in the DTO, map it to the user field
-    if (updateProfileDto.userId) {
-      updateData['user'] = updateProfileDto.userId;
-      delete updateData['userId'];
+    // If user is provided in the DTO, map it to the user field
+    if (updateProfileDto.user) {
+      updateData['user'] = updateProfileDto.user;
+      delete updateData['user'];
     }
 
     const updatedProfile = await this.profileModel

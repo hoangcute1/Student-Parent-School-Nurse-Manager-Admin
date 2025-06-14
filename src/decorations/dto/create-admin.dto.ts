@@ -9,5 +9,5 @@ export class CreateAdminDto {
   })
   @IsNotEmpty()
   @IsMongoId()
-  readonly userId: string;
+  readonly user: string;
 }

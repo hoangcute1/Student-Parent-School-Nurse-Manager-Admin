@@ -32,7 +32,7 @@ export class UserService {
       updatedAt: Date;
     }[]
   > {
-    const users = await this.userModel.find().populate('roleId').exec();
+    const users = await this.userModel.find().exec();
 
     return users.map((user) => {
       return {
@@ -46,7 +46,7 @@ export class UserService {
 
   async findById(id: string): Promise<UserDocument> {
     try {
-      const user = await this.userModel.findById(id).populate('roleId').exec();
+      const user = await this.userModel.findById(id).exec();
       if (!user) {
         throw new NotFoundException(`User với ID "${id}" không tìm thấy`);
       }
@@ -59,22 +59,21 @@ export class UserService {
     }
   }
 
-  async findByIdWithRole(userId: string): Promise<UserDocument | null> {
-    return this.userModel.findById(userId).populate('roleId').exec();
+  async findByIdWithRole(user: string): Promise<UserDocument | null> {
+    return this.userModel.findById(user).exec();
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ email }).populate('roleId').exec();
+    return this.userModel.findOne({ email }).exec();
   }
 
   async findByEmailWithRole(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).populate('roleId').exec();
+    return this.userModel.findOne({ email }).exec();
   }
 
   async findByRefreshToken(refreshToken: string): Promise<UserDocument | null> {
     return this.userModel
       .findOne({ refresh_token: refreshToken })
-      .populate('roleId')
       .exec();
   }
 
@@ -119,13 +118,13 @@ export class UserService {
     return this.userModel.findByIdAndDelete(id).exec();
   }
 
-  async getUserProfile(userId: string) {
-    const user = await this.findById(userId);
+  async getUserProfile(user_id: string) {
+    const user = await this.findById(user_id);
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException(`User with ID ${user} not found`);
     }
 
-    const profile = await this.profileService.findByUserId(userId);
+    const profile = await this.profileService.findByuser(user_id);
     return { user, profile };
   }
 

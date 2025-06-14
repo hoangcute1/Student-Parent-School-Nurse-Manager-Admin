@@ -18,5 +18,5 @@ export class UpdateStaffDto {
   })
   @IsOptional()
   @IsMongoId()
-  readonly userId?: string;
+  readonly user?: string;
 }
