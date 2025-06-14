@@ -8,5 +8,5 @@ export class CreateParentDto {
   })
   @IsNotEmpty()
   @IsMongoId()
-  readonly userId: string;
+  readonly user: string;
 }

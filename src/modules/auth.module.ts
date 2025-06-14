@@ -9,7 +9,6 @@ import { TokenBlacklistModule } from './token-blacklist.module';
 import { OtpModule } from './otp.module';
 import { JwtStrategy } from '@/strategies/jwt.strategy';
 import { LocalStrategy } from '@/strategies/local.strategy';
-import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ParentModule } from './parent.module';
 import { StaffModule } from './staff.module';

@@ -11,14 +11,4 @@ export class LoginDto {
   @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string;
-
-  @ApiProperty({
-    example: 'staff',
-    description: 'Vai trò người dùng (parent/staff/admin)',
-  })
-  @IsNotEmpty({ message: 'Vai trò không được để trống' })
-  @IsIn(['staff', 'parent', 'admin'], {
-    message: 'Vai trò phải là staff, parent hoặc admin',
-  })
-  role: 'staff' | 'parent' | 'admin';
 }

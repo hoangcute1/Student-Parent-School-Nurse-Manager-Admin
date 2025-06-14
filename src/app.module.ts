@@ -9,7 +9,6 @@ import configuration from './configuration';
 import { ProfileModule } from './modules/profile.module';
 import { AuthModule } from './modules/auth.module';
 import { StudentModule } from './modules/student.module';
-import { RoleModule } from './modules/role.module';
 import { ThrottlerModule } from './modules/throttler.module';
 import { TokenBlacklistModule } from './modules/token-blacklist.module';
 import { ParentModule } from './modules/parent.module';
@@ -28,13 +27,13 @@ import { SuggestionModule } from './modules/suggestion.module';
       load: [configuration],
     }),
     MongooseModule.forRoot(configuration().MONGODB_URI),
+    AuthModule,
     ThrottlerModule,
     TokenBlacklistModule,
     UserModule,
     ProfileModule,
-    AuthModule,
+
     StudentModule,
-    RoleModule,
     ParentModule,
     StaffModule,
     AdminModule,

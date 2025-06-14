@@ -7,84 +7,27 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '@/schemas/user.schema';
-import { RoleService } from './role.service';
 import { ProfileService } from './profile.service';
 import { AdminService } from './admin.service';
 import { StaffService } from './staff.service';
 import { ParentService } from './parent.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '@/decorations/dto/create-user.dto';
+import { UpdateUserDto } from '@/decorations/dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private roleService: RoleService,
     private profileService: ProfileService,
     private adminService: AdminService,
     private staffService: StaffService,
     private parentService: ParentService,
   ) {}
-  async create({
-    email,
-    password,
-    role,
-  }: CreateUserDto): Promise<UserDocument> {
-    // Check if user with this email already exists
-    const existingUser = await this.userModel.findOne({ email }).exec();
-    if (existingUser) {
-      throw new ConflictException('Email đã tồn tại');
-    }
-
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const foundRole = role ? await this.roleService.findByName(role) : null;
-
-      const createdUser = new this.userModel({
-        email,
-        password: hashedPassword,
-        roleId: foundRole ? foundRole._id : null,
-      });
-
-      const savedUser = (await createdUser.save()) as UserDocument;
-
-      if (foundRole && savedUser._id) {
-        const userId = savedUser._id.toString();
-        // Create corresponding record based on role
-        switch (foundRole.name) {
-          case 'admin':
-            await this.adminService.create({ userId });
-            break;
-          case 'staff':
-            await this.staffService.create({
-              userId,
-              position: 'staff',
-            });
-            break;
-          case 'parent':
-            await this.parentService.create({ userId });
-            break;
-        }
-      }
-
-      return savedUser;
-    } catch (error) {
-      // If role not found, fallback to creating without role reference
-      if (error instanceof NotFoundException) {
-        const createdUser = new this.userModel({
-          email,
-          password: await bcrypt.hash(password, 10),
-        });
-        return createdUser.save();
-      }
-      throw error;
-    }
-  }
 
   async findAll(): Promise<
     {
-      id: any;
+      _id: any;
       email: string;
-      role: string | null;
       createdAt: Date;
       updatedAt: Date;
     }[]
@@ -93,14 +36,8 @@ export class UserService {
 
     return users.map((user) => {
       return {
-        id: user._id,
+        _id: user._id,
         email: user.email,
-        role:
-          user.roleId &&
-          typeof user.roleId === 'object' &&
-          'name' in user.roleId
-            ? (user.roleId as any).name
-            : null,
         createdAt: user.created_at,
         updatedAt: user.updated_at,
       };
@@ -166,10 +103,8 @@ export class UserService {
 
     try {
       // Find the role by name
-      const role = await this.roleService.findByName(roleName);
 
       // Update user's role
-      user.roleId = role.id as any;
       user.updated_at = new Date();
 
       return user.save();
@@ -192,5 +127,37 @@ export class UserService {
 
     const profile = await this.profileService.findByUserId(userId);
     return { user, profile };
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    // Check if email already exists
+    const existingUser = await this.userModel.findOne({
+      email: createUserDto.email,
+    });
+    if (existingUser) {
+      throw new ConflictException('Email đã tồn tại');
+    }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const createdUser = new this.userModel({
+      ...createUserDto,
+      password: hashedPassword,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    return createdUser.save();
+  }
+
+  async updateById(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User với ID "${id}" không tìm thấy`);
+    }
+    // If password is being updated, hash it
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+    Object.assign(user, updateUserDto, { updated_at: new Date() });
+    return user.save();
   }
 }

@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parent, ParentDocument } from '@/schemas/parent.schema';
+import { CreateParentDto } from '@/decorations/dto/create-parent.dto';
+import { UpdateParentDto } from '@/decorations/dto/update-parent.dto';
 
 @Injectable()
 export class ParentService {
@@ -10,28 +16,24 @@ export class ParentService {
   ) {}
 
   async findAll(): Promise<any[]> {
-    const parents = await this.parentModel
-      .find()
-      .populate<{ userId: { id: String; email: string } }>('userId')
-      .exec();
-    
+    const parents = await this.parentModel.find().populate('user').exec();
+
     return parents.map((parent) => ({
-      userId: parent.userId?.id,
-      name: parent.name,
-      phone: parent.phone,
-      address: parent.address,
-      email: parent.userId?.email,
-      createdAt: parent.created_at,
-      updatedAt: parent.updated_at,
+      id: parent._id,
+      user: parent.user,
     }));
+  }
+  async validateParent(user: string): Promise<ParentDocument | null> {
+    const parent = await this.parentModel.findOne({ user }).exec();
+    if (!parent) {
+      throw new NotFoundException(`Parent with user ID "${user}" not found`);
+    }
+    return parent;
   }
 
   async findById(id: string): Promise<ParentDocument> {
-    const parent = await this.parentModel
-      .findById(id)
-      .populate('userId')
-      .exec();
-      
+    const parent = await this.parentModel.findById(id).populate('user').exec();
+
     if (!parent) {
       throw new NotFoundException(`Parent with ID "${id}" not found`);
     }
@@ -39,12 +41,12 @@ export class ParentService {
   }
 
   async findByUserId(userId: string): Promise<ParentDocument | null> {
-    return this.parentModel.findOne({ userId }).exec();
+    return this.parentModel.findOne({ user: userId }).exec();
   }
 
-  async create(createParentDto: any): Promise<ParentDocument> {
+  async create(createParentDto: CreateParentDto): Promise<ParentDocument> {
     const existingParent = await this.parentModel
-      .findOne({ userId: createParentDto.userId })
+      .findOne({ user: createParentDto.user })
       .exec();
 
     if (existingParent) {
@@ -52,24 +54,18 @@ export class ParentService {
     }
 
     const createdParent = new this.parentModel({
-      ...createParentDto,
-      created_at: new Date(),
-      updated_at: new Date(),
+      user: createParentDto.user,
     });
-    
+
     return createdParent.save();
   }
 
-  async update(id: string, updateParentDto: any): Promise<ParentDocument> {
+  async update(
+    id: string,
+    updateParentDto: UpdateParentDto,
+  ): Promise<ParentDocument> {
     const updatedParent = await this.parentModel
-      .findByIdAndUpdate(
-        id,
-        { 
-          ...updateParentDto, 
-          updated_at: new Date() 
-        },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, updateParentDto, { new: true })
       .exec();
 
     if (!updatedParent) {

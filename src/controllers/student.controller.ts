@@ -78,4 +78,23 @@ export class StudentController {
   async remove(@Param('id') id: string) {
     return this.studentService.remove(id);
   }
+
+  @Get('parent/:parentId')
+  @ApiOperation({ summary: 'Lấy danh sách học sinh theo parentId' })
+  @ApiParam({ name: 'parentId', description: 'ID của phụ huynh' })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách học sinh theo parentId.',
+  })
+  async findByParent(@Param('parentId') parentId: string) {
+    return this.studentService.findByParentId(parentId);
+  }
+
+  @Get('class/:classId')
+  @ApiOperation({ summary: 'Lấy danh sách học sinh theo classId' })
+  @ApiParam({ name: 'classId', description: 'ID của lớp học' })
+  @ApiResponse({ status: 200, description: 'Danh sách học sinh theo classId.' })
+  async findByClass(@Param('classId') classId: string) {
+    return this.studentService.findByClassId(classId);
+  }
 }

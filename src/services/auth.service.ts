@@ -1,252 +1,194 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserService } from './user.service';
-import { TokenBlacklistService } from './token-blacklist.service';
-import { ProfileService } from './profile.service';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from '@/schemas/user.schema';
+import { CreateUserDto } from '@/decorations/dto/create-user.dto';
+import { UpdateUserDto } from '@/decorations/dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
+import { OtpService } from './otp.service';
 import { ParentService } from './parent.service';
 import { StaffService } from './staff.service';
 import { AdminService } from './admin.service';
-import * as bcrypt from 'bcrypt';
-import { RegisterDto } from '@/decorations/dto/register.dto';
-import { OtpService } from './otp.service';
+import { Parent } from '@/schemas/parent.schema';
+import { Staff } from '@/schemas/staff.schema';
+import { Admin } from '@/schemas/admin.schema';
+import { JwtService } from '@nestjs/jwt';
+import { ProfileService } from './profile.service';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
-    private tokenBlacklistService: TokenBlacklistService,
-    private profileService: ProfileService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private otpService: OtpService,
     private parentService: ParentService,
     private staffService: StaffService,
     private adminService: AdminService,
-    private otpService: OtpService,
+    private profileService: ProfileService,
+    private jwtService: JwtService,
   ) {}
 
-  async sendLoginOTP(email: string): Promise<void> {
-    await this.otpService.createOTP(email);
-  }
-
-  async verifyLoginOTP(email: string, otp: string): Promise<boolean> {
-    return this.otpService.verifyOTP(email, otp);
-  }
-
-  async validateUser(
-    email: string,
-    password: string,
-    role: string,
-  ): Promise<any> {
-    const user = await this.userService.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
-    }
-
-    const userId = user.userId.toString(); // Assuming '_id' is the correct property name
-    if (!userId) {
-      throw new UnauthorizedException('Lỗi xác thực người dùng');
-    }
-
-    // Get user with populated role information
-    const userWithRole = await this.userService.findByEmailWithRole(email);
-    const userRole = userWithRole?.roleId as any;
-    const roleName = userRole?.name; // For staff login
-    if (role === 'staff') {
-      // Allow both admin and staff roles to log in as staff
-      if (!roleName || (roleName !== 'admin' && roleName !== 'staff')) {
-        throw new UnauthorizedException(
-          'Tài khoản không có quyền truy cập với vai trò staff',
-        );
-      }
-
-      const staffProfile = await this.staffService.findByUserId(userId);
-      if (!staffProfile) {
-        throw new UnauthorizedException('Không tìm thấy thông tin nhân viên');
-      }
-    }
-    // For admin login
-    else if (role === 'admin') {
-      if (!roleName || roleName !== 'admin') {
-        throw new UnauthorizedException(
-          'Tài khoản không có quyền truy cập với vai trò admin',
-        );
-      }
-
-      const staffProfile = await this.staffService.findByUserId(userId);
-      if (!staffProfile) {
-        throw new UnauthorizedException('Không tìm thấy thông tin nhân viên');
-      }
-    }
-    // For parent login
-    else if (role === 'parent') {
-      const parentProfile = await this.parentService.findByUserId(userId);
-      if (!parentProfile) {
-        throw new UnauthorizedException('Không tìm thấy thông tin phụ huynh');
-      }
+  async login(email: string, password: string, type: string) {
+    console.log('Đang đăng nhập với email:', email, 'và loại:', type);
+    if (type === 'parent') {
+      const parent = await this.loginParent(email, password);
+      if (!parent)
+        throw new UnauthorizedException('Không phải tài khoản phụ huynh');
+      return parent;
+    } else if (type === 'staff') {
+      // Staff và admin đều login bằng type staff
+      const staff = await this.loginStaff(email, password);
+      if (staff) return staff;
+      // Nếu không phải staff, thử đăng nhập admin
+      const admin = await this.loginAdmin(email, password);
+      if (admin) return admin;
+      throw new UnauthorizedException(
+        'Không phải tài khoản nhân viên hoặc admin',
+      );
     } else {
-      throw new UnauthorizedException('Vai trò không hợp lệ');
+      // fallback: chỉ cho phép parent hoặc staff
+      throw new UnauthorizedException('Loại tài khoản không hợp lệ');
     }
-
-    const { password: _, ...result } = user;
-    return result;
   }
 
-  async login(user: any) {
-    let permissions: string[] = [];
-    if (
-      user.roleId &&
-      typeof user.roleId === 'object' &&
-      'permissions' in user.roleId
-    ) {
-      const rolePermissions = user.roleId.permissions;
-      if (Array.isArray(rolePermissions)) {
-        permissions = rolePermissions;
-      }
-    }
-
-    // Xác định loại user: parent, staff, hoặc admin
-    let userType = 'user';
-    const parent = await this.parentService.findByUserId(user._id.toString());
-    if (parent) {
-      userType = 'parent';
-    } else {
-      const staff = await this.staffService.findByUserId(user._id.toString());
-      if (staff) {
-        // Check if user has admin role
-        const userWithRole = await this.userService.findByEmailWithRole(
-          user.email,
-        );
-        const userRole = userWithRole?.roleId as any;
-        const roleName = userRole?.name;
-        userType = roleName === 'admin' ? 'admin' : 'staff';
-      }
-    }
-
-    const payload = {
-      email: user.email,
-      sub: user._id,
-      role: user.role,
-      permissions: permissions,
-      userType: userType,
-    };
-
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
-
-    await this.userService.updateRefreshToken(user._id, refreshToken);
-
-    // Lấy thông tin profile
-    const profile = await this.profileService.findByUserId(user._id);
-
-    return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        permissions: permissions,
-        userType: userType,
-      },
-      profile: profile,
-    };
+  async register(createUserDto: CreateUserDto): Promise<User> {
+    const exists = await this.userModel.findOne({ email: createUserDto.email });
+    if (exists) throw new ConflictException('Email đã tồn tại');
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const created = new this.userModel({
+      ...createUserDto,
+      password: hashedPassword,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    return created.save();
   }
-  async register(registerDto: RegisterDto) {
-    // Create user
-    const user = await this.userService.create(registerDto);
 
-    // Get role information
-    const userWithRole = await this.userService.findByEmailWithRole(
-      registerDto.email,
-    );
-    const userRole = userWithRole?.roleId as any;
-    const roleName = userRole?.name;
+  async findAll(): Promise<User[]> {
+    return this.userModel.find().exec();
+  }
 
-    if (roleName === 'admin') {
-      // Create admin record
-      await this.adminService.create({
-        userId: user._id,
-      } as any);
-    } else if (roleName === 'staff') {
-      // Create staff record
-      await this.staffService.create({
-        userId: user._id,
-        position: 'staff',
-      });
-    }
-
+  async findById(id: string): Promise<User> {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) throw new NotFoundException('Không tìm thấy user');
     return user;
   }
 
-  async logout(userId: string, token?: string) {
-    // Update user's refresh token to null
-    await this.userService.updateRefreshToken(userId, null);
-
-    // Add the token to the blacklist if provided
-    if (token) {
-      // Get the token expiration by decoding it
-      try {
-        const decoded = this.jwtService.decode(token);
-        if (decoded && typeof decoded === 'object' && decoded.exp) {
-          // Calculate remaining seconds until expiration
-          const currentTime = Math.floor(Date.now() / 1000);
-          const expiresIn = Math.max(0, decoded.exp - currentTime);
-
-          // Add to blacklist
-          await this.tokenBlacklistService.blacklistToken(token, expiresIn);
-        }
-      } catch (error) {
-        console.error('Error blacklisting token:', error);
-      }
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-
-    return { success: true, message: 'Đăng xuất thành công' };
+    const updated = await this.userModel
+      .findByIdAndUpdate(
+        id,
+        { ...updateUserDto, updated_at: new Date() },
+        { new: true },
+      )
+      .exec();
+    if (!updated) throw new NotFoundException('Không tìm thấy user');
+    return updated;
   }
 
-  async refreshTokens(userId: string, refreshToken: string) {
-    const user = await this.userService.findById(userId);
+  async remove(id: string): Promise<void> {
+    const deleted = await this.userModel.findByIdAndDelete(id).exec();
+    if (!deleted) throw new NotFoundException('Không tìm thấy user');
+  }
 
-    if (!user || !user.refresh_token || user.refresh_token !== refreshToken) {
-      throw new UnauthorizedException('Refresh token không hợp lệ');
-    }
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.userModel.findOne({ email }).exec();
+    if (!user) throw new UnauthorizedException('Sai email hoặc mật khẩu');
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Sai email hoặc mật khẩu');
+    return user;
+  }
 
-    // Get permissions from role if available
-    // Use optional chaining and check if roleId is populated
-    let permissions: string[] = [];
-    if (
-      user.roleId &&
-      typeof user.roleId === 'object' &&
-      'permissions' in user.roleId
-    ) {
-      const rolePermissions = user.roleId.permissions;
-      if (Array.isArray(rolePermissions)) {
-        permissions = rolePermissions;
-      }
-    }
+  async loginWithOtp(
+    email: string,
+    password: string,
+    otp: string,
+  ): Promise<Parent | Staff | Admin | User> {
+    // Xác thực tài khoản như login thông thường
+    const user = await this.validateUser(email, password);
+    // Xác thực OTP
+    const isOtpValid = await this.otpService.verifyOTP(email, otp);
+    if (!isOtpValid) throw new UnauthorizedException('OTP không hợp lệ');
+    return user;
+  }
 
-    const payload = {
-      email: user.email,
-      sub: user._id,
-      permissions: permissions,
+  async logout(userId: string, token: string): Promise<void> {
+    // Đảm bảo chỉ xóa refresh_token nếu token khớp
+    await this.userModel
+      .updateOne({ _id: userId, refresh_token: token }, { refresh_token: null })
+      .exec();
+  }
+
+  async loginParent(email: string, password: string) {
+    const user = await this.validateUser(email, password);
+    const userId = (user as any)._id?.toString();
+    const parent = await this.parentService.validateParent(userId);
+    if (!parent)
+      throw new UnauthorizedException(
+        'Email này không được đăng ký làm tài khoản phụ huynh',
+      );
+    const parent_profile = await this.profileService.findByUserId(userId);
+    const response = {
+      _id: parent_profile?._id,
+      phone: parent_profile?.phone,
+      fullName: parent_profile?.name, // Changed from 'name' to 'fullName' to avoid deprecation
+      gender: parent_profile?.gender,
+      birth: parent_profile?.birth,
+      address: parent_profile?.address,
+      avatar: parent_profile?.avatar,
+      created_at: parent_profile?.created_at,
+      updated_at: parent_profile?.updated_at,
     };
+    return response;
+  }
+
+  async loginStaff(email: string, password: string): Promise<Staff | null> {
+    const user = await this.validateUser(email, password);
+    const userId = (user as any)._id?.toString();
+    const staff = await this.staffService.findByUserId(userId);
+    console.log(staff);
+    if (!staff)
+      throw new UnauthorizedException('Không phải tài khoản nhân viên');
+    return staff;
+  }
+  async loginAdmin(email: string, password: string): Promise<Admin | null> {
+    const user = await this.validateUser(email, password);
+    const userId = (user as any)._id?.toString();
+    const admin = await this.adminService.validateAdmin(userId);
+    if (!admin) {
+      throw new UnauthorizedException('Không phải tài khoản admin');
+    }
+    return admin;
+  }
+
+  async refreshTokens(
+    userId: string,
+    refreshToken: string,
+  ): Promise<{ accessToken: string }> {
+    const user = await this.userModel.findOne({
+      _id: userId,
+      refresh_token: refreshToken,
+    });
+    if (!user) throw new UnauthorizedException('Refresh token không hợp lệ');
+    // Sinh access token mới
+    const payload = { sub: userId, email: user.email };
     const accessToken = this.jwtService.sign(payload);
-    return {
-      access_token: accessToken,
-      user: {
-        id: user._id,
-        email: user.email,
-      },
-    };
+    return { accessToken };
   }
 
-  async validateRefreshToken(refreshToken: string) {
-    const user = await this.userService.findByRefreshToken(refreshToken);
-    if (!user || !user.refresh_token || user.refresh_token !== refreshToken) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
+  async sendOtp(email: string): Promise<void> {
+    await this.otpService.createOTP(email);
+  }
+
+  async verifyOtp(email: string, otp: string): Promise<void> {
+    await this.otpService.verifyOTP(email, otp);
   }
 }

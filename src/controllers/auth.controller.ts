@@ -1,3 +1,4 @@
+import { IsEmail } from 'class-validator';
 import {
   Controller,
   Post,
@@ -14,7 +15,7 @@ import { LocalAuthGuard } from '@/guards/local-auth.guard';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginDto } from '@/decorations/dto/login.dto';
-import { RegisterDto } from '@/decorations/dto/register.dto';
+
 import { RefreshTokenDto } from '@/decorations/dto/refresh-token.dto';
 import { VerifyOtpDto } from '@/decorations/dto/verify-otp.dto';
 
@@ -27,48 +28,40 @@ export class AuthController {
     private profileService: ProfileService,
   ) {}
 
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  @ApiOperation({ summary: 'Đăng nhập người dùng' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
+  @Post('login-parent')
+  @ApiOperation({ summary: 'Đăng nhập phụ huynh' })
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
   @ApiResponse({
     status: 401,
     description: 'Email hoặc mật khẩu không chính xác.',
   })
-  async login(@Req() req) {
-    return this.authService.login(req.user);
+  async loginParent(@Body() loginDto: LoginDto) {
+    return this.authService.loginParent(loginDto.email, loginDto.password);
   }
-  @Post('register')
-  @ApiOperation({ summary: 'Đăng ký người dùng mới' })
-  @ApiBody({ type: RegisterDto })
+
+  @Post('login-staff')
+  @ApiOperation({ summary: 'Đăng nhập nhân viên' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 200, description: 'Đăng nhập nhân viên thành công.' })
   @ApiResponse({
-    status: 201,
-    description: 'Người dùng đã được tạo thành công.',
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
   })
-  @ApiResponse({ status: 400, description: 'Email đã tồn tại.' })
-  async register(@Body() registerDto: RegisterDto) {
-    // Register the user
-    const user = await this.authService.register(registerDto);
-
-    // Determine the userId safely
-    let userId: string;
-    if (user._id) {
-      userId = user._id.toString();
-    } else if (user.id) {
-      userId = user.id.toString();
-    } else {
-      throw new Error('User ID not available after registration');
-    }
-
-    // Create an empty profile automatically
-    await this.profileService.create({
-      userId: userId,
-    });
-
-    // Login the user to get tokens
-    return this.authService.login(user);
+  async loginStaff(@Body() loginDto: LoginDto) {
+    return this.authService.loginStaff(loginDto.email, loginDto.password);
   }
+
+  @Post('login-admin')
+  @ApiOperation({ summary: 'Đăng nhập admin' })
+  @ApiResponse({ status: 200, description: 'Đăng nhập admin thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginAdmin(@Body() loginDto: LoginDto) {
+    return this.authService.loginAdmin(loginDto.email, loginDto.password);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @ApiOperation({ summary: 'Đăng xuất người dùng' })
@@ -133,35 +126,48 @@ export class AuthController {
     description: 'Email hoặc mật khẩu không chính xác.',
   })
   async loginRequest(@Body() loginDto: LoginDto) {
-    // Validate user first
-    await this.authService.validateUser(
-      loginDto.email,
-      loginDto.password,
-      loginDto.role,
-    );
-    // Send OTP
-    await this.authService.sendLoginOTP(loginDto.email);
+    // Validate user
+    await this.authService.validateUser(loginDto.email, loginDto.password);
+    // Gửi OTP qua otpService (gọi qua authService)
+    await this.authService.sendOtp(loginDto.email);
     return { message: 'OTP đã được gửi đến email của bạn' };
   }
 
-  @Post('login-verify')
-  @ApiOperation({ summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập' })
-  @ApiBody({ type: VerifyOtpDto })
-  @ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
-  @ApiResponse({
-    status: 400,
-    description: 'OTP không hợp lệ hoặc đã hết hạn.',
+  // @Post('login-verify')
+  // @ApiOperation({ summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập' })
+  // @ApiBody({ type: VerifyOtpDto })
+  // @ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'OTP không hợp lệ hoặc đã hết hạn.',
+  // })
+  // async loginVerify(@Body() verifyOtpDto: VerifyOtpDto) {
+  //   // Xác thực OTP qua authService
+  //   await this.authService.verifyOtp(verifyOtpDto.email, verifyOtpDto.otp);
+  //   // Lấy user và trả về thông tin đăng nhập
+  //   const user = await this.userService.findByEmail(verifyOtpDto.email);
+  //   if (!user) {
+  //     throw new NotFoundException('Không tìm thấy người dùng');
+  //   }
+  //   return this.authService.login(user.email, user.password);
+  // }
+
+  @Post('login-otp')
+  @ApiOperation({ summary: 'Đăng nhập bằng email, password và OTP' })
+  @ApiBody({
+    schema: {
+      properties: {
+        email: { type: 'string' },
+        password: { type: 'string' },
+        otp: { type: 'string' },
+      },
+    },
   })
-  async loginVerify(@Body() verifyOtpDto: VerifyOtpDto) {
-    // Verify OTP
-    await this.authService.verifyLoginOTP(verifyOtpDto.email, verifyOtpDto.otp);
-
-    // Get user and complete login
-    const user = await this.userService.findByEmail(verifyOtpDto.email);
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng');
-    }
-
-    return this.authService.login(user);
+  @ApiResponse({ status: 200, description: 'Đăng nhập OTP thành công.' })
+  @ApiResponse({ status: 401, description: 'Sai thông tin hoặc OTP.' })
+  async loginWithOtp(
+    @Body() body: { email: string; password: string; otp: string },
+  ) {
+    return this.authService.loginWithOtp(body.email, body.password, body.otp);
   }
 }

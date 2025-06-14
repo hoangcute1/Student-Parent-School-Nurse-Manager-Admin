@@ -37,20 +37,20 @@ export class MedicineStorageController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all medicines in storage',
+    summary: 'Lấy tất cả các loại thuốc trong kho',
     description:
-      'Retrieve all medicines stored in the system with optional filtering.',
+      'Truy xuất tất cả các loại thuốc được lưu trữ trong hệ thống với bộ lọc tùy chọn.',
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all medicines in storage.',
+    description: 'Danh sách tất cả các loại thuốc trong kho.',
     type: MedicineStorage,
     isArray: true,
   })
   @ApiResponse({
     status: 403,
     description:
-      'Forbidden. You do not have permission to access this resource.',
+      'Bị cấm. Bạn không có quyền truy cập vào tài nguyên này.',
   })
   async getMedicines() {
     return this.medicineStorageService.findAll();
