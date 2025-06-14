@@ -19,14 +19,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
-import { requestLoginOTP, verifyLoginOTP, type LoginRequestCredentials } from "@/lib/api";
+import {
+  requestParentLoginOTP,
+  verifyParentLoginOTP,
+  type LoginRequestCredentials,
+} from "@/lib/api";
 import { storeAuthData } from "@/lib/auth";
 
 export function ParentLoginForm() {
-  const [isLoading, setIsLoading] = useState(false);  const [formData, setFormData] = useState<LoginRequestCredentials>({
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState<LoginRequestCredentials>({
     email: "",
     password: "",
-    role: "parent"
   });
   const [errors, setErrors] = useState<{
     email?: string;
@@ -82,13 +86,19 @@ export function ParentLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };  const verifyOTP = async (otp: string) => {
+  };
+  const verifyOTP = async (otp: string) => {
     try {
-      const response = await verifyLoginOTP({
+      console.log("Verifying OTP in parent login:", otp);
+      console.log("Using email:", formData.email);
+      console.log("Using password:", formData.password);
+
+      const response = await verifyParentLoginOTP({
         email: formData.email,
-        otp
+        password: formData.password,
+        otp: otp,
       });
-      
+
       storeAuthData(response);
 
       toast({
@@ -109,41 +119,45 @@ export function ParentLoginForm() {
         window.location.href = "/";
       }
     } catch (error) {
-      throw error; // Let OTPDialog handle the error
+      console.error("OTP Verification failed:", error);
+      toast({
+        title: "Xác thực thất bại",
+        description:
+          error instanceof Error ? error.message : "Vui lòng thử lại sau",
+        variant: "destructive",
+      });
+      throw error;
     }
   };
-
   const resendOTP = async () => {
     try {
-      await requestLoginOTP({
+      console.log("Resending OTP with data:", { ...formData });
+      await requestParentLoginOTP({
         ...formData,
-        role: "parent"
       });
       toast({
         title: "Đã gửi lại mã OTP",
-        description: "Vui lòng kiểm tra email của bạn"
+        description: "Vui lòng kiểm tra email của bạn",
       });
     } catch (error) {
       throw error;
     }
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
     setIsLoading(true);
-
     try {
       // First step: request OTP
-      await requestLoginOTP({
+      console.log("Requesting OTP with data:", { ...formData });
+      await requestParentLoginOTP({
         ...formData,
-        role: "parent"
       });
       setShowOTP(true);
       toast({
         title: "Thành công",
-        description: "Mã OTP đã được gửi đến email của bạn"
+        description: "Mã OTP đã được gửi đến email của bạn",
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -262,7 +276,6 @@ export function ParentLoginForm() {
             onVerify={verifyOTP}
             onResend={resendOTP}
           />
-        
         </CardFooter>
       </form>
     </Card>

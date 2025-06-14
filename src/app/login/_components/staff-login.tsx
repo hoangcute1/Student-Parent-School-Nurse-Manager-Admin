@@ -20,8 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import {
-  requestLoginOTP,
-  verifyLoginOTP,
+  requestStaffLoginOTP,
+  verifyStaffLoginOTP,
   type LoginRequestCredentials,
 } from "@/lib/api";
 import { storeAuthData } from "@/lib/auth";
@@ -87,11 +87,15 @@ export function StaffLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };
-  const verifyOTP = async (otp: string) => {
+  };  const verifyOTP = async (otp: string) => {
     try {
-      const response = await verifyLoginOTP({
+      console.log("Verifying OTP in staff login:", otp);
+      console.log("Using email:", formData.email);
+      console.log("Using password:", formData.password);
+      
+      const response = await verifyStaffLoginOTP({
         email: formData.email,
+        password: formData.password,
         otp,
       });
 
@@ -119,10 +123,9 @@ export function StaffLoginForm() {
       throw error; // Let OTPDialog handle the error
     }
   };
-
   const resendOTP = async () => {
     try {
-      await requestLoginOTP({
+      await requestStaffLoginOTP({
         ...formData,
         role: "staff",
       });
@@ -139,10 +142,9 @@ export function StaffLoginForm() {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
-    setIsLoading(true);
-    try {
+    setIsLoading(true);    try {
       // First step: request OTP
-      await requestLoginOTP({
+      await requestStaffLoginOTP({
         ...formData,
         role: "staff",
       });

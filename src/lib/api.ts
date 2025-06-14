@@ -27,6 +27,13 @@ async function fetchData<T>(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
+    // Log the request details for debugging
+    console.log(`API Request to ${endpoint}:`, {
+      method: options.method || "GET",
+      headers,
+      body: options.body ? JSON.parse(options.body as string) : undefined,
+    });
+
     // Xử lý URL cho API request
     const apiUrl = API_URL ? API_URL : ""; // Nếu không có API_URL, sử dụng URL tương đối
 
@@ -47,9 +54,13 @@ async function fetchData<T>(
       ...options,
       headers,
     });
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error("API Error Response:", {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+      });
       throw new Error(
         errorData.message ||
           `API error: ${response.status} ${response.statusText}`
@@ -71,31 +82,97 @@ export type LoginRequestCredentials = {
 
 export type LoginVerifyCredentials = {
   email: string;
+  password: string;
   otp: string;
 };
 
 export type LoginResponse = AuthResponse;
 
 // Request OTP for login
-export const requestLoginOTP = (
+export const requestParentLoginOTP = (
   credentials: LoginRequestCredentials
 ): Promise<{ message: string }> => {
-  return fetchData<{ message: string }>("/auth/login-request", {
+  // Remove role from credentials to prevent API error
+  const { role, ...credentialsWithoutRole } = credentials;
+
+  return fetchData<{ message: string }>("/auth/login-parent", {
     method: "POST",
-    body: JSON.stringify(credentials),
+    body: JSON.stringify(credentialsWithoutRole),
+  });
+};
+
+export const requestStaffLoginOTP = (
+  credentials: LoginRequestCredentials
+): Promise<{ message: string }> => {
+  // Remove role from credentials to prevent API error
+  const { role, ...credentialsWithoutRole } = credentials;
+
+  return fetchData<{ message: string }>("/auth/login-staff", {
+    method: "POST",
+    body: JSON.stringify(credentialsWithoutRole),
+  });
+};
+
+export const requestAdminLoginOTP = (
+  credentials: LoginRequestCredentials
+): Promise<{ message: string }> => {
+  // Remove role from credentials to prevent API error
+  const { role, ...credentialsWithoutRole } = credentials;
+
+  return fetchData<{ message: string }>("/auth/login-admin", {
+    method: "POST",
+    body: JSON.stringify(credentialsWithoutRole),
   });
 };
 
 // Verify OTP and login
-export const verifyLoginOTP = (
+export const verifyParentLoginOTP = (
   credentials: LoginVerifyCredentials
 ): Promise<LoginResponse> => {
-  return fetchData<LoginResponse>("/auth/login-verify", {
+  console.log("Verifying parent login with credentials:", credentials);
+
+  // Send email, password and OTP as required by the backend
+  return fetchData<LoginResponse>("/auth/login-parent/verify", {
     method: "POST",
-    body: JSON.stringify(credentials),
+    body: JSON.stringify({
+      email: credentials.email,
+      password: credentials.password,
+      otp: credentials.otp,
+    }),
   });
 };
 
+export const verifyStaffLoginOTP = (
+  credentials: LoginVerifyCredentials
+): Promise<LoginResponse> => {
+  console.log("Verifying staff login with credentials:", credentials);
+  
+  // Send email, password and OTP as required by the backend
+  return fetchData<LoginResponse>("/auth/login-staff/verify", {
+    method: "POST",
+    body: JSON.stringify({
+      email: credentials.email,
+      password: credentials.password,
+      otp: credentials.otp,
+    }),
+  });
+};
+
+export const verifyAdminLoginOTP = (
+  credentials: LoginVerifyCredentials
+): Promise<LoginResponse> => {
+  console.log("Verifying admin login with credentials:", credentials);
+  
+  // Send email, password and OTP as required by the backend
+  return fetchData<LoginResponse>("/auth/login-admin/verify", {
+    method: "POST",
+    body: JSON.stringify({
+      email: credentials.email,
+      password: credentials.password,
+      otp: credentials.otp,
+    }),
+  });
+};
 // Get users
 export const getUsers = () => {
   return fetchData("/users");

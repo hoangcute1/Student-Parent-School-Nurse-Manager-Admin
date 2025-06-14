@@ -1,8 +1,7 @@
 // Authentication utilities
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RoleName } from "./roles";
 import type { AuthResponse, User, UserProfile } from "./types";
 
 // Storage keys
