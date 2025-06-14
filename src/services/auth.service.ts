@@ -251,6 +251,166 @@ export class AuthService {
         : null,
     };
   }
+
+  // Parent login with OTP
+  async loginParentWithOtp(
+    email: string,
+    password: string,
+    otp: string,
+  ): Promise<any> {
+    // Xác thực tài khoản như login thông thường
+    const user = await this.validateUser(email, password);
+    const user_id = (user as any)._id?.toString();
+
+    // Xác thực là parent
+    const parent = await this.parentService.validateParent(user_id);
+    if (!parent)
+      throw new UnauthorizedException(
+        'Email này không được đăng ký làm tài khoản phụ huynh',
+      );
+
+    // Xác thực OTP
+    await this.otpService.verifyOTP(email, otp);
+
+    // Generate tokens
+    const tokens = await this.generateTokens(user_id, user.email);
+
+    // Get parent profile
+    const parent_profile = await this.profileService.findByuser(user_id);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'parent',
+      },
+      parent: {
+        _id: parent._id,
+      },
+      profile: parent_profile
+        ? {
+            _id: parent_profile._id,
+            name: parent_profile.name,
+            phone: parent_profile.phone,
+            gender: parent_profile.gender,
+            birth: parent_profile.birth,
+            address: parent_profile.address,
+            avatar: parent_profile.avatar,
+            created_at: parent_profile.created_at,
+            updated_at: parent_profile.updated_at,
+          }
+        : null,
+    };
+  }
+
+  // Staff login with OTP
+  async loginStaffWithOtp(
+    email: string,
+    password: string,
+    otp: string,
+  ): Promise<any> {
+    // Xác thực tài khoản như login thông thường
+    const user = await this.validateUser(email, password);
+    const user_id = (user as any)._id?.toString();
+
+    // Xác thực là staff
+    const staff = await this.staffService.findByuser(user_id);
+    if (!staff)
+      throw new UnauthorizedException('Không phải tài khoản nhân viên');
+
+    // Xác thực OTP
+    await this.otpService.verifyOTP(email, otp);
+
+    // Generate tokens
+    const tokens = await this.generateTokens(user_id, user.email);
+
+    // Get staff profile
+    const staff_profile = await this.profileService.findByuser(user_id);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'staff',
+      },
+      staff: {
+        _id: staff._id,
+      },
+      profile: staff_profile
+        ? {
+            _id: staff_profile._id,
+            name: staff_profile.name,
+            phone: staff_profile.phone,
+            gender: staff_profile.gender,
+            birth: staff_profile.birth,
+            address: staff_profile.address,
+            avatar: staff_profile.avatar,
+          }
+        : null,
+    };
+  }
+
+  // Admin login with OTP
+  async loginAdminWithOtp(
+    email: string,
+    password: string,
+    otp: string,
+  ): Promise<any> {
+    // Xác thực tài khoản như login thông thường
+    const user = await this.validateUser(email, password);
+    const user_id = (user as any)._id?.toString();
+
+    // Xác thực là admin
+    const admin = await this.adminService.findByuser(user_id);
+    if (!admin) throw new UnauthorizedException('Không phải tài khoản admin');
+
+    // Xác thực OTP
+    await this.otpService.verifyOTP(email, otp);
+
+    // Generate tokens
+    const tokens = await this.generateTokens(user_id, user.email);
+
+    // Get admin profile
+    const admin_profile = await this.profileService.findByuser(user_id);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'admin',
+      },
+      admin: {
+        _id: admin._id,
+      },
+      profile: admin_profile
+        ? {
+            _id: admin_profile._id,
+            name: admin_profile.name,
+            phone: admin_profile.phone,
+            gender: admin_profile.gender,
+            birth: admin_profile.birth,
+            address: admin_profile.address,
+            avatar: admin_profile.avatar,
+          }
+        : null,
+    };
+  }
+
   async refreshTokens(
     user_id: string,
     refreshToken: string,
@@ -307,5 +467,172 @@ export class AuthService {
     await this.userModel
       .updateOne({ _id: user }, { refresh_token: refreshToken })
       .exec();
+  }
+
+  // Phương thức xác thực tài khoản phụ huynh
+  async validateParentAccount(userId: string): Promise<boolean> {
+    const parent = await this.parentService.findByuser(userId);
+    if (!parent) {
+      throw new UnauthorizedException('Không phải tài khoản phụ huynh');
+    }
+    return true;
+  }
+
+  // Phương thức xác thực tài khoản nhân viên
+  async validateStaffAccount(userId: string): Promise<boolean> {
+    const staff = await this.staffService.findByuser(userId);
+    if (!staff) {
+      throw new UnauthorizedException('Không phải tài khoản nhân viên');
+    }
+    return true;
+  }
+
+  // Phương thức xác thực tài khoản admin
+  async validateAdminAccount(userId: string): Promise<boolean> {
+    const admin = await this.adminService.findByuser(userId);
+    if (!admin) {
+      throw new UnauthorizedException('Không phải tài khoản admin');
+    }
+    return true;
+  }
+
+  // Lấy thông tin đăng nhập của phụ huynh
+  async getParentLoginInfo(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    const parent = await this.parentService.findByuser(userId);
+    if (!parent) {
+      throw new UnauthorizedException('Không phải tài khoản phụ huynh');
+    }
+
+    // Generate tokens
+    const tokens = await this.generateTokens(userId, user.email);
+
+    // Get parent profile
+    const parent_profile = await this.profileService.findByuser(userId);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'parent',
+      },
+      parent: {
+        _id: parent._id,
+      },
+      profile: parent_profile
+        ? {
+            _id: parent_profile._id,
+            name: parent_profile.name,
+            phone: parent_profile.phone,
+            gender: parent_profile.gender,
+            birth: parent_profile.birth,
+            address: parent_profile.address,
+            avatar: parent_profile.avatar,
+            created_at: parent_profile.created_at,
+            updated_at: parent_profile.updated_at,
+          }
+        : null,
+    };
+  }
+
+  // Lấy thông tin đăng nhập của nhân viên
+  async getStaffLoginInfo(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    const staff = await this.staffService.findByuser(userId);
+    if (!staff) {
+      throw new UnauthorizedException('Không phải tài khoản nhân viên');
+    }
+
+    // Generate tokens
+    const tokens = await this.generateTokens(userId, user.email);
+
+    // Get staff profile
+    const staff_profile = await this.profileService.findByuser(userId);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'staff',
+      },
+      staff: {
+        _id: staff._id,
+      },
+      profile: staff_profile
+        ? {
+            _id: staff_profile._id,
+            name: staff_profile.name,
+            phone: staff_profile.phone,
+            gender: staff_profile.gender,
+            birth: staff_profile.birth,
+            address: staff_profile.address,
+            avatar: staff_profile.avatar,
+          }
+        : null,
+    };
+  }
+
+  // Lấy thông tin đăng nhập của admin
+  async getAdminLoginInfo(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    const admin = await this.adminService.findByuser(userId);
+    if (!admin) {
+      throw new UnauthorizedException('Không phải tài khoản admin');
+    }
+
+    // Generate tokens
+    const tokens = await this.generateTokens(userId, user.email);
+
+    // Get admin profile
+    const admin_profile = await this.profileService.findByuser(userId);
+
+    // Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        _id: user,
+        email: user.email,
+        role: 'admin',
+      },
+      admin: {
+        _id: admin._id,
+      },
+      profile: admin_profile
+        ? {
+            _id: admin_profile._id,
+            name: admin_profile.name,
+            phone: admin_profile.phone,
+            gender: admin_profile.gender,
+            birth: admin_profile.birth,
+            address: admin_profile.address,
+            avatar: admin_profile.avatar,
+          }
+        : null,
+    };
   }
 }

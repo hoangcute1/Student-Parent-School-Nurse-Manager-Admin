@@ -27,35 +27,158 @@ export class AuthController {
     private userService: UserService,
     private profileService: ProfileService,
   ) {}
-
   @Post('login-parent')
-  @ApiOperation({ summary: 'Đăng nhập phụ huynh' })
-  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập phụ huynh và nhận OTP' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
   @ApiResponse({
     status: 401,
     description: 'Email hoặc mật khẩu không chính xác.',
   })
   async loginParent(@Body() loginDto: LoginDto) {
-    return this.authService.loginParent(loginDto.email, loginDto.password);
-  }
+    // Validate user
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
 
+    // Kiểm tra phải là tài khoản phụ huynh không
+    await this.authService.validateParentAccount(user['_id'].toString());
+
+    // Gửi OTP qua otpService
+    await this.authService.sendOtp(loginDto.email);
+    return {
+      message: 'OTP đã được gửi đến email của bạn',
+      email: loginDto.email,
+    };
+  }
+  @Post('login-parent/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập phụ huynh',
+  })
+  @ApiBody({
+    schema: {
+      properties: {
+        email: { type: 'string', example: 'parent@example.com' },
+        otp: { type: 'string', example: '123456' },
+      },
+      required: ['email', 'otp'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async verifyParentLogin(@Body() body: { email: string; otp: string }) {
+    // Chỉ xác thực OTP, không kiểm tra lại tài khoản
+    await this.authService.verifyOtp(body.email, body.otp);
+    // Lấy thông tin user
+    const user = await this.userService.findByEmail(body.email);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    // Trả về thông tin đăng nhập phụ huynh
+    return this.authService.getParentLoginInfo(user['_id'].toString());
+  }
   @Post('login-staff')
-  @ApiOperation({ summary: 'Đăng nhập nhân viên' })
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập nhân viên và nhận OTP' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Đăng nhập nhân viên thành công.' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
   @ApiResponse({
     status: 401,
     description: 'Email hoặc mật khẩu không chính xác.',
   })
   async loginStaff(@Body() loginDto: LoginDto) {
-    return this.authService.loginStaff(loginDto.email, loginDto.password);
+    // Validate user
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
+
+    // Kiểm tra có phải là staff không
+    await this.authService.validateStaffAccount(user['_id'].toString());
+
+    // Gửi OTP
+    await this.authService.sendOtp(loginDto.email);
+    return {
+      message: 'OTP đã được gửi đến email của bạn',
+      email: loginDto.email,
+    };
+  }
+
+  @Post('login-staff/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập nhân viên',
+  })
+  @ApiBody({
+    schema: {
+      properties: {
+        email: { type: 'string', example: 'staff@example.com' },
+        otp: { type: 'string', example: '123456' },
+      },
+      required: ['email', 'otp'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập nhân viên thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async verifyStaffLogin(@Body() body: { email: string; otp: string }) {
+    // Chỉ xác thực OTP, không kiểm tra lại tài khoản
+    await this.authService.verifyOtp(body.email, body.otp);
+    // Lấy thông tin user
+    const user = await this.userService.findByEmail(body.email);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    // Trả về thông tin đăng nhập nhân viên
+    return this.authService.getStaffLoginInfo(user['_id'].toString());
   }
   @Post('login-admin')
-  @ApiOperation({ summary: 'Đăng nhập admin' })
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập admin và nhận OTP' })
   @ApiResponse({
     status: 200,
-    description:
-      'Đăng nhập admin thành công. Trả về access token, refresh token và thông tin admin.',
+    description: 'OTP đã được gửi.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginAdmin(@Body() loginDto: LoginDto) {
+    // Validate user
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
+
+    // Kiểm tra có phải là admin không
+    await this.authService.validateAdminAccount(user['_id'].toString());
+
+    // Gửi OTP
+    await this.authService.sendOtp(loginDto.email);
+    return {
+      message: 'OTP đã được gửi đến email của bạn',
+      email: loginDto.email,
+    };
+  }
+
+  @Post('login-admin/verify')
+  @ApiOperation({ summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập admin' })
+  @ApiBody({
+    schema: {
+      properties: {
+        email: { type: 'string', example: 'admin@example.com' },
+        otp: { type: 'string', example: '123456' },
+      },
+      required: ['email', 'otp'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng nhập admin thành công.',
     schema: {
       properties: {
         tokens: {
@@ -99,10 +222,19 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Email hoặc mật khẩu không chính xác.',
+    description: 'OTP không chính xác hoặc đã hết hạn.',
   })
-  async loginAdmin(@Body() loginDto: LoginDto) {
-    return this.authService.loginAdmin(loginDto.email, loginDto.password);
+  async verifyAdminLogin(@Body() body: { email: string; otp: string }) {
+    // Chỉ xác thực OTP, không kiểm tra lại tài khoản
+    await this.authService.verifyOtp(body.email, body.otp);
+    // Lấy thông tin user
+    const user = await this.userService.findByEmail(body.email);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    // Trả về thông tin đăng nhập admin
+    return this.authService.getAdminLoginInfo(user['_id'].toString());
   }
 
   @UseGuards(JwtAuthGuard)
