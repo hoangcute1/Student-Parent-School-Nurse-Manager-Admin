@@ -33,4 +33,4 @@ export class VaccineCampaign extends Document {
   created_at: Date;
 }
 
-export const FeedbackSchema = SchemaFactory.createForClass(VaccineCampaign);
+export const VaccineCampaignSchema = SchemaFactory.createForClass(VaccineCampaign);
