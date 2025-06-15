@@ -5,19 +5,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getAuthToken } from "@/lib/auth";
 import { ParentLoginForm } from "./_components/parent-login";
 import { StaffLoginForm } from "./_components/staff-login";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { profile, user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (getAuthToken()) {
+    if (isAuthenticated) {
+      console.log(profile, user, isAuthenticated);
       router.replace("/");
     }
-  }, [router]);
+  }, [isAuthenticated, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex flex-col items-center justify-center p-4">
@@ -40,13 +42,13 @@ export default function LoginPage() {
           <CardContent className="pt-6">
             <Tabs defaultValue="parent" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-blue-50 p-1">
-                <TabsTrigger 
+                <TabsTrigger
                   value="parent"
                   className="data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-sm"
                 >
                   Phụ huynh
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="staff"
                   className="data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-sm"
                 >
@@ -64,8 +66,8 @@ export default function LoginPage() {
         </Card>
       </div>
 
-      <Link 
-        href="/" 
+      <Link
+        href="/"
         className="mt-6 text-blue-600 hover:text-blue-700 text-sm flex items-center gap-2"
       >
         ← Quay về trang chủ

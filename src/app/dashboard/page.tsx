@@ -1,27 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import {
-  Calendar,
   MessageSquare,
   Pill,
-  AlertCircle,
   ArrowRight,
   CheckCircle,
   Clock,
   BookOpen,
-  Activity,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Progress } from "@/components/layout/sidebar/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,49 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Settings2, UserCircle } from "lucide-react";
-import { logout } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { User, UserProfile } from "@/lib/types";
 import Notification from "./noti";
+import { useAuthStore } from "@/stores/auth-store";
+import { logout } from "@/lib/auth";
 
 export default function User() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  useEffect(() => {
-    // Get user data from localStorage
-    const authData = localStorage.getItem("authData");
-    if (!authData) {
-      // Kiểm tra xem có dữ liệu user trực tiếp không
-      const directUser = localStorage.getItem("user");
-      if (directUser) {
-        try {
-          const userData = JSON.parse(directUser);
-          setUser(userData);
-          // Không đặt profile nếu không có - UI sẽ xử lý trường hợp này
-        } catch (error) {
-          console.error("Error parsing direct user data:", error);
-        }
-      }
-      return;
-    }
-
-    try {
-      const data = JSON.parse(authData);
-      if (data.user) {
-        setUser(data.user);
-        // Chỉ đặt profile nếu có đầy đủ dữ liệu
-        if (data.profile && data.profile._id) {
-          setProfile(data.profile);
-        }
-      }
-    } catch (error) {
-      console.error("Error parsing auth data:", error);
-      // Don't redirect, just log the error
-    }
-  }, [router]);
-  if (!user || !profile) {
+  const { user, profile, isAuthenticated, role } = useAuthStore();
+  // Nếu không đăng nhập, hiển thị nút đăng nhập
+  if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center gap-2">
         <Link href="/login">
@@ -65,6 +32,7 @@ export default function User() {
       </div>
     );
   }
+
   return (
     <div className="flex">
       <Notification />
@@ -74,7 +42,6 @@ export default function User() {
             variant="ghost"
             className="relative h-10 w-auto gap-2 px-2 select-none"
           >
-            {" "}
             <Avatar className="h-8 w-8">
               <AvatarImage
                 src={profile?.avatar || ""}
@@ -93,9 +60,9 @@ export default function User() {
                 {profile?.name || user?.email || "Người dùng"}
               </span>
               <span className="text-xs text-muted-foreground">
-                {user?.userType === "admin"
+                {role === "admin"
                   ? "Quản trị viên"
-                  : user?.userType === "staff"
+                  : role === "staff"
                   ? "Nhân viên y tế"
                   : "Phụ huynh"}
               </span>
@@ -119,7 +86,7 @@ export default function User() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />{" "}
-          {(user?.userType === "admin" || user?.userType === "staff") && (
+          {(role === "admin" || role === "staff") && (
             <>
               <DropdownMenuItem asChild>
                 <Link href="/cms" className="flex w-full items-center">
@@ -130,7 +97,7 @@ export default function User() {
               <DropdownMenuSeparator />
             </>
           )}
-          {user?.userType === "parent" && (
+          {role === "parent" && (
             <>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard" className="flex w-full items-center">
@@ -143,7 +110,10 @@ export default function User() {
           )}
           <DropdownMenuItem
             className="cursor-pointer text-red-600"
-            onSelect={() => logout()}
+            onSelect={() => {
+              logout();
+              router.push("/");
+            }}
           >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Đăng xuất</span>

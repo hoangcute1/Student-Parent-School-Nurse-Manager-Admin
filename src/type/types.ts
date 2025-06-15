@@ -8,21 +8,17 @@ export interface UserProfile {
   birth: string;
   address: string;
   avatar: string;
-  userId: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface User {
-  id: string;
   email: string;
-  permissions: string[];
-  userType: "staff" | "parent" | "admin";
+  role: "staff" | "parent" | "admin" | null;
 }
 
 export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
+  token: string;
   user: User;
   profile: UserProfile;
 }

@@ -75,25 +75,17 @@ export function getAllRoles(): Role[] {
 export function hasRole(userRole: string, requiredRole: RoleName): boolean {
   if (!isValidRole(userRole)) return false;
 
-  // Special case: admin role has access to everything
   if (userRole === "admin") return true;
 
   return userRole === requiredRole;
 }
 
-/**
- * Check if a user has permission to access a resource
- * @param userRole The user's role
- * @param allowedRoles Array of roles that have access
- * @returns Boolean indicating if user has permission
- */
 export function hasPermission(
-  userRole: string,
+  userRole: string | null,
   allowedRoles: RoleName[]
 ): boolean {
-  if (!isValidRole(userRole)) return false;
+  if (userRole && !isValidRole(userRole)) return false;
 
-  // Admin always has access to everything
   if (userRole === "admin") return true;
 
   return allowedRoles.includes(userRole as RoleName);

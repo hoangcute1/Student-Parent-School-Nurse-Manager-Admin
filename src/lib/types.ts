@@ -36,13 +36,11 @@ export interface UserProfile {
 export interface User {
   id: string;
   email: string;
-  permissions: string[];
-  userType: "staff" | "parent" | "admin";
+  role: "staff" | "parent" | "admin";
 }
 
 export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
+  token: string;
   user: User;
   profile: UserProfile;
 }
