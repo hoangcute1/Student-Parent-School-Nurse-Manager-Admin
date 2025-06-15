@@ -6,34 +6,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAuthData } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import LoginPopup from "./login-popup";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { features } from "../_constants/feature";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function Feature() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
-  const handleFeatureClick = (
-    e: React.MouseEvent,
-    feature: (typeof features)[0]
-  ) => {
-    e.preventDefault();
-    const auth = getAuthData();
-    if (!auth) {
-      setOpen(true);
-    } else {
-      router.push(feature.href);
-    }
-  };
+  const { user } = useAuthStore();
   useEffect(() => {
     return () => {
       setOpen(false);
     };
   }, []);
+  const handleFeatureClick = (
+    e: React.MouseEvent<HTMLDivElement>,
+    feature: (typeof features)[number]
+  ) => {
+    e.preventDefault();
+    console.log(user);
+    if (!user) {
+      setOpen(true);
+      return;
+    }
+    router.push(feature.href);
+  };
   return (
     <>
       <section
@@ -59,7 +59,9 @@ export default function Feature() {
                 onClick={(e) => handleFeatureClick(e, feature)}
                 className="cursor-pointer select-none hover:scale-105 transition-all duration-300"
               >
-                <Card className={`h-full cursor-pointer border-2 transition-all duration-300 hover:shadow-lg hover:${feature.borderColor} flex flex-col`}>
+                <Card
+                  className={`h-full cursor-pointer border-2 transition-all duration-300 hover:shadow-lg hover:${feature.borderColor} flex flex-col`}
+                >
                   <CardHeader className="flex flex-row items-center gap-4 h-24">
                     <feature.icon className={`h-8 w-8 ${feature.textColor}`} />
                     <div>

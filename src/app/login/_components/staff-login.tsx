@@ -21,10 +21,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import {
   requestStaffLoginOTP,
-  verifyStaffLoginOTP,
   type LoginRequestCredentials,
-} from "@/lib/api";
-import { storeAuthData } from "@/lib/auth";
+} from "@/lib/api/api";
+import { loginParentOTP } from "@/lib/api";
 
 export function StaffLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -87,40 +86,37 @@ export function StaffLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };  const verifyOTP = async (otp: string) => {
+  };
+  const verifyOTP = async (otp: string) => {
     try {
       console.log("Verifying OTP in staff login:", otp);
       console.log("Using email:", formData.email);
       console.log("Using password:", formData.password);
-      
-      const response = await verifyStaffLoginOTP({
-        email: formData.email,
-        password: formData.password,
-        otp,
-      });
 
-      storeAuthData(response);
+      // Sử dụng AuthService để xác thực OTP và đăng nhập
+      const success = await loginParentOTP(formData.email, otp);
 
-      toast({
-        title: "Đăng nhập thành công",
-        description: "Đang chuyển hướng...",
-      });
+      if (success) {
+        toast({
+          title: "Đăng nhập thành công",
+          description: "Đang chuyển hướng...",
+        });
 
-      setShowOTP(false);
+        setShowOTP(false);
 
-      // Check userType to allow both staff and admin
-      const userType = response.user.userType;
-      if (userType === "staff" || userType === "admin") {
+        // Redirect to CMS
         router.push("/cms");
       } else {
-        toast({
-          variant: "destructive",
-          title: "Lỗi đăng nhập",
-          description: "Tài khoản không có quyền truy cập",
-        });
+        throw new Error("Xác thực OTP thất bại");
       }
     } catch (error) {
-      throw error; // Let OTPDialog handle the error
+      console.error("OTP Verification failed:", error);
+      toast({
+        title: "Xác thực thất bại",
+        description:
+          error instanceof Error ? error.message : "Vui lòng thử lại sau",
+        variant: "destructive",
+      });
     }
   };
   const resendOTP = async () => {
@@ -142,7 +138,8 @@ export function StaffLoginForm() {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
-    setIsLoading(true);    try {
+    setIsLoading(true);
+    try {
       // First step: request OTP
       await requestStaffLoginOTP({
         ...formData,
@@ -244,11 +241,10 @@ export function StaffLoginForm() {
               <p className="text-xs text-red-500 mt-1">{errors.password}</p>
             )}
           </div>
-          
         </CardContent>
         <CardFooter>
           <div className="flex w-full gap-2">
-          <Button
+            <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               type="submit"
               disabled={isLoading}

@@ -21,10 +21,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import {
   requestParentLoginOTP,
-  verifyParentLoginOTP,
   type LoginRequestCredentials,
-} from "@/lib/api";
-import { storeAuthData } from "@/lib/auth";
+} from "@/lib/api/api";
+import { loginParentOTP } from "@/lib/api";
 
 export function ParentLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -93,30 +92,21 @@ export function ParentLoginForm() {
       console.log("Using email:", formData.email);
       console.log("Using password:", formData.password);
 
-      const response = await verifyParentLoginOTP({
-        email: formData.email,
-        password: formData.password,
-        otp: otp,
-      });
+      // Sử dụng AuthService để xác thực OTP và đăng nhập
+      const success = await loginParentOTP(formData.email, otp);
 
-      storeAuthData(response);
+      if (success) {
+        toast({
+          title: "Đăng nhập thành công",
+          description: "Đang chuyển hướng...",
+        });
 
-      toast({
-        title: "Đăng nhập thành công",
-        description: "Đang chuyển hướng...",
-      });
+        setShowOTP(false);
 
-      setShowOTP(false);
-
-      // Redirect based on user type
-      if (
-        response.user.userType === "staff" ||
-        response.user.userType === "admin"
-      ) {
-        router.push("/dashboard");
+        // Redirect to home page
+        router.push("/");
       } else {
-        // Ensure parent users are redirected to home page
-        window.location.href = "/";
+        throw new Error("Xác thực OTP thất bại");
       }
     } catch (error) {
       console.error("OTP Verification failed:", error);
@@ -126,7 +116,6 @@ export function ParentLoginForm() {
           error instanceof Error ? error.message : "Vui lòng thử lại sau",
         variant: "destructive",
       });
-      throw error;
     }
   };
   const resendOTP = async () => {

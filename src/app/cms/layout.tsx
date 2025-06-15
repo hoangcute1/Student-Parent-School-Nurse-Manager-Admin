@@ -4,47 +4,25 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { User as AppUser, UserProfile } from "@/lib/types";
-import { getAuthToken } from "@/lib/auth";
 import CheckAuth from "./check-auth";
 import User from "@/components/layout/header/user";
 import Sidebar from "./_components/sidebar";
-import Notification from "@/components/layout/header/noti";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user, profile } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Effect for handling initial state
   useEffect(() => {
-    // Check auth token first
-    if (!getAuthToken()) {
-      return;
-    }
-
     // Get sidebar state from localStorage
     const savedSidebarState = localStorage.getItem("sidebarOpen");
     if (savedSidebarState !== null) {
       setIsSidebarOpen(JSON.parse(savedSidebarState));
-    }
-
-    // Get user data from localStorage
-    const authData = localStorage.getItem("authData");
-    if (authData) {
-      try {
-        const data = JSON.parse(authData);
-        if (data.user && data.profile) {
-          setUser(data.user);
-          setProfile(data.profile);
-        }
-      } catch (error) {
-        console.error("Error parsing auth data:", error);
-      }
     }
   }, []);
 

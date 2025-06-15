@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "@/lib/api";
+import { User } from "@/lib/api/api";
 import { RoleName } from "@/lib/roles";
 import { RoleSelector } from "@/components/RoleSelector";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,10 +21,10 @@ interface UserProfileCardProps {
   isAdmin?: boolean;
 }
 
-export function UserProfileCard({ 
-  user, 
+export function UserProfileCard({
+  user,
   onRoleChange,
-  isAdmin = false 
+  isAdmin = false,
 }: UserProfileCardProps) {
   const [role, setRole] = useState<RoleName>(user.role);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,11 +61,15 @@ export function UserProfileCard({
 
   // Get appropriate badge variant based on role
   const getBadgeVariant = (role: RoleName) => {
-    switch(role) {
-      case "admin": return "destructive";
-      case "staff": return "default";
-      case "parent": return "secondary";
-      default: return "outline";
+    switch (role) {
+      case "admin":
+        return "destructive";
+      case "staff":
+        return "default";
+      case "parent":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
@@ -85,7 +95,9 @@ export function UserProfileCard({
       </CardHeader>
       <CardContent className="p-4">
         <div className="space-y-2">
-          <div className="text-sm text-muted-foreground">User ID: {user.id}</div>
+          <div className="text-sm text-muted-foreground">
+            User ID: {user.id}
+          </div>
           {isEditing && (
             <div className="pt-2">
               <RoleSelector
@@ -100,18 +112,18 @@ export function UserProfileCard({
       {isAdmin && (
         <CardFooter className="flex justify-end gap-2 border-t bg-muted/30 p-4">
           {!isEditing ? (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setIsEditing(true)}
             >
               Thay đổi vai trò
             </Button>
           ) : (
             <>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setIsEditing(false);
                   setRole(user.role);
@@ -120,9 +132,9 @@ export function UserProfileCard({
               >
                 Hủy
               </Button>
-              <Button 
-                variant="default" 
-                size="sm" 
+              <Button
+                variant="default"
+                size="sm"
                 onClick={saveRoleChange}
                 disabled={isLoading || role === user.role}
               >
