@@ -75,14 +75,15 @@ export function OTPDialog({
             value={otp}
             onChange={async (value) => {
               setOtp(value);
-              setError(null);
-
-              // Auto verify when all 6 digits are entered
+              setError(null); // Auto verify when all 6 digits are entered
               if (value.length === 6) {
                 setIsVerifying(true);
                 try {
+                  console.log("Attempting to verify OTP:", value);
                   await onVerify(value);
+                  console.log("OTP verification successful");
                 } catch (err) {
+                  console.error("OTP verification error:", err);
                   setError("Mã OTP không chính xác. Vui lòng thử lại.");
                   setIsVerifying(false);
                 }

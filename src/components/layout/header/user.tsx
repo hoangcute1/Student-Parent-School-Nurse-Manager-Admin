@@ -26,14 +26,28 @@ export default function User() {
     // Get user data from localStorage
     const authData = localStorage.getItem("authData");
     if (!authData) {
-      // Don't redirect, just leave user as null
+      // Kiểm tra xem có dữ liệu user trực tiếp không
+      const directUser = localStorage.getItem("user");
+      if (directUser) {
+        try {
+          const userData = JSON.parse(directUser);
+          setUser(userData);
+          // Không đặt profile nếu không có - UI sẽ xử lý trường hợp này
+        } catch (error) {
+          console.error("Error parsing direct user data:", error);
+        }
+      }
       return;
     }
+
     try {
       const data = JSON.parse(authData);
-      if (data.user && data.profile) {
+      if (data.user) {
         setUser(data.user);
-        setProfile(data.profile);
+        // Chỉ đặt profile nếu có đầy đủ dữ liệu
+        if (data.profile && data.profile._id) {
+          setProfile(data.profile);
+        }
       }
     } catch (error) {
       console.error("Error parsing auth data:", error);
@@ -52,7 +66,7 @@ export default function User() {
     );
   }
   return (
-    <div className='flex'>
+    <div className="flex">
       <Notification />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -60,18 +74,28 @@ export default function User() {
             variant="ghost"
             className="relative h-10 w-auto gap-2 px-2 select-none"
           >
+            {" "}
             <Avatar className="h-8 w-8">
-              <AvatarImage src={profile.avatar} alt={profile.name} />
+              <AvatarImage
+                src={profile?.avatar || ""}
+                alt={profile?.name || user?.email || "User"}
+              />
               <AvatarFallback>
-                {profile.name.charAt(0).toUpperCase()}
+                {profile?.name
+                  ? profile.name.charAt(0).toUpperCase()
+                  : user?.email
+                  ? user.email.charAt(0).toUpperCase()
+                  : "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start">
-              <span className="text-sm font-medium">{profile.name}</span>
+              <span className="text-sm font-medium">
+                {profile?.name || user?.email || "Người dùng"}
+              </span>
               <span className="text-xs text-muted-foreground">
-                {user.userType === "admin"
+                {user?.userType === "admin"
                   ? "Quản trị viên"
-                  : user.userType === "staff"
+                  : user?.userType === "staff"
                   ? "Nhân viên y tế"
                   : "Phụ huynh"}
               </span>
@@ -94,8 +118,8 @@ export default function User() {
               <span>Thông tin cá nhân</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {(user.userType === "admin" || user.userType === "staff") && (
+          <DropdownMenuSeparator />{" "}
+          {(user?.userType === "admin" || user?.userType === "staff") && (
             <>
               <DropdownMenuItem asChild>
                 <Link href="/cms" className="flex w-full items-center">
@@ -106,7 +130,7 @@ export default function User() {
               <DropdownMenuSeparator />
             </>
           )}
-          {user.userType === "parent" && (
+          {user?.userType === "parent" && (
             <>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard" className="flex w-full items-center">
