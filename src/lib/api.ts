@@ -15,8 +15,9 @@ async function fetchData<T>(
   options: RequestInit = {}
 ): Promise<T> {
   try {
-    // Get authentication token
+    // Get authentication token - Sử dụng getAuthToken đã cập nhật để kiểm tra tất cả các vị trí token
     const token = getAuthToken();
+    console.log(`API Request to ${endpoint} - token exists:`, !!token);
 
     // Create headers object
     const headers: Record<string, string> = {

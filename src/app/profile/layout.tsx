@@ -21,7 +21,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   useEffect(() => {
     // Check auth token first
     if (!getAuthToken()) {
-      router.push("/login");
+      // router.push("/login");
       return;
     }
 

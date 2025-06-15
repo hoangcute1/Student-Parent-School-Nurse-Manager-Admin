@@ -19,12 +19,23 @@ interface StoredAuthData {
 export function storeAuthData(response: any) {
   if (typeof window === "undefined") return;
 
+  console.log("Storing auth data:", response);
+
   // Handle different token property names
   const accessToken = response.access_token || response.token;
   const refreshToken = response.refresh_token || response.token;
 
   if (accessToken) {
+    // Lưu token vào tất cả các khóa có thể được sử dụng
     localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
+    localStorage.setItem("access_token", accessToken);
+    localStorage.setItem("token", accessToken);
+    
+    console.log("Stored tokens to all locations:", {
+      [AUTH_TOKEN_KEY]: accessToken,
+      "access_token": accessToken,
+      "token": accessToken
+    });
   }
 
   if (refreshToken) {
@@ -39,16 +50,25 @@ export function storeAuthData(response: any) {
     };
 
     localStorage.setItem(AUTH_DATA_KEY, JSON.stringify(userData));
+    console.log("Stored auth data:", userData);
 
     // Also store the user directly for broader compatibility
     localStorage.setItem("user", JSON.stringify(response.user));
+    console.log("Stored direct user:", response.user);
   }
 }
 
 // Function to get auth token
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(AUTH_TOKEN_KEY);
+  
+  // Kiểm tra tất cả các vị trí token có thể được lưu trữ
+  const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
+  const accessToken = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
+  
+  // Trả về token đầu tiên tìm thấy
+  return authToken || accessToken || token;
 }
 
 // Function to get user data
@@ -78,22 +98,36 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const initialized = useRef(false);
+  
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
+    // Kiểm tra token trước tiên
+    const token = getAuthToken();
+    console.log("Found token in useAuth:", !!token);
+    
+    if (!token) {
+      console.log("No token found, user is not authenticated");
+      setLoading(false);
+      return;
+    }
+
     // Try getting user data in order of preference
     const authData = getAuthData();
     const directUser = localStorage.getItem("user");
+    
+    console.log("Auth data exists in useAuth:", !!authData);
+    console.log("Direct user exists in useAuth:", !!directUser);
 
-    if (authData) {
-      console.log("Found auth data:", authData);
+    if (authData && authData.user) {
+      console.log("Using auth data user:", authData.user);
       setUser(authData.user);
       setLoading(false);
       return;
     } else if (directUser) {
       try {
-        console.log("Found direct user data");
+        console.log("Using direct user data");
         const userData = JSON.parse(directUser);
         setUser(userData);
         setLoading(false);
@@ -103,7 +137,11 @@ export function useAuth() {
       }
     }
 
-    // No auth data found
+    // No auth data found but token exists
+    if (token) {
+      console.log("Token exists but no user data found. User might need to re-login");
+    }
+    
     setLoading(false);
   }, [router]);
 

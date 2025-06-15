@@ -28,7 +28,7 @@ export interface UserProfile {
   birth: string;
   address: string;
   avatar: string;
-  userId: string;
+  user: string;
   createdAt: string;
   updatedAt: string;
 }
