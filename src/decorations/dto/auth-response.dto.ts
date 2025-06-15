@@ -6,13 +6,7 @@ export class TokenInfo {
     description: 'Access token for API authentication',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
-  accessToken: string;
-
-  @ApiProperty({
-    description: 'Refresh token to get new access tokens',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
-  refreshToken: string;
+  token: string;
 }
 
 export class UserInfo {

@@ -13,6 +13,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ParentModule } from './parent.module';
 import { StaffModule } from './staff.module';
 import { AdminModule } from './admin.module';
+import { TokenModule } from './token.module';
+import configuration from '@/configuration';
 
 @Module({
   imports: [
@@ -25,15 +27,14 @@ import { AdminModule } from './admin.module';
     StaffModule,
     AdminModule,
     OtpModule,
+    TokenModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET', 'your-secret-key'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION', '1h'),
-        },
-      }),
       inject: [ConfigService],
+      useFactory: async () => ({
+        secret: configuration().JWT_SECRET,
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
   ],
   controllers: [AuthController],

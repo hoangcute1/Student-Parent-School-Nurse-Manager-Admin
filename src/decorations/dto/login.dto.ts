@@ -12,3 +12,14 @@ export class LoginDto {
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password: string;
 }
+
+export class LoginWithOtpDto {
+  @ApiProperty()
+  @IsEmail({}, { message: 'Email không hợp lệ' })
+  @IsNotEmpty({ message: 'Email không được để trống' })
+  email: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'OTP không được để trống' })
+  otp: string;
+}

@@ -32,6 +32,8 @@ import { TreatmentHistoryModule } from './modules/treatment-history.module';
 import { VaccineModule } from './modules/vaccine.module';
 import { VaccineCampaignModule } from './modules/vaccine-campaign.module';
 import { ClassModule } from './modules/class.module';
+import { UserInfoModule } from './modules/user-info.module';
+import { TokenModule } from './modules/token.module';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { ClassModule } from './modules/class.module';
     AuthModule,
     ThrottlerModule,
     TokenBlacklistModule,
+    TokenModule,
     UserModule,
     ProfileModule,
     ClassModule,
