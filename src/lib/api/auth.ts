@@ -70,7 +70,6 @@ const loginParentOTP = async (email: string, otp: string): Promise<boolean> => {
   }
 };
 
-
 const loginAdmin = async (
   email: string,
   password: string
@@ -100,26 +99,28 @@ const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        email, 
+      body: JSON.stringify({
+        email,
         otp,
       }),
     });
 
     if (!response.ok) {
-      // Đọc thông tin lỗi từ response
+       // Đọc thông tin lỗi từ response
       const errorData = await response.json().catch(() => ({}));
       // Ném ra lỗi với thông tin chi tiết hơn
-      throw new Error(errorData.message || `Xác thực OTP không thành công: ${response.status}`);
+      throw new Error(
+        errorData.message || `Xác thực OTP không thành công: ${response.status}`
+      );
     }
-    
+
     // Xử lý response thành công
     const data: AuthResponse = await response.json();
-    
+
     // Lưu token và thông tin người dùng
     setToken(data.token);
     useAuthStore.getState().updateUserInfo(data.user, data.profile);
-    
+
     return true;
   } catch (error) {
     console.error("Admin OTP verification error:", error);
@@ -156,8 +157,8 @@ const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        email, 
+      body: JSON.stringify({
+        email,
         otp,
       }),
     });
@@ -166,16 +167,18 @@ const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
       // Đọc thông tin lỗi từ response
       const errorData = await response.json().catch(() => ({}));
       // Ném ra lỗi với thông tin chi tiết hơn
-      throw new Error(errorData.message || `Xác thực OTP không thành công: ${response.status}`);
+      throw new Error(
+        errorData.message || `Xác thực OTP không thành công: ${response.status}`
+      );
     }
-    
+
     // Xử lý response thành công
     const data: AuthResponse = await response.json();
-    
+
     // Lưu token và thông tin người dùng
     setToken(data.token);
     useAuthStore.getState().updateUserInfo(data.user, data.profile);
-    
+
     return true;
   } catch (error) {
     console.error("Staff OTP verification error:", error);

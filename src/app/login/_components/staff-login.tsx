@@ -86,28 +86,29 @@ export function StaffLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };  const verifyOTP = async (otp: string) => {
+  };
+  const verifyOTP = async (otp: string) => {
     try {
       console.log(`Verifying OTP:`, otp);
       console.log("Using email:", formData.email);
 
       // Thử đăng nhập cả staff và admin song song
-      let staffPromise = loginStaffOTP(formData.email, otp).catch(error => {
+      let staffPromise = loginStaffOTP(formData.email, otp).catch((error) => {
         console.log("Staff login failed:", error);
         return null;
       });
-      
-      let adminPromise = loginAdminOTP(formData.email, otp).catch(error => {
+
+      let adminPromise = loginAdminOTP(formData.email, otp).catch((error) => {
         console.log("Admin login failed:", error);
         return null;
       });
-      
+
       // Chờ cả hai kết quả
       const [staffResult, adminResult] = await Promise.all([
         staffPromise,
-        adminPromise
+        adminPromise,
       ]);
-      
+
       // Kiểm tra kết quả
       if (staffResult === true) {
         toast({
@@ -118,7 +119,7 @@ export function StaffLoginForm() {
         router.push("/cms");
         return;
       }
-      
+
       if (adminResult === true) {
         toast({
           title: "Đăng nhập thành công (Quản trị viên)",
@@ -128,7 +129,7 @@ export function StaffLoginForm() {
         router.push("/cms");
         return;
       }
-      
+
       // Nếu cả hai đều thất bại
       throw new Error("Xác thực OTP thất bại. Email hoặc OTP không hợp lệ.");
     } catch (error) {
@@ -146,24 +147,24 @@ export function StaffLoginForm() {
       // Thử gửi OTP cho cả staff và admin song song
       let staffPromise = requestStaffLoginOTP({
         ...formData,
-      }).catch(error => {
+      }).catch((error) => {
         console.log("Failed to resend staff OTP:", error);
         return null;
       });
-      
+
       let adminPromise = requestAdminLoginOTP({
         ...formData,
-      }).catch(error => {
+      }).catch((error) => {
         console.log("Failed to resend admin OTP:", error);
         return null;
       });
-      
+
       // Chờ cả hai kết quả
       const [staffResult, adminResult] = await Promise.all([
         staffPromise,
-        adminPromise
+        adminPromise,
       ]);
-      
+
       // Kiểm tra nếu ít nhất một loại OTP đã gửi thành công
       if (staffResult || adminResult) {
         toast({
@@ -180,7 +181,8 @@ export function StaffLoginForm() {
         variant: "destructive",
       });
     }
-  };const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
@@ -189,24 +191,24 @@ export function StaffLoginForm() {
       // Thử gửi OTP cho cả staff và admin song song
       let staffPromise = requestStaffLoginOTP({
         ...formData,
-      }).catch(error => {
+      }).catch((error) => {
         console.log("Failed to send staff OTP:", error);
         return null;
       });
-      
+
       let adminPromise = requestAdminLoginOTP({
         ...formData,
-      }).catch(error => {
+      }).catch((error) => {
         console.log("Failed to send admin OTP:", error);
         return null;
       });
-      
+
       // Chờ cả hai kết quả
       const [staffResult, adminResult] = await Promise.all([
         staffPromise,
-        adminPromise
+        adminPromise,
       ]);
-      
+
       // Kiểm tra nếu ít nhất một loại OTP đã gửi thành công
       if (staffResult || adminResult) {
         setShowOTP(true);
