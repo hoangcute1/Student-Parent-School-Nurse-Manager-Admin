@@ -99,7 +99,7 @@ export function AddStudentDialog({ onSubmit }: AddStudentDialogProps) {
   };
 
   return (
-    user?.userType == "admin" && (
+    user?.role == "admin" && (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="bg-blue-600 hover:bg-blue-700">
