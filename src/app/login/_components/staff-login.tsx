@@ -21,17 +21,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import {
   requestStaffLoginOTP,
+  requestAdminLoginOTP,
   type LoginRequestCredentials,
 } from "@/lib/api/api";
-import { loginStaffOTP } from "@/lib/api";
-
+import { loginStaffOTP, loginAdminOTP } from "@/lib/api/auth";
 
 export function StaffLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginRequestCredentials>({
     email: "",
     password: "",
-    role: "staff",
   });
   const [errors, setErrors] = useState<{
     email?: string;
@@ -87,29 +86,51 @@ export function StaffLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };
-  const verifyOTP = async (otp: string) => {
+  };  const verifyOTP = async (otp: string) => {
     try {
-      console.log("Verifying OTP in staff login:", otp);
+      console.log(`Verifying OTP:`, otp);
       console.log("Using email:", formData.email);
-      console.log("Using password:", formData.password);
 
-      // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const success = await loginStaffOTP(formData.email, otp);
-
-      if (success) {
+      // Thử đăng nhập cả staff và admin song song
+      let staffPromise = loginStaffOTP(formData.email, otp).catch(error => {
+        console.log("Staff login failed:", error);
+        return null;
+      });
+      
+      let adminPromise = loginAdminOTP(formData.email, otp).catch(error => {
+        console.log("Admin login failed:", error);
+        return null;
+      });
+      
+      // Chờ cả hai kết quả
+      const [staffResult, adminResult] = await Promise.all([
+        staffPromise,
+        adminPromise
+      ]);
+      
+      // Kiểm tra kết quả
+      if (staffResult === true) {
         toast({
-          title: "Đăng nhập thành công",
+          title: "Đăng nhập thành công (Nhân viên y tế)",
           description: "Đang chuyển hướng...",
         });
-
         setShowOTP(false);
-
-        // Redirect to CMS
         router.push("/cms");
-      } else {
-        throw new Error("Xác thực OTP thất bại");
+        return;
       }
+      
+      if (adminResult === true) {
+        toast({
+          title: "Đăng nhập thành công (Quản trị viên)",
+          description: "Đang chuyển hướng...",
+        });
+        setShowOTP(false);
+        router.push("/cms");
+        return;
+      }
+      
+      // Nếu cả hai đều thất bại
+      throw new Error("Xác thực OTP thất bại. Email hoặc OTP không hợp lệ.");
     } catch (error) {
       console.error("OTP Verification failed:", error);
       toast({
@@ -122,35 +143,80 @@ export function StaffLoginForm() {
   };
   const resendOTP = async () => {
     try {
-      await requestStaffLoginOTP({
+      // Thử gửi OTP cho cả staff và admin song song
+      let staffPromise = requestStaffLoginOTP({
         ...formData,
-        role: "staff",
+      }).catch(error => {
+        console.log("Failed to resend staff OTP:", error);
+        return null;
       });
-      toast({
-        title: "Đã gửi lại mã OTP",
-        description: "Vui lòng kiểm tra email của bạn",
+      
+      let adminPromise = requestAdminLoginOTP({
+        ...formData,
+      }).catch(error => {
+        console.log("Failed to resend admin OTP:", error);
+        return null;
       });
+      
+      // Chờ cả hai kết quả
+      const [staffResult, adminResult] = await Promise.all([
+        staffPromise,
+        adminPromise
+      ]);
+      
+      // Kiểm tra nếu ít nhất một loại OTP đã gửi thành công
+      if (staffResult || adminResult) {
+        toast({
+          title: "Đã gửi lại mã OTP",
+          description: "Vui lòng kiểm tra email của bạn",
+        });
+      } else {
+        throw new Error("Không thể gửi lại OTP");
+      }
     } catch (error) {
-      throw error;
+      toast({
+        title: "Lỗi",
+        description: "Không thể gửi lại mã OTP",
+        variant: "destructive",
+      });
     }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  };const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
     setIsLoading(true);
     try {
-      // First step: request OTP
-      await requestStaffLoginOTP({
+      // Thử gửi OTP cho cả staff và admin song song
+      let staffPromise = requestStaffLoginOTP({
         ...formData,
-        role: "staff",
+      }).catch(error => {
+        console.log("Failed to send staff OTP:", error);
+        return null;
       });
-      setShowOTP(true);
-      toast({
-        title: "Thành công",
-        description: "Mã OTP đã được gửi đến email của bạn",
+      
+      let adminPromise = requestAdminLoginOTP({
+        ...formData,
+      }).catch(error => {
+        console.log("Failed to send admin OTP:", error);
+        return null;
       });
+      
+      // Chờ cả hai kết quả
+      const [staffResult, adminResult] = await Promise.all([
+        staffPromise,
+        adminPromise
+      ]);
+      
+      // Kiểm tra nếu ít nhất một loại OTP đã gửi thành công
+      if (staffResult || adminResult) {
+        setShowOTP(true);
+        toast({
+          title: "Thành công",
+          description: "Mã OTP đã được gửi đến email của bạn",
+        });
+      } else {
+        throw new Error("Không thể gửi OTP. Email hoặc mật khẩu không hợp lệ.");
+      }
     } catch (error) {
       console.error("Login error:", error);
       let message = "Có lỗi xảy ra khi đăng nhập";
@@ -160,6 +226,8 @@ export function StaffLoginForm() {
           message = "Email hoặc mật khẩu không chính xác";
         } else if (error.message.includes("403")) {
           message = "Tài khoản của bạn không có quyền truy cập";
+        } else {
+          message = error.message;
         }
       }
 
@@ -176,8 +244,9 @@ export function StaffLoginForm() {
 
   return (
     <Card>
+      {" "}
       <CardHeader>
-        <CardTitle>Đăng nhập dành cho nhân viên y tế</CardTitle>
+        <CardTitle>Đăng nhập Portal Quản lý</CardTitle>
         <CardDescription>
           Quản lý sức khỏe học sinh và sự kiện y tế
         </CardDescription>
@@ -191,11 +260,11 @@ export function StaffLoginForm() {
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email</Label>{" "}
             <Input
               id="email"
               type="email"
-              placeholder="staff@example.com"
+              placeholder="nhập email đăng nhập"
               value={formData.email}
               onChange={handleChange}
               required

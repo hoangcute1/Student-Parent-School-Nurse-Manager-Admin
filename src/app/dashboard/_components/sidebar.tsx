@@ -41,8 +41,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <Heart className="h-7 w-7 text-white" />
           </div>
-          <div>
-            <div className="font-bold text-blue-800 text-lg">HEALTH CARE</div>
+          <Link href="/" className="flex-1">
+            <div className="font-bold text-blue-800 text-lg">Y Tế Học Đường </div>
             <div className="text-xs text-blue-600">Dành cho phụ huynh</div>
             <Badge
               variant="outline"
@@ -50,7 +50,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             >
               Phụ huynh
             </Badge>
-          </div>
+          </Link>
         </div>
       </div>
 

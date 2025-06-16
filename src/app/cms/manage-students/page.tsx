@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Plus,
@@ -15,6 +15,7 @@ import {
   UserCheck,
   Activity,
 } from "lucide-react";
+import { API_URL } from "@/lib/env";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,138 +55,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Sample data for classes
-const classesData = [
-  {
-    id: 1,
-    name: "1A",
-    teacher: "Cô Nguyễn Thị Lan",
-    studentCount: 25,
-    maleCount: 13,
-    femaleCount: 12,
-    averageAge: 6.2,
-  },
-  {
-    id: 2,
-    name: "1B",
-    teacher: "Cô Trần Thị Hoa",
-    studentCount: 24,
-    maleCount: 12,
-    femaleCount: 12,
-    averageAge: 6.1,
-  },
-  {
-    id: 3,
-    name: "2A",
-    teacher: "Cô Lê Thị Mai",
-    studentCount: 26,
-    maleCount: 14,
-    femaleCount: 12,
-    averageAge: 7.3,
-  },
-  {
-    id: 4,
-    name: "2B",
-    teacher: "Cô Phạm Thị Nga",
-    studentCount: 25,
-    maleCount: 13,
-    femaleCount: 12,
-    averageAge: 7.2,
-  },
-  {
-    id: 5,
-    name: "3A",
-    teacher: "Cô Hoàng Thị Linh",
-    studentCount: 27,
-    maleCount: 15,
-    femaleCount: 12,
-    averageAge: 8.1,
-  },
-  {
-    id: 6,
-    name: "3B",
-    teacher: "Cô Vũ Thị Hương",
-    studentCount: 26,
-    maleCount: 14,
-    femaleCount: 12,
-    averageAge: 8.2,
-  },
-  {
-    id: 7,
-    name: "4A",
-    teacher: "Cô Đặng Thị Thảo",
-    studentCount: 23,
-    maleCount: 11,
-    femaleCount: 12,
-    averageAge: 9.1,
-  },
-  {
-    id: 8,
-    name: "4B",
-    teacher: "Cô Bùi Thị Loan",
-    studentCount: 24,
-    maleCount: 12,
-    femaleCount: 12,
-    averageAge: 9.0,
-  },
-  {
-    id: 9,
-    name: "5A",
-    teacher: "Cô Ngô Thị Dung",
-    studentCount: 22,
-    maleCount: 10,
-    femaleCount: 12,
-    averageAge: 10.2,
-  },
-  {
-    id: 10,
-    name: "5B",
-    teacher: "Cô Lý Thị Hạnh",
-    studentCount: 21,
-    maleCount: 9,
-    femaleCount: 12,
-    averageAge: 10.1,
-  },
-];
+
 
 // Sample data for students
-const studentsData = [
-  {
-    id: 1,
-    name: "Nguyễn Văn An",
-    studentId: "HS2025001",
-    class: "1A",
-    birthDate: "2018-03-15",
-    gender: "Nam",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-    parentName: "Nguyễn Văn Bình",
-    parentPhone: "0901234567",
-    status: "Đang học",
-  },
-  {
-    id: 2,
-    name: "Trần Thị Bình",
-    studentId: "HS2025002",
-    class: "1A",
-    birthDate: "2018-05-20",
-    gender: "Nữ",
-    address: "456 Đường DEF, Quận 2, TP.HCM",
-    parentName: "Trần Văn Cường",
-    parentPhone: "0902345678",
-    status: "Đang học",
-  },
-  {
-    id: 3,
-    name: "Lê Hoàng Cường",
-    studentId: "HS2025003",
-    class: "2A",
-    birthDate: "2017-08-10",
-    gender: "Nam",
-    address: "789 Đường GHI, Quận 3, TP.HCM",
-    parentName: "Lê Thị Dung",
-    parentPhone: "0903456789",
-    status: "Đang học",
-  },
-];
+
+
+// Interface cho lớp học từ API
+interface ClassItem {
+  id: number;
+  name: string;
+  grade: string;
+}
 
 export default function StudentsPage() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
@@ -193,6 +73,39 @@ export default function StudentsPage() {
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Fetch danh sách lớp học từ API
+  const fetchClasses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/classes`);
+      if (!response.ok) {
+        throw new Error('Không thể lấy danh sách lớp học');
+      }
+      const data = await response.json();
+      setClasses(data);
+    } catch (err) {
+      console.error('Error fetching classes:', err);
+      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi lấy danh sách lớp học');
+      // Sử dụng dữ liệu mẫu nếu API không hoạt động (chỉ để demo)
+      setClasses([
+        { id: 1, name: "1A", grade: "1" },
+        { id: 2, name: "1B", grade: "1" },
+        { id: 3, name: "2A", grade: "2" },
+        { id: 4, name: "2B", grade: "2" },
+        { id: 5, name: "3A", grade: "3" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  // Gọi API khi component được mount
+  useEffect(() => {
+    fetchClasses();
+  }, []);
 
   const handleAddStudent = () => {
     setIsAddStudentOpen(false);
@@ -219,11 +132,10 @@ export default function StudentsPage() {
   const handleHealthCheck = (student: any) => {
     alert(`Bắt đầu kiểm tra sức khỏe cho học sinh: ${student.name}`);
   };
-
   if (selectedClass) {
-    const classStudents = studentsData.filter(
-      (student) => student.class === selectedClass
-    );
+    // Find the selected class details
+    const classDetails = classes.find(c => c.name === selectedClass) || { id: 0, name: selectedClass, grade: "" };
+    
 
     return (
       <div className="space-y-6">
@@ -236,7 +148,9 @@ export default function StudentsPage() {
             <h1 className="text-3xl font-bold tracking-tight text-blue-800">
               Danh sách học sinh lớp {selectedClass}
             </h1>
-            <p className="text-blue-600">Quản lý thông tin chi tiết học sinh</p>
+            <p className="text-blue-600">
+              Khối {classDetails.grade} - Mã lớp: {classDetails.id}
+            </p>
           </div>
         </div>
 
@@ -248,7 +162,7 @@ export default function StudentsPage() {
                   Học sinh lớp {selectedClass}
                 </CardTitle>
                 <CardDescription className="text-blue-600">
-                  Tổng số: {classStudents.length} học sinh
+                  
                 </CardDescription>
               </div>
               <div className="flex gap-2">
@@ -376,7 +290,7 @@ export default function StudentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {classStudents.map((student) => (
+                  {/* {classStudents.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -463,7 +377,7 @@ export default function StudentsPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ))} */}
                 </TableBody>
               </Table>
             </div>
@@ -570,9 +484,7 @@ export default function StudentsPage() {
         <p className="text-blue-600">
           Quản lý thông tin học sinh theo từng lớp
         </p>
-      </div>
-
-      {/* Stats Cards */}
+      </div>      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -582,7 +494,13 @@ export default function StudentsPage() {
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">248</div>
+            <div className="text-2xl font-bold text-blue-800">
+              {loading ? (
+                <span className="animate-pulse">...</span>
+              ) : (
+                "248" // Cần API để lấy thông tin thực tế
+              )}
+            </div>
             <p className="text-xs text-blue-600">Đang theo học</p>
           </CardContent>
         </Card>
@@ -595,23 +513,18 @@ export default function StudentsPage() {
             <Activity className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-800">12</div>
+            <div className="text-2xl font-bold text-green-800">
+              {loading ? (
+                <span className="animate-pulse">...</span>
+              ) : (
+                classes.length
+              )}
+            </div>
             <p className="text-xs text-green-600">Lớp học</p>
           </CardContent>
         </Card>
 
-        <Card className="border-orange-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">
-              Mới nhập học
-            </CardTitle>
-            <Plus className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">15</div>
-            <p className="text-xs text-orange-600">Tháng này</p>
-          </CardContent>
-        </Card>
+      
 
         <Card className="border-purple-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -621,56 +534,81 @@ export default function StudentsPage() {
             <Users className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-800">21</div>
+            <div className="text-2xl font-bold text-purple-800">
+              {loading ? (
+                <span className="animate-pulse">...</span>
+              ) : classes.length > 0 ? (
+                Math.round(248 / classes.length) // Cần API để lấy thông tin thực tế
+              ) : (
+                "0"
+              )}
+            </div>
             <p className="text-xs text-purple-600">Học sinh</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Classes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {classesData.map((classInfo) => (
-          <Card
-            key={classInfo.id}
-            className="border-blue-100 hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => setSelectedClass(classInfo.name)}
-          >
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl text-blue-800 flex items-center justify-between">
-                Lớp {classInfo.name}
-                <Badge className="bg-blue-100 text-blue-800">
-                  {classInfo.studentCount} HS
-                </Badge>
-              </CardTitle>
-              <CardDescription className="text-blue-600">
-                Giáo viên chủ nhiệm: {classInfo.teacher}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Nam:</span>
-                  <span className="font-medium">{classInfo.maleCount}</span>
+      {loading ? (
+        <div className="flex justify-center items-center p-8">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-700"></div>
+          <span className="ml-3 text-blue-700">Đang tải danh sách lớp...</span>
+        </div>
+      ) : error ? (
+        <Card className="border-red-100 bg-red-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-red-700">Không thể tải danh sách lớp</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-600">{error}</p>
+            <Button 
+              onClick={fetchClasses} 
+              className="mt-4 bg-red-600 hover:bg-red-700"
+              size="sm"
+            >
+              Thử lại
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {classes.map((classItem) => (
+            <Card
+              key={classItem.id}
+              className="border-blue-100 hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => setSelectedClass(classItem.name)}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl text-blue-800 flex items-center justify-between">
+                  Lớp {classItem.name}
+                  <Badge className="bg-blue-100 text-blue-800">
+                    Khối {classItem.grade}
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="text-blue-600">
+                  Mã lớp: {classItem.id}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-xl font-bold">{classItem.grade}</span>
+                  </div>
+                  <div className="text-center mb-3">
+                    <span className="text-gray-600">Khối {classItem.grade} - Lớp {classItem.name}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Nữ:</span>
-                  <span className="font-medium">{classInfo.femaleCount}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Tuổi TB:</span>
-                  <span className="font-medium">{classInfo.averageAge}</span>
-                </div>
-              </div>
-              <Button
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
-                size="sm"
-              >
-                Xem danh sách
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <Button
+                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700"
+                  size="sm"
+                >
+                  Xem danh sách
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
