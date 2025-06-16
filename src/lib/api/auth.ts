@@ -70,6 +70,96 @@ const loginParentOTP = async (email: string, otp: string): Promise<boolean> => {
   }
 };
 
+
+const loginAdmin = async (
+  email: string,
+  password: string
+): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login-admin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Login failed");
+    }
+    return true;
+  } catch (error) {
+    console.error("Login error:", error);
+    return false;
+  }
+}; // Đăng nhập với OTP
+const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login-admin/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    if (!response.ok) {
+      throw new Error("OTP verification failed");
+    }
+    const data: AuthResponse = await response.json();
+    setToken(data.token);
+    useAuthStore.getState().updateUserInfo(data.user, data.profile);
+    return true;
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    return false;
+  }
+};
+
+const loginStaff = async (
+  email: string,
+  password: string
+): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login-staff`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Login failed");
+    }
+    return true;
+  } catch (error) {
+    console.error("Login error:", error);
+    return false;
+  }
+}; // Đăng nhập với OTP
+const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login-staff/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    if (!response.ok) {
+      throw new Error("OTP verification failed");
+    }
+    const data: AuthResponse = await response.json();
+    setToken(data.token);
+    useAuthStore.getState().updateUserInfo(data.user, data.profile);
+    return true;
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    return false;
+  }
+};
 // Đăng xuất
 const logout = (): void => {
   // Xóa token khỏi memory
@@ -86,5 +176,9 @@ export {
   hasToken,
   loginParent,
   loginParentOTP,
+  loginAdmin,
+  loginAdminOTP,
+  loginStaff,
+  loginStaffOTP,
   logout,
 };

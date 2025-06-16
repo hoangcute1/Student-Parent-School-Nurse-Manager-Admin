@@ -23,7 +23,8 @@ import {
   requestStaffLoginOTP,
   type LoginRequestCredentials,
 } from "@/lib/api/api";
-import { loginParentOTP } from "@/lib/api";
+import { loginStaffOTP } from "@/lib/api";
+
 
 export function StaffLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -94,7 +95,7 @@ export function StaffLoginForm() {
       console.log("Using password:", formData.password);
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const success = await loginParentOTP(formData.email, otp);
+      const success = await loginStaffOTP(formData.email, otp);
 
       if (success) {
         toast({
