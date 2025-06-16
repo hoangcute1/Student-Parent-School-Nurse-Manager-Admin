@@ -33,19 +33,42 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Định nghĩa kiểu dữ liệu cho medication
+interface Medication {
+  studentName: string;
+  medicationName: string;
+  dosage: string;
+  schedule: string;
+  status: string;
+  frequency?: string;
+  startDate?: string;
+  endDate?: string;
+  reason?: string;
+  instructions?: string;
+  parentContact?: string;
+}
+
 export default function MedicationsPage() {
   const [isAddMedicineOpen, setIsAddMedicineOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedMedication, setSelectedMedication] =
+    useState<Medication | null>(null);
 
   const handleSubmitMedicine = () => {
     // TODO: Implement medicine submission logic
     setIsAddMedicineOpen(false);
   };
 
+  const handleViewDetail = (medication: Medication) => {
+    setSelectedMedication(medication);
+    setIsDetailOpen(true);
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Quản lý thuốc
+          Gửi thuốc cho học sinh
         </h1>
         <p className="text-blue-600">Theo dõi thuốc của học sinh</p>
       </div>
@@ -234,7 +257,11 @@ export default function MedicationsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewDetail(med)}
+                    >
                       Chi tiết
                     </Button>
                   </TableCell>
@@ -244,17 +271,120 @@ export default function MedicationsPage() {
           </Table>
         </div>
       </div>
+
+      {/* Dialog xem chi tiết thuốc */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Chi tiết thuốc</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Thông tin về thuốc và lịch uống của học sinh
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedMedication && (
+            <div className="space-y-6 py-4">
+              <div className="border-b pb-4">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  Thông tin học sinh
+                </h3>
+                <p className="text-gray-800">
+                  {selectedMedication.studentName}
+                </p>
+              </div>
+
+              <div className="border-b pb-4">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  Thông tin thuốc
+                </h3>
+                <p className="text-gray-800">
+                  {selectedMedication.medicationName}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-b pb-4">
+                <div>
+                  <h3 className="font-medium text-blue-800 mb-2">Liều dùng</h3>
+                  <p className="text-gray-800">{selectedMedication.dosage}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-blue-800 mb-2">Tần suất</h3>
+                  <p className="text-gray-800">
+                    {selectedMedication.schedule || "Chưa cập nhật"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-b pb-4">
+                <div>
+                  <h3 className="font-medium text-blue-800 mb-2">
+                    Ngày bắt đầu
+                  </h3>
+                  <p className="text-gray-800">
+                    {selectedMedication.startDate || "Chưa cập nhật"}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-blue-800 mb-2">
+                    Ngày kết thúc
+                  </h3>
+                  <p className="text-gray-800">
+                    {selectedMedication.endDate || "Chưa cập nhật"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-b pb-4">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  Lý do sử dụng
+                </h3>
+                <p className="text-gray-800">
+                  {selectedMedication.reason || "Chưa cập nhật"}
+                </p>
+              </div>
+
+              <div className="border-b pb-4">
+                <h3 className="font-medium text-blue-800 mb-2">
+                  Hướng dẫn đặc biệt
+                </h3>
+                <p className="text-gray-800">
+                  {selectedMedication.instructions || "Không có"}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-medium text-blue-800 mb-2">
+                  Liên hệ phụ huynh
+                </h3>
+                <p className="text-gray-800">
+                  {selectedMedication.parentContact || "Chưa cập nhật"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setIsDetailOpen(false)}>Đóng</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-const studentMedications = [
+const studentMedications: Medication[] = [
   {
     studentName: "Nguyễn Văn An",
     medicationName: "Paracetamol",
     dosage: "500mg, 1 viên",
     schedule: "Sau bữa trưa",
     status: "Đang dùng",
+    frequency: "3 lần/ngày",
+    startDate: "15/06/2025",
+    endDate: "22/06/2025",
+    reason: "Điều trị sốt nhẹ, đau đầu",
+    instructions: "Uống sau bữa ăn, không uống khi đói",
+    parentContact: "0912345678",
   },
   {
     studentName: "Trần Thị Bình",
@@ -262,6 +392,12 @@ const studentMedications = [
     dosage: "10mg, 1 viên",
     schedule: "Sáng và tối",
     status: "Đang dùng",
+    frequency: "2 lần/ngày",
+    startDate: "10/06/2025",
+    endDate: "25/06/2025",
+    reason: "Điều trị dị ứng theo mùa",
+    instructions: "Có thể gây buồn ngủ, uống vào buổi tối",
+    parentContact: "0923456789",
   },
   {
     studentName: "Lê Hoàng Cường",
@@ -269,6 +405,12 @@ const studentMedications = [
     dosage: "2 nhát xịt",
     schedule: "Khi có triệu chứng",
     status: "Khi cần",
+    frequency: "Khi cần thiết",
+    startDate: "01/06/2025",
+    endDate: "30/06/2025",
+    reason: "Điều trị hen suyễn",
+    instructions: "Xịt khi có triệu chứng khó thở, không quá 4 lần/ngày",
+    parentContact: "0934567890",
   },
   {
     studentName: "Phạm Minh Đức",
@@ -276,6 +418,12 @@ const studentMedications = [
     dosage: "400 IU, 1 viên",
     schedule: "Sau bữa sáng",
     status: "Đang dùng",
+    frequency: "1 lần/ngày",
+    startDate: "01/05/2025",
+    endDate: "31/07/2025",
+    reason: "Bổ sung vitamin D",
+    instructions: "Uống hàng ngày sau bữa sáng",
+    parentContact: "0945678901",
   },
   {
     studentName: "Hoàng Thị Lan",
@@ -283,5 +431,11 @@ const studentMedications = [
     dosage: "200mg, 1 viên",
     schedule: "Khi đau đầu",
     status: "Khi cần",
+    frequency: "Khi cần thiết",
+    startDate: "10/06/2025",
+    endDate: "10/07/2025",
+    reason: "Giảm đau nhẹ, đau đầu",
+    instructions: "Không dùng khi dị ứng, có thể gây kích ứng dạ dày",
+    parentContact: "0956789012",
   },
 ];

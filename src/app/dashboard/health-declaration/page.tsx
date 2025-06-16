@@ -12,6 +12,47 @@ import {
   Shield,
 } from "lucide-react";
 
+// Health Record Interface
+interface HealthRecord {
+  id: number;
+  studentName: string;
+  class: string;
+  allergies: string | null;
+  chronicDisease: string | null;
+  vision: string;
+  lastUpdated: string;
+}
+
+interface AllergyRecord {
+  studentName: string;
+  class: string;
+  foodAllergies: string | null;
+  drugAllergies: string | null;
+  otherAllergies: string | null;
+  emergencyAction?: string;
+}
+
+interface ChronicDiseaseRecord {
+  studentName: string;
+  class: string;
+  disease: string;
+  condition: string;
+  medication: string;
+  notes: string;
+}
+
+interface Vaccine {
+  name: string;
+  completed: boolean;
+}
+
+interface VaccinationRecord {
+  studentName: string;
+  class: string;
+  completionRate: number;
+  vaccines: Vaccine[];
+}
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -55,10 +96,37 @@ export default function ParentHealthRecords() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAddRecordOpen, setIsAddRecordOpen] = useState(false);
+  const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<HealthRecord | null>(
+    null
+  );
 
   const handleSubmitRecord = () => {
     setIsAddRecordOpen(false);
-    alert("Đã cập nhật hồ sơ sức khỏe thành công!");
+    alert(
+      selectedRecord
+        ? "Đã cập nhật hồ sơ sức khỏe thành công!"
+        : "Đã thêm hồ sơ sức khỏe mới thành công!"
+    );
+    setSelectedRecord(null);
+  };
+
+  const handleViewDetail = (record: HealthRecord) => {
+    setSelectedRecord(record);
+    setIsDetailViewOpen(true);
+  };
+
+  const handleEditRecord = (record: HealthRecord) => {
+    setSelectedRecord(record);
+    setIsAddRecordOpen(true);
+  };
+
+  // Clear selected record when the add dialog is closed
+  const handleAddDialogOpenChange = (open: boolean) => {
+    setIsAddRecordOpen(open);
+    if (!open) {
+      setSelectedRecord(null);
+    }
   };
 
   return (
@@ -154,7 +222,10 @@ export default function ParentHealthRecords() {
             </TabsTrigger>
           </TabsList>
 
-          <Dialog open={isAddRecordOpen} onOpenChange={setIsAddRecordOpen}>
+          <Dialog
+            open={isAddRecordOpen}
+            onOpenChange={handleAddDialogOpenChange}
+          >
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4 mr-2" />
@@ -163,7 +234,11 @@ export default function ParentHealthRecords() {
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Khai báo hồ sơ sức khỏe học sinh</DialogTitle>
+                <DialogTitle>
+                  {selectedRecord
+                    ? "Chỉnh sửa hồ sơ sức khỏe"
+                    : "Khai báo hồ sơ sức khỏe học sinh"}
+                </DialogTitle>
                 <DialogDescription>
                   Vui lòng điền đầy đủ thông tin sức khỏe của con em
                 </DialogDescription>
@@ -177,17 +252,30 @@ export default function ParentHealthRecords() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="student">Học sinh</Label>
-                      <Select>
+                      <Select
+                        defaultValue={
+                          selectedRecord ? "selected-student" : undefined
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Chọn học sinh" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="student1">
-                            Nguyễn Văn An - Lớp 1A
-                          </SelectItem>
-                          <SelectItem value="student2">
-                            Trần Thị Bình - Lớp 2B
-                          </SelectItem>
+                          {selectedRecord ? (
+                            <SelectItem value="selected-student">
+                              {selectedRecord.studentName} -{" "}
+                              {selectedRecord.class}
+                            </SelectItem>
+                          ) : (
+                            <>
+                              <SelectItem value="student1">
+                                Nguyễn Văn An - Lớp 1A
+                              </SelectItem>
+                              <SelectItem value="student2">
+                                Trần Thị Bình - Lớp 2B
+                              </SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -213,7 +301,12 @@ export default function ParentHealthRecords() {
                   <h3 className="text-lg font-semibold text-red-800">Dị ứng</h3>
                   <div className="space-y-3">
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="no-allergy" />
+                      <Checkbox
+                        id="no-allergy"
+                        defaultChecked={
+                          selectedRecord ? !selectedRecord.allergies : false
+                        }
+                      />
                       <Label htmlFor="no-allergy">Không có dị ứng</Label>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -469,7 +562,7 @@ export default function ParentHealthRecords() {
                 <div className="flex justify-end gap-2 pt-4">
                   <Button
                     variant="outline"
-                    onClick={() => setIsAddRecordOpen(false)}
+                    onClick={() => handleAddDialogOpenChange(false)}
                   >
                     Hủy
                   </Button>
@@ -477,7 +570,7 @@ export default function ParentHealthRecords() {
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={handleSubmitRecord}
                   >
-                    Lưu hồ sơ
+                    {selectedRecord ? "Cập nhật" : "Lưu hồ sơ"}
                   </Button>
                 </div>
               </div>
@@ -571,10 +664,18 @@ export default function ParentHealthRecords() {
                         <TableCell>{record.lastUpdated}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewDetail(record)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditRecord(record)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
@@ -749,6 +850,235 @@ export default function ParentHealthRecords() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Health Record Detail View Dialog */}
+      <Dialog open={isDetailViewOpen} onOpenChange={setIsDetailViewOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-blue-800">
+              {selectedRecord?.studentName} - Chi tiết Hồ sơ sức khỏe
+            </DialogTitle>
+            <DialogDescription>
+              Thông tin sức khỏe chi tiết của học sinh
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRecord && (
+            <div className="space-y-6">
+              {/* Thông tin cơ bản */}
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                  Thông tin cơ bản
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">
+                      Học sinh:
+                    </p>
+                    <p className="text-sm font-semibold">
+                      {selectedRecord.studentName}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Lớp:</p>
+                    <p className="text-sm font-semibold">
+                      {selectedRecord.class}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">
+                      Cập nhật lần cuối:
+                    </p>
+                    <p className="text-sm font-semibold">
+                      {selectedRecord.lastUpdated}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">
+                      Nhóm máu:
+                    </p>
+                    <p className="text-sm font-semibold">A (mẫu dữ liệu)</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dị ứng */}
+              <div className="rounded-lg border border-red-100 bg-red-50 p-4">
+                <h3 className="text-lg font-semibold text-red-800 mb-3">
+                  Dị ứng
+                </h3>
+                {selectedRecord.allergies ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <Badge className="bg-red-100 text-red-800">
+                        {selectedRecord.allergies}
+                      </Badge>
+                    </div>
+                    <p className="text-sm mt-2">
+                      <strong>Mô tả:</strong> Dị ứng {selectedRecord.allergies}{" "}
+                      có thể gây phản ứng nghiêm trọng, cần tránh tiếp xúc.
+                    </p>
+                    <p className="text-sm">
+                      <strong>Xử lý khẩn cấp:</strong> Nếu có dấu hiệu phản ứng,
+                      sử dụng thuốc kháng histamine và thông báo cho phụ huynh
+                      ngay lập tức.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Không có dị ứng</p>
+                )}
+              </div>
+
+              {/* Bệnh mãn tính */}
+              <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">
+                <h3 className="text-lg font-semibold text-orange-800 mb-3">
+                  Bệnh mãn tính
+                </h3>
+                {selectedRecord.chronicDisease ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <Badge className="bg-orange-100 text-orange-800">
+                        {selectedRecord.chronicDisease}
+                      </Badge>
+                    </div>
+                    {selectedRecord.chronicDisease === "Hen suyễn" && (
+                      <>
+                        <p className="text-sm mt-2">
+                          <strong>Tình trạng:</strong> Kiểm soát tốt
+                        </p>
+                        <p className="text-sm">
+                          <strong>Thuốc:</strong> Salbutamol xịt khi cần
+                        </p>
+                        <p className="text-sm">
+                          <strong>Lưu ý:</strong> Tránh vận động mạnh, có sẵn
+                          thuốc xịt
+                        </p>
+                      </>
+                    )}
+                    {selectedRecord.chronicDisease === "Tiểu đường type 1" && (
+                      <>
+                        <p className="text-sm mt-2">
+                          <strong>Tình trạng:</strong> Ổn định
+                        </p>
+                        <p className="text-sm">
+                          <strong>Thuốc:</strong> Insulin theo chỉ định bác sĩ
+                        </p>
+                        <p className="text-sm">
+                          <strong>Lưu ý:</strong> Kiểm tra đường huyết định kỳ,
+                          chế độ ăn đặc biệt
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Không có bệnh mãn tính
+                  </p>
+                )}
+              </div>
+
+              {/* Thị lực và thính lực */}
+              <div className="rounded-lg border border-green-100 bg-green-50 p-4">
+                <h3 className="text-lg font-semibold text-green-800 mb-3">
+                  Thị lực và Thính lực
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Thị lực:</p>
+                    <Badge
+                      className={
+                        selectedRecord.vision === "Bình thường"
+                          ? "bg-green-100 text-green-800 mt-1"
+                          : "bg-yellow-100 text-yellow-800 mt-1"
+                      }
+                    >
+                      {selectedRecord.vision}
+                    </Badge>
+                    {selectedRecord.vision !== "Bình thường" && (
+                      <p className="text-sm mt-2">
+                        Cần đeo kính khi học và đọc sách
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Thính lực:</p>
+                    <Badge className="bg-green-100 text-green-800 mt-1">
+                      Bình thường
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tiêm chủng */}
+              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                  Lịch sử tiêm chủng
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    "BCG",
+                    "Viêm gan B",
+                    "DPT",
+                    "Bại liệt",
+                    "Sởi",
+                    "Rubella",
+                    "Quai bị",
+                    "Thủy đậu",
+                  ].map((vaccine) => (
+                    <div
+                      key={vaccine}
+                      className="flex justify-between items-center"
+                    >
+                      <span className="text-sm">{vaccine}</span>
+                      <Badge className="bg-green-100 text-green-800">✓</Badge>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm mt-3">
+                  <strong>Tỷ lệ hoàn thành:</strong> 95%
+                </p>
+              </div>
+
+              {/* Thông tin liên hệ khẩn cấp */}
+              <div className="rounded-lg border border-red-100 bg-red-50 p-4">
+                <h3 className="text-lg font-semibold text-red-800 mb-3">
+                  Thông tin liên hệ khẩn cấp
+                </h3>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <strong>Phụ huynh:</strong> Nguyễn Văn Phụ huynh
+                  </p>
+                  <p className="text-sm">
+                    <strong>Số điện thoại:</strong> 0987654321
+                  </p>
+                  <p className="text-sm">
+                    <strong>Bác sĩ gia đình:</strong> Bs. Trần Văn A -
+                    0123456789
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDetailViewOpen(false)}
+                >
+                  Đóng
+                </Button>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    setIsDetailViewOpen(false);
+                    handleEditRecord(selectedRecord);
+                  }}
+                >
+                  Chỉnh sửa
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
