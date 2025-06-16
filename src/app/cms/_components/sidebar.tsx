@@ -7,6 +7,7 @@ import { navLinks, adminNavLinks } from "../_constants/sidebar";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import type { User as AppUser } from "@/lib/types";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -14,22 +15,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
-  const [user, setUser] = useState<AppUser | null>(null);
-
-  useEffect(() => {
-    // Get user data from localStorage
-    const authData = localStorage.getItem("authData");
-    if (!authData) return;
-
-    try {
-      const data = JSON.parse(authData);
-      if (data.user) {
-        setUser(data.user);
-      }
-    } catch (error) {
-      console.error("Error parsing auth data:", error);
-    }
-  }, []);
+  const { user } = useAuthStore();
 
   return (
     <aside
@@ -39,13 +25,16 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       )}
     >
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
-        <div className="flex items-center gap-3 border-b border-blue-200 pb-4">
+        <Link
+          href="/"
+          className="flex items-center gap-3 border-b border-blue-200 pb-4"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
             <Heart className="h-7 w-7 text-white" />
           </div>
           <div>
             <div className="font-bold text-blue-800 text-lg">
-              HEALTH CARE CMS
+              Y Tế Học Đường
             </div>
             <div className="text-xs text-blue-600">Hệ thống quản lý y tế</div>
             <Badge
@@ -54,10 +43,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             >
               {" "}
               <Shield className="mr-1 h-3 w-3" />
-              {user?.userType === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
+              {user?.role === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
             </Badge>
           </div>
-        </div>
+        </Link>
         {/* Thống kê nhanh */}
         <div className="bg-white rounded-lg border border-blue-200 p-3 mb-4">
           <div className="grid grid-cols-2 gap-2 text-center">
@@ -73,7 +62,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </div>{" "}
         <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
           {/* Admin navigation links */}
-          {user?.userType === "admin" && (
+          {user?.role === "admin" && (
             <>
               <div className="text-xs font-medium text-blue-500 uppercase tracking-wider mb-2 mt-2">
                 Quản lý hệ thống

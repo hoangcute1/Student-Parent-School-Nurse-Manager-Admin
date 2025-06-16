@@ -100,19 +100,30 @@ const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, otp }),
+      body: JSON.stringify({ 
+        email, 
+        otp,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error("OTP verification failed");
+      // Đọc thông tin lỗi từ response
+      const errorData = await response.json().catch(() => ({}));
+      // Ném ra lỗi với thông tin chi tiết hơn
+      throw new Error(errorData.message || `Xác thực OTP không thành công: ${response.status}`);
     }
+    
+    // Xử lý response thành công
     const data: AuthResponse = await response.json();
+    
+    // Lưu token và thông tin người dùng
     setToken(data.token);
     useAuthStore.getState().updateUserInfo(data.user, data.profile);
+    
     return true;
   } catch (error) {
-    console.error("OTP verification error:", error);
-    return false;
+    console.error("Admin OTP verification error:", error);
+    throw error; // Re-throw để xử lý ở hàm gọi
   }
 };
 
@@ -145,19 +156,30 @@ const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, otp }),
+      body: JSON.stringify({ 
+        email, 
+        otp,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error("OTP verification failed");
+      // Đọc thông tin lỗi từ response
+      const errorData = await response.json().catch(() => ({}));
+      // Ném ra lỗi với thông tin chi tiết hơn
+      throw new Error(errorData.message || `Xác thực OTP không thành công: ${response.status}`);
     }
+    
+    // Xử lý response thành công
     const data: AuthResponse = await response.json();
+    
+    // Lưu token và thông tin người dùng
     setToken(data.token);
     useAuthStore.getState().updateUserInfo(data.user, data.profile);
+    
     return true;
   } catch (error) {
-    console.error("OTP verification error:", error);
-    return false;
+    console.error("Staff OTP verification error:", error);
+    throw error; // Re-throw để xử lý ở hàm gọi
   }
 };
 // Đăng xuất
