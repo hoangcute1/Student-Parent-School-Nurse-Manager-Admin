@@ -9,12 +9,12 @@ import {
 
 const features = [
   {
-    title: "Hồ sơ sức khỏe",
+    title: "Khai báo sức khỏe",
     description: "Quản lý thông tin sức khỏe học sinh",
     content:
       "Phụ huynh có thể khai báo dị ứng, bệnh mãn tính, tiền sử điều trị, thị lực, thính lực, tiêm chủng và các thông tin sức khỏe khác.",
     icon: FileText,
-    href: "/dashboard/profile",
+    href: "/dashboard/health-declaration",
     textColor: "text-blue-500",
     borderColor: "border-blue-500",
   },
@@ -34,7 +34,7 @@ const features = [
     content:
       "Xem kết quả khám sức khỏe định kỳ và các chỉ số sức khỏe của học sinh.",
     icon: Calendar,
-    href: "/dashboard/health-results",
+    href: "/dashboard/profile",
     textColor: "text-green-500",
     borderColor: "border-green-500",
   },
@@ -49,7 +49,7 @@ const features = [
     borderColor: "border-purple-500",
   },
   {
-    title: "Sự kiện y tế",
+    title: "Thông báo & Sự kiện",
     description: "Kết nối phụ huynh và nhà trường",
     content:
       "Hệ thống liên lạc giữa phụ huynh và nhân viên y tế, đặt lịch tư vấn và thông báo kết quả kiểm tra.",

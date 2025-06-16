@@ -23,7 +23,8 @@ import {
   requestStaffLoginOTP,
   type LoginRequestCredentials,
 } from "@/lib/api/api";
-import { loginStaffOTP } from "@/lib/api";
+import { loginStaffOTP } from "@/lib/api/auth";
+
 
 
 export function StaffLoginForm() {

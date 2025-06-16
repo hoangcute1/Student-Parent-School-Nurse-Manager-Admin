@@ -23,7 +23,8 @@ import {
   requestParentLoginOTP,
   type LoginRequestCredentials,
 } from "@/lib/api/api";
-import { loginParentOTP } from "@/lib/api";
+import { loginParentOTP } from "@/lib/api/auth";
+
 
 export function ParentLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
