@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Shield, Calendar } from "lucide-react";
 import {
@@ -13,14 +13,63 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/auth-store";
+import { API_URL } from "@/lib/env";
+import { AuthService } from "@/lib/auth-service";
 
 export default function ProfilePage() {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const { user, role, profile } = useAuthStore();
+  const { user, role, profile, updateUserInfo } = useAuthStore();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!AuthService.hasToken()) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = AuthService.getToken();
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          updateUserInfo(data.user, data.profile);
+        } else {
+          toast({
+            title: "Lỗi",
+            description: "Không thể tải thông tin người dùng",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast({
+          title: "Lỗi",
+          description: "Đã xảy ra lỗi khi tải thông tin người dùng",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [toast, updateUserInfo]);
+
   if (loading) {
     return <div className="flex justify-center p-8">Đang tải thông tin...</div>;
+  }
+
+  // Nếu không có thông tin người dùng, chuyển hướng đến trang đăng nhập
+  if (!user) {
+    router.push("/login");
+    return null;
   }
 
   if (!profile && user) {
@@ -60,11 +109,6 @@ export default function ProfilePage() {
     );
   }
 
-  // Nếu không có thông tin người dùng, chuyển hướng đến trang đăng nhập
-  if (!user) {
-    router.push("/login");
-    return null;
-  }
   return (
     <div className="px-4 space-y-8 py-8">
       <Card>
