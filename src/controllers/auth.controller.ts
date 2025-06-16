@@ -52,6 +52,58 @@ export class AuthController {
     );
   }
 
+  @Post('login-staff')
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập phụ huynh và nhận OTP' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginStaff(@Body() loginDto: LoginDto) {
+    return this.authService.loginStaff(loginDto.email, loginDto.password);
+  }
+  @Post('login-staff/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập phụ huynh',
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async loginStaffOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
+    return this.authService.loginStaffWithOtp(
+      loginWithOtpDto.email,
+      loginWithOtpDto.otp,
+    );
+  }
+
+  @Post('login-admin')
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập phụ huynh và nhận OTP' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginAdmin(@Body() loginDto: LoginDto) {
+    return this.authService.loginAdmin(loginDto.email, loginDto.password);
+  }
+  @Post('login-admin/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập phụ huynh',
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async loginAdminOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
+    return this.authService.loginAdminWithOtp(
+      loginWithOtpDto.email,
+      loginWithOtpDto.otp,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @ApiOperation({ summary: 'Đăng xuất người dùng' })
