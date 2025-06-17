@@ -138,7 +138,6 @@ export class MedicineStorageService {
   ): Promise<MedicineStorage[]> {
     return this.medicineStorageModel
       .find({
-        
         expired: {
           $gte: new Date(startDate),
           $lte: new Date(endDate),

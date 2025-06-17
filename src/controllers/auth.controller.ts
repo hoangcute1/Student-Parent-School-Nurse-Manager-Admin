@@ -17,6 +17,11 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginDto, LoginWithOtpDto } from '@/decorations/dto/login.dto';
 
 import { RefreshTokenDto } from '@/decorations/dto/refresh-token.dto';
+<<<<<<< HEAD
+=======
+import { VerifyOtpDto } from '@/decorations/dto/verify-otp.dto';
+import { GoogleLoginDto } from '@/decorations/dto/google-login.dto';
+>>>>>>> main
 
 @ApiTags('auth')
 @Controller('auth')
@@ -108,7 +113,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Đăng xuất người dùng' })
   @ApiResponse({ status: 200, description: 'Đăng xuất thành công.' })
-  async logout(@Req() req) {
+  logout(@Req() req) {
     // Extract token from the authorization header
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
@@ -165,4 +170,88 @@ export class AuthController {
       profile: profile,
     };
   }
+<<<<<<< HEAD
+=======
+
+  @UseGuards(LocalAuthGuard)
+  @Post('login-request')
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập và nhận OTP' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginRequest(@Body() loginDto: LoginDto) {
+    // Validate user first
+    await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+      loginDto.role,
+    );
+    // Send OTP
+    await this.authService.sendLoginOTP(loginDto.email);
+    return { message: 'OTP đã được gửi đến email của bạn' };
+  }
+
+  @Post('login-verify')
+  @ApiOperation({ summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập' })
+  @ApiBody({ type: VerifyOtpDto })
+  @ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
+  @ApiResponse({
+    status: 400,
+    description: 'OTP không hợp lệ hoặc đã hết hạn.',
+  })
+  async loginVerify(@Body() verifyOtpDto: VerifyOtpDto) {
+    // Verify OTP
+    await this.authService.verifyLoginOTP(verifyOtpDto.email, verifyOtpDto.otp);
+
+    // Get user and complete login
+    const user = await this.userService.findByEmail(verifyOtpDto.email);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    return this.authService.login(user);
+  }
+
+  @Post('parent-google')
+  @ApiOperation({ summary: 'Đăng nhập bằng Google cho phụ huynh' })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng nhập thành công',
+    schema: {
+      properties: {
+        access_token: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+        refresh_token: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '60d21b4667d0d8992e610c85' },
+            email: { type: 'string', example: 'parent@example.com' },
+            role: { type: 'string', example: 'parent' },
+            userType: { type: 'string', example: 'parent' },
+          },
+        },
+        profile: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', example: 'Nguyễn Văn A' },
+            phone: { type: 'string', example: '0123456789' },
+            gender: { type: 'string', example: 'male' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Email chưa được đăng ký trong hệ thống',
+  })
+  @ApiResponse({ status: 401, description: 'Không phải tài khoản phụ huynh' })
+  @ApiBody({ type: GoogleLoginDto })
+  async loginParentWithGoogle(@Body() googleLoginDto: GoogleLoginDto) {
+    return this.authService.loginParentGoogle(googleLoginDto.email);
+  }
+>>>>>>> main
 }

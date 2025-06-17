@@ -105,7 +105,8 @@ export class UserService {
       // Find the role by name
 
       // Update user's role
-      user.updated_at = new Date();
+      user.roleId = role.id as any;
+      user.updatedAt = new Date();
 
       return user.save();
     } catch (error) {
@@ -193,7 +194,7 @@ export class UserService {
     const parentUsers: any[] = [];
 
     for (const parent of parents) {
-      const user = parent.user as any;
+      const user = parent.user;
       if (user && user._id) {
         parentUsers.push({
           _id: user._id,
