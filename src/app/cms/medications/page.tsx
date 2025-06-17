@@ -51,11 +51,44 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+// Define type for medicine
+interface Medicine {
+  id: number;
+  name: string;
+  category: string;
+  quantity: number;
+  maxQuantity: number;
+  unit: string;
+  expiryDate: string;
+  status: string;
+}
+
 export default function Medicine() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(
+    null
+  );
+
+  const handleViewMedicine = (medicine: Medicine) => {
+    setSelectedMedicine(medicine);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditMedicine = (medicine: Medicine) => {
+    setSelectedMedicine(medicine);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteMedicine = (medicine: Medicine) => {
+    setSelectedMedicine(medicine);
+    setIsDeleteDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -150,7 +183,6 @@ export default function Medicine() {
             Hạn sử dụng
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="inventory" className="mt-6">
           <Card>
             <CardHeader>
@@ -316,13 +348,25 @@ export default function Medicine() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewMedicine(medicine)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditMedicine(medicine)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteMedicine(medicine)}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -335,7 +379,6 @@ export default function Medicine() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="import" className="mt-6">
           <Card>
             <CardHeader>
@@ -379,7 +422,6 @@ export default function Medicine() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="export" className="mt-6">
           <Card>
             <CardHeader>
@@ -544,7 +586,6 @@ export default function Medicine() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="expiry" className="mt-6">
           <Card>
             <CardHeader>
@@ -600,8 +641,244 @@ export default function Medicine() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent>{" "}
       </Tabs>
+
+      {/* View Medicine Dialog */}
+      {selectedMedicine && (
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Chi tiết thuốc</DialogTitle>
+              <DialogDescription>Thông tin chi tiết về thuốc</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Tên thuốc
+                  </h4>
+                  <p className="text-lg font-medium">{selectedMedicine.name}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Loại thuốc
+                  </h4>
+                  <p className="text-lg font-medium">
+                    {selectedMedicine.category}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Số lượng
+                  </h4>
+                  <p className="text-lg font-medium">
+                    {selectedMedicine.quantity} {selectedMedicine.unit}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Hạn sử dụng
+                  </h4>
+                  <p className="text-lg font-medium">
+                    {selectedMedicine.expiryDate}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">
+                  Trạng thái
+                </h4>
+                <Badge
+                  variant={
+                    selectedMedicine.status === "Đầy đủ"
+                      ? "default"
+                      : selectedMedicine.status === "Sắp hết"
+                      ? "destructive"
+                      : "secondary"
+                  }
+                  className={
+                    selectedMedicine.status === "Đầy đủ"
+                      ? "bg-green-100 text-green-800 mt-1"
+                      : selectedMedicine.status === "Sắp hết"
+                      ? "bg-red-100 text-red-800 mt-1"
+                      : "bg-orange-100 text-orange-800 mt-1"
+                  }
+                >
+                  {selectedMedicine.status}
+                </Badge>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Tồn kho</h4>
+                <Progress
+                  value={
+                    (selectedMedicine.quantity / selectedMedicine.maxQuantity) *
+                    100
+                  }
+                  className="h-2 mt-2"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {selectedMedicine.quantity} / {selectedMedicine.maxQuantity}{" "}
+                  {selectedMedicine.unit}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsViewDialogOpen(false)}
+                >
+                  Đóng
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Medicine Dialog */}
+      {selectedMedicine && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Chỉnh sửa thuốc</DialogTitle>
+              <DialogDescription>
+                Chỉnh sửa thông tin thuốc trong kho
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Tên thuốc</Label>
+                <Input
+                  id="edit-name"
+                  defaultValue={selectedMedicine.name}
+                  placeholder="Nhập tên thuốc"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Loại thuốc</Label>
+                <Select
+                  defaultValue={selectedMedicine.category
+                    .toLowerCase()
+                    .replace(/ /g, "-")}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn loại thuốc" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thuoc-giam-dau">
+                      Thuốc giảm đau
+                    </SelectItem>
+                    <SelectItem value="khang-sinh">Kháng sinh</SelectItem>
+                    <SelectItem value="vitamin">Vitamin</SelectItem>
+                    <SelectItem value="thuoc-sat-trung">
+                      Thuốc sát trùng
+                    </SelectItem>
+                    <SelectItem value="thuoc-di-ung">Thuốc dị ứng</SelectItem>
+                    <SelectItem value="thuoc-hen-suyen">
+                      Thuốc hen suyễn
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-quantity">Số lượng</Label>
+                <Input
+                  id="edit-quantity"
+                  type="number"
+                  defaultValue={selectedMedicine.quantity}
+                  placeholder="Nhập số lượng"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-unit">Đơn vị</Label>
+                <Input
+                  id="edit-unit"
+                  defaultValue={selectedMedicine.unit}
+                  placeholder="Nhập đơn vị"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-expiry">Hạn sử dụng</Label>
+                <Input
+                  id="edit-expiry"
+                  defaultValue={selectedMedicine.expiryDate
+                    .split("/")
+                    .reverse()
+                    .join("-")}
+                  type="date"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    setIsEditDialogOpen(false);
+                    alert("Đã cập nhật thông tin thuốc thành công!");
+                  }}
+                >
+                  Lưu thay đổi
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Delete Medicine Dialog */}
+      {selectedMedicine && (
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Xác nhận xóa thuốc</DialogTitle>
+              <DialogDescription>
+                Bạn có chắc chắn muốn xóa thuốc này khỏi kho không?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg border border-red-100 bg-red-50">
+                <h4 className="font-medium text-red-800">
+                  {selectedMedicine.name}
+                </h4>
+                <p className="text-sm text-red-600 mt-1">
+                  Loại: {selectedMedicine.category}
+                </p>
+                <p className="text-sm text-red-600">
+                  Số lượng: {selectedMedicine.quantity} {selectedMedicine.unit}
+                </p>
+              </div>
+              <p className="text-sm text-gray-500">
+                Hành động này không thể hoàn tác. Tất cả dữ liệu về thuốc này sẽ
+                bị xóa vĩnh viễn.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setIsDeleteDialogOpen(false);
+                    alert("Đã xóa thuốc thành công!");
+                  }}
+                >
+                  Xóa thuốc
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
