@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Download,
   Filter,
@@ -7,6 +9,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +23,14 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -29,7 +40,156 @@ import {
 } from "@/components/ui/table";
 import { Progress } from "@/components/layout/sidebar/progress";
 
+// Component hiển thị thông tin chi tiết của lần khám
+interface ExaminationDetailsProps {
+  exam: {
+    date: string;
+    type: string;
+    doctor: string;
+    result: string;
+    notes: string;
+    measurements?: { name: string; value: string }[];
+    location?: string;
+    recommendations?: string;
+    nextAppointment?: string;
+  };
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+function ExaminationDetailsDialog({
+  exam,
+  isOpen,
+  onClose,
+}: ExaminationDetailsProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl text-blue-800 flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-600" />
+            Chi tiết lần khám: {exam.type}
+          </DialogTitle>
+          <DialogDescription className="text-blue-600">
+            Ngày khám: {exam.date}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-blue-700">
+                Bác sĩ khám:
+              </div>
+              <div className="text-blue-800">{exam.doctor}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-blue-700">Kết quả:</div>
+              <Badge
+                variant={
+                  exam.result === "Bình thường" ? "default" : "secondary"
+                }
+                className={
+                  exam.result === "Bình thường"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }
+              >
+                {exam.result === "Bình thường" ? (
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                ) : (
+                  <AlertCircle className="mr-1 h-3 w-3" />
+                )}
+                {exam.result}
+              </Badge>
+            </div>
+          </div>
+
+          {exam.location && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-blue-700">
+                Địa điểm khám:
+              </div>
+              <div className="text-blue-800">{exam.location}</div>
+            </div>
+          )}
+
+          {exam.measurements && exam.measurements.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-blue-700">
+                Các chỉ số:
+              </div>
+              <div className="bg-blue-50 rounded-lg p-3 grid grid-cols-2 gap-2">
+                {exam.measurements.map((measurement, idx) => (
+                  <div key={idx} className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-700">
+                      {measurement.name}:
+                    </span>
+                    <span className="text-sm text-blue-800 font-semibold">
+                      {measurement.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-blue-700">Ghi chú:</div>
+            <div className="bg-blue-50 rounded-lg p-3 text-blue-800">
+              {exam.notes}
+            </div>
+          </div>
+
+          {exam.recommendations && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-blue-700">
+                Khuyến nghị:
+              </div>
+              <div className="bg-blue-50 rounded-lg p-3 text-blue-800">
+                {exam.recommendations}
+              </div>
+            </div>
+          )}
+
+          {exam.nextAppointment && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-blue-700">
+                Lịch tái khám:
+              </div>
+              <div className="text-blue-800">{exam.nextAppointment}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end mt-4">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={onClose}
+          >
+            Đóng
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function RegularResultsPage() {
+  const [selectedExam, setSelectedExam] = useState<
+    (typeof examinationHistory)[0] | null
+  >(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const handleOpenDialog = (exam: (typeof examinationHistory)[0]) => {
+    setSelectedExam(exam);
+    setIsDetailsOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDetailsOpen(false);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
@@ -289,6 +449,7 @@ export default function RegularResultsPage() {
                   <TableRow
                     key={index}
                     className="hover:bg-blue-50 cursor-pointer"
+                    onClick={() => handleOpenDialog(exam)}
                   >
                     <TableCell className="font-medium text-blue-800">
                       {exam.date}
@@ -315,12 +476,13 @@ export default function RegularResultsPage() {
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate text-blue-700">
                       {exam.notes}
-                    </TableCell>
+                    </TableCell>{" "}
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-blue-700 hover:bg-blue-100"
+                        onClick={() => handleOpenDialog(exam)}
                       >
                         Xem chi tiết
                       </Button>
@@ -332,6 +494,14 @@ export default function RegularResultsPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {selectedExam && (
+        <ExaminationDetailsDialog
+          exam={selectedExam}
+          isOpen={isDetailsOpen}
+          onClose={handleCloseDialog}
+        />
+      )}
     </div>
   );
 }
@@ -367,7 +537,7 @@ const recentResults = [
     measurements: [
       { name: "Thị lực mắt phải", value: "10/10" },
       { name: "Thị lực mắt trái", value: "10/10" },
-      { name: "Nhãn áp", value: "Bình thư���ng" },
+      { name: "Nhãn áp", value: "Bình thường" },
     ],
     notes: "Thị lực tốt, không có dấu hiệu bất thường.",
   },
@@ -380,6 +550,17 @@ const examinationHistory = [
     doctor: "BS. Nguyễn Thị Hương",
     result: "Bình thường",
     notes: "Sức khỏe tổng quát tốt, phát triển bình thường theo độ tuổi.",
+    location: "Phòng y tế trường Tiểu học Ánh Dương",
+    measurements: [
+      { name: "Chiều cao", value: "115 cm" },
+      { name: "Cân nặng", value: "22 kg" },
+      { name: "BMI", value: "16.6" },
+      { name: "Thị lực", value: "10/10" },
+      { name: "Nhịp tim", value: "85 nhịp/phút" },
+      { name: "Huyết áp", value: "90/60 mmHg" },
+    ],
+    recommendations: "Tiếp tục duy trì chế độ dinh dưỡng và vận động hợp lý.",
+    nextAppointment: "15/11/2025",
   },
   {
     date: "10/05/2025",
@@ -387,6 +568,16 @@ const examinationHistory = [
     doctor: "BS. Trần Văn Minh",
     result: "Cần theo dõi",
     notes: "Phát hiện 1 răng sâu nhẹ, cần điều trị sớm.",
+    location: "Phòng khám Nha khoa trường Tiểu học Ánh Dương",
+    measurements: [
+      { name: "Răng sữa", value: "18 răng" },
+      { name: "Răng vĩnh viễn", value: "2 răng" },
+      { name: "Sâu răng", value: "1 răng" },
+      { name: "Cao răng", value: "Nhẹ" },
+    ],
+    recommendations:
+      "Đặt lịch điều trị sâu răng trong vòng 2 tuần. Hướng dẫn vệ sinh răng miệng đúng cách.",
+    nextAppointment: "24/05/2025",
   },
   {
     date: "05/05/2025",
@@ -394,6 +585,16 @@ const examinationHistory = [
     doctor: "BS. Lê Thị Mai",
     result: "Bình thường",
     notes: "Thị lực tốt, không có dấu hiệu bất thường.",
+    location: "Phòng khám Mắt trường Tiểu học Ánh Dương",
+    measurements: [
+      { name: "Thị lực mắt phải", value: "10/10" },
+      { name: "Thị lực mắt trái", value: "10/10" },
+      { name: "Nhãn áp", value: "Bình thường" },
+      { name: "Khô mắt", value: "Không" },
+    ],
+    recommendations:
+      "Hạn chế thời gian sử dụng thiết bị điện tử, đảm bảo ánh sáng phù hợp khi đọc sách.",
+    nextAppointment: "05/11/2025",
   },
   {
     date: "01/04/2025",
@@ -401,6 +602,16 @@ const examinationHistory = [
     doctor: "BS. Nguyễn Thị Hương",
     result: "Bình thường",
     notes: "Phát triển tốt, cần bổ sung vitamin D.",
+    location: "Phòng y tế trường Tiểu học Ánh Dương",
+    measurements: [
+      { name: "Chiều cao", value: "114 cm" },
+      { name: "Cân nặng", value: "21.5 kg" },
+      { name: "BMI", value: "16.5" },
+      { name: "Thị lực", value: "10/10" },
+      { name: "Nhịp tim", value: "88 nhịp/phút" },
+    ],
+    recommendations: "Bổ sung vitamin D, tăng cường hoạt động ngoài trời.",
+    nextAppointment: "01/10/2025",
   },
   {
     date: "15/01/2025",
@@ -408,5 +619,13 @@ const examinationHistory = [
     doctor: "BS. Phạm Văn Đức",
     result: "Bình thường",
     notes: "Tim mạch hoạt động bình thường, nhịp tim đều.",
+    location: "Bệnh viện Nhi Trung ương",
+    measurements: [
+      { name: "Nhịp tim", value: "86 nhịp/phút" },
+      { name: "Huyết áp", value: "90/60 mmHg" },
+      { name: "ECG", value: "Bình thường" },
+    ],
+    recommendations: "Tiếp tục theo dõi định kỳ mỗi 6 tháng.",
+    nextAppointment: "15/07/2025",
   },
 ];
