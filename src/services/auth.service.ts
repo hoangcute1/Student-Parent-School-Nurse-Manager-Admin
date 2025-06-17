@@ -242,4 +242,35 @@ export class AuthService {
       },
     };
   }
+
+  /**
+   * Đăng nhập bằng Google cho phụ huynh
+   * Kiểm tra xem email có tồn tại trong hệ thống không
+   * Nếu có, kiểm tra xem người dùng có vai trò parent không
+   * @param email Email của người dùng
+   * @returns Thông tin đăng nhập
+   */
+  async loginParentGoogle(email: string): Promise<any> {
+    // Tìm user với email
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Email chưa được đăng ký trong hệ thống');
+    }
+
+    const userId = user._id?.toString();
+    if (!userId) {
+      throw new UnauthorizedException('Invalid user ID');
+    }
+
+    // Kiểm tra xem user có phải là phụ huynh không
+    const parent = await this.parentService.findByUserId(userId);
+    if (!parent) {
+      throw new UnauthorizedException(
+        'Email này không được đăng ký làm tài khoản phụ huynh',
+      );
+    }
+
+    // Đăng nhập bình thường
+    return this.login(user);
+  }
 }
