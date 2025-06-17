@@ -49,8 +49,7 @@ export class MedicineStorageController {
   })
   @ApiResponse({
     status: 403,
-    description:
-      'Bị cấm. Bạn không có quyền truy cập vào tài nguyên này.',
+    description: 'Bị cấm. Bạn không có quyền truy cập vào tài nguyên này.',
   })
   async getMedicines() {
     return this.medicineStorageService.findAll();

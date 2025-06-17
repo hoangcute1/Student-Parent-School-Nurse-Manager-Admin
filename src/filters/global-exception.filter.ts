@@ -27,7 +27,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         message = (errorResponse as any).message || message;
         error = (errorResponse as any).error || 'Error';
       } else {
-        message = errorResponse as string;
+        message = errorResponse;
       }
     } else if (exception instanceof MongoError) {
       // Handle MongoDB errors

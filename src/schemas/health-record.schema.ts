@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema} from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type HealthRecordDocument = HealthRecord & Document;
 
@@ -8,7 +8,7 @@ export class HealthRecord {
   @Prop({ required: true })
   allergies: string;
 
-  @Prop({ required: false }) 
+  @Prop({ required: false })
   chronic_conditions: string;
 
   @Prop({ required: false })

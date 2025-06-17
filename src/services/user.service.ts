@@ -121,9 +121,6 @@ export class UserService {
 
   async getUserProfile(user_id: string) {
     const user = await this.findById(user_id);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${user} not found`);
-    }
 
     const profile = await this.profileService.findByuser(user_id);
     return { user, profile };
@@ -193,7 +190,7 @@ export class UserService {
     const parentUsers: any[] = [];
 
     for (const parent of parents) {
-      const user = parent.user as any;
+      const user = parent.user;
       if (user && user._id) {
         parentUsers.push({
           _id: user._id,

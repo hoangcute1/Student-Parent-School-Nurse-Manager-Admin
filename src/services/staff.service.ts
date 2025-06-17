@@ -29,13 +29,13 @@ export class StaffService {
     return this.staffModel.findOne({ user }).exec();
   }
 
-    async validateStaff(user: string): Promise<StaffDocument | null> {
-      const staff = await this.staffModel.findOne({ user }).exec();
-      if (!staff) {
-        throw new NotFoundException(`Staff with user ID "${user}" not found`);
-      }
-      return staff;
+  async validateStaff(user: string): Promise<StaffDocument | null> {
+    const staff = await this.staffModel.findOne({ user }).exec();
+    if (!staff) {
+      throw new NotFoundException(`Staff with user ID "${user}" not found`);
     }
+    return staff;
+  }
 
   async create(createStaffDto: any): Promise<Staff> {
     // Check if staff with this user already exists

@@ -53,7 +53,11 @@ export class MedicineDelivery extends Document {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Staff', required: true })
   staff: MongooseSchema.Types.ObjectId;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Medicine', required: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Medicine',
+    required: true,
+  })
   medicine: MongooseSchema.Types.ObjectId;
 }
 

@@ -31,7 +31,7 @@ import configuration from '@/configuration';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async () => ({
+      useFactory: () => ({
         secret: configuration().JWT_SECRET,
         signOptions: { expiresIn: '1h' },
       }),

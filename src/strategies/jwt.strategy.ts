@@ -8,9 +8,7 @@ import configuration from '@/configuration';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private tokenBlacklistService: TokenBlacklistService,
-  ) {
+  constructor(private tokenBlacklistService: TokenBlacklistService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
