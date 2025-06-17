@@ -6,7 +6,7 @@ export class TokenBlacklistService {
   private readonly expirationTimes: Map<string, number> = new Map();
 
   // Add a token to the blacklist
-  async blacklistToken(token: string, expiresIn: number): Promise<void> {
+  blacklistToken(token: string, expiresIn: number): void {
     const expirationTime = Date.now() + expiresIn * 1000;
     this.blacklist.add(token);
     this.expirationTimes.set(token, expirationTime);
@@ -19,12 +19,12 @@ export class TokenBlacklistService {
   }
 
   // Check if a token is blacklisted
-  async isBlacklisted(token: string): Promise<boolean> {
-    return this.blacklist.has(token);
+  isBlacklisted(token: string): Promise<boolean> {
+    return Promise.resolve(this.blacklist.has(token));
   }
 
   // Clean up expired tokens
-  async cleanupExpiredTokens(): Promise<void> {
+  cleanupExpiredTokens() {
     const now = Date.now();
     for (const [token, expirationTime] of this.expirationTimes.entries()) {
       if (expirationTime <= now) {

@@ -73,7 +73,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Đăng xuất người dùng' })
   @ApiResponse({ status: 200, description: 'Đăng xuất thành công.' })
-  async logout(@Req() req) {
+  logout(@Req() req) {
     // Extract token from the authorization header
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];

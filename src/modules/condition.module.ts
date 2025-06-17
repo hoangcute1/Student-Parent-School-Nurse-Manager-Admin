@@ -5,7 +5,11 @@ import { ConditionService } from '../services/condition.service';
 import { ConditionController } from '../controllers/condition.controller';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Condition.name, schema: ConditionSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Condition.name, schema: ConditionSchema },
+    ]),
+  ],
   controllers: [ConditionController],
   providers: [ConditionService],
   exports: [ConditionService],

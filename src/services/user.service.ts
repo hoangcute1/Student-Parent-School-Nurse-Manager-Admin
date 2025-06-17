@@ -162,7 +162,7 @@ export class UserService {
       const role = await this.roleService.findByName(roleName);
 
       // Update user's role
-      user.roleId = role.id as any;
+      user.roleId = role.id;
       user.updatedAt = new Date();
 
       return user.save();

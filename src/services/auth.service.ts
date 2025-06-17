@@ -182,9 +182,9 @@ export class AuthService {
     return user;
   }
 
-  async logout(userId: string, token?: string) {
+  logout(userId: string, token?: string) {
     // Update user's refresh token to null
-    await this.userService.updateRefreshToken(userId, null);
+    this.userService.updateRefreshToken(userId, null);
 
     // Add the token to the blacklist if provided
     if (token) {
@@ -197,7 +197,7 @@ export class AuthService {
           const expiresIn = Math.max(0, decoded.exp - currentTime);
 
           // Add to blacklist
-          await this.tokenBlacklistService.blacklistToken(token, expiresIn);
+          this.tokenBlacklistService.blacklistToken(token, expiresIn);
         }
       } catch (error) {
         console.error('Error blacklisting token:', error);

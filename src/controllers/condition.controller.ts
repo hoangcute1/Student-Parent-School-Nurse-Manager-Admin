@@ -1,6 +1,13 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { ConditionService } from '../services/condition.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiProperty } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiProperty,
+} from '@nestjs/swagger';
 
 class CreateConditionDto {
   @ApiProperty({ example: 'Condition A', description: 'Tên condition' })
@@ -12,7 +19,7 @@ class CreateConditionDto {
 export class ConditionController {
   constructor(private readonly conditionService: ConditionService) {}
 
-  @Get() 
+  @Get()
   @ApiOperation({ summary: 'Lấy danh sách condition' })
   @ApiResponse({ status: 200, description: 'Danh sách condition.' })
   async findAll() {

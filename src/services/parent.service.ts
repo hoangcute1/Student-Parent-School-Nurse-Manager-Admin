@@ -15,7 +15,7 @@ export class ParentService {
   async findAll(): Promise<any[]> {
     const parents = await this.parentModel
       .find()
-      .populate<{ userId: { id: String; email: string } }>('userId')
+      .populate<{ userId: { id: string; email: string } }>('userId')
       .exec();
     return parents.map((parent) => ({
       userId: parent.userId?.id,

@@ -28,7 +28,7 @@ import { AdminModule } from './admin.module';
     OtpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET', 'your-secret-key'),
         signOptions: {
           expiresIn: configService.get('JWT_EXPIRATION', '1h'),
