@@ -1,22 +1,23 @@
 // Authentication utilities
 
+import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/env";
+import { useAuthStore } from "@/stores/auth-store";
 
-const AUTH_TOKEN_KEY = "authToken";
 
 const getAuthToken = (): string | null => {
   if (typeof window === "undefined") return null;
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
   return token;
 };
 
 const setAuthToken = (token: string) => {
-  if (typeof window === "undefined")
-    return localStorage.setItem("token", token);
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
 };
 
 const clearAuthToken = () => {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
 };
 
 // Function to logout

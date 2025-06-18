@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore, useHasRole } from "@/stores/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 // Kiểm tra trạng thái đăng nhập và phân quyền - Chỉ cho phép Staff và Admin
 export default function CheckAuth({ children }: { children: React.ReactNode }) {

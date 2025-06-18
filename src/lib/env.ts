@@ -4,11 +4,11 @@
  */
 
 // API URL
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
-// Auth related environment variables
-export const AUTH_SECRET = process.env.AUTH_SECRET || "your-secret-key";
-export const JWT_EXPIRATION = process.env.JWT_EXPIRATION || "1d";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+export const AUTH_SECRET = process.env.AUTH_SECRET || "";
+export const JWT_EXPIRATION = process.env.JWT_EXPIRATION || "1h";
+export const LOCAL_STORAGE_TOKEN_KEY =
+  process.env.LOCAL_STORAGE_TOKEN_KEY || "";
 
 // Application environment
 export const NODE_ENV = process.env.NODE_ENV || "development";
@@ -17,7 +17,8 @@ export const IS_DEVELOPMENT = NODE_ENV === "development";
 export const IS_TEST = NODE_ENV === "test";
 
 // Other application settings
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "School Health Management System";
+export const APP_NAME =
+  process.env.NEXT_PUBLIC_APP_NAME || "School Health Management System";
 export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
 
 // Debug mode
@@ -34,7 +35,7 @@ const env = {
   IS_TEST,
   APP_NAME,
   APP_VERSION,
-  DEBUG_MODE
+  DEBUG_MODE,
 };
 
 export default env;
