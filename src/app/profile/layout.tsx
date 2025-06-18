@@ -1,13 +1,11 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Heart } from "lucide-react";
 import Header from "@/components/layout/header/header";
-import type { User as AppUser, UserProfile } from "@/lib/types";
-import { getAuthToken } from "@/lib/auth";
-import Link from "next/link";
+import { getAuthToken } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
@@ -15,13 +13,10 @@ interface ProfileLayoutProps {
 
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const router = useRouter();
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { setUser, setProfile } = useAuthStore();
 
   useEffect(() => {
-    // Check auth token first
-    if (!getAuthToken()) {
-      // router.push("/login");
+    if (!getAuthToken) {
       return;
     }
 

@@ -9,6 +9,7 @@ import { ParentLoginForm } from "./_components/parent-login";
 import { StaffLoginForm } from "./_components/staff-login";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth-store";
+import { AdminLoginForm } from "./_components/admin-login";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function LoginPage() {
         <Card className="bg-white/95 backdrop-blur-sm border border-blue-100">
           <CardContent className="pt-6">
             <Tabs defaultValue="parent" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-blue-50 p-1">
+              <TabsList className="grid w-full grid-cols-3 bg-blue-50 p-1">
                 <TabsTrigger
                   value="parent"
                   className="data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-sm"
@@ -54,12 +55,21 @@ export default function LoginPage() {
                 >
                   Nhân viên y tế
                 </TabsTrigger>
+                <TabsTrigger
+                  value="admin"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-900 data-[state=active]:shadow-sm"
+                >
+                  Nhân viên quản lý
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="parent">
                 <ParentLoginForm />
               </TabsContent>
               <TabsContent value="staff">
                 <StaffLoginForm />
+              </TabsContent>
+              <TabsContent value="admin">
+                <AdminLoginForm />
               </TabsContent>
             </Tabs>
           </CardContent>

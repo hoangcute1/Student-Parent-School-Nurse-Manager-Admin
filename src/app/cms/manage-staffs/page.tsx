@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Staff as ApiStaff } from "../../../type/staff";
+import type { Staff as ApiStaff } from "../../../lib/type/staff";
 import {
   Card,
   CardContent,
@@ -13,14 +13,13 @@ import { FilterBar } from "./_components/filter-bar";
 import { useStaffStore } from "@/stores/staff-store";
 import { StaffFormValues } from "./_components/add-staff-dialog";
 import { StaffTable } from "./_components/staff-table";
-import { DisplayStaff } from "@/type/staff";
+import { DisplayStaff } from "@/lib/type/staff";
 
 export default function ParentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [healthFilter, setHealthFilter] = useState("all");
 
-  
   const onSubmit = async (data: StaffFormValues) => {
     // try {
     //   const newStaff = await createStaff({

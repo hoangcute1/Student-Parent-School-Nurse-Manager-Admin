@@ -3,8 +3,13 @@ import {
   CreateFeedbackParams,
   FeedbackStore,
   UpdateFeedbackParams,
-} from "../type/feedbacks";
-import { createFeedback, deleteFeedback, getFeedbacks, updateFeedback } from "@/lib/api/feedbacks";
+} from "../lib/type/feedbacks";
+import {
+  createFeedback,
+  deleteFeedback,
+  getFeedbacks,
+  updateFeedback,
+} from "@/lib/api/feedbacks";
 
 export const useFeedbackStore = create<FeedbackStore>((set) => ({
   feedbacks: [],

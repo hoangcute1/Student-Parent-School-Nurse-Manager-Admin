@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { getParents, createParent } from "@/lib/api/parents";
-import type { Parent as ApiParent } from "../type/parents";
+import type { Parent as ApiParent } from "../lib/type/parents";
 import type { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
 
 interface DisplayParent {

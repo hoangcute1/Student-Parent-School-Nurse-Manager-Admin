@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { API_URL } from "@/lib/env";
-import { AuthService } from "@/lib/auth-service";
+import { setAuthToken } from "../lib/api/auth";
 
 // Hook này giúp khôi phục trạng thái xác thực khi tải trang
 export function useAuthInit() {
@@ -14,11 +14,9 @@ export function useAuthInit() {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Kiểm tra xem có token trong localStorage không (legacy support)
         const legacyToken = localStorage.getItem("token");
         if (legacyToken) {
-          // Nếu có token từ phiên bản trước, khôi phục vào memory
-          AuthService.setToken(legacyToken);
+          setAuthToken(legacyToken);
           const response = await fetch(`${API_URL}/auth/me`, {
             headers: {
               Authorization: `Bearer ${legacyToken}`,

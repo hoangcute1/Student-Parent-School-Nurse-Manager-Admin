@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { User as AppUser } from "@/lib/types";
+import type { User as AppUser } from "@/lib/type/types";
 
 const parentFormSchema = z.object({
   name: z.string().min(1, { message: "Họ và tên không được để trống" }),

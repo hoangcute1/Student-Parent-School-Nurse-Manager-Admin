@@ -10,63 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/auth-store";
-import { API_URL } from "@/lib/env";
-import { AuthService } from "@/lib/auth-service";
-
 export default function ProfilePage() {
-  const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const { user, role, profile, updateUserInfo } = useAuthStore();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!AuthService.hasToken()) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const token = AuthService.getToken();
-        const response = await fetch(`${API_URL}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          updateUserInfo(data.user, data.profile);
-        } else {
-          toast({
-            title: "Lỗi",
-            description: "Không thể tải thông tin người dùng",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        toast({
-          title: "Lỗi",
-          description: "Đã xảy ra lỗi khi tải thông tin người dùng",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [toast, updateUserInfo]);
+  const { user, role, profile } = useAuthStore();
 
   if (loading) {
     return <div className="flex justify-center p-8">Đang tải thông tin...</div>;
   }
-
-  // Nếu không có thông tin người dùng, chuyển hướng đến trang đăng nhập
   if (!user) {
     router.push("/login");
     return null;
@@ -145,8 +98,8 @@ export default function ProfilePage() {
             <Calendar className="h-4 w-4" />
             <span>
               Tham gia ngày:{" "}
-              {profile?.createdAt
-                ? new Date(profile.createdAt).toLocaleDateString("vi-VN")
+              {profile?.created_at
+                ? new Date(profile.created_at).toLocaleDateString("vi-VN")
                 : new Date().toLocaleDateString("vi-VN")}
             </span>
           </div>

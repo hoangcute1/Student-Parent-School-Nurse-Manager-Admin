@@ -121,7 +121,6 @@ export default function ParentHealthRecords() {
     setIsAddRecordOpen(true);
   };
 
-  // Clear selected record when the add dialog is closed
   const handleAddDialogOpenChange = (open: boolean) => {
     setIsAddRecordOpen(open);
     if (!open) {

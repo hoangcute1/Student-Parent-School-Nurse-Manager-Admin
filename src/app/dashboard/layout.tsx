@@ -4,26 +4,23 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { User as AppUser, UserProfile } from "@/lib/types";
-import { getAuthToken } from "@/lib/auth";
+
 import CheckAuth from "./check-auth";
 import User from "@/components/layout/header/user";
 import Sidebar from "./_components/sidebar";
-import Notification from "@/components/layout/header/noti";
+import { getAuthToken } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user, profile, setUser, setProfile } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // Effect for handling initial state
   useEffect(() => {
-    // Check auth token first
-    if (!getAuthToken()) {
+    if (!getAuthToken) {
       return;
     }
 

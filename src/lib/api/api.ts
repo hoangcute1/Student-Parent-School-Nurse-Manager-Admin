@@ -1,21 +1,15 @@
 // API utility functions for making HTTP requests
-import { getAuthToken } from "../auth";
+
 import { API_URL } from "../env";
-import type {
-  AuthResponse,
-  StudentResponse,
-  Child,
-  HealthRecord,
-  UserProfile,
-} from "../types";
+import { UserProfile } from "../type/users";
+import { getAuthToken } from "./auth";
 
 // Generic fetch function with error handling
-async function fetchData<T>(
+export async function fetchData<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
   try {
-    // Get authentication token - Sử dụng getAuthToken đã cập nhật để kiểm tra tất cả các vị trí token
     const token = getAuthToken();
     console.log(`API Request to ${endpoint} - token exists:`, !!token);
 
@@ -56,7 +50,12 @@ async function fetchData<T>(
       headers,
     });
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: response.statusText };
+      }
       console.error("API Error Response:", {
         status: response.status,
         statusText: response.statusText,
@@ -74,131 +73,6 @@ async function fetchData<T>(
     throw error;
   }
 }
-
-export type LoginRequestCredentials = {
-  email: string;
-  password: string;
-  role?: string;
-};
-
-export type LoginVerifyCredentials = {
-  email: string;
-  password: string;
-  otp: string;
-};
-
-export type LoginResponse = AuthResponse;
-
-// Request OTP for login
-export const requestParentLoginOTP = (
-  credentials: LoginRequestCredentials
-): Promise<{ message: string }> => {
-  // Remove role from credentials to prevent API error
-  const { role, ...credentialsWithoutRole } = credentials;
-
-  return fetchData<{ message: string }>("/auth/login-parent", {
-    method: "POST",
-    body: JSON.stringify(credentialsWithoutRole),
-  });
-};
-
-export const requestStaffLoginOTP = (
-  credentials: LoginRequestCredentials
-): Promise<{ message: string }> => {
-  // Remove role from credentials to prevent API error
-  const { role, ...credentialsWithoutRole } = credentials;
-
-  return fetchData<{ message: string }>("/auth/login-staff", {
-    method: "POST",
-    body: JSON.stringify(credentialsWithoutRole),
-  });
-};
-
-export const requestAdminLoginOTP = (
-  credentials: LoginRequestCredentials
-): Promise<{ message: string }> => {
-  // Remove role from credentials to prevent API error
-  const { role, ...credentialsWithoutRole } = credentials;
-
-  return fetchData<{ message: string }>("/auth/login-admin", {
-    method: "POST",
-    body: JSON.stringify(credentialsWithoutRole),
-  });
-};
-
-// Verify OTP and login
-export const verifyParentLoginOTP = (
-  credentials: LoginVerifyCredentials
-): Promise<LoginResponse> => {
-  console.log("Verifying parent login with credentials:", credentials);
-
-  // Send email, password and OTP as required by the backend
-  return fetchData<LoginResponse>("/auth/login-parent/verify", {
-    method: "POST",
-    body: JSON.stringify({
-      email: credentials.email,
-      password: credentials.password,
-      otp: credentials.otp,
-    }),
-  });
-};
-
-export const verifyStaffLoginOTP = (
-  credentials: LoginVerifyCredentials
-): Promise<LoginResponse> => {
-  console.log("Verifying staff login with credentials:", credentials);
-
-  // Send email, password and OTP as required by the backend
-  return fetchData<LoginResponse>("/auth/login-staff/verify", {
-    method: "POST",
-    body: JSON.stringify({
-      email: credentials.email,
-      password: credentials.password,
-      otp: credentials.otp,
-    }),
-  });
-};
-
-export const verifyAdminLoginOTP = (
-  credentials: LoginVerifyCredentials
-): Promise<LoginResponse> => {
-  console.log("Verifying admin login with credentials:", credentials);
-
-  // Send email, password and OTP as required by the backend
-  return fetchData<LoginResponse>("/auth/login-admin/verify", {
-    method: "POST",
-    body: JSON.stringify({
-      email: credentials.email,
-      password: credentials.password,
-      otp: credentials.otp,
-    }),
-  });
-};
-// Get users
-export const getUsers = () => {
-  return fetchData("/users");
-};
-
-export const getStudents = (
-  page: number = 1,
-  pageSize: number = 10
-): Promise<StudentResponse> => {
-  return fetchData<StudentResponse>(
-    `/students?page=${page}&pageSize=${pageSize}`
-  );
-};
-
-// Get child by ID
-export const getChildById = (id: string): Promise<Child> => {
-  return fetchData<Child>(`/children/${id}`);
-};
-
-// Get health record by child ID
-export const getHealthRecordByChildId = (
-  childId: string
-): Promise<HealthRecord> => {
-  return fetchData<HealthRecord>(`/health-records/${childId}`);
-};
 
 export interface UpdateProfileData {
   name: string;

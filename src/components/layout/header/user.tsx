@@ -15,7 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Notification from "./noti";
 import { useAuthStore } from "@/stores/auth-store";
-import { logout } from "@/lib/auth";
+import { logout } from "@/lib/api";
 
 export default function User() {
   const router = useRouter();
