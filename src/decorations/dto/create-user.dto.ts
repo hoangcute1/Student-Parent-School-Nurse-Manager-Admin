@@ -12,12 +12,6 @@ export class CreateUserDto {
   @IsString()
   password: string;
 
-  @ApiProperty({
-    example: 'user',
-    description: 'Vai trò người dùng',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  role?: string;
+
+
 }

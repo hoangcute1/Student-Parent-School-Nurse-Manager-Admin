@@ -1,34 +1,40 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { User } from './user.schema';
 
 export type ProfileDocument = Profile & Document;
 
 @Schema({ versionKey: false })
 export class Profile extends Document {
-  @Prop({ required: false })
+  @Prop({ required: false, default: null })
   name: string;
 
-  @Prop({ enum: ['male', 'female', 'other'] })
+  @Prop({
+    enum: ['male', 'female', 'other'],
+    required: false,
+    default: 'other',
+  })
   gender: string;
 
-  @Prop()
+  @Prop({ required: false, default: null })
   birth: Date;
 
-  @Prop()
+  @Prop({ required: false, default: null })
   address: string;
 
-  @Prop()
+  @Prop({ required: false, default: null })
   avatar: string;
 
+  @Prop({ required: false, default: null })
+  phone: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
-  userId: MongooseSchema.Types.ObjectId;
+  user: MongooseSchema.Types.ObjectId;
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  created_at: Date;
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updated_at: Date;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

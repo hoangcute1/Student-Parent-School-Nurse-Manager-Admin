@@ -17,5 +17,5 @@ export class CreateStaffDto {
   })
   @IsNotEmpty()
   @IsMongoId()
-  readonly userId: string;
+  readonly user: string;
 }

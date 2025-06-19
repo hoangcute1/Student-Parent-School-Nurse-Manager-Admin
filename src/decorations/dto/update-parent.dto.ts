@@ -9,5 +9,5 @@ export class UpdateParentDto {
   })
   @IsOptional()
   @IsMongoId()
-  readonly userId?: string;
+  readonly user?: string;
 }

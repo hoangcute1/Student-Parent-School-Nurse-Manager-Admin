@@ -9,11 +9,12 @@ import { TokenBlacklistModule } from './token-blacklist.module';
 import { OtpModule } from './otp.module';
 import { JwtStrategy } from '@/strategies/jwt.strategy';
 import { LocalStrategy } from '@/strategies/local.strategy';
-import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ParentModule } from './parent.module';
 import { StaffModule } from './staff.module';
 import { AdminModule } from './admin.module';
+import { TokenModule } from './token.module';
+import configuration from '@/configuration';
 
 @Module({
   imports: [
@@ -26,15 +27,14 @@ import { AdminModule } from './admin.module';
     StaffModule,
     AdminModule,
     OtpModule,
+    TokenModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET', 'your-secret-key'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION', '1h'),
-        },
-      }),
       inject: [ConfigService],
+      useFactory: () => ({
+        secret: configuration().JWT_SECRET,
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
   ],
   controllers: [AuthController],

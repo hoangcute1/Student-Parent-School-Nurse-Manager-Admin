@@ -43,13 +43,13 @@ export class ProfileController {
     return this.profileService.findAll();
   }
 
-  @Get('user/:userId')
-  @ApiOperation({ summary: 'Lấy profile theo userId' })
-  @ApiParam({ name: 'userId', description: 'ID của user' })
-  @ApiResponse({ status: 200, description: 'Profile theo userId.' })
+  @Get('user/:user')
+  @ApiOperation({ summary: 'Lấy profile theo user' })
+  @ApiParam({ name: 'user', description: 'ID của user' })
+  @ApiResponse({ status: 200, description: 'Profile theo user.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy profile.' })
-  async findByUserId(@Param('userId') userId: string) {
-    return this.profileService.findByUserId(userId);
+  async findByuser(@Param('user') user: string) {
+    return this.profileService.findByuser(user);
   }
 
   @Get(':id')

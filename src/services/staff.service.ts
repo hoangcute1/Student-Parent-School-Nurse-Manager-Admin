@@ -14,25 +14,33 @@ export class StaffService {
   ) {}
 
   async findAll(): Promise<Staff[]> {
-    return this.staffModel.find().populate('userId').exec();
+    return this.staffModel.find().populate('user').exec();
   }
 
   async findById(id: string): Promise<Staff> {
-    const staff = await this.staffModel.findById(id).populate('userId').exec();
+    const staff = await this.staffModel.findById(id).populate('user').exec();
     if (!staff) {
       throw new NotFoundException(`Staff with ID "${id}" not found`);
     }
     return staff;
   }
 
-  async findByUserId(userId: string): Promise<Staff | null> {
-    return this.staffModel.findOne({ userId }).exec();
+  async findByuser(user: string): Promise<Staff | null> {
+    return this.staffModel.findOne({ user }).exec();
   }
 
+    async validateStaff(user: string): Promise<StaffDocument | null> {
+      const staff = await this.staffModel.findOne({ user }).exec();
+      if (!staff) {
+        throw new NotFoundException(`Staff with user ID "${user}" not found`);
+      }
+      return staff;
+    }
+
   async create(createStaffDto: any): Promise<Staff> {
-    // Check if staff with this userId already exists
+    // Check if staff with this user already exists
     const existingStaff = await this.staffModel
-      .findOne({ userId: createStaffDto.userId })
+      .findOne({ user: createStaffDto.user })
       .exec();
 
     if (existingStaff) {

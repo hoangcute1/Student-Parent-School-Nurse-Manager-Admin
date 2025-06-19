@@ -1,22 +1,22 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt, Strategy, StrategyOptionsWithRequest } from 'passport-jwt';
 import { TokenBlacklistService } from '../services/token-blacklist.service';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
+import configuration from '@/configuration';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private tokenBlacklistService: TokenBlacklistService,
-    private configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET', 'your-secret-key'),
+      secretOrKey: configuration().JWT_SECRET,
       passReqToCallback: true, // Pass the request to the validate method
-    });
+    } as StrategyOptionsWithRequest);
   }
 
   async validate(req: Request, payload: any) {
@@ -30,10 +30,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     return {
-      userId: payload.sub,
+      user: payload.sub,
       email: payload.email,
       role: payload.role,
-      roleId: payload.roleId, // Include roleId for permission checks
     };
   }
 }

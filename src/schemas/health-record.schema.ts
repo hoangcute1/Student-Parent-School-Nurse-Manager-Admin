@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Student } from './student.schema';
+import { Document, Schema as MongooseSchema} from 'mongoose';
 
 export type HealthRecordDocument = HealthRecord & Document;
 
@@ -9,20 +8,29 @@ export class HealthRecord {
   @Prop({ required: true })
   allergies: string;
 
-  @Prop()
+  @Prop({ required: false }) 
   chronic_conditions: string;
 
-  @Prop()
-  treatment_history: string;
+  @Prop({ required: false })
+  height: string;
 
-  @Prop()
+  @Prop({ required: false })
+  weight: string;
+
+  @Prop({ required: false })
   vision: string;
 
-  @Prop()
-  notes: string;
+  @Prop({ required: false })
+  hearing: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Student', required: true })
-  student_id: Student;
+  student: MongooseSchema.Types.ObjectId;
+
+  @Prop({ default: Date.now })
+  created_at: Date;
+
+  @Prop({ default: Date.now })
+  updated_at: Date;
 }
 
 export const HealthRecordSchema = SchemaFactory.createForClass(HealthRecord);

@@ -64,5 +64,5 @@ export class CreateProfileDto {
   })
   @IsNotEmpty()
   @IsMongoId()
-  readonly userId: string;
+  readonly user: string;
 }

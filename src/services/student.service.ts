@@ -401,4 +401,12 @@ export class StudentService {
   async remove(id: string): Promise<Student> {
     return this.delete(id);
   }
+
+  async findByParentId(parentId: string): Promise<Student[]> {
+    return this.studentModel.find({ parentId }).exec();
+  }
+
+  async findByClassId(classId: string): Promise<Student[]> {
+    return this.studentModel.find({ classId }).exec();
+  }
 }

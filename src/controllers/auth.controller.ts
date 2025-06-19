@@ -1,3 +1,4 @@
+import { IsEmail } from 'class-validator';
 import {
   Controller,
   Post,
@@ -13,10 +14,14 @@ import { ProfileService } from '@/services/profile.service';
 import { LocalAuthGuard } from '@/guards/local-auth.guard';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { LoginDto } from '@/decorations/dto/login.dto';
-import { RegisterDto } from '@/decorations/dto/register.dto';
+import { LoginDto, LoginWithOtpDto } from '@/decorations/dto/login.dto';
+
 import { RefreshTokenDto } from '@/decorations/dto/refresh-token.dto';
+<<<<<<< HEAD
+=======
 import { VerifyOtpDto } from '@/decorations/dto/verify-otp.dto';
+import { GoogleLoginDto } from '@/decorations/dto/google-login.dto';
+>>>>>>> main
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,49 +31,84 @@ export class AuthController {
     private userService: UserService,
     private profileService: ProfileService,
   ) {}
-
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  @ApiOperation({ summary: 'Đăng nhập người dùng' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
+  @Post('login-parent')
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập phụ huynh và nhận OTP' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
   @ApiResponse({
     status: 401,
     description: 'Email hoặc mật khẩu không chính xác.',
   })
-  async login(@Req() req) {
-    return this.authService.login(req.user);
+  async loginParent(@Body() loginDto: LoginDto) {
+    return this.authService.loginParent(loginDto.email, loginDto.password);
   }
-  @Post('register')
-  @ApiOperation({ summary: 'Đăng ký người dùng mới' })
-  @ApiBody({ type: RegisterDto })
-  @ApiResponse({
-    status: 201,
-    description: 'Người dùng đã được tạo thành công.',
+  @Post('login-parent/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập phụ huynh',
   })
-  @ApiResponse({ status: 400, description: 'Email đã tồn tại.' })
-  async register(@Body() registerDto: RegisterDto) {
-    // Register the user
-    const user = await this.authService.register(registerDto);
-
-    // Determine the userId safely
-    let userId: string;
-    if (user._id) {
-      userId = user._id.toString();
-    } else if (user.id) {
-      userId = user.id.toString();
-    } else {
-      throw new Error('User ID not available after registration');
-    }
-
-    // Create an empty profile automatically
-    await this.profileService.create({
-      userId: userId,
-    });
-
-    // Login the user to get tokens
-    return this.authService.login(user);
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async loginParentOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
+    return this.authService.loginParentWithOtp(
+      loginWithOtpDto.email,
+      loginWithOtpDto.otp,
+    );
   }
+
+  @Post('login-staff')
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập phụ huynh và nhận OTP' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginStaff(@Body() loginDto: LoginDto) {
+    return this.authService.loginStaff(loginDto.email, loginDto.password);
+  }
+  @Post('login-staff/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập phụ huynh',
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async loginStaffOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
+    return this.authService.loginStaffWithOtp(
+      loginWithOtpDto.email,
+      loginWithOtpDto.otp,
+    );
+  }
+
+  @Post('login-admin')
+  @ApiOperation({ summary: 'Bước 1: Yêu cầu đăng nhập phụ huynh và nhận OTP' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Email hoặc mật khẩu không chính xác.',
+  })
+  async loginAdmin(@Body() loginDto: LoginDto) {
+    return this.authService.loginAdmin(loginDto.email, loginDto.password);
+  }
+  @Post('login-admin/verify')
+  @ApiOperation({
+    summary: 'Bước 2: Xác thực OTP và hoàn tất đăng nhập phụ huynh',
+  })
+  @ApiResponse({ status: 200, description: 'Đăng nhập phụ huynh thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'OTP không chính xác hoặc đã hết hạn.',
+  })
+  async loginAdminOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
+    return this.authService.loginAdminWithOtp(
+      loginWithOtpDto.email,
+      loginWithOtpDto.otp,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @ApiOperation({ summary: 'Đăng xuất người dùng' })
@@ -78,17 +118,25 @@ export class AuthController {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
-    return this.authService.logout(req.user.userId, token);
+    return this.authService.logout(req.user.user, token);
   }
-
   @Post('refresh')
-  @ApiOperation({ summary: 'Làm mới access token' })
+  @ApiOperation({ summary: 'Làm mới access token và refresh token' })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ status: 200, description: 'Token đã được làm mới.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens đã được làm mới.',
+    schema: {
+      properties: {
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+      },
+    },
+  })
   @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(
-      refreshTokenDto.userId,
+      refreshTokenDto.user,
       refreshTokenDto.refresh_token,
     );
   }
@@ -109,10 +157,10 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Chưa xác thực.' })
   async getMe(@Req() req) {
     // Get detailed user information from the database using the ID in the JWT
-    const user = await this.userService.findById(req.user.userId);
+    const user = await this.userService.findById(req.user.user);
 
     // Get user's profile
-    const profile = await this.profileService.findByUserId(req.user.userId);
+    const profile = await this.profileService.findByuser(req.user.user);
 
     // Remove sensitive information
     const { password, refreshToken, ...userResult } = user.toObject();
@@ -122,6 +170,8 @@ export class AuthController {
       profile: profile,
     };
   }
+<<<<<<< HEAD
+=======
 
   @UseGuards(LocalAuthGuard)
   @Post('login-request')
@@ -164,4 +214,44 @@ export class AuthController {
 
     return this.authService.login(user);
   }
+
+  @Post('parent-google')
+  @ApiOperation({ summary: 'Đăng nhập bằng Google cho phụ huynh' })
+  @ApiResponse({
+    status: 200,
+    description: 'Đăng nhập thành công',
+    schema: {
+      properties: {
+        access_token: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+        refresh_token: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '60d21b4667d0d8992e610c85' },
+            email: { type: 'string', example: 'parent@example.com' },
+            role: { type: 'string', example: 'parent' },
+            userType: { type: 'string', example: 'parent' },
+          },
+        },
+        profile: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', example: 'Nguyễn Văn A' },
+            phone: { type: 'string', example: '0123456789' },
+            gender: { type: 'string', example: 'male' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Email chưa được đăng ký trong hệ thống',
+  })
+  @ApiResponse({ status: 401, description: 'Không phải tài khoản phụ huynh' })
+  @ApiBody({ type: GoogleLoginDto })
+  async loginParentWithGoogle(@Body() googleLoginDto: GoogleLoginDto) {
+    return this.authService.loginParentGoogle(googleLoginDto.email);
+  }
+>>>>>>> main
 }

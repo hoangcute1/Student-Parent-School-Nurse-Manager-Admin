@@ -10,5 +10,5 @@ export class RefreshTokenDto {
   @ApiProperty({ description: 'ID của người dùng' })
   @IsNotEmpty({ message: 'ID người dùng không được để trống' })
   @IsMongoId({ message: 'ID người dùng không hợp lệ' })
-  userId: string;
+  user: string;
 }

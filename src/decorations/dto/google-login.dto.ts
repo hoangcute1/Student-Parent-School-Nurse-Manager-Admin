@@ -23,13 +23,4 @@ export class GoogleLoginDto {
   })
   @IsOptional()
   googleId?: string;
-
-  @ApiProperty({
-    example: 'parent',
-    description: 'Vai trò người dùng',
-    enum: ['parent'],
-    default: 'parent',
-  })
-  @IsNotEmpty({ message: 'Vai trò không được để trống' })
-  role: string = 'parent';
 }

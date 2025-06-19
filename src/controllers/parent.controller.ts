@@ -20,13 +20,19 @@ import {
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateParentDto } from '@/decorations/dto/create-parent.dto';
 import { UpdateParentDto } from '@/decorations/dto/update-parent.dto';
+import { UserService } from '@/services/user.service';
+import { CreateUserParentDto } from '@/decorations/dto/create-user-parent.dto';
+import { SuccessResponseDto } from '@/decorations/dto/success-response.dto';
 
 @ApiTags('parents')
 @Controller('parents')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class ParentController {
-  constructor(private readonly parentService: ParentService) {}
+  constructor(
+    private readonly parentService: ParentService,
+    private readonly userService: UserService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách phụ huynh' })
@@ -53,6 +59,34 @@ export class ParentController {
   @ApiResponse({ status: 403, description: 'Không có quyền tạo phụ huynh.' })
   async create(@Body() createParentDto: CreateParentDto) {
     return this.parentService.create(createParentDto);
+  }
+
+  @Post('/create-with-user')
+  @ApiOperation({ summary: 'Tạo mới user phụ huynh' })
+  @ApiBody({
+    type: CreateUserParentDto,
+    description: 'Thông tin của user phụ huynh mới',
+    required: true,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User phụ huynh đã được tạo thành công.',
+    type: SuccessResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Thông tin không hợp lệ hoặc đã tồn tại.',
+  })
+  async createWithUser(@Body() createUserParentDto: CreateUserParentDto) {
+    const result = await this.userService.createParent(createUserParentDto);
+    return new SuccessResponseDto(
+      'User phụ huynh đã được tạo thành công',
+      result,
+    );
   }
 
   @Put(':id')

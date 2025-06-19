@@ -46,7 +46,6 @@ export class OtpService {
         expiresAt: { $gt: new Date() },
       })
       .exec();
-
     if (!otpRecord) {
       throw new BadRequestException('OTP không hợp lệ hoặc đã hết hạn');
     }

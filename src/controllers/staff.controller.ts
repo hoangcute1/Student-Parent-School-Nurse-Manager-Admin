@@ -20,13 +20,19 @@ import {
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateStaffDto } from '@/decorations/dto/create-staff.dto';
 import { UpdateStaffDto } from '@/decorations/dto/update-staff.dto';
+import { UserService } from '@/services/user.service';
+import { CreateUserStaffDto } from '@/decorations/dto/create-user-staff.dto';
+import { SuccessResponseDto } from '@/decorations/dto/success-response.dto';
 
 @ApiTags('staff')
 @Controller('staff')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class StaffController {
-  constructor(private readonly staffService: StaffService) {}
+  constructor(
+    private readonly staffService: StaffService,
+    private readonly userService: UserService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách nhân viên' })
@@ -53,6 +59,34 @@ export class StaffController {
   @ApiResponse({ status: 403, description: 'Không có quyền tạo nhân viên.' })
   async create(@Body() createStaffDto: CreateStaffDto) {
     return this.staffService.create(createStaffDto);
+  }
+
+  @Post('/create-with-user')
+  @ApiOperation({ summary: 'Tạo mới user nhân viên' })
+  @ApiBody({
+    type: CreateUserStaffDto,
+    description: 'Thông tin của user nhân viên mới',
+    required: true,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User nhân viên đã được tạo thành công.',
+    type: SuccessResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền thực hiện thao tác này.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Thông tin không hợp lệ hoặc đã tồn tại.',
+  })
+  async createWithUser(@Body() createUserStaffDto: CreateUserStaffDto) {
+    const result = await this.userService.createStaff(createUserStaffDto);
+    return new SuccessResponseDto(
+      'User nhân viên đã được tạo thành công',
+      result,
+    );
   }
 
   @Put(':id')
