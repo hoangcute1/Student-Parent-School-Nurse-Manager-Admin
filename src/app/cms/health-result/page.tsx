@@ -1,20 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  ClipboardCheck,
+  Shield,
   Plus,
   Search,
-  Filter,
-  Eye,
-  Download,
-  Calendar,
   Users,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Download,
+  Bell,
+  ArrowUpDown,
+  Filter,
   Activity,
-  ArrowLeft,
+  Calendar,
+  ClipboardCheck,
+  AlertTriangle,
+  Eye,
   Edit,
   UserCheck,
-  AlertTriangle,
+  ArrowLeft,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +33,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -53,618 +60,753 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Progress } from "@/components/ui/progress";
+import ClassHealthList from "./_components/class-health-list";
 
-export default function ExamResults() {
+interface ExamInfo {
+  name: string;
+  description: string;
+  type: string;
+}
+
+interface Schedule {
+  examType: string;
+  targetGroup: string;
+  date: string;
+  completed: number;
+  total: number;
+  status: string;
+}
+
+interface ClassProgress {
+  class: string;
+  completed: number;
+  total: number;
+}
+
+interface MonthlyStat {
+  label: string;
+  description: string;
+  value: string;
+  trend: string;
+  icon: any;
+}
+
+interface ExamDetail {
+  name: string;
+  class: string;
+  status: string;
+  examDate: string | null;
+  result: string;
+  issues: string | null;
+}
+
+const examSchedule: Schedule[] = [
+  {
+    examType: "Khám sức khỏe định kỳ",
+    targetGroup: "Tất cả học sinh lớp 1-3",
+    date: "20/12/2024",
+    completed: 85,
+    total: 100,
+    status: "Đang tiến hành",
+  },
+  {
+    examType: "Khám nha khoa",
+    targetGroup: "Học sinh lớp 1",
+    date: "15/11/2024",
+    completed: 45,
+    total: 45,
+    status: "Hoàn thành",
+  },
+  {
+    examType: "Khám mắt",
+    targetGroup: "Học sinh lớp 2",
+    date: "25/12/2024",
+    completed: 0,
+    total: 52,
+    status: "Chưa bắt đầu",
+  },
+];
+
+const classExamProgress: ClassProgress[] = [
+  { class: "Lớp 1A", completed: 23, total: 25 },
+  { class: "Lớp 1B", completed: 22, total: 24 },
+  { class: "Lớp 2A", completed: 24, total: 26 },
+  { class: "Lớp 2B", completed: 25, total: 25 },
+  { class: "Lớp 3A", completed: 25, total: 27 },
+  { class: "Lớp 3B", completed: 24, total: 26 },
+];
+
+const monthlyStats: MonthlyStat[] = [
+  {
+    label: "Tổng lượt khám",
+    description: "Số lượt khám trong tháng",
+    value: "156",
+    trend: "+12%",
+    icon: Shield,
+  },
+  {
+    label: "Học sinh mới",
+    description: "Lần đầu khám sức khỏe",
+    value: "28",
+    trend: "+8%",
+    icon: Users,
+  },
+  {
+    label: "Hoàn thành",
+    description: "Học sinh đã khám xong",
+    value: "42",
+    trend: "+15%",
+    icon: CheckCircle,
+  },
+];
+
+export default function HealthResults() {
+  const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false);
+  const [selectedExamInfo, setSelectedExamInfo] = useState<ExamInfo | null>(
+    null
+  );
+  const [selectedTargets, setSelectedTargets] = useState<string[]>([]);
+  const [isScheduleDetailOpen, setIsScheduleDetailOpen] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
+    null
+  );
+  const [isExamResultOpen, setIsExamResultOpen] = useState(false);
+  const [selectedScheduleForClass, setSelectedScheduleForClass] =
+    useState<Schedule | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
-  const [isAddResultOpen, setIsAddResultOpen] = useState(false);
-  const [isScheduleConsultOpen, setIsScheduleConsultOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] =
+    useState(false);
 
-  const handleAddResult = () => {
-    setIsAddResultOpen(false);
-    alert("Đã cập nhật kết quả khám thành công!");
+  const handleScheduleClick = (schedule: Schedule) => {
+    setSelectedScheduleForClass(schedule);
+    setIsExamResultOpen(true);
   };
 
-  const handleScheduleConsult = (student: any) => {
+  const handleClassClick = (classInfo: ClassProgress) => {
+    setSelectedClass(classInfo.class);
+    setIsExamResultOpen(false);
+    setIsScheduleDetailOpen(true);
+  };
+
+  const handleRecordClick = (student: any) => {
     setSelectedStudent(student);
-    setIsScheduleConsultOpen(true);
+    setIsRecordDialogOpen(true);
   };
 
-  const handleConfirmConsult = () => {
-    setIsScheduleConsultOpen(false);
-    setSelectedStudent(null);
-    alert("Đã đặt lịch hẹn tư vấn thành công!");
+  const handleNotifyClick = (student: any) => {
+    setSelectedStudent(student);
+    setIsNotificationDialogOpen(true);
   };
-
-  const handleHealthCheck = (student: any) => {
-    alert(`Bắt đầu kiểm tra sức khỏe cho học sinh: ${student.studentName}`);
-  };
-
-  if (selectedClass) {
-    const classResults = examResultsData.filter(
-      (result) => result.class === selectedClass
-    );
-    const checkedCount = classResults.length;
-    const totalStudents =
-      classesData.find((c) => c.name === selectedClass)?.studentCount || 0;
-    const normalCount = classResults.filter(
-      (r) => r.result === "Bình thường"
-    ).length;
-    const abnormalCount = classResults.filter(
-      (r) => r.result !== "Bình thường"
-    ).length;
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => setSelectedClass(null)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Quay lại
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-teal-800">
-              Kết quả khám lớp {selectedClass}
-            </h1>
-            <p className="text-teal-600">
-              Theo dõi kết quả khám sức khỏe học sinh
-            </p>
-          </div>
-        </div>
-
-        {/* Class Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-blue-100">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">
-                Đã khám
-              </CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-800">
-                {checkedCount}
-              </div>
-              <p className="text-xs text-blue-600">/{totalStudents} học sinh</p>
-              <Progress
-                value={(checkedCount / totalStudents) * 100}
-                className="mt-2"
-              />
-            </CardContent>
-          </Card>
-
-          <Card className="border-green-100">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-green-700">
-                Bình thường
-              </CardTitle>
-              <Users className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-800">
-                {normalCount}
-              </div>
-              <p className="text-xs text-green-600">
-                {Math.round((normalCount / checkedCount) * 100)}% kết quả tốt
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-orange-100">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-orange-700">
-                Cần theo dõi
-              </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-800">
-                {abnormalCount}
-              </div>
-              <p className="text-xs text-orange-600">Cần chú ý đặc biệt</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-100">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700">
-                Chưa khám
-              </CardTitle>
-              <Activity className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-800">
-                {totalStudents - checkedCount}
-              </div>
-              <p className="text-xs text-purple-600">Cần lên lịch</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <CardTitle className="text-teal-800">
-                  Kết quả khám lớp {selectedClass}
-                </CardTitle>
-                <CardDescription className="text-teal-600">
-                  Danh sách kết quả khám sức khỏe của học sinh
-                </CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Xuất báo cáo
-                </Button>
-                <Dialog
-                  open={isAddResultOpen}
-                  onOpenChange={setIsAddResultOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Cập nhật kết quả
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Cập nhật kết quả khám sức khỏe</DialogTitle>
-                      <DialogDescription>
-                        Nhập kết quả khám chi tiết cho học sinh
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="student">Học sinh</Label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Chọn học sinh" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="student1">
-                                Nguyễn Văn An
-                              </SelectItem>
-                              <SelectItem value="student2">
-                                Trần Thị Bình
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="examType">Loại khám</Label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Chọn loại khám" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="general">
-                                Khám tổng quát
-                              </SelectItem>
-                              <SelectItem value="dental">Răng miệng</SelectItem>
-                              <SelectItem value="vision">Thị lực</SelectItem>
-                              <SelectItem value="hearing">Thính lực</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="height">Chiều cao (cm)</Label>
-                          <Input id="height" placeholder="VD: 115" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="weight">Cân nặng (kg)</Label>
-                          <Input id="weight" placeholder="VD: 20" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="bmi">BMI</Label>
-                          <Input id="bmi" placeholder="Tự động tính" disabled />
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <Label>Kết quả tổng quát</Label>
-                        <RadioGroup defaultValue="normal">
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="normal" id="normal" />
-                            <Label htmlFor="normal">Bình thường</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="follow-up" id="follow-up" />
-                            <Label htmlFor="follow-up">Cần theo dõi</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="abnormal" id="abnormal" />
-                            <Label htmlFor="abnormal">Bất thường</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="notes">Ghi chú chi tiết</Label>
-                        <Textarea
-                          id="notes"
-                          placeholder="Mô tả chi tiết kết quả khám, các dấu hiệu bất thường (nếu có)..."
-                          rows={4}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="recommendations">Khuyến nghị</Label>
-                        <Textarea
-                          id="recommendations"
-                          placeholder="Khuyến nghị điều trị, theo dõi hoặc tái khám..."
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsAddResultOpen(false)}
-                        >
-                          Hủy
-                        </Button>
-                        <Button
-                          className="bg-teal-600 hover:bg-teal-700"
-                          onClick={handleAddResult}
-                        >
-                          Lưu kết quả
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Tìm kiếm theo tên học sinh..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Loại khám" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="general">Khám tổng quát</SelectItem>
-                  <SelectItem value="dental">Răng miệng</SelectItem>
-                  <SelectItem value="vision">Thị lực</SelectItem>
-                  <SelectItem value="hearing">Thính lực</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Học sinh</TableHead>
-                    <TableHead>Loại khám</TableHead>
-                    <TableHead>Ngày khám</TableHead>
-                    <TableHead>Chiều cao</TableHead>
-                    <TableHead>Cân nặng</TableHead>
-                    <TableHead>BMI</TableHead>
-                    <TableHead>Kết quả</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {classResults.map((result) => (
-                    <TableRow key={result.id}>
-                      <TableCell className="font-medium">
-                        {result.studentName}
-                      </TableCell>
-                      <TableCell>{result.examType}</TableCell>
-                      <TableCell>{result.examDate}</TableCell>
-                      <TableCell>{result.height}</TableCell>
-                      <TableCell>{result.weight}</TableCell>
-                      <TableCell>{result.bmi}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            result.result === "Bình thường"
-                              ? "default"
-                              : "destructive"
-                          }
-                          className={
-                            result.result === "Bình thường"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-orange-100 text-orange-800"
-                          }
-                        >
-                          {result.result}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Xem chi tiết"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" title="Chỉnh sửa">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Kiểm tra sức khỏe"
-                            onClick={() => handleHealthCheck(result)}
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            <UserCheck className="h-4 w-4" />
-                          </Button>
-                          {result.result !== "Bình thường" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              title="Đặt lịch tư vấn"
-                              onClick={() => handleScheduleConsult(result)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Calendar className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm" title="Tải xuống">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Schedule Consultation Dialog */}
-        <Dialog
-          open={isScheduleConsultOpen}
-          onOpenChange={setIsScheduleConsultOpen}
-        >
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Đặt lịch hẹn tư vấn riêng</DialogTitle>
-              <DialogDescription>
-                Đặt lịch tư vấn cho học sinh có dấu hiệu bất thường
-              </DialogDescription>
-            </DialogHeader>
-            {selectedStudent && (
-              <div className="space-y-4">
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <h4 className="font-medium text-orange-900">
-                    Thông tin học sinh
-                  </h4>
-                  <p className="text-sm text-orange-700 mt-1">
-                    <strong>Tên:</strong> {selectedStudent.studentName}
-                  </p>
-                  <p className="text-sm text-orange-700">
-                    <strong>Kết quả khám:</strong> {selectedStudent.result}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="consultDate">Ngày hẹn</Label>
-                    <Input id="consultDate" type="date" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="consultTime">Giờ hẹn</Label>
-                    <Input id="consultTime" type="time" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="doctor">Bác sĩ tư vấn</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn bác sĩ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="dr1">
-                        BS. Nguyễn Văn A - Nhi khoa
-                      </SelectItem>
-                      <SelectItem value="dr2">BS. Trần Thị B - Mắt</SelectItem>
-                      <SelectItem value="dr3">
-                        BS. Lê Văn C - Răng hàm mặt
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reason">Lý do tư vấn</Label>
-                  <Textarea
-                    id="reason"
-                    placeholder="Mô tả chi tiết lý do cần tư vấn..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="parentContact">Liên hệ phụ huynh</Label>
-                  <Input
-                    id="parentContact"
-                    placeholder="Số điện thoại phụ huynh"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsScheduleConsultOpen(false)}
-                  >
-                    Hủy
-                  </Button>
-                  <Button
-                    className="bg-red-600 hover:bg-red-700"
-                    onClick={handleConfirmConsult}
-                  >
-                    Đặt lịch hẹn
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-teal-800">
-          Kết quả Khám sức khỏe
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+          Quản lý Khám Sức Khỏe
         </h1>
-        <p className="text-teal-600">
-          Quản lý và theo dõi kết quả khám sức khỏe theo từng lớp
-        </p>
+        <p className="text-blue-600">Theo dõi lịch khám và kết quả sức khỏe</p>
       </div>
 
-      {/* Overall Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-teal-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-teal-700">
-              Tổng đã khám
-            </CardTitle>
-            <ClipboardCheck className="h-4 w-4 text-teal-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-teal-800">235</div>
-            <p className="text-xs text-teal-600">94.8% học sinh</p>
-          </CardContent>
-        </Card>
-
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-blue-700">
-              Bình thường
+              Tỷ lệ khám sức khỏe
             </CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <Shield className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">198</div>
-            <p className="text-xs text-blue-600">84.3% kết quả tốt</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-orange-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">
-              Cần theo dõi
-            </CardTitle>
-            <Activity className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">37</div>
-            <p className="text-xs text-orange-600">15.7% cần chú ý</p>
+            <div className="text-2xl font-bold text-blue-800">85%</div>
+            <p className="text-xs text-blue-600">
+              Hoàn thành đợt khám hiện tại
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-green-700">
-              Tuần này
+              Đã khám
             </CardTitle>
-            <Calendar className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-800">42</div>
-            <p className="text-xs text-green-600">Lượt khám mới</p>
+            <div className="text-2xl font-bold text-green-800">210</div>
+            <p className="text-xs text-green-600">Học sinh đã khám xong</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-orange-700">
+              Chưa khám
+            </CardTitle>
+            <Clock className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-800">38</div>
+            <p className="text-xs text-orange-600">Học sinh cần khám</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-red-700">
+              Có vấn đề
+            </CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-800">5</div>
+            <p className="text-xs text-red-600">Cần theo dõi đặc biệt</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Classes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {classesData.map((classInfo) => {
-          const classResults = examResultsData.filter(
-            (result) => result.class === classInfo.name
-          );
-          const checkedCount = classResults.length;
-          const normalCount = classResults.filter(
-            (r) => r.result === "Bình thường"
-          ).length;
-          const abnormalCount = classResults.filter(
-            (r) => r.result !== "Bình thường"
-          ).length;
-
-          return (
-            <Card
-              key={classInfo.id}
-              className="border-teal-100 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => setSelectedClass(classInfo.name)}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <CardTitle className="text-blue-800">
+                Lịch khám sức khỏe
+              </CardTitle>
+              <CardDescription className="text-blue-600">
+                Kế hoạch khám sức khỏe cho học sinh
+              </CardDescription>
+            </div>
+            <Button
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => setIsCreateScheduleOpen(true)}
             >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl text-teal-800 flex items-center justify-between">
-                  Lớp {classInfo.name}
-                  <Badge className="bg-teal-100 text-teal-800">
-                    {checkedCount}/{classInfo.studentCount}
-                  </Badge>
-                </CardTitle>
-                <CardDescription className="text-teal-600">
-                  Tỷ lệ khám:{" "}
-                  {Math.round((checkedCount / classInfo.studentCount) * 100)}%
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Bình thường:</span>
-                    <span className="font-medium text-green-600">
-                      {normalCount}
-                    </span>
+              <Plus className="h-4 w-4 mr-2" />
+              Tạo lịch khám
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {examSchedule.map((schedule, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 rounded-lg border border-blue-100 hover:bg-blue-50 cursor-pointer"
+                onClick={() => handleScheduleClick(schedule)}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                    <Shield className="h-6 w-6 text-blue-600" />
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Cần theo dõi:</span>
-                    <span className="font-medium text-orange-600">
-                      {abnormalCount}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Chưa khám:</span>
-                    <span className="font-medium text-gray-600">
-                      {classInfo.studentCount - checkedCount}
-                    </span>
+                  <div>
+                    <h4 className="font-medium text-blue-800">
+                      {schedule.examType}
+                    </h4>
+                    <p className="text-sm text-blue-600">
+                      {schedule.targetGroup}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Ngày khám: {schedule.date}
+                    </p>
                   </div>
                 </div>
-                <Progress
-                  value={(checkedCount / classInfo.studentCount) * 100}
-                  className="mt-3"
-                />
-                <Button
-                  className="w-full mt-4 bg-teal-600 hover:bg-teal-700"
-                  size="sm"
-                >
-                  Xem kết quả
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">
+                      {schedule.completed}/{schedule.total}
+                    </p>
+                    <Progress
+                      value={(schedule.completed / schedule.total) * 100}
+                      className="w-24 h-2 mt-1"
+                    />
+                  </div>
+                  <Badge
+                    variant={
+                      schedule.status === "Hoàn thành" ? "default" : "secondary"
+                    }
+                    className={
+                      schedule.status === "Hoàn thành"
+                        ? "bg-green-100 text-green-800"
+                        : schedule.status === "Đang tiến hành"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-800"
+                    }
+                  >
+                    {schedule.status}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dialog tạo lịch khám */}
+      <Dialog
+        open={isCreateScheduleOpen}
+        onOpenChange={setIsCreateScheduleOpen}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCreateScheduleOpen(false)}
+              >
+                ← Quay lại
+              </Button>
+              <div>
+                <DialogTitle>
+                  Tạo lịch khám sức khỏe cho {selectedClass}
+                </DialogTitle>
+                <DialogDescription>
+                  Lập kế hoạch khám sức khỏe cho học sinh
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="exam-type">Loại khám sức khỏe *</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn loại khám" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Khám tổng quát</SelectItem>
+                    <SelectItem value="dental">Khám nha khoa</SelectItem>
+                    <SelectItem value="eye">Khám mắt</SelectItem>
+                    <SelectItem value="growth">Khám tăng trưởng</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Đối tượng khám * (Có thể chọn nhiều)</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  "Tất cả học sinh",
+                  "Học sinh lớp 1",
+                  "Học sinh lớp 2",
+                  "Học sinh lớp 3",
+                  "Học sinh lớp 4",
+                  "Học sinh lớp 5",
+                ].map((target) => (
+                  <label
+                    key={target}
+                    className="flex items-center space-x-2 p-2 border rounded-md hover:bg-gray-50"
+                  >
+                    <input
+                      type="checkbox"
+                      className="rounded"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTargets([...selectedTargets, target]);
+                        } else {
+                          setSelectedTargets(
+                            selectedTargets.filter((t) => t !== target)
+                          );
+                        }
+                      }}
+                    />
+                    <span className="text-sm">{target}</span>
+                  </label>
+                ))}
+              </div>
+              {selectedTargets.length > 0 && (
+                <div className="mt-2 p-2 bg-green-50 rounded-md">
+                  <p className="text-sm text-green-800">
+                    <strong>Đã chọn:</strong> {selectedTargets.join(", ")}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="schedule-date">Ngày khám</Label>
+                <Input id="schedule-date" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="schedule-time">Giờ bắt đầu</Label>
+                <Input id="schedule-time" type="time" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="location">Địa điểm khám</Label>
+              <Input id="location" placeholder="VD: Phòng y tế trường" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="doctor">Bác sĩ thực hiện</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn bác sĩ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dr1">BS. Nguyễn Văn A</SelectItem>
+                  <SelectItem value="dr2">BS. Trần Thị B</SelectItem>
+                  <SelectItem value="dr3">BS. Lê Văn C</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Ghi chú</Label>
+              <Textarea
+                id="notes"
+                placeholder="Ghi chú về lịch khám, lưu ý đặc biệt..."
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="parent-notification">Thông báo phụ huynh</Label>
+              <Textarea
+                id="parent-notification"
+                placeholder="Nội dung thông báo gửi đến phụ huynh..."
+                rows={4}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateScheduleOpen(false)}
+              >
+                Hủy
+              </Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  if (selectedTargets.length === 0) {
+                    alert("Vui lòng chọn ít nhất một đối tượng khám!");
+                    return;
+                  }
+                  setIsCreateScheduleOpen(false);
+                  alert("Đã tạo lịch khám sức khỏe thành công!");
+                }}
+              >
+                Tạo lịch khám
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog danh sách lớp và kết quả khám */}
+      <Dialog open={isExamResultOpen} onOpenChange={setIsExamResultOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <DialogTitle>
+                Danh sách lớp tham gia khám {selectedScheduleForClass?.examType}
+              </DialogTitle>
+              <DialogDescription>
+                Ngày khám: {selectedScheduleForClass?.date}
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4">
+            {classExamProgress.map((classInfo) => (
+              <Card
+                key={classInfo.class}
+                className="cursor-pointer hover:border-blue-500 transition-colors"
+                onClick={() => handleClassClick(classInfo)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">{classInfo.class}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="text-sm text-gray-500">
+                      Sĩ số: {classInfo.total} học sinh
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Đã khám:</span>
+                      <span>
+                        {classInfo.completed}/{classInfo.total}
+                      </span>
+                    </div>
+                    <Progress
+                      value={(classInfo.completed / classInfo.total) * 100}
+                      className="h-2"
+                    />
+                    <Badge
+                      className={
+                        classInfo.completed === classInfo.total
+                          ? "bg-green-100 text-green-800"
+                          : classInfo.completed > 0
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }
+                    >
+                      {classInfo.completed === classInfo.total
+                        ? "Hoàn thành"
+                        : classInfo.completed > 0
+                        ? "Đang tiến hành"
+                        : "Chưa bắt đầu"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog chi tiết lịch khám */}
+      <Dialog
+        open={isScheduleDetailOpen}
+        onOpenChange={setIsScheduleDetailOpen}
+      >
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full overflow-y-auto">
+          <DialogHeader className="pb-4 border-b">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsScheduleDetailOpen(false);
+                  setIsExamResultOpen(true);
+                }}
+              >
+                ← Quay lại
+              </Button>
+              <div>
+                <DialogTitle className="text-2xl">
+                  Chi tiết lịch khám: {selectedSchedule?.examType}
+                </DialogTitle>
+                <DialogDescription className="mt-2">
+                  Thông tin chi tiết về tiến độ khám sức khỏe - {selectedClass}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          {selectedSchedule && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Thông tin chung</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Loại khám:</span>
+                      <span className="font-medium">
+                        {selectedSchedule.examType}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Đối tượng:</span>
+                      <span className="font-medium">
+                        {selectedSchedule.targetGroup}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Ngày khám:</span>
+                      <span className="font-medium">
+                        {selectedSchedule.date}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tiến độ:</span>
+                      <span className="font-medium">
+                        {selectedSchedule.completed}/{selectedSchedule.total}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Thống kê</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Đã hoàn thành</span>
+                          <span>
+                            {Math.round(
+                              (selectedSchedule.completed /
+                                selectedSchedule.total) *
+                                100
+                            )}
+                            %
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            (selectedSchedule.completed /
+                              selectedSchedule.total) *
+                            100
+                          }
+                          className="h-2"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="text-center p-2 bg-green-50 rounded">
+                          <div className="font-bold text-green-800">
+                            {selectedSchedule.completed}
+                          </div>
+                          <div className="text-green-600">Đã khám</div>
+                        </div>
+                        <div className="text-center p-2 bg-orange-50 rounded">
+                          <div className="font-bold text-orange-800">
+                            {selectedSchedule.total -
+                              selectedSchedule.completed}
+                          </div>
+                          <div className="text-orange-600">Chưa khám</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <ClassHealthList
+                className={selectedClass || "Lớp 1A"}
+                completed={selectedSchedule.completed}
+                total={selectedSchedule.total}
+                onRecordClick={handleRecordClick}
+                onNotifyClick={handleNotifyClick}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog ghi nhận kết quả khám */}
+      <Dialog open={isRecordDialogOpen} onOpenChange={setIsRecordDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ghi nhận kết quả khám sức khỏe</DialogTitle>
+            <DialogDescription>
+              Cập nhật thông tin khám cho học sinh {selectedStudent?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Kết quả khám</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn kết quả khám" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal">Bình thường</SelectItem>
+                  <SelectItem value="mild">Nhẹ (cần theo dõi)</SelectItem>
+                  <SelectItem value="moderate">Trung bình (tư vấn)</SelectItem>
+                  <SelectItem value="severe">Nặng (điều trị)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Kế hoạch theo dõi</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn kế hoạch theo dõi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Không cần theo dõi</SelectItem>
+                  <SelectItem value="weekly">Theo dõi hàng tuần</SelectItem>
+                  <SelectItem value="monthly">Theo dõi hàng tháng</SelectItem>
+                  <SelectItem value="quarterly">Theo dõi 3 tháng</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Ghi chú</Label>
+              <Textarea
+                placeholder="Nhập các ghi chú về tình trạng sức khỏe, lời khuyên..."
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsRecordDialogOpen(false)}
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsRecordDialogOpen(false);
+                  // TODO: Save health record
+                }}
+              >
+                Lưu
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog gửi thông báo */}
+      <Dialog
+        open={isNotificationDialogOpen}
+        onOpenChange={setIsNotificationDialogOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gửi thông báo phụ huynh</DialogTitle>
+            <DialogDescription>
+              Gửi thông báo cho phụ huynh học sinh {selectedStudent?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nội dung thông báo</Label>
+              <Textarea
+                placeholder="Nhập nội dung thông báo cho phụ huynh..."
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Mức độ ưu tiên</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn mức độ ưu tiên" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Thấp</SelectItem>
+                  <SelectItem value="medium">Trung bình</SelectItem>
+                  <SelectItem value="high">Cao</SelectItem>
+                  <SelectItem value="urgent">Khẩn cấp</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-start space-x-2">
+              <input type="checkbox" id="sms" className="mt-1" />
+              <Label htmlFor="sms" className="text-sm">
+                Gửi kèm tin nhắn SMS cho phụ huynh
+              </Label>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsNotificationDialogOpen(false)}
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsNotificationDialogOpen(false);
+                  // TODO: Send notification
+                }}
+              >
+                Gửi thông báo
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

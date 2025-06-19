@@ -53,12 +53,7 @@ const navLinks = [
     label: "Kết quả khám",
     description: "Kết quả khám",
   },
-  {
-    href: "/cms/notifications",
-    icon: Speech,
-    label: "Thông báo",
-    description: "Thông báo",
-  },
+  
   {
     href: "/cms/events",
     icon: ClipboardCheck,

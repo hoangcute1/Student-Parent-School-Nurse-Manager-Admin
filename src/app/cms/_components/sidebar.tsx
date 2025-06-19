@@ -1,12 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Database, Heart, LogOut, Settings, Shield, User } from "lucide-react";
+import { Heart, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navLinks, adminNavLinks } from "../_constants/sidebar";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import type { User as AppUser } from "@/lib/types";
+
 import { useAuthStore } from "@/stores/auth-store";
 
 interface SidebarProps {

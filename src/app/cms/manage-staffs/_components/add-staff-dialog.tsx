@@ -17,7 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import { Form, useForm } from "react-hook-form";
 import * as z from "zod";
-import type { User as AppUser } from "@/lib/types";
+import type { User as AppUser } from "@/lib/type/types";
 import { Button } from "@/components/ui/button";
 
 const staffFormSchema = z.object({

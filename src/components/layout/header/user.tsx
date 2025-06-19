@@ -15,11 +15,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Notification from "./noti";
 import { useAuthStore } from "@/stores/auth-store";
-import { logout } from "@/lib/auth";
+import { logout } from "@/lib/api";
 
 export default function User() {
   const router = useRouter();
-  const { user, profile, isAuthenticated, role } = useAuthStore();
+  const { user, profile, isAuthenticated, role, clearAuth } = useAuthStore();
   // Nếu không đăng nhập, hiển thị nút đăng nhập
   if (!isAuthenticated || !user) {
     return (
@@ -112,6 +112,7 @@ export default function User() {
             className="cursor-pointer text-red-600"
             onSelect={() => {
               logout();
+              clearAuth();
               router.push("/");
             }}
           >

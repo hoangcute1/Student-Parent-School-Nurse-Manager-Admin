@@ -4,49 +4,20 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { User as AppUser, UserProfile } from "@/lib/types";
-import { getAuthToken } from "@/lib/auth";
-import CheckAuth from "./check-auth";
+
+
 import User from "@/components/layout/header/user";
 import Sidebar from "./_components/sidebar";
-import Notification from "@/components/layout/header/noti";
+
+import { useAuthStore } from "@/stores/auth-store";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user, profile, setUser, setProfile } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  // Effect for handling initial state
-  useEffect(() => {
-    // Check auth token first
-    if (!getAuthToken()) {
-      return;
-    }
-
-    // Get sidebar state from localStorage
-    const savedSidebarState = localStorage.getItem("sidebarOpen");
-    if (savedSidebarState !== null) {
-      setIsSidebarOpen(JSON.parse(savedSidebarState));
-    }
-
-    // Get user data from localStorage
-    const authData = localStorage.getItem("authData");
-    if (authData) {
-      try {
-        const data = JSON.parse(authData);
-        if (data.user && data.profile) {
-          setUser(data.user);
-          setProfile(data.profile);
-        }
-      } catch (error) {
-        console.error("Error parsing auth data:", error);
-      }
-    }
-  }, []);
 
   // Save sidebar state to localStorage when it changes
   const toggleSidebar = () => {
@@ -56,39 +27,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <CheckAuth>
-      <div className="flex min-h-screen">
-        <Sidebar isOpen={isSidebarOpen} />
-        <div
-          className={cn(
-            "flex min-h-screen flex-1 flex-col transition-all duration-200 ease-in-out",
-            isSidebarOpen ? "lg:ml-64" : "lg:ml-0"
-          )}
-        >
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background  pl-2 pr-4 md:pr-6">
-            <div className="flex items-center gap-4">
-              <div
-                onClick={toggleSidebar}
-                className=" size-10 flex justify-center items-center hover:bg-slate-100 rounded-md"
-              >
-                {isSidebarOpen ? <ChevronLeft size={25} /> : <Menu size={25} />}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {user && profile ? <User /> : null}
-            </div>
-          </header>
-          <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
-        </div>
-        {/* Mobile overlay */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
-            onClick={toggleSidebar}
-          />
+    <div className="flex min-h-screen">
+      <Sidebar isOpen={isSidebarOpen} />
+      <div
+        className={cn(
+          "flex min-h-screen flex-1 flex-col transition-all duration-200 ease-in-out",
+          isSidebarOpen ? "lg:ml-64" : "lg:ml-0"
         )}
+      >
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background  pl-2 pr-4 md:pr-6">
+          <div className="flex items-center gap-4">
+            <div
+              onClick={toggleSidebar}
+              className=" size-10 flex justify-center items-center hover:bg-slate-100 rounded-md"
+            >
+              {isSidebarOpen ? <ChevronLeft size={25} /> : <Menu size={25} />}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {user && profile ? <User /> : null}
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </div>
-    </CheckAuth>
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+    </div>
   );
 }

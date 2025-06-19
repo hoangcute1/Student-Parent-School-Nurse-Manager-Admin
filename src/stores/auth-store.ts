@@ -1,7 +1,7 @@
 // src/stores/auth-store.ts
 import { create } from "zustand";
 
-import { AuthState } from "@/type/auth";
+import { AuthState } from "@/lib/type/auth";
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,

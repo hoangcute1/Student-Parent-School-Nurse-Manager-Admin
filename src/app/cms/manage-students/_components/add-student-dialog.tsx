@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { User as AppUser } from "@/lib/types";
+import type { User as AppUser } from "@/lib/type/types";
 import {
   Select,
   SelectContent,

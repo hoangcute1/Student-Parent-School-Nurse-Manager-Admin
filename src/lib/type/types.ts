@@ -1,27 +1,9 @@
 
 
 
-export interface UserProfile {
-  _id: string;
-  name: string;
-  gender: string;
-  birth: string;
-  address: string;
-  avatar: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
-export interface User {
-  email: string;
-  role: "staff" | "parent" | "admin" | null;
-}
 
-export interface AuthResponse {
-  token: string;
-  user: User;
-  profile: UserProfile;
-}
+
 
 export interface Child {
   id: string;

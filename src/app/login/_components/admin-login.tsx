@@ -19,11 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
-import { loginParentOTP, requestParentLoginOTP } from "@/lib/api/auth";
+import { loginAdminOTP, requestAdminLoginOTP } from "@/lib/api/auth";
 import { LoginRequestCredentials } from "@/lib/type/auth";
 
 
-export function ParentLoginForm() {
+export function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginRequestCredentials>({
     email: "",
@@ -85,12 +85,12 @@ export function ParentLoginForm() {
   };
   const verifyOTP = async (otp: string) => {
     try {
-      console.log("Verifying OTP in parent login:", otp);
+      console.log("Verifying OTP in admin login:", otp);
       console.log("Using email:", formData.email);
       console.log("Using password:", formData.password);
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const success = await loginParentOTP(formData.email, otp);
+      const success = await loginAdminOTP(formData.email, otp);
 
       if (success) {
         toast({
@@ -118,7 +118,7 @@ export function ParentLoginForm() {
   const resendOTP = async () => {
     try {
       console.log("Resending OTP with data:", { ...formData });
-      await requestParentLoginOTP({
+      await requestAdminLoginOTP({
         ...formData,
       });
       toast({
@@ -137,7 +137,7 @@ export function ParentLoginForm() {
     try {
       // First step: request OTP
       console.log("Requesting OTP with data:", { ...formData });
-      await requestParentLoginOTP({
+      await requestAdminLoginOTP({
         ...formData,
       });
       setShowOTP(true);

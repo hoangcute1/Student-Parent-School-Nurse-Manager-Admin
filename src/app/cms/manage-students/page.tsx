@@ -6,13 +6,7 @@ import {
   Plus,
   Search,
   Filter,
-  Eye,
-  Edit,
-  Trash2,
-  Phone,
-  Mail,
   ArrowLeft,
-  UserCheck,
   Activity,
 } from "lucide-react";
 import { API_URL } from "@/lib/env";
@@ -30,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -52,13 +45,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Sample data for classes
 
-
 // Sample data for students
-
 
 // Interface cho lớp học từ API
 interface ClassItem {
@@ -83,13 +73,17 @@ export default function StudentsPage() {
     try {
       const response = await fetch(`${API_URL}/classes`);
       if (!response.ok) {
-        throw new Error('Không thể lấy danh sách lớp học');
+        throw new Error("Không thể lấy danh sách lớp học");
       }
       const data = await response.json();
       setClasses(data);
     } catch (err) {
-      console.error('Error fetching classes:', err);
-      setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi lấy danh sách lớp học');
+      console.error("Error fetching classes:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Đã xảy ra lỗi khi lấy danh sách lớp học"
+      );
       // Sử dụng dữ liệu mẫu nếu API không hoạt động (chỉ để demo)
       setClasses([
         { id: 1, name: "1A", grade: "1" },
@@ -134,8 +128,11 @@ export default function StudentsPage() {
   };
   if (selectedClass) {
     // Find the selected class details
-    const classDetails = classes.find(c => c.name === selectedClass) || { id: 0, name: selectedClass, grade: "" };
-    
+    const classDetails = classes.find((c) => c.name === selectedClass) || {
+      id: 0,
+      name: selectedClass,
+      grade: "",
+    };
 
     return (
       <div className="space-y-6">
@@ -161,9 +158,7 @@ export default function StudentsPage() {
                 <CardTitle className="text-blue-800">
                   Học sinh lớp {selectedClass}
                 </CardTitle>
-                <CardDescription className="text-blue-600">
-                  
-                </CardDescription>
+                <CardDescription className="text-blue-600"></CardDescription>
               </div>
               <div className="flex gap-2">
                 <Dialog
@@ -484,7 +479,8 @@ export default function StudentsPage() {
         <p className="text-blue-600">
           Quản lý thông tin học sinh theo từng lớp
         </p>
-      </div>      {/* Stats Cards */}
+      </div>{" "}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -524,8 +520,6 @@ export default function StudentsPage() {
           </CardContent>
         </Card>
 
-      
-
         <Card className="border-purple-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-purple-700">
@@ -547,7 +541,6 @@ export default function StudentsPage() {
           </CardContent>
         </Card>
       </div>
-
       {/* Classes Grid */}
       {loading ? (
         <div className="flex justify-center items-center p-8">
@@ -557,12 +550,14 @@ export default function StudentsPage() {
       ) : error ? (
         <Card className="border-red-100 bg-red-50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-red-700">Không thể tải danh sách lớp</CardTitle>
+            <CardTitle className="text-lg text-red-700">
+              Không thể tải danh sách lớp
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-red-600">{error}</p>
-            <Button 
-              onClick={fetchClasses} 
+            <Button
+              onClick={fetchClasses}
               className="mt-4 bg-red-600 hover:bg-red-700"
               size="sm"
             >
@@ -595,7 +590,9 @@ export default function StudentsPage() {
                     <span className="text-xl font-bold">{classItem.grade}</span>
                   </div>
                   <div className="text-center mb-3">
-                    <span className="text-gray-600">Khối {classItem.grade} - Lớp {classItem.name}</span>
+                    <span className="text-gray-600">
+                      Khối {classItem.grade} - Lớp {classItem.name}
+                    </span>
                   </div>
                 </div>
                 <Button

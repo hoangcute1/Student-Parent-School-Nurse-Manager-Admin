@@ -1,5 +1,5 @@
 import { createStaff, getStaffs } from "@/lib/api/staff";
-import { ApiStaff, DisplayStaff, StaffStore } from "../type/staff";
+import { ApiStaff, DisplayStaff, StaffStore } from "../lib/type/staff";
 import { create } from "zustand";
 import type { StaffFormValues } from "@/app/cms/manage-staffs/_components/add-staff-dialog";
 
@@ -25,7 +25,7 @@ export const useStaffStore = create<StaffStore>((set) => ({
       // Kiểm tra nếu response là array thì dùng luôn, không thì check response.data
       const staffList = Array.isArray(response)
         ? response
-        : response?.data || [];
+        : (response as { data: ApiStaff[] }).data;
       set({
         staff: staffList.map(mapToDisplayStaff),
         error: null,

@@ -2,11 +2,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   Heart,
-  Home,
-  LogOut,
   MessageSquare,
   ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
