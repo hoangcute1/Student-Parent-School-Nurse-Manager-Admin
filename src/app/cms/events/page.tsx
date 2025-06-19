@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertTriangle, Plus, Search, Clock, User, MapPin, Phone, FileText, CheckCircle } from "lucide-react"
+import { AlertTriangle, Plus, Search, Clock, User, MapPin, Phone, FileText, CheckCircle, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,10 +9,168 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 export default function MedicalEvents() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
+  
+  // State for modals
+  const [addEventOpen, setAddEventOpen] = useState(false)
+  const [updateEventOpen, setUpdateEventOpen] = useState(false)
+  const [processEventOpen, setProcessEventOpen] = useState(false)
+  const [viewEventDetailsOpen, setViewEventDetailsOpen] = useState(false)
+  const [emergencyProcessOpen, setEmergencyProcessOpen] = useState(false)
+  
+  // State for selected event
+  const [selectedEvent, setSelectedEvent] = useState<any>(null)
+  
+  // Form schema for adding/updating event
+  const eventFormSchema = z.object({
+    title: z.string().min(3, "Tiêu đề phải có ít nhất 3 ký tự"),
+    student: z.string().min(2, "Tên học sinh phải có ít nhất 2 ký tự"),
+    class: z.string().min(1, "Vui lòng chọn lớp"),
+    location: z.string().min(1, "Vui lòng nhập địa điểm"),
+    priority: z.enum(["Cao", "Trung bình", "Thấp"]),
+    description: z.string().min(10, "Mô tả phải có ít nhất 10 ký tự"),
+    contactStatus: z.string().optional(),
+    reporter: z.string().optional(),
+  })
+  
+  // Form for adding new event
+  const addEventForm = useForm<z.infer<typeof eventFormSchema>>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: {
+      title: "",
+      student: "",
+      class: "",
+      location: "",
+      priority: "Trung bình",
+      description: "",
+      contactStatus: "Chưa liên hệ",
+      reporter: "",
+    },
+  })
+  
+  // Form for updating event
+  const updateEventForm = useForm<z.infer<typeof eventFormSchema>>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: {
+      title: "",
+      student: "",
+      class: "",
+      location: "",
+      priority: "Trung bình",
+      description: "",
+      contactStatus: "Chưa liên hệ",
+      reporter: "",
+    },
+  })
+  
+  // Process event form
+  const processFormSchema = z.object({
+    status: z.enum(["processing", "completed", "waiting"]),
+    notes: z.string().min(5, "Ghi chú phải có ít nhất 5 ký tự"),
+    contactParent: z.boolean(),
+    actionTaken: z.string().min(5, "Hành động phải có ít nhất 5 ký tự"),
+  })
+  
+  const processEventForm = useForm<z.infer<typeof processFormSchema>>({
+    resolver: zodResolver(processFormSchema),
+    defaultValues: {
+      status: "processing",
+      notes: "",
+      contactParent: false,
+      actionTaken: "",
+    },
+  })
+  
+  // Emergency process form
+  const emergencyFormSchema = z.object({
+    immediateAction: z.string().min(5, "Hành động phải có ít nhất 5 ký tự"),
+    notifyParent: z.boolean(),
+    transferToHospital: z.boolean(),
+    hospitalName: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  
+  const emergencyProcessForm = useForm<z.infer<typeof emergencyFormSchema>>({
+    resolver: zodResolver(emergencyFormSchema),
+    defaultValues: {
+      immediateAction: "",
+      notifyParent: true,
+      transferToHospital: false,
+      hospitalName: "",
+      notes: "",
+    },
+  })
+  
+  // Handle form submissions
+  const onAddEvent = (data: z.infer<typeof eventFormSchema>) => {
+    console.log("Add event data:", data)
+    // Add logic to save new event
+    // For now, just close the modal
+    setAddEventOpen(false)
+    addEventForm.reset()
+  }
+  
+  const onUpdateEvent = (data: z.infer<typeof eventFormSchema>) => {
+    console.log("Update event data:", data)
+    // Add logic to update event
+    setUpdateEventOpen(false)
+  }
+  
+  const onProcessEvent = (data: z.infer<typeof processFormSchema>) => {
+    console.log("Process event data:", data)
+    // Add logic to process event
+    setProcessEventOpen(false)
+  }
+  
+  const onEmergencyProcess = (data: z.infer<typeof emergencyFormSchema>) => {
+    console.log("Emergency process data:", data)
+    // Add logic for emergency handling
+    setEmergencyProcessOpen(false)
+  }
+  
+  // Handle opening modals with event data
+  const handleViewDetails = (event: any) => {
+    setSelectedEvent(event)
+    setViewEventDetailsOpen(true)
+  }
+  
+  const handleUpdateEvent = (event: any) => {
+    setSelectedEvent(event)
+    updateEventForm.reset({
+      title: event.title,
+      student: event.student,
+      class: event.class,
+      location: event.location,
+      priority: event.priority,
+      description: event.description,
+      contactStatus: event.contactStatus || "Chưa liên hệ",
+      reporter: event.reporter || "",
+    })
+    setUpdateEventOpen(true)
+  }
+  
+  const handleProcessEvent = (event: any) => {
+    setSelectedEvent(event)
+    processEventForm.reset()
+    setProcessEventOpen(true)
+  }
+  
+  const handleEmergencyProcess = (event: any) => {
+    setSelectedEvent(event)
+    emergencyProcessForm.reset()
+    setEmergencyProcessOpen(true)
+  }
 
   return (
     <div className="space-y-6">
@@ -94,7 +252,11 @@ export default function MedicalEvents() {
                     Danh sách các sự kiện y tế cần theo dõi và xử lý
                   </CardDescription>
                 </div>
-                <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
+                <Button
+                  size="sm"
+                  className="bg-teal-600 hover:bg-teal-700"
+                  onClick={() => setAddEventOpen(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Thêm sự kiện
                 </Button>
@@ -176,10 +338,10 @@ export default function MedicalEvents() {
                         <span>Đã liên hệ: {event.contactStatus}</span>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleUpdateEvent(event)}>
                           Cập nhật
                         </Button>
-                        <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
+                        <Button size="sm" className="bg-teal-600 hover:bg-teal-700" onClick={() => handleProcessEvent(event)}>
                           Xử lý
                         </Button>
                       </div>
@@ -214,8 +376,7 @@ export default function MedicalEvents() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-green-100 text-green-800">Đã xử lý</Badge>
-                      <Button variant="ghost" size="sm">
+                      <Badge className="bg-green-100 text-green-800">Đã xử lý</Badge>                      <Button variant="ghost" size="sm" onClick={() => handleViewDetails(event)}>
                         Chi tiết
                       </Button>
                     </div>
@@ -272,12 +433,10 @@ export default function MedicalEvents() {
                     <p className="text-sm text-red-700 mb-3">{event.description}</p>
 
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-red-600 hover:bg-red-700">
+                      <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={() => handleEmergencyProcess(event)}>
                         Xử lý ngay
-                      </Button>
-
-                      <Button size="sm" variant="outline" className="border-red-200 text-red-700">
-                        Liên hệ PH
+                      </Button>                      <Button size="sm" variant="outline" className="border-red-200 text-red-700" onClick={() => handleViewDetails(event)}>
+                        Chi tiết
                       </Button>
                     </div>
                   </div>
@@ -348,6 +507,738 @@ export default function MedicalEvents() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Add Event Dialog */}
+      <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-teal-800">Thêm sự kiện y tế</DialogTitle>
+            <DialogDescription className="text-teal-600">
+              Nhập thông tin về sự kiện y tế mới
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...addEventForm}>
+            <form onSubmit={addEventForm.handleSubmit(onAddEvent)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={addEventForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tiêu đề sự kiện</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nhập tiêu đề" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={addEventForm.control}
+                  name="student"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Học sinh</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Tên học sinh" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={addEventForm.control}
+                  name="class"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Lớp</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn lớp" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Lớp 1A">Lớp 1A</SelectItem>
+                          <SelectItem value="Lớp 1B">Lớp 1B</SelectItem>
+                          <SelectItem value="Lớp 2A">Lớp 2A</SelectItem>
+                          <SelectItem value="Lớp 2B">Lớp 2B</SelectItem>
+                          <SelectItem value="Lớp 3A">Lớp 3A</SelectItem>
+                          <SelectItem value="Lớp 3B">Lớp 3B</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={addEventForm.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Địa điểm</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Địa điểm xảy ra" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={addEventForm.control}
+                  name="reporter"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Người báo cáo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Người báo cáo sự kiện" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={addEventForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mức độ ưu tiên</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn mức độ" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Cao">Cao</SelectItem>
+                          <SelectItem value="Trung bình">Trung bình</SelectItem>
+                          <SelectItem value="Thấp">Thấp</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={addEventForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả chi tiết</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Mô tả chi tiết về sự kiện y tế" 
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={addEventForm.control}
+                name="contactStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trạng thái liên hệ phụ huynh</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Trạng thái liên hệ" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Chưa liên hệ">Chưa liên hệ</SelectItem>
+                        <SelectItem value="Đang gọi">Đang gọi</SelectItem>
+                        <SelectItem value="Đã liên hệ">Đã liên hệ</SelectItem>
+                        <SelectItem value="Phụ huynh">Phụ huynh đang đến</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setAddEventOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
+                  Lưu sự kiện
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Update Event Dialog */}
+      <Dialog open={updateEventOpen} onOpenChange={setUpdateEventOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-teal-800">Cập nhật sự kiện y tế</DialogTitle>
+            <DialogDescription className="text-teal-600">
+              Cập nhật thông tin về sự kiện y tế
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...updateEventForm}>
+            <form onSubmit={updateEventForm.handleSubmit(onUpdateEvent)} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={updateEventForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tiêu đề sự kiện</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nhập tiêu đề" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={updateEventForm.control}
+                  name="student"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Học sinh</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Tên học sinh" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={updateEventForm.control}
+                  name="class"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Lớp</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn lớp" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Lớp 1A">Lớp 1A</SelectItem>
+                          <SelectItem value="Lớp 1B">Lớp 1B</SelectItem>
+                          <SelectItem value="Lớp 2A">Lớp 2A</SelectItem>
+                          <SelectItem value="Lớp 2B">Lớp 2B</SelectItem>
+                          <SelectItem value="Lớp 3A">Lớp 3A</SelectItem>
+                          <SelectItem value="Lớp 3B">Lớp 3B</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={updateEventForm.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Địa điểm</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Địa điểm xảy ra" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={updateEventForm.control}
+                  name="reporter"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Người báo cáo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Người báo cáo sự kiện" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={updateEventForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mức độ ưu tiên</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn mức độ" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Cao">Cao</SelectItem>
+                          <SelectItem value="Trung bình">Trung bình</SelectItem>
+                          <SelectItem value="Thấp">Thấp</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={updateEventForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả chi tiết</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Mô tả chi tiết về sự kiện y tế" 
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={updateEventForm.control}
+                name="contactStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trạng thái liên hệ phụ huynh</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Trạng thái liên hệ" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Chưa liên hệ">Chưa liên hệ</SelectItem>
+                        <SelectItem value="Đang gọi">Đang gọi</SelectItem>
+                        <SelectItem value="Đã liên hệ">Đã liên hệ</SelectItem>
+                        <SelectItem value="Phụ huynh">Phụ huynh đang đến</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setUpdateEventOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
+                  Cập nhật
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Process Event Dialog */}
+      <Dialog open={processEventOpen} onOpenChange={setProcessEventOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-teal-800">Xử lý sự kiện y tế</DialogTitle>
+            <DialogDescription className="text-teal-600">
+              Ghi chú và cập nhật trạng thái xử lý sự kiện y tế
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedEvent && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-md">
+              <h4 className="font-medium text-gray-800">{selectedEvent.title}</h4>
+              <div className="text-sm text-gray-600 mt-1">
+                <div>{selectedEvent.student} - {selectedEvent.class}</div>
+                <div>{selectedEvent.location} - {selectedEvent.time}</div>
+              </div>
+            </div>
+          )}
+          
+          <Form {...processEventForm}>
+            <form onSubmit={processEventForm.handleSubmit(onProcessEvent)} className="space-y-4">
+              <FormField
+                control={processEventForm.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trạng thái xử lý</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn trạng thái" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="processing">Đang xử lý</SelectItem>
+                        <SelectItem value="waiting">Chờ phụ huynh</SelectItem>
+                        <SelectItem value="completed">Đã xử lý xong</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={processEventForm.control}
+                name="actionTaken"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hành động đã thực hiện</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Mô tả hành động đã thực hiện" 
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={processEventForm.control}
+                name="contactParent"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-600"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Đã liên hệ phụ huynh</FormLabel>
+                      <FormDescription>
+                        Đánh dấu nếu đã liên hệ với phụ huynh về sự kiện này
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={processEventForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ghi chú bổ sung</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Thêm ghi chú về tình trạng học sinh, hướng dẫn tiếp theo, v.v." 
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setProcessEventOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
+                  Hoàn tất xử lý
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* View Event Details Dialog */}
+      <Dialog open={viewEventDetailsOpen} onOpenChange={setViewEventDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-teal-800">Chi tiết sự kiện y tế</DialogTitle>
+          </DialogHeader>
+          
+          {selectedEvent && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-teal-800">{selectedEvent.title}</h3>
+                  <div className="flex items-center gap-2 mt-2 text-gray-600">
+                    <Badge className={
+                      selectedEvent.priority === "Cao"
+                        ? "bg-red-100 text-red-800"
+                        : selectedEvent.priority === "Trung bình"
+                          ? "bg-yellow-100 text-yellow-800" 
+                          : "bg-blue-100 text-blue-800"
+                    }>
+                      {selectedEvent.priority || "Đã xử lý"}
+                    </Badge>
+                    <span>{selectedEvent.time || selectedEvent.date}</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500">Học sinh</p>
+                    <p className="font-medium">{selectedEvent.student}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Lớp</p>
+                    <p className="font-medium">{selectedEvent.class}</p>
+                  </div>
+                  {selectedEvent.location && (
+                    <div>
+                      <p className="text-gray-500">Địa điểm</p>
+                      <p className="font-medium">{selectedEvent.location}</p>
+                    </div>
+                  )}
+                  {selectedEvent.reporter && (
+                    <div>
+                      <p className="text-gray-500">Người báo cáo</p>
+                      <p className="font-medium">{selectedEvent.reporter}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {selectedEvent.description && (
+                <div>
+                  <h4 className="font-medium text-gray-700">Mô tả</h4>
+                  <p className="mt-1 text-gray-600">{selectedEvent.description}</p>
+                </div>
+              )}
+              
+              {selectedEvent.contactStatus && (
+                <div>
+                  <h4 className="font-medium text-gray-700">Trạng thái liên hệ</h4>
+                  <p className="mt-1 text-gray-600">{selectedEvent.contactStatus}</p>
+                </div>
+              )}
+              
+              {selectedEvent.parentContact && (
+                <div>
+                  <h4 className="font-medium text-gray-700">Thông tin phụ huynh</h4>
+                  <p className="mt-1 text-gray-600">{selectedEvent.parentContact}</p>
+                </div>
+              )}
+              
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setViewEventDetailsOpen(false)}
+                >
+                  Đóng
+                </Button>
+                {!selectedEvent.date && ( // Only show for active events, not completed ones
+                  <Button
+                    className="bg-teal-600 hover:bg-teal-700"
+                    onClick={() => {
+                      setViewEventDetailsOpen(false)
+                      handleProcessEvent(selectedEvent)
+                    }}
+                  >
+                    Xử lý sự kiện
+                  </Button>
+                )}
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Emergency Process Dialog */}
+      <Dialog open={emergencyProcessOpen} onOpenChange={setEmergencyProcessOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-red-800">Xử lý sự kiện khẩn cấp</DialogTitle>
+            <DialogDescription className="text-red-600">
+              Hành động nhanh cho trường hợp cần xử lý ngay
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedEvent && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-md">
+              <h4 className="font-medium text-red-800">{selectedEvent.title}</h4>
+              <div className="text-sm text-red-700 mt-1">
+                <div>{selectedEvent.student} - {selectedEvent.class}</div>
+                <div>{selectedEvent.location} - {selectedEvent.time}</div>
+              </div>
+            </div>
+          )}
+          
+          <Form {...emergencyProcessForm}>
+            <form onSubmit={emergencyProcessForm.handleSubmit(onEmergencyProcess)} className="space-y-4">
+              <FormField
+                control={emergencyProcessForm.control}
+                name="immediateAction"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hành động khẩn cấp</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Mô tả hành động khẩn cấp đã thực hiện" 
+                        className="min-h-[80px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={emergencyProcessForm.control}
+                name="notifyParent"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-600"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Thông báo cho phụ huynh</FormLabel>
+                      <FormDescription>
+                        Đã liên hệ với phụ huynh về tình trạng khẩn cấp
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={emergencyProcessForm.control}
+                name="transferToHospital"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-600"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Chuyển đến bệnh viện</FormLabel>
+                      <FormDescription>
+                        Trường hợp cần chuyển đến cơ sở y tế
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={emergencyProcessForm.control}
+                name="hospitalName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tên bệnh viện/Cơ sở y tế</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Nhập tên bệnh viện/cơ sở y tế (nếu có)"
+                        {...field}
+                        disabled={!emergencyProcessForm.watch("transferToHospital")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={emergencyProcessForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ghi chú bổ sung</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Thêm ghi chú quan trọng về tình trạng, thuốc men, xử lý..." 
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setEmergencyProcessOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button type="submit" className="bg-red-600 hover:bg-red-700">
+                  Xác nhận xử lý khẩn cấp
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

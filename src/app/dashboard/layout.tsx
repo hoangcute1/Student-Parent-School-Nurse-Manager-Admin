@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import CheckAuth from "./check-auth";
+
 import User from "@/components/layout/header/user";
 import Sidebar from "./_components/sidebar";
-import { getAuthToken } from "@/lib/api";
+
 import { useAuthStore } from "@/stores/auth-store";
 
 interface DashboardLayoutProps {
