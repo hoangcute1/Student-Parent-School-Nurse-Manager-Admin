@@ -1,6 +1,7 @@
 interface User {
   _id: string;
   email: string;
+  role: UserRoleType;
   created_at: Date;
   updated_at: Date;
 }

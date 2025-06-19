@@ -4,9 +4,8 @@ import type React from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/header/header";
-
-import { getAuthToken } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
+import { getAuthToken } from "@/lib/api/auth/token";
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
@@ -17,7 +16,8 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const { setUser, setProfile } = useAuthStore();
 
   useEffect(() => {
-    if (!getAuthToken) {
+    const token = getAuthToken();
+    if (!token) {
       return;
     }
 
@@ -34,7 +34,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
         console.error("Error parsing auth data:", error);
       }
     }
-  }, [router]);
+  }, [router, setUser, setProfile]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -72,9 +72,8 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                 Không có dữ liệu học sinh
               </TableCell>
             </TableRow>
-          ) : (
-            parents.map((parent, index) => (
-              <TableRow key={index} className="hover:bg-blue-50 cursor-pointer">
+          ) : (            parents.map((parent, index) => (
+              <TableRow key={`parent-${parent.phone}-${index}`} className="hover:bg-blue-50 cursor-pointer">
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8 border border-blue-200">

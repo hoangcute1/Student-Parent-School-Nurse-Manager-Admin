@@ -1,5 +1,4 @@
-import { useAuthStore } from "@/stores/auth-store";
-import { AuthResponse, LoginRequestCredentials } from "@/lib/type/auth";
+import { LoginRequestCredentials } from "@/lib/type/auth";
 import { fetchData } from "../api";
 import { setAuthToken } from "./token";
 
@@ -14,7 +13,8 @@ const requestStaffLoginOTP = (
 
 const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
   try {
-    const response = await fetchData<AuthResponse>(`/auth/login-staff/verify`, {
+    // API mới chỉ trả về token
+    const token = await fetchData<string>(`/auth/login-staff/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,11 +22,12 @@ const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
       body: JSON.stringify({ email, otp }),
     });
 
-    if (!response) {
+    if (!token) {
       throw new Error("OTP verification failed");
     }
-    setAuthToken(response.token);
-    useAuthStore.getState().updateUserInfo(response.user, response.profile);
+
+    // Lưu token vào localStorage
+    setAuthToken(token);
     return true;
   } catch (error) {
     console.error("OTP verification error:", error);

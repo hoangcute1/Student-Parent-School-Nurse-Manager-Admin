@@ -17,6 +17,11 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const { user, role, profile } = useAuthStore();
 
+  useEffect(() => {
+    // Khi dữ liệu từ useAuthStore đã được nạp, đặt loading thành false
+    setLoading(false);
+  }, [user, profile]);
+
   if (loading) {
     return <div className="flex justify-center p-8">Đang tải thông tin...</div>;
   }

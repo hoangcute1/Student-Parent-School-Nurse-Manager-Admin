@@ -24,8 +24,6 @@ interface AuthState {
   setUser: (user: UserLoginResponse | null) => void;
   setProfile: (profile: UserProfile | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
-
-  // Các hàm tiện ích
   clearAuth: () => void;
   updateUserInfo: (user: UserLoginResponse, profile?: UserProfile) => void;
 }

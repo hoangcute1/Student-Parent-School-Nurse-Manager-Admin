@@ -1,74 +1,73 @@
-// src/hooks/use-auth-init.ts
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/auth-store";
-import { API_URL, LOCAL_STORAGE_TOKEN_KEY } from "@/lib/env";
-import { getAuthToken, setAuthToken } from "../lib/api/auth";
+import { API_URL } from "@/lib/env";
+import { getAuthToken, clearAuthToken } from "@/lib/api/auth/token";
 
 // Hook này giúp khôi phục trạng thái xác thực khi tải trang
 export function useAuthInit() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const { updateUserInfo } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const token = getAuthToken();
+  // Sử dụng các actions cụ thể từ store thay vì toàn bộ store
+  const updateUserInfo = useAuthStore((state) => state.updateUserInfo);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
-        if (token) {
-          // Nếu có token, gửi request kiểm tra
-          const response = await fetch(`${API_URL}/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+  // Sử dụng useCallback để tránh tạo hàm mới mỗi khi render
+  const initializeAuth = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const token = getAuthToken();
 
-          if (response.ok) {
-            const data = await response.json();
-            // Cập nhật thông tin người dùng trong store
-            updateUserInfo(data.user, data.profile);
-            console.log("Auth initialized from stored token");
-          } else {
-            // Nếu token không hợp lệ, xóa token
-            localStorage.removeItem("authToken");
-            console.log("Stored token invalid, cleared auth data");
-          }
+      if (token) {
+        console.log("Found auth token, checking validity...");
+
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Auth response status:", response);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Auth response data:", data);
+          // Cập nhật thông tin người dùng vào store
+          updateUserInfo(data.user, data.profile);
+          console.log("Auth initialized successfully");
         } else {
-          // Kiểm tra legacy token nếu có
-          const legacyToken = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-          if (legacyToken) {
-            setAuthToken(legacyToken);
-            const response = await fetch(`${API_URL}/auth/me`, {
-              headers: {
-                Authorization: `Bearer ${legacyToken}`,
-              },
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              updateUserInfo(data.user, data.profile);
-              localStorage.removeItem("token");
-              console.log("Auth initialized from legacy token");
-            } else {
-              localStorage.removeItem("token");
-              localStorage.removeItem("authData");
-              localStorage.removeItem("user");
-              console.log(
-                "Legacy token invalid, but extracted user info if available"
-              );
-            }
-          }
+          // Token không hợp lệ, xóa token và thông tin xác thực
+          clearAuthToken();
+          clearAuth();
+          console.log("Token invalid, cleared auth data");
         }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-      } finally {
-        setIsInitialized(true);
+      } else {
+        // Không tìm thấy token, xóa dữ liệu xác thực cũ nếu có
+        clearAuth();
+
+        // Xóa các localStorage cũ để tránh conflict
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("token");
+          localStorage.removeItem("authData");
+          localStorage.removeItem("user");
+        }
+
+        console.log("No token found, auth state cleared");
       }
-    };
+    } catch (error) {
+      console.error("Error initializing auth:", error);
+      clearAuth();
+    } finally {
+      setIsLoading(false);
+      setIsInitialized(true);
+    }
+  }, [updateUserInfo, clearAuth]);
 
+  // Chỉ chạy một lần khi component được mount
+  useEffect(() => {
     initializeAuth();
-  }, [updateUserInfo]);
+  }, [initializeAuth]);
 
-  return { isInitialized };
+  return { isInitialized, isLoading };
 }

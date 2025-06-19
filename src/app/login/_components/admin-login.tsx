@@ -101,7 +101,7 @@ export function AdminLoginForm() {
         setShowOTP(false);
 
         // Redirect to home page
-        router.push("/");
+        router.push("/cms");
       } else {
         throw new Error("Xác thực OTP thất bại");
       }

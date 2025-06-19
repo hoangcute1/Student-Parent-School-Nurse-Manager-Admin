@@ -22,9 +22,10 @@ export function NegativeResponses() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {" "}
           {negativeFeedback.map((feedback, index) => (
             <div
-              key={index}
+              key={`negative-${feedback.author}-${index}`}
               className="p-4 rounded-lg border border-red-100 bg-red-50"
             >
               <div className="flex items-center gap-3 mb-3">

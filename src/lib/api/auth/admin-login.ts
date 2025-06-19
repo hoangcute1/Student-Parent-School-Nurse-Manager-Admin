@@ -1,6 +1,5 @@
-import { useAuthStore } from "@/stores/auth-store";
 import { fetchData } from "../api";
-import { AuthResponse, LoginRequestCredentials } from "@/lib/type/auth";
+import { LoginRequestCredentials } from "@/lib/type/auth";
 import { setAuthToken } from "./token";
 
 const requestAdminLoginOTP = (
@@ -14,7 +13,7 @@ const requestAdminLoginOTP = (
 
 const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
   try {
-    const response = await fetchData<AuthResponse>(`/auth/login-admin/verify`, {
+    const token = await fetchData<string>(`/auth/login-admin/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,11 +21,12 @@ const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
       body: JSON.stringify({ email, otp }),
     });
 
-    if (!response) {
+    if (!token) {
       throw new Error("OTP verification failed");
     }
-    setAuthToken(response.token);
-    useAuthStore.getState().updateUserInfo(response.user, response.profile);
+
+    // Lưu token vào localStorage
+    setAuthToken(token);
     return true;
   } catch (error) {
     console.error("OTP verification error:", error);

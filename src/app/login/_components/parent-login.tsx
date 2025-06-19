@@ -22,7 +22,6 @@ import { toast } from "@/components/ui/use-toast";
 import { loginParentOTP, requestParentLoginOTP } from "@/lib/api/auth";
 import { LoginRequestCredentials } from "@/lib/type/auth";
 
-
 export function ParentLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginRequestCredentials>({
@@ -87,7 +86,6 @@ export function ParentLoginForm() {
     try {
       console.log("Verifying OTP in parent login:", otp);
       console.log("Using email:", formData.email);
-      console.log("Using password:", formData.password);
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
       const success = await loginParentOTP(formData.email, otp);
@@ -100,8 +98,13 @@ export function ParentLoginForm() {
 
         setShowOTP(false);
 
-        // Redirect to home page
-        router.push("/");
+        // Thêm delay ngắn để đảm bảo token được lưu và xử lý đúng
+        setTimeout(() => {
+          // Redirect to home page
+          router.push("/");
+          // Tải lại trang để đảm bảo fetch lại user data
+          window.location.reload();
+        }, 300);
       } else {
         throw new Error("Xác thực OTP thất bại");
       }

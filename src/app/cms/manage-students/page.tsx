@@ -8,6 +8,12 @@ import {
   Filter,
   ArrowLeft,
   Activity,
+  Phone,
+  Mail,
+  Eye,
+  Edit,
+  UserCheck,
+  Trash2,
 } from "lucide-react";
 import { API_URL } from "@/lib/env";
 
@@ -27,6 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCell,
 } from "@/components/ui/table";
 import {
   Select,
@@ -45,6 +52,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Sample data for classes
 
@@ -57,16 +65,29 @@ interface ClassItem {
   grade: string;
 }
 
+// Interface cho học sinh
+interface Student {
+  id: number;
+  name: string;
+  studentId: string;
+  birthDate: string;
+  gender: string;
+  address: string;
+  parentName: string;
+  parentPhone: string;
+  status: string;
+}
+
 export default function StudentsPage() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [classStudents, setClassStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  // Fetch danh sách lớp học từ API
+  const [error, setError] = useState<string | null>(null); // Fetch danh sách lớp học từ API
   const fetchClasses = async () => {
     setLoading(true);
     setError(null);
@@ -91,6 +112,115 @@ export default function StudentsPage() {
         { id: 3, name: "2A", grade: "2" },
         { id: 4, name: "2B", grade: "2" },
         { id: 5, name: "3A", grade: "3" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }; // Fetch danh sách học sinh theo lớp từ API
+  const fetchStudentsByClass = async (classId: number) => {
+    setLoading(true);
+    setError(null);
+    setClassStudents([]); // Clear previous data
+
+    try {
+      console.log(
+        `Fetching students for class ID: ${classId} from ${API_URL}/students/class/${classId}`
+      );
+      const response = await fetch(`${API_URL}/students/class/${classId}`);
+
+      if (!response.ok) {
+        throw new Error(
+          `Không thể lấy danh sách học sinh (Status: ${response.status})`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Student data received:", data);
+
+      if (Array.isArray(data)) {
+        setClassStudents(data);
+      } else {
+        console.error("API did not return an array:", data);
+        setError("Dữ liệu học sinh không đúng định dạng");
+        // Use sample data as fallback
+        setClassStudents([
+          {
+            id: 1,
+            name: "Nguyễn Văn A",
+            studentId: "HS2023001",
+            birthDate: "2016-05-15",
+            gender: "Nam",
+            address: "123 Đường Lê Lợi, Quận 1, TP.HCM",
+            parentName: "Nguyễn Văn X",
+            parentPhone: "0901234567",
+            status: "Đang học",
+          },
+          {
+            id: 2,
+            name: "Trần Thị B",
+            studentId: "HS2023002",
+            birthDate: "2016-08-21",
+            gender: "Nữ",
+            address: "456 Đường Nguyễn Huệ, Quận 1, TP.HCM",
+            parentName: "Trần Văn Y",
+            parentPhone: "0909876543",
+            status: "Đang học",
+          },
+          {
+            id: 3,
+            name: "Lê Minh C",
+            studentId: "HS2023003",
+            birthDate: "2016-02-10",
+            gender: "Nam",
+            address: "789 Đường Lý Tự Trọng, Quận 3, TP.HCM",
+            parentName: "Lê Văn Z",
+            parentPhone: "0905555555",
+            status: "Nghỉ học",
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Đã xảy ra lỗi khi lấy danh sách học sinh"
+      );
+      // Sử dụng dữ liệu mẫu nếu API không hoạt động (chỉ để demo)
+      setClassStudents([
+        {
+          id: 1,
+          name: "Nguyễn Văn A",
+          studentId: "HS2023001",
+          birthDate: "2016-05-15",
+          gender: "Nam",
+          address: "123 Đường Lê Lợi, Quận 1, TP.HCM",
+          parentName: "Nguyễn Văn X",
+          parentPhone: "0901234567",
+          status: "Đang học",
+        },
+        {
+          id: 2,
+          name: "Trần Thị B",
+          studentId: "HS2023002",
+          birthDate: "2016-08-21",
+          gender: "Nữ",
+          address: "456 Đường Nguyễn Huệ, Quận 1, TP.HCM",
+          parentName: "Trần Văn Y",
+          parentPhone: "0909876543",
+          status: "Đang học",
+        },
+        {
+          id: 3,
+          name: "Lê Minh C",
+          studentId: "HS2023003",
+          birthDate: "2016-02-10",
+          gender: "Nam",
+          address: "789 Đường Lý Tự Trọng, Quận 3, TP.HCM",
+          parentName: "Lê Văn Z",
+          parentPhone: "0905555555",
+          status: "Nghỉ học",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -122,18 +252,89 @@ export default function StudentsPage() {
       alert("Đã xóa học sinh thành công!");
     }
   };
-
   const handleHealthCheck = (student: any) => {
     alert(`Bắt đầu kiểm tra sức khỏe cho học sinh: ${student.name}`);
   };
-  if (selectedClass) {
-    // Find the selected class details
-    const classDetails = classes.find((c) => c.name === selectedClass) || {
-      id: 0,
-      name: selectedClass,
-      grade: "",
+
+  // Find the selected class details - moved outside the conditional render
+  const classDetails = selectedClass
+    ? classes.find((c) => c.name === selectedClass) || {
+        id: 0,
+        name: selectedClass,
+        grade: "",
+      }
+    : {
+        id: 0,
+        name: "",
+        grade: "",
+      };
+  // Gọi API để lấy danh sách học sinh theo lớp - useEffect moved outside conditional
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchData = async () => {
+      // Only fetch if there's a selected class with a valid ID
+      if (selectedClass && classDetails && classDetails.id > 0) {
+        console.log(
+          `UseEffect triggered: Fetching students for class ${classDetails.name} (ID: ${classDetails.id})`
+        );
+
+        // Don't need to call fetchStudentsByClass here as it might cause issues with state updates
+        // Instead, do the fetch logic directly here
+        setLoading(true);
+        setError(null);
+
+        try {
+          const response = await fetch(
+            `${API_URL}/students/class/${classDetails.id}`
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              `Không thể lấy danh sách học sinh (Status: ${response.status})`
+            );
+          }
+
+          const data = await response.json();
+
+          // Only update state if the component is still mounted and the selected class hasn't changed
+          if (isActive) {
+            console.log("Student data received in useEffect:", data);
+
+            if (Array.isArray(data)) {
+              setClassStudents(data);
+            } else {
+              console.error("API did not return an array:", data);
+              setError("Dữ liệu học sinh không đúng định dạng");
+              setClassStudents([]);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching students in useEffect:", err);
+          if (isActive) {
+            setError(
+              err instanceof Error
+                ? err.message
+                : "Đã xảy ra lỗi khi lấy danh sách học sinh"
+            );
+            // Don't set sample data here to clearly see if the API call fails
+          }
+        } finally {
+          if (isActive) {
+            setLoading(false);
+          }
+        }
+      }
     };
 
+    fetchData();
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isActive = false;
+    };
+  }, [selectedClass, API_URL, classDetails]); // Added classDetails as a dependency, but this is safe because classDetails is derived from selectedClass
+  if (selectedClass) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
@@ -272,6 +473,7 @@ export default function StudentsPage() {
 
             <div className="rounded-md border">
               <Table>
+                {" "}
                 <TableHeader>
                   <TableRow>
                     <TableHead>Học sinh</TableHead>
@@ -285,94 +487,145 @@ export default function StudentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* {classStudents.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback className="bg-blue-100 text-blue-600">
-                              {student.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{student.name}</div>
-                            <div className="text-sm text-gray-500">
-                              {student.address}
-                            </div>
-                          </div>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="h-24 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          {" "}
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700 mb-2"></div>
+                          <span className="text-blue-700">
+                            Đang tải danh sách học sinh...
+                          </span>
                         </div>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {student.studentId}
-                      </TableCell>
-                      <TableCell>{student.birthDate}</TableCell>
-                      <TableCell>{student.gender}</TableCell>
-                      <TableCell>{student.parentName}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Phone className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Mail className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            student.status === "Đang học"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className={
-                            student.status === "Đang học"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }
-                        >
-                          {student.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
+                    </TableRow>
+                  ) : error ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="h-24 text-center">
+                        <div className="flex flex-col items-center justify-center text-red-600">
+                          <span className="mb-2">
+                            Không thể tải danh sách học sinh
+                          </span>
+                          <span className="text-sm mb-3">{error}</span>
                           <Button
-                            variant="ghost"
+                            onClick={() => {
+                              if (classDetails && classDetails.id > 0) {
+                                fetchStudentsByClass(classDetails.id);
+                              }
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
                             size="sm"
-                            title="Xem chi tiết"
                           >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Chỉnh sửa"
-                            onClick={() => handleEditStudent(student)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Kiểm tra sức khỏe"
-                            onClick={() => handleHealthCheck(student)}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <UserCheck className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="Xóa"
-                            onClick={() => handleDeleteStudent(student.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
+                            Thử lại
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))} */}
+                  ) : classStudents.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="h-24 text-center">
+                        {" "}
+                        <div className="flex flex-col items-center justify-center text-gray-500">
+                          <span>Không có học sinh nào trong lớp này</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    classStudents.map((student, index) => (
+                      <TableRow
+                        key={`student-${selectedClass}-${student.id}-${index}`}
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarFallback className="bg-blue-100 text-blue-600">
+                                {student.name.charAt(0)}
+                              </AvatarFallback>
+                              <AvatarImage
+                                src={`/placeholder-user.jpg`}
+                                alt={student.name}
+                              />
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{student.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {student.address}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {student.studentId}
+                        </TableCell>
+                        <TableCell>{student.birthDate}</TableCell>
+                        <TableCell>{student.gender}</TableCell>
+                        <TableCell>{student.parentName}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Phone className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              student.status === "Đang học"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className={
+                              student.status === "Đang học"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }
+                          >
+                            {student.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Xem chi tiết"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Chỉnh sửa"
+                              onClick={() => handleEditStudent(student)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Kiểm tra sức khỏe"
+                              onClick={() => handleHealthCheck(student)}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <UserCheck className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Xóa"
+                              onClick={() => handleDeleteStudent(student.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -478,8 +731,8 @@ export default function StudentsPage() {
         </h1>
         <p className="text-blue-600">
           Quản lý thông tin học sinh theo từng lớp
-        </p>
-      </div>{" "}
+        </p>{" "}
+      </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-blue-100">
@@ -567,11 +820,10 @@ export default function StudentsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {classes.map((classItem) => (
+          {classes.map((classItem, index) => (
             <Card
-              key={classItem.id}
-              className="border-blue-100 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => setSelectedClass(classItem.name)}
+              key={`class-${classItem.grade}-${classItem.name}-${classItem.id}`}
+              className="border-blue-100 hover:shadow-lg transition-shadow"
             >
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl text-blue-800 flex items-center justify-between">
@@ -590,6 +842,7 @@ export default function StudentsPage() {
                     <span className="text-xl font-bold">{classItem.grade}</span>
                   </div>
                   <div className="text-center mb-3">
+                    {" "}
                     <span className="text-gray-600">
                       Khối {classItem.grade} - Lớp {classItem.name}
                     </span>
@@ -598,6 +851,13 @@ export default function StudentsPage() {
                 <Button
                   className="w-full mt-2 bg-blue-600 hover:bg-blue-700"
                   size="sm"
+                  onClick={() => {
+                    console.log(
+                      `Clicked "Xem danh sách" for class ${classItem.name} (ID: ${classItem.id})`
+                    );
+                    setSelectedClass(classItem.name);
+                    // The useEffect will handle fetching students once selectedClass is updated
+                  }}
                 >
                   Xem danh sách
                 </Button>
