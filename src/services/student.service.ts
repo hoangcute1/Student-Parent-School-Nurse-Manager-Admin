@@ -407,6 +407,10 @@ export class StudentService {
   }
 
   async findByClassId(classId: string): Promise<Student[]> {
-    return this.studentModel.find({ classId }).exec();
+    return this.studentModel
+      .find({ class: classId })
+      .populate('parent')
+      .populate('class')
+      .exec();
   }
 }
