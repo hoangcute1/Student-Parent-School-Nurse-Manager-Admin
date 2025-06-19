@@ -1,37 +1,75 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { AlertTriangle, Plus, Search, Clock, User, MapPin, Phone, FileText, CheckCircle, X } from "lucide-react"
+import { useState } from "react";
+import {
+  AlertTriangle,
+  Plus,
+  Search,
+  Clock,
+  User,
+  MapPin,
+  Phone,
+  FileText,
+  CheckCircle,
+  X,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function MedicalEvents() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+
   // State for modals
-  const [addEventOpen, setAddEventOpen] = useState(false)
-  const [updateEventOpen, setUpdateEventOpen] = useState(false)
-  const [processEventOpen, setProcessEventOpen] = useState(false)
-  const [viewEventDetailsOpen, setViewEventDetailsOpen] = useState(false)
-  const [emergencyProcessOpen, setEmergencyProcessOpen] = useState(false)
-  
+  const [addEventOpen, setAddEventOpen] = useState(false);
+  const [updateEventOpen, setUpdateEventOpen] = useState(false);
+  const [processEventOpen, setProcessEventOpen] = useState(false);
+  const [viewEventDetailsOpen, setViewEventDetailsOpen] = useState(false);
+  const [emergencyProcessOpen, setEmergencyProcessOpen] = useState(false);
+
   // State for selected event
-  const [selectedEvent, setSelectedEvent] = useState<any>(null)
-  
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
   // Form schema for adding/updating event
   const eventFormSchema = z.object({
     title: z.string().min(3, "Tiêu đề phải có ít nhất 3 ký tự"),
@@ -42,8 +80,8 @@ export default function MedicalEvents() {
     description: z.string().min(10, "Mô tả phải có ít nhất 10 ký tự"),
     contactStatus: z.string().optional(),
     reporter: z.string().optional(),
-  })
-  
+  });
+
   // Form for adding new event
   const addEventForm = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
@@ -57,8 +95,8 @@ export default function MedicalEvents() {
       contactStatus: "Chưa liên hệ",
       reporter: "",
     },
-  })
-  
+  });
+
   // Form for updating event
   const updateEventForm = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
@@ -72,16 +110,16 @@ export default function MedicalEvents() {
       contactStatus: "Chưa liên hệ",
       reporter: "",
     },
-  })
-  
+  });
+
   // Process event form
   const processFormSchema = z.object({
     status: z.enum(["processing", "completed", "waiting"]),
     notes: z.string().min(5, "Ghi chú phải có ít nhất 5 ký tự"),
     contactParent: z.boolean(),
     actionTaken: z.string().min(5, "Hành động phải có ít nhất 5 ký tự"),
-  })
-  
+  });
+
   const processEventForm = useForm<z.infer<typeof processFormSchema>>({
     resolver: zodResolver(processFormSchema),
     defaultValues: {
@@ -90,8 +128,8 @@ export default function MedicalEvents() {
       contactParent: false,
       actionTaken: "",
     },
-  })
-  
+  });
+
   // Emergency process form
   const emergencyFormSchema = z.object({
     immediateAction: z.string().min(5, "Hành động phải có ít nhất 5 ký tự"),
@@ -99,8 +137,8 @@ export default function MedicalEvents() {
     transferToHospital: z.boolean(),
     hospitalName: z.string().optional(),
     notes: z.string().optional(),
-  })
-  
+  });
+
   const emergencyProcessForm = useForm<z.infer<typeof emergencyFormSchema>>({
     resolver: zodResolver(emergencyFormSchema),
     defaultValues: {
@@ -110,43 +148,43 @@ export default function MedicalEvents() {
       hospitalName: "",
       notes: "",
     },
-  })
-  
+  });
+
   // Handle form submissions
   const onAddEvent = (data: z.infer<typeof eventFormSchema>) => {
-    console.log("Add event data:", data)
+    console.log("Add event data:", data);
     // Add logic to save new event
     // For now, just close the modal
-    setAddEventOpen(false)
-    addEventForm.reset()
-  }
-  
+    setAddEventOpen(false);
+    addEventForm.reset();
+  };
+
   const onUpdateEvent = (data: z.infer<typeof eventFormSchema>) => {
-    console.log("Update event data:", data)
+    console.log("Update event data:", data);
     // Add logic to update event
-    setUpdateEventOpen(false)
-  }
-  
+    setUpdateEventOpen(false);
+  };
+
   const onProcessEvent = (data: z.infer<typeof processFormSchema>) => {
-    console.log("Process event data:", data)
+    console.log("Process event data:", data);
     // Add logic to process event
-    setProcessEventOpen(false)
-  }
-  
+    setProcessEventOpen(false);
+  };
+
   const onEmergencyProcess = (data: z.infer<typeof emergencyFormSchema>) => {
-    console.log("Emergency process data:", data)
+    console.log("Emergency process data:", data);
     // Add logic for emergency handling
-    setEmergencyProcessOpen(false)
-  }
-  
+    setEmergencyProcessOpen(false);
+  };
+
   // Handle opening modals with event data
   const handleViewDetails = (event: any) => {
-    setSelectedEvent(event)
-    setViewEventDetailsOpen(true)
-  }
-  
+    setSelectedEvent(event);
+    setViewEventDetailsOpen(true);
+  };
+
   const handleUpdateEvent = (event: any) => {
-    setSelectedEvent(event)
+    setSelectedEvent(event);
     updateEventForm.reset({
       title: event.title,
       student: event.student,
@@ -156,34 +194,40 @@ export default function MedicalEvents() {
       description: event.description,
       contactStatus: event.contactStatus || "Chưa liên hệ",
       reporter: event.reporter || "",
-    })
-    setUpdateEventOpen(true)
-  }
-  
+    });
+    setUpdateEventOpen(true);
+  };
+
   const handleProcessEvent = (event: any) => {
-    setSelectedEvent(event)
-    processEventForm.reset()
-    setProcessEventOpen(true)
-  }
-  
+    setSelectedEvent(event);
+    processEventForm.reset();
+    setProcessEventOpen(true);
+  };
+
   const handleEmergencyProcess = (event: any) => {
-    setSelectedEvent(event)
-    emergencyProcessForm.reset()
-    setEmergencyProcessOpen(true)
-  }
+    setSelectedEvent(event);
+    emergencyProcessForm.reset();
+    setEmergencyProcessOpen(true);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-teal-800">Sự kiện Y tế</h1>
-        <p className="text-teal-600">Quản lý và xử lý các sự kiện y tế đột xuất</p>
+        <h1 className="text-3xl font-bold tracking-tight text-teal-800">
+          Sự kiện Y tế
+        </h1>
+        <p className="text-teal-600">
+          Quản lý và xử lý các sự kiện y tế đột xuất
+        </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-red-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Sự kiện hôm nay</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-700">
+              Sự kiện hôm nay
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
@@ -194,7 +238,9 @@ export default function MedicalEvents() {
 
         <Card className="border-orange-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">Đang xử lý</CardTitle>
+            <CardTitle className="text-sm font-medium text-orange-700">
+              Đang xử lý
+            </CardTitle>
             <Clock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -205,7 +251,9 @@ export default function MedicalEvents() {
 
         <Card className="border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Đã xử lý</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-700">
+              Đã xử lý
+            </CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -216,7 +264,9 @@ export default function MedicalEvents() {
 
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Tổng sự kiện</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Tổng sự kiện
+            </CardTitle>
             <FileText className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -228,16 +278,28 @@ export default function MedicalEvents() {
 
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-teal-50">
-          <TabsTrigger value="active" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="active"
+            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+          >
             Đang xử lý
           </TabsTrigger>
-          <TabsTrigger value="completed" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="completed"
+            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+          >
             Đã xử lý
           </TabsTrigger>
-          <TabsTrigger value="emergency" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="emergency"
+            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+          >
             Khẩn cấp
           </TabsTrigger>
-          <TabsTrigger value="reports" className="data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+          <TabsTrigger
+            value="reports"
+            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
+          >
             Báo cáo
           </TabsTrigger>
         </TabsList>
@@ -247,7 +309,9 @@ export default function MedicalEvents() {
             <CardHeader>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-teal-800">Sự kiện đang xử lý</CardTitle>
+                  <CardTitle className="text-teal-800">
+                    Sự kiện đang xử lý
+                  </CardTitle>
                   <CardDescription className="text-teal-600">
                     Danh sách các sự kiện y tế cần theo dõi và xử lý
                   </CardDescription>
@@ -273,7 +337,10 @@ export default function MedicalEvents() {
                     className="pl-10"
                   />
                 </div>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={setSelectedStatus}
+                >
                   <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="Trạng thái" />
                   </SelectTrigger>
@@ -294,13 +361,15 @@ export default function MedicalEvents() {
                       event.priority === "Cao"
                         ? "border-l-red-500 bg-red-50"
                         : event.priority === "Trung bình"
-                          ? "border-l-yellow-500 bg-yellow-50"
-                          : "border-l-blue-500 bg-blue-50"
+                        ? "border-l-yellow-500 bg-yellow-50"
+                        : "border-l-blue-500 bg-blue-50"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h4 className="font-bold text-gray-900">{event.title}</h4>
+                        <h4 className="font-bold text-gray-900">
+                          {event.title}
+                        </h4>
                         <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <User className="h-3 w-3" />
@@ -317,20 +386,24 @@ export default function MedicalEvents() {
                         </div>
                       </div>
                       <Badge
-                        variant={event.priority === "Cao" ? "destructive" : "secondary"}
+                        variant={
+                          event.priority === "Cao" ? "destructive" : "secondary"
+                        }
                         className={
                           event.priority === "Cao"
                             ? "bg-red-100 text-red-800"
                             : event.priority === "Trung bình"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-blue-100 text-blue-800"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
                         }
                       >
                         {event.priority}
                       </Badge>
                     </div>
 
-                    <p className="text-sm text-gray-700 mb-3">{event.description}</p>
+                    <p className="text-sm text-gray-700 mb-3">
+                      {event.description}
+                    </p>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -338,10 +411,18 @@ export default function MedicalEvents() {
                         <span>Đã liên hệ: {event.contactStatus}</span>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handleUpdateEvent(event)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleUpdateEvent(event)}
+                        >
                           Cập nhật
                         </Button>
-                        <Button size="sm" className="bg-teal-600 hover:bg-teal-700" onClick={() => handleProcessEvent(event)}>
+                        <Button
+                          size="sm"
+                          className="bg-teal-600 hover:bg-teal-700"
+                          onClick={() => handleProcessEvent(event)}
+                        >
                           Xử lý
                         </Button>
                       </div>
@@ -357,7 +438,9 @@ export default function MedicalEvents() {
           <Card>
             <CardHeader>
               <CardTitle className="text-teal-800">Sự kiện đã xử lý</CardTitle>
-              <CardDescription className="text-teal-600">Lịch sử các sự kiện y tế đã được giải quyết</CardDescription>
+              <CardDescription className="text-teal-600">
+                Lịch sử các sự kiện y tế đã được giải quyết
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -369,14 +452,23 @@ export default function MedicalEvents() {
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <div>
-                        <div className="font-medium text-gray-900">{event.title}</div>
+                        <div className="font-medium text-gray-900">
+                          {event.title}
+                        </div>
                         <div className="text-sm text-gray-600">
                           {event.student} - {event.class} | {event.date}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-green-100 text-green-800">Đã xử lý</Badge>                      <Button variant="ghost" size="sm" onClick={() => handleViewDetails(event)}>
+                      <Badge className="bg-green-100 text-green-800">
+                        Đã xử lý
+                      </Badge>{" "}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewDetails(event)}
+                      >
                         Chi tiết
                       </Button>
                     </div>
@@ -391,18 +483,27 @@ export default function MedicalEvents() {
           <Card>
             <CardHeader>
               <CardTitle className="text-red-800">Sự kiện khẩn cấp</CardTitle>
-              <CardDescription className="text-red-600">Các trường hợp cần xử lý ngay lập tức</CardDescription>
+              <CardDescription className="text-red-600">
+                Các trường hợp cần xử lý ngay lập tức
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {emergencyEvents.map((event, index) => (
-                  <div key={index} className="p-4 rounded-lg border-2 border-red-200 bg-red-50">
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg border-2 border-red-200 bg-red-50"
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-red-600" />
-                        <h4 className="font-semibold text-red-900">{event.title}</h4>
+                        <h4 className="font-semibold text-red-900">
+                          {event.title}
+                        </h4>
                       </div>
-                      <Badge className="bg-red-100 text-red-800">KHẨN CẤP</Badge>
+                      <Badge className="bg-red-100 text-red-800">
+                        KHẨN CẤP
+                      </Badge>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
@@ -430,12 +531,24 @@ export default function MedicalEvents() {
                       </div>
                     </div>
 
-                    <p className="text-sm text-red-700 mb-3">{event.description}</p>
+                    <p className="text-sm text-red-700 mb-3">
+                      {event.description}
+                    </p>
 
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-red-600 hover:bg-red-700" onClick={() => handleEmergencyProcess(event)}>
+                      <Button
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700"
+                        onClick={() => handleEmergencyProcess(event)}
+                      >
                         Xử lý ngay
-                      </Button>                      <Button size="sm" variant="outline" className="border-red-200 text-red-700" onClick={() => handleViewDetails(event)}>
+                      </Button>{" "}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-200 text-red-700"
+                        onClick={() => handleViewDetails(event)}
+                      >
                         Chi tiết
                       </Button>
                     </div>
@@ -450,8 +563,12 @@ export default function MedicalEvents() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-teal-800">Thống kê theo loại sự kiện</CardTitle>
-                <CardDescription className="text-teal-600">Phân loại sự kiện y tế trong tháng</CardDescription>
+                <CardTitle className="text-teal-800">
+                  Thống kê theo loại sự kiện
+                </CardTitle>
+                <CardDescription className="text-teal-600">
+                  Phân loại sự kiện y tế trong tháng
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -461,15 +578,25 @@ export default function MedicalEvents() {
                       className="flex items-center justify-between p-3 rounded-lg border border-teal-100"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`h-3 w-3 rounded-full ${stat.color}`}></div>
+                        <div
+                          className={`h-3 w-3 rounded-full ${stat.color}`}
+                        ></div>
                         <div>
-                          <div className="font-medium text-teal-800">{stat.type}</div>
-                          <div className="text-sm text-teal-600">{stat.description}</div>
+                          <div className="font-medium text-teal-800">
+                            {stat.type}
+                          </div>
+                          <div className="text-sm text-teal-600">
+                            {stat.description}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold text-teal-800">{stat.count}</div>
-                        <div className="text-xs text-gray-500">{stat.percentage}%</div>
+                        <div className="text-lg font-bold text-teal-800">
+                          {stat.count}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {stat.percentage}%
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -479,15 +606,21 @@ export default function MedicalEvents() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-teal-800">Thời gian xử lý trung bình</CardTitle>
-                <CardDescription className="text-teal-600">Hiệu quả xử lý sự kiện y tế</CardDescription>
+                <CardTitle className="text-teal-800">
+                  Thời gian xử lý trung bình
+                </CardTitle>
+                <CardDescription className="text-teal-600">
+                  Hiệu quả xử lý sự kiện y tế
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {responseTimeStats.map((stat, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-teal-700 font-medium">{stat.priority}</span>
+                        <span className="text-teal-700 font-medium">
+                          {stat.priority}
+                        </span>
                         <span className="text-teal-800">{stat.avgTime}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -512,14 +645,19 @@ export default function MedicalEvents() {
       <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-teal-800">Thêm sự kiện y tế</DialogTitle>
+            <DialogTitle className="text-teal-800">
+              Thêm sự kiện y tế
+            </DialogTitle>
             <DialogDescription className="text-teal-600">
               Nhập thông tin về sự kiện y tế mới
             </DialogDescription>
           </DialogHeader>
-          
+
           <Form {...addEventForm}>
-            <form onSubmit={addEventForm.handleSubmit(onAddEvent)} className="space-y-4">
+            <form
+              onSubmit={addEventForm.handleSubmit(onAddEvent)}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={addEventForm.control}
@@ -534,7 +672,7 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={addEventForm.control}
                   name="student"
@@ -548,14 +686,14 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={addEventForm.control}
                   name="class"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Lớp</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
@@ -577,7 +715,7 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={addEventForm.control}
                   name="location"
@@ -591,7 +729,7 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={addEventForm.control}
                   name="reporter"
@@ -605,14 +743,14 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={addEventForm.control}
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Mức độ ưu tiên</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
@@ -632,7 +770,7 @@ export default function MedicalEvents() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={addEventForm.control}
                 name="description"
@@ -640,8 +778,8 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Mô tả chi tiết</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Mô tả chi tiết về sự kiện y tế" 
+                      <Textarea
+                        placeholder="Mô tả chi tiết về sự kiện y tế"
                         className="min-h-[100px]"
                         {...field}
                       />
@@ -650,14 +788,14 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={addEventForm.control}
                 name="contactStatus"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Trạng thái liên hệ phụ huynh</FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
@@ -667,21 +805,25 @@ export default function MedicalEvents() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Chưa liên hệ">Chưa liên hệ</SelectItem>
+                        <SelectItem value="Chưa liên hệ">
+                          Chưa liên hệ
+                        </SelectItem>
                         <SelectItem value="Đang gọi">Đang gọi</SelectItem>
                         <SelectItem value="Đã liên hệ">Đã liên hệ</SelectItem>
-                        <SelectItem value="Phụ huynh">Phụ huynh đang đến</SelectItem>
+                        <SelectItem value="Phụ huynh">
+                          Phụ huynh đang đến
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setAddEventOpen(false)}
                 >
                   Hủy
@@ -694,19 +836,24 @@ export default function MedicalEvents() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Update Event Dialog */}
       <Dialog open={updateEventOpen} onOpenChange={setUpdateEventOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-teal-800">Cập nhật sự kiện y tế</DialogTitle>
+            <DialogTitle className="text-teal-800">
+              Cập nhật sự kiện y tế
+            </DialogTitle>
             <DialogDescription className="text-teal-600">
               Cập nhật thông tin về sự kiện y tế
             </DialogDescription>
           </DialogHeader>
-          
+
           <Form {...updateEventForm}>
-            <form onSubmit={updateEventForm.handleSubmit(onUpdateEvent)} className="space-y-4">
+            <form
+              onSubmit={updateEventForm.handleSubmit(onUpdateEvent)}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={updateEventForm.control}
@@ -721,7 +868,7 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={updateEventForm.control}
                   name="student"
@@ -735,14 +882,14 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={updateEventForm.control}
                   name="class"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Lớp</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
@@ -764,7 +911,7 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={updateEventForm.control}
                   name="location"
@@ -778,7 +925,7 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={updateEventForm.control}
                   name="reporter"
@@ -792,14 +939,14 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={updateEventForm.control}
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Mức độ ưu tiên</FormLabel>
-                      <Select 
+                      <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
@@ -819,7 +966,7 @@ export default function MedicalEvents() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={updateEventForm.control}
                 name="description"
@@ -827,8 +974,8 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Mô tả chi tiết</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Mô tả chi tiết về sự kiện y tế" 
+                      <Textarea
+                        placeholder="Mô tả chi tiết về sự kiện y tế"
                         className="min-h-[100px]"
                         {...field}
                       />
@@ -837,14 +984,14 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={updateEventForm.control}
                 name="contactStatus"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Trạng thái liên hệ phụ huynh</FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
@@ -854,21 +1001,25 @@ export default function MedicalEvents() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Chưa liên hệ">Chưa liên hệ</SelectItem>
+                        <SelectItem value="Chưa liên hệ">
+                          Chưa liên hệ
+                        </SelectItem>
                         <SelectItem value="Đang gọi">Đang gọi</SelectItem>
                         <SelectItem value="Đã liên hệ">Đã liên hệ</SelectItem>
-                        <SelectItem value="Phụ huynh">Phụ huynh đang đến</SelectItem>
+                        <SelectItem value="Phụ huynh">
+                          Phụ huynh đang đến
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setUpdateEventOpen(false)}
                 >
                   Hủy
@@ -886,31 +1037,42 @@ export default function MedicalEvents() {
       <Dialog open={processEventOpen} onOpenChange={setProcessEventOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-teal-800">Xử lý sự kiện y tế</DialogTitle>
+            <DialogTitle className="text-teal-800">
+              Xử lý sự kiện y tế
+            </DialogTitle>
             <DialogDescription className="text-teal-600">
               Ghi chú và cập nhật trạng thái xử lý sự kiện y tế
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedEvent && (
             <div className="mb-4 p-3 bg-gray-50 rounded-md">
-              <h4 className="font-medium text-gray-800">{selectedEvent.title}</h4>
+              <h4 className="font-medium text-gray-800">
+                {selectedEvent.title}
+              </h4>
               <div className="text-sm text-gray-600 mt-1">
-                <div>{selectedEvent.student} - {selectedEvent.class}</div>
-                <div>{selectedEvent.location} - {selectedEvent.time}</div>
+                <div>
+                  {selectedEvent.student} - {selectedEvent.class}
+                </div>
+                <div>
+                  {selectedEvent.location} - {selectedEvent.time}
+                </div>
               </div>
             </div>
           )}
-          
+
           <Form {...processEventForm}>
-            <form onSubmit={processEventForm.handleSubmit(onProcessEvent)} className="space-y-4">
+            <form
+              onSubmit={processEventForm.handleSubmit(onProcessEvent)}
+              className="space-y-4"
+            >
               <FormField
                 control={processEventForm.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Trạng thái xử lý</FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
@@ -929,7 +1091,7 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={processEventForm.control}
                 name="actionTaken"
@@ -937,8 +1099,8 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Hành động đã thực hiện</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Mô tả hành động đã thực hiện" 
+                      <Textarea
+                        placeholder="Mô tả hành động đã thực hiện"
                         className="min-h-[80px]"
                         {...field}
                       />
@@ -947,7 +1109,7 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={processEventForm.control}
                 name="contactParent"
@@ -970,7 +1132,7 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={processEventForm.control}
                 name="notes"
@@ -978,8 +1140,8 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Ghi chú bổ sung</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Thêm ghi chú về tình trạng học sinh, hướng dẫn tiếp theo, v.v." 
+                      <Textarea
+                        placeholder="Thêm ghi chú về tình trạng học sinh, hướng dẫn tiếp theo, v.v."
                         className="min-h-[100px]"
                         {...field}
                       />
@@ -988,11 +1150,11 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setProcessEventOpen(false)}
                 >
                   Hủy
@@ -1005,33 +1167,42 @@ export default function MedicalEvents() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* View Event Details Dialog */}
-      <Dialog open={viewEventDetailsOpen} onOpenChange={setViewEventDetailsOpen}>
+      <Dialog
+        open={viewEventDetailsOpen}
+        onOpenChange={setViewEventDetailsOpen}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-teal-800">Chi tiết sự kiện y tế</DialogTitle>
+            <DialogTitle className="text-teal-800">
+              Chi tiết sự kiện y tế
+            </DialogTitle>
           </DialogHeader>
-          
+
           {selectedEvent && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-teal-800">{selectedEvent.title}</h3>
+                  <h3 className="text-lg font-semibold text-teal-800">
+                    {selectedEvent.title}
+                  </h3>
                   <div className="flex items-center gap-2 mt-2 text-gray-600">
-                    <Badge className={
-                      selectedEvent.priority === "Cao"
-                        ? "bg-red-100 text-red-800"
-                        : selectedEvent.priority === "Trung bình"
-                          ? "bg-yellow-100 text-yellow-800" 
+                    <Badge
+                      className={
+                        selectedEvent.priority === "Cao"
+                          ? "bg-red-100 text-red-800"
+                          : selectedEvent.priority === "Trung bình"
+                          ? "bg-yellow-100 text-yellow-800"
                           : "bg-blue-100 text-blue-800"
-                    }>
+                      }
+                    >
                       {selectedEvent.priority || "Đã xử lý"}
                     </Badge>
                     <span>{selectedEvent.time || selectedEvent.date}</span>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <p className="text-gray-500">Học sinh</p>
@@ -1055,28 +1226,38 @@ export default function MedicalEvents() {
                   )}
                 </div>
               </div>
-              
+
               {selectedEvent.description && (
                 <div>
                   <h4 className="font-medium text-gray-700">Mô tả</h4>
-                  <p className="mt-1 text-gray-600">{selectedEvent.description}</p>
+                  <p className="mt-1 text-gray-600">
+                    {selectedEvent.description}
+                  </p>
                 </div>
               )}
-              
+
               {selectedEvent.contactStatus && (
                 <div>
-                  <h4 className="font-medium text-gray-700">Trạng thái liên hệ</h4>
-                  <p className="mt-1 text-gray-600">{selectedEvent.contactStatus}</p>
+                  <h4 className="font-medium text-gray-700">
+                    Trạng thái liên hệ
+                  </h4>
+                  <p className="mt-1 text-gray-600">
+                    {selectedEvent.contactStatus}
+                  </p>
                 </div>
               )}
-              
+
               {selectedEvent.parentContact && (
                 <div>
-                  <h4 className="font-medium text-gray-700">Thông tin phụ huynh</h4>
-                  <p className="mt-1 text-gray-600">{selectedEvent.parentContact}</p>
+                  <h4 className="font-medium text-gray-700">
+                    Thông tin phụ huynh
+                  </h4>
+                  <p className="mt-1 text-gray-600">
+                    {selectedEvent.parentContact}
+                  </p>
                 </div>
               )}
-              
+
               <DialogFooter>
                 <Button
                   variant="outline"
@@ -1088,8 +1269,8 @@ export default function MedicalEvents() {
                   <Button
                     className="bg-teal-600 hover:bg-teal-700"
                     onClick={() => {
-                      setViewEventDetailsOpen(false)
-                      handleProcessEvent(selectedEvent)
+                      setViewEventDetailsOpen(false);
+                      handleProcessEvent(selectedEvent);
                     }}
                   >
                     Xử lý sự kiện
@@ -1102,27 +1283,41 @@ export default function MedicalEvents() {
       </Dialog>
 
       {/* Emergency Process Dialog */}
-      <Dialog open={emergencyProcessOpen} onOpenChange={setEmergencyProcessOpen}>
+      <Dialog
+        open={emergencyProcessOpen}
+        onOpenChange={setEmergencyProcessOpen}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-red-800">Xử lý sự kiện khẩn cấp</DialogTitle>
+            <DialogTitle className="text-red-800">
+              Xử lý sự kiện khẩn cấp
+            </DialogTitle>
             <DialogDescription className="text-red-600">
               Hành động nhanh cho trường hợp cần xử lý ngay
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedEvent && (
             <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-md">
-              <h4 className="font-medium text-red-800">{selectedEvent.title}</h4>
+              <h4 className="font-medium text-red-800">
+                {selectedEvent.title}
+              </h4>
               <div className="text-sm text-red-700 mt-1">
-                <div>{selectedEvent.student} - {selectedEvent.class}</div>
-                <div>{selectedEvent.location} - {selectedEvent.time}</div>
+                <div>
+                  {selectedEvent.student} - {selectedEvent.class}
+                </div>
+                <div>
+                  {selectedEvent.location} - {selectedEvent.time}
+                </div>
               </div>
             </div>
           )}
-          
+
           <Form {...emergencyProcessForm}>
-            <form onSubmit={emergencyProcessForm.handleSubmit(onEmergencyProcess)} className="space-y-4">
+            <form
+              onSubmit={emergencyProcessForm.handleSubmit(onEmergencyProcess)}
+              className="space-y-4"
+            >
               <FormField
                 control={emergencyProcessForm.control}
                 name="immediateAction"
@@ -1130,8 +1325,8 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Hành động khẩn cấp</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Mô tả hành động khẩn cấp đã thực hiện" 
+                      <Textarea
+                        placeholder="Mô tả hành động khẩn cấp đã thực hiện"
                         className="min-h-[80px]"
                         {...field}
                       />
@@ -1140,7 +1335,7 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={emergencyProcessForm.control}
                 name="notifyParent"
@@ -1163,7 +1358,7 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={emergencyProcessForm.control}
                 name="transferToHospital"
@@ -1186,7 +1381,7 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={emergencyProcessForm.control}
                 name="hospitalName"
@@ -1194,17 +1389,19 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Tên bệnh viện/Cơ sở y tế</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder="Nhập tên bệnh viện/cơ sở y tế (nếu có)"
                         {...field}
-                        disabled={!emergencyProcessForm.watch("transferToHospital")}
+                        disabled={
+                          !emergencyProcessForm.watch("transferToHospital")
+                        }
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={emergencyProcessForm.control}
                 name="notes"
@@ -1212,8 +1409,8 @@ export default function MedicalEvents() {
                   <FormItem>
                     <FormLabel>Ghi chú bổ sung</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Thêm ghi chú quan trọng về tình trạng, thuốc men, xử lý..." 
+                      <Textarea
+                        placeholder="Thêm ghi chú quan trọng về tình trạng, thuốc men, xử lý..."
                         className="min-h-[100px]"
                         {...field}
                       />
@@ -1222,11 +1419,11 @@ export default function MedicalEvents() {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setEmergencyProcessOpen(false)}
                 >
                   Hủy
@@ -1240,7 +1437,7 @@ export default function MedicalEvents() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
 const activeEvents = [
@@ -1251,7 +1448,8 @@ const activeEvents = [
     time: "11:30 - 16/12/2024",
     location: "Phòng ăn",
     priority: "Cao",
-    description: "Học sinh xuất hiện mề đay và ngứa sau khi ăn trưa. Đã sơ cứu ban đầu và cách ly khỏi nguồn dị ứng.",
+    description:
+      "Học sinh xuất hiện mề đay và ngứa sau khi ăn trưa. Đã sơ cứu ban đầu và cách ly khỏi nguồn dị ứng.",
     contactStatus: "Phụ huynh",
   },
   {
@@ -1261,7 +1459,8 @@ const activeEvents = [
     time: "10:15 - 16/12/2024",
     location: "Sân chơi",
     priority: "Trung bình",
-    description: "Học sinh bị té ngã khi chơi, xây xát nhẹ ở đầu gối. Đã vệ sinh và băng bó vết thương.",
+    description:
+      "Học sinh bị té ngã khi chơi, xây xát nhẹ ở đầu gối. Đã vệ sinh và băng bó vết thương.",
     contactStatus: "Chưa liên hệ",
   },
   {
@@ -1271,10 +1470,11 @@ const activeEvents = [
     time: "14:20 - 16/12/2024",
     location: "Lớp học",
     priority: "Trung bình",
-    description: "Học sinh than đau bụng, có dấu hiệu buồn nôn. Đang theo dõi và cho nghỉ ngơi.",
+    description:
+      "Học sinh than đau bụng, có dấu hiệu buồn nôn. Đang theo dõi và cho nghỉ ngơi.",
     contactStatus: "Đang gọi",
   },
-]
+];
 
 const completedEvents = [
   {
@@ -1295,7 +1495,7 @@ const completedEvents = [
     class: "Lớp 3B",
     date: "13/12/2024",
   },
-]
+];
 
 const emergencyEvents = [
   {
@@ -1309,7 +1509,7 @@ const emergencyEvents = [
     description:
       "Học sinh có phản ứng dị ứng nghiêm trọng với tôm, khó thở, sưng mặt. Đã tiêm thuốc khẩn cấp và chuẩn bị chuyển viện.",
   },
-]
+];
 
 const eventTypeStats = [
   {
@@ -1347,7 +1547,7 @@ const eventTypeStats = [
     percentage: 15,
     color: "bg-blue-500",
   },
-]
+];
 
 const responseTimeStats = [
   {
@@ -1378,4 +1578,4 @@ const responseTimeStats = [
     performance: 85,
     color: "bg-gray-500",
   },
-]
+];
