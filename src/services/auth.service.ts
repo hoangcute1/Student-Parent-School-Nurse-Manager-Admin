@@ -134,7 +134,10 @@ export class AuthService {
   }
 
   // Parent login with OTP
-  async loginParentWithOtp(email: string, otp: string): Promise<any> {
+  async loginParentWithOtp(
+    email: string,
+    otp: string,
+  ): Promise<{ token: string }> {
     await this.otpService.verifyOTP(email, otp);
     const user = await this.UserService.findByEmail(email);
     const user_id = (user as any)._id?.toString();
@@ -144,39 +147,15 @@ export class AuthService {
       throw new UnauthorizedException(
         'Email này không được đăng ký làm tài khoản phụ huynh',
       );
-
-    // Generate tokens
     const tokens = await this.generateTokens(user_id, email, 'parent');
+    return { token: tokens.accessToken };
+  }
 
-    // Get parent profile
-    const parent_profile = await this.profileService.findByuser(user_id);
-
-    // Return data with tokens
-    return {
-      token: tokens.accessToken,
-      user: {
-        email: user?.email,
-        role: 'parent',
-      },
-      profile: parent_profile
-        ? {
-            name: parent_profile.name,
-            phone: parent_profile.phone,
-            gender: parent_profile.gender,
-            birth: parent_profile.birth,
-            address: parent_profile.address,
-            avatar: parent_profile.avatar,
-            created_at: parent_profile.created_at,
-            updated_at: parent_profile.updated_at,
-          }
-        : null,
-    };
-  } // Staff login with OTP
-  async loginStaffWithOtp(email: string, otp: string): Promise<any> {
-    // Xác thực OTP
+  async loginStaffWithOtp(
+    email: string,
+    otp: string,
+  ): Promise<{ token: string }> {
     await this.otpService.verifyOTP(email, otp);
-
-    // Lấy thông tin user
     const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng');
@@ -189,36 +168,14 @@ export class AuthService {
     if (!staff) {
       throw new UnauthorizedException('Không phải tài khoản nhân viên');
     }
-
-    // Generate tokens
     const tokens = await this.generateTokens(user_id, email, 'staff');
-
-    // Get staff profile
-    const staff_profile = await this.profileService.findByuser(user_id);
-
-    // Return data with tokens
-    return {
-      token: tokens.accessToken,
-      user: {
-        email: user?.email,
-        role: 'staff',
-      },
-      profile: staff_profile
-        ? {
-            name: staff_profile.name,
-            phone: staff_profile.phone,
-            gender: staff_profile.gender,
-            birth: staff_profile.birth,
-            address: staff_profile.address,
-            avatar: staff_profile.avatar,
-            created_at: staff_profile.created_at,
-            updated_at: staff_profile.updated_at,
-          }
-        : null,
-    };
+    return { token: tokens.accessToken };
   }
   // Admin login with OTP
-  async loginAdminWithOtp(email: string, otp: string): Promise<any> {
+  async loginAdminWithOtp(
+    email: string,
+    otp: string,
+  ): Promise<{ token: string }> {
     // Xác thực OTP
     await this.otpService.verifyOTP(email, otp);
 
@@ -239,31 +196,7 @@ export class AuthService {
     // Generate tokens
     const tokens = await this.generateTokens(user_id, email, 'admin');
 
-    // Get admin profile
-    const admin_profile = await this.profileService.findByuser(user_id);
-
-    // Return data with tokens
-    return {
-      tokens: {
-        accessToken: tokens.accessToken,
-      },
-      user: {
-        email: user?.email,
-        role: 'admin',
-      },
-      profile: admin_profile
-        ? {
-            name: admin_profile.name,
-            phone: admin_profile.phone,
-            gender: admin_profile.gender,
-            birth: admin_profile.birth,
-            address: admin_profile.address,
-            avatar: admin_profile.avatar,
-            created_at: admin_profile.created_at,
-            updated_at: admin_profile.updated_at,
-          }
-        : null,
-    };
+    return { token: tokens.accessToken };
   }
 
   async refreshTokens(
