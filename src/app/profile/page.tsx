@@ -12,10 +12,47 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/auth-store";
+import { API_URL } from "@/lib/env";
+import { getAuthToken } from "@/lib/api/auth";
 export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const { user, role, profile } = useAuthStore();
+  const setProfile = useAuthStore((state) => state.setProfile);
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        // Only attempt to fetch if user is authenticated but profile is missing
+        if (user && !profile) {
+          // Get the token from the auth utility
+          const token = getAuthToken();
+          if (token) {
+            const response = await fetch(`${API_URL}/auth/me`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              // Update the profile in the store
+              if (data.profile) {
+                setProfile(data.profile);
+              }
+            }
+          }
+        }
+        // Set loading to false after fetching or if no fetch is needed
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return <div className="flex justify-center p-8">Đang tải thông tin...</div>;
