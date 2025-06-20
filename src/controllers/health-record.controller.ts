@@ -7,6 +7,10 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
+  HttpStatus,
+  HttpCode,
+  BadRequestException,
 } from '@nestjs/common';
 import { HealthRecordService } from '@/services/health-record.service';
 import {
@@ -16,6 +20,7 @@ import {
   ApiParam,
   ApiBody,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateHealthRecordDto } from '@/decorations/dto/create-health-record.dto';
@@ -29,68 +34,127 @@ export class HealthRecordController {
   constructor(private readonly healthRecordService: HealthRecordService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách hồ sơ sức khỏe' })
-  @ApiResponse({ status: 200, description: 'Danh sách hồ sơ sức khỏe.' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Get all health records',
+    description: 'Retrieves a list of all health records. Can be filtered by query parameters.'
+  })
+  @ApiQuery({ name: 'student_id', required: false, description: 'Filter by student ID' })
+  @ApiQuery({ name: 'blood_type', required: false, description: 'Filter by blood type' })
+  @ApiQuery({ name: 'allergies', required: false, description: 'Filter by allergies (partial match)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of health records retrieved successfully.'
+  })
   @ApiResponse({
     status: 403,
-    description: 'Không có quyền thực hiện thao tác này.',
+    description: 'Forbidden. Insufficient permissions.',
   })
-  async findAll() {
+  async findAll(
+    @Query('student_id') student_id?: string,
+    @Query('blood_type') blood_type?: string,
+    @Query('allergies') allergies?: string,
+  ) {
+    if (student_id || blood_type || allergies) {
+      return this.healthRecordService.findWithFilters({ student_id, blood_type, allergies });
+    }
     return this.healthRecordService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Lấy thông tin hồ sơ sức khỏe theo ID' })
-  @ApiParam({ name: 'id', description: 'ID của hồ sơ sức khỏe' })
-  @ApiResponse({ status: 200, description: 'Thông tin hồ sơ sức khỏe.' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hồ sơ sức khỏe.' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Get health record by ID',
+    description: 'Retrieves a health record by its ID.'
+  })
+  @ApiParam({ name: 'id', description: 'Health record ID' })
+  @ApiResponse({ status: 200, description: 'Health record retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Health record not found.' })
   async findOne(@Param('id') id: string) {
     return this.healthRecordService.findById(id);
   }
 
   @Get('student/:studentId')
-  @ApiOperation({ summary: 'Lấy hồ sơ sức khỏe theo ID sinh viên' })
-  @ApiParam({ name: 'studentId', description: 'ID của sinh viên' })
-  @ApiResponse({ status: 200, description: 'Thông tin hồ sơ sức khỏe.' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hồ sơ sức khỏe.' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Get health record by student ID',
+    description: 'Retrieves the health record for a specific student by their ID.'
+  })
+  @ApiParam({ name: 'studentId', description: 'Student ID' })
+  @ApiResponse({ status: 200, description: 'Health record retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Health record not found for this student.' })
   async findByStudentId(@Param('studentId') studentId: string) {
     return this.healthRecordService.findByStudentId(studentId);
   }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo hồ sơ sức khỏe mới' })
-  @ApiResponse({ status: 201, description: 'Hồ sơ sức khỏe đã được tạo.' })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ 
+    summary: 'Create new health record',
+    description: 'Creates a new health record for a student.'
+  })
+  @ApiBody({ type: CreateHealthRecordDto })
+  @ApiResponse({ status: 201, description: 'Health record created successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request. Invalid input data or student already has a health record.' })
   @ApiResponse({
     status: 403,
-    description: 'Không có quyền tạo hồ sơ sức khỏe.',
+    description: 'Forbidden. Insufficient permissions.',
   })
   async create(@Body() createHealthRecordDto: CreateHealthRecordDto) {
-    return this.healthRecordService.create(createHealthRecordDto);
+    try {
+      return await this.healthRecordService.create(createHealthRecordDto);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to create health record',
+      );
+    }
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật thông tin hồ sơ sức khỏe' })
-  @ApiParam({ name: 'id', description: 'ID của hồ sơ sức khỏe' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Update health record',
+    description: 'Updates an existing health record by its ID.'
+  })
+  @ApiParam({ name: 'id', description: 'Health record ID' })
+  @ApiBody({ type: UpdateHealthRecordDto })
   @ApiResponse({
     status: 200,
-    description: 'Thông tin hồ sơ sức khỏe đã được cập nhật.',
+    description: 'Health record updated successfully.',
   })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hồ sơ sức khỏe.' })
+  @ApiResponse({ status: 404, description: 'Health record not found.' })
+  @ApiResponse({ status: 400, description: 'Bad request. Invalid input data.' })
   async update(
     @Param('id') id: string,
     @Body() updateHealthRecordDto: UpdateHealthRecordDto,
   ) {
-    return this.healthRecordService.update(id, updateHealthRecordDto);
+    try {
+      return await this.healthRecordService.update(id, updateHealthRecordDto);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to update health record',
+      );
+    }
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa hồ sơ sức khỏe' })
-  @ApiParam({ name: 'id', description: 'ID của hồ sơ sức khỏe' })
-  @ApiResponse({ status: 200, description: 'Hồ sơ sức khỏe đã được xóa.' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hồ sơ sức khỏe.' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: 'Delete health record',
+    description: 'Deletes a health record by its ID.'
+  })
+  @ApiParam({ name: 'id', description: 'Health record ID' })
+  @ApiResponse({ status: 200, description: 'Health record deleted successfully.' })
+  @ApiResponse({ status: 404, description: 'Health record not found.' })
   @ApiResponse({
     status: 403,
-    description: 'Không có quyền xóa hồ sơ sức khỏe.',
+    description: 'Forbidden. Insufficient permissions.',
   })
   async remove(@Param('id') id: string) {
     return this.healthRecordService.remove(id);

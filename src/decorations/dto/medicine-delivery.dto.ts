@@ -7,31 +7,33 @@ import {
   Min,
   IsDateString,
   IsMongoId,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MedicineDeliveryStatus } from '@/schemas/medicine-delivery.schema';
 
 export class CreateMedicineDeliveryDto {
   @ApiProperty({
-    example: 'Paracetamol',
-    description: 'Tên thuốc',
+    example: 'Paracetamol Delivery',
+    description: 'Tên lịch giao thuốc',
   })
   @IsString()
-  medicine_name: string;
+  @IsNotEmpty()
+  name: string;
 
   @ApiProperty({
     example: '2024-12-31T00:00:00.000Z',
     description: 'Ngày giao thuốc',
   })
   @IsDateString()
-  delivery_date: Date;
+  date: Date;
 
   @ApiProperty({
     example: 30,
     description: 'Tổng số lượng thuốc',
   })
   @IsNumber()
-  @Min(0)
+  @Min(1)
   @Type(() => Number)
   total: number;
 
@@ -41,21 +43,24 @@ export class CreateMedicineDeliveryDto {
     description: 'Trạng thái giao thuốc',
   })
   @IsEnum(MedicineDeliveryStatus)
-  status: MedicineDeliveryStatus;
+  @IsOptional()
+  status?: MedicineDeliveryStatus;
 
   @ApiProperty({
     example: '2 tablets',
     description: 'Liều lượng mỗi lần uống',
   })
   @IsString()
-  perDose: string;
+  @IsNotEmpty()
+  per_dose: string;
 
   @ApiProperty({
     example: '3 times a day',
     description: 'Số lần uống mỗi ngày',
   })
   @IsString()
-  perDay: string;
+  @IsNotEmpty()
+  per_day: string;
 
   @ApiProperty({
     example: 'Take after meals',
@@ -71,21 +76,24 @@ export class CreateMedicineDeliveryDto {
     description: 'Lý do dùng thuốc',
   })
   @IsString()
+  @IsNotEmpty()
   reason: string;
 
   @ApiProperty({
     example: '2024-12-31T00:00:00.000Z',
-    description: 'Thời gian bắt đầu',
+    description: 'Thời gian bắt đầu (mặc định là thời gian hiện tại)',
+    required: false,
   })
   @IsDateString()
-  sentAt: Date;
+  @IsOptional()
+  sent_at?: Date;
 
   @ApiProperty({
     example: '2025-01-07T00:00:00.000Z',
     description: 'Thời gian kết thúc',
   })
   @IsDateString()
-  endAt: Date;
+  end_at: Date;
 
   @ApiProperty({
     example: '60d0fe4f5311236168a109ca',
@@ -93,52 +101,171 @@ export class CreateMedicineDeliveryDto {
   })
   @IsMongoId()
   student: string;
+
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109cb',
+    description: 'ID của thuốc',
+    required: true,
+  })
+  @IsMongoId()
+  medicine: string;
+
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109cc',
+    description: 'ID của nhân viên y tế',
+    required: false,
+  })
+  @IsMongoId()
+  @IsOptional()
+  staff?: string;
 }
 
 export class UpdateMedicineDeliveryDto {
+  @ApiProperty({
+    example: 'Updated Paracetamol Delivery',
+    description: 'Tên lịch giao thuốc',
+    required: false,
+  })
   @IsString()
   @IsOptional()
-  medicine_name?: string;
+  name?: string;
 
+  @ApiProperty({
+    example: '2024-12-31T00:00:00.000Z',
+    description: 'Ngày giao thuốc',
+    required: false,
+  })
   @IsDateString()
   @IsOptional()
-  delivery_date?: Date;
+  date?: Date;
 
+  @ApiProperty({
+    example: 30,
+    description: 'Tổng số lượng thuốc',
+    required: false,
+  })
   @IsNumber()
-  @Min(0)
+  @Min(1)
   @Type(() => Number)
   @IsOptional()
   total?: number;
 
+  @ApiProperty({
+    example: MedicineDeliveryStatus.APPROVED,
+    enum: MedicineDeliveryStatus,
+    description: 'Trạng thái giao thuốc',
+    required: false,
+  })
   @IsEnum(MedicineDeliveryStatus)
   @IsOptional()
   status?: MedicineDeliveryStatus;
 
+  @ApiProperty({
+    example: '2 tablets',
+    description: 'Liều lượng mỗi lần uống',
+    required: false,
+  })
   @IsString()
   @IsOptional()
-  perDose?: string;
+  per_dose?: string;
 
+  @ApiProperty({
+    example: '3 times a day',
+    description: 'Số lần uống mỗi ngày',
+    required: false,
+  })
   @IsString()
   @IsOptional()
-  perDay?: string;
+  per_day?: string;
 
+  @ApiProperty({
+    example: 'Take after meals',
+    description: 'Ghi chú',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   note?: string;
 
+  @ApiProperty({
+    example: 'Fever and headache',
+    description: 'Lý do dùng thuốc',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   reason?: string;
 
+  @ApiProperty({
+    example: '2024-12-31T00:00:00.000Z',
+    description: 'Thời gian bắt đầu (mặc định là thời gian hiện tại)',
+    required: false,
+  })
   @IsDateString()
   @IsOptional()
-  sentAt?: Date;
+  sent_at?: Date;
 
+  @ApiProperty({
+    example: '2025-01-07T00:00:00.000Z',
+    description: 'Thời gian kết thúc',
+    required: false,
+  })
   @IsDateString()
   @IsOptional()
-  endAt?: Date;
+  end_at?: Date;
 
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109ca',
+    description: 'ID của học sinh',
+    required: false,
+  })
   @IsMongoId()
   @IsOptional()
   student?: string;
+
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109cb',
+    description: 'ID của thuốc',
+    required: false,
+  })
+  @IsMongoId()
+  @IsOptional()
+  medicine?: string;
+}
+
+export class ApproveRejectDeliveryDto {
+  @ApiProperty({
+    example: MedicineDeliveryStatus.APPROVED,
+    enum: [MedicineDeliveryStatus.APPROVED, MedicineDeliveryStatus.REJECTED],
+    description: 'Trạng thái phê duyệt',
+  })
+  @IsEnum([MedicineDeliveryStatus.APPROVED, MedicineDeliveryStatus.REJECTED])
+  status: MedicineDeliveryStatus;
+
+  @ApiProperty({
+    example: 'Approved due to medical necessity',
+    description: 'Lý do phê duyệt hoặc từ chối',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  note?: string;
+}
+
+export class DateRangeDto {
+  @ApiProperty({
+    example: '2024-01-01T00:00:00.000Z',
+    description: 'Ngày bắt đầu',
+    required: true,
+  })
+  @IsDateString()
+  from: string;
+
+  @ApiProperty({
+    example: '2024-12-31T23:59:59.999Z',
+    description: 'Ngày kết thúc',
+    required: true,
+  })
+  @IsDateString()
+  to: string;
 }

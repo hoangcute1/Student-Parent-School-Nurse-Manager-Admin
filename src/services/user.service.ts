@@ -287,8 +287,7 @@ export class UserService {
    * Create a new staff user
    * @param createUserStaffDto DTO containing staff user data
    * @returns The created staff user with staff document
-   */
-  async createStaff(createUserStaffDto: CreateUserStaffDto): Promise<any> {
+   */ async createStaff(createUserStaffDto: CreateUserStaffDto): Promise<any> {
     // First create the user
     const createdUser = await this.create({
       email: createUserStaffDto.email,
@@ -298,7 +297,6 @@ export class UserService {
     // Then create the staff record with the user's ID
     const createdStaff = await this.staffService.create({
       user: createdUser['_id'],
-      position: createUserStaffDto.position,
     });
 
     return {

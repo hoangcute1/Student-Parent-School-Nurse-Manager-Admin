@@ -37,11 +37,10 @@ export class MedicineDelivery extends Document {
 
   @Prop({ trim: true, required: false, default: null })
   note: string;
-
   @Prop({ required: true })
   reason: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: Date.now })
   sent_at: Date;
 
   @Prop({ required: true })

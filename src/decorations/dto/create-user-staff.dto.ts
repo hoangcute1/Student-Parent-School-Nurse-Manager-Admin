@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, IsOptional, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateUserStaffDto {
   @ApiProperty({
@@ -17,13 +17,4 @@ export class CreateUserStaffDto {
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   @IsString()
   password: string;
-
-  @ApiProperty({
-    example: 'Giáo viên',
-    description: 'Chức vụ',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  readonly position?: string;
 }

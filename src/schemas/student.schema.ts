@@ -32,3 +32,13 @@ export class Student extends Document {
 }
 
 export const StudentSchema = SchemaFactory.createForClass(Student);
+
+// Thêm trường ảo parentId
+StudentSchema.virtual('parentId').get(function () {
+  return this.parent ? this.parent.toString() : null;
+});
+
+// Thêm trường ảo classId
+
+
+// Đảm bảo các trường ảo được bao gồm trong kết quả JSON);

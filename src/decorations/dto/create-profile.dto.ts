@@ -59,6 +59,15 @@ export class CreateProfileDto {
   readonly avatar?: string;
 
   @ApiProperty({
+    example: '0123456789',
+    description: 'Số điện thoại',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  readonly phone?: string;
+
+  @ApiProperty({
     example: '60d0fe4f5311236168a109ca',
     description: 'ID của User trong hệ thống (MongoDB ObjectID)',
   })
