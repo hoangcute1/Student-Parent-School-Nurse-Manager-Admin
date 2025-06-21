@@ -4,6 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { API_URL } from "@/lib/env";
 import { getAuthToken, clearAuthToken } from "@/lib/api/auth/token";
+import { fetchData } from "@/lib/api/api";
+import { GetMeResponse } from "@/lib/type/auth";
+import { clear } from "console";
 
 // Hook này giúp khôi phục trạng thái xác thực khi tải trang
 export function useAuthInit() {
@@ -23,37 +26,19 @@ export function useAuthInit() {
       if (token) {
         console.log("Found auth token, checking validity...");
 
-        const response = await fetch(`${API_URL}/auth/me`, {
+        const response = await fetchData<Promise<GetMeResponse>>(`/auth/me`, {
           headers: {
+            method: "GET",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("Auth response status:", response);
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Auth response data:", data);
-          // Cập nhật thông tin người dùng vào store
-          updateUserInfo(data.user, data.profile);
-          console.log("Auth initialized successfully");
-        } else {
-          // Token không hợp lệ, xóa token và thông tin xác thực
-          clearAuthToken();
-          clearAuth();
-          console.log("Token invalid, cleared auth data");
-        }
+        updateUserInfo(response.user, response.profile);
       } else {
-        // Không tìm thấy token, xóa dữ liệu xác thực cũ nếu có
+        // Token không hợp lệ, xóa token và thông tin xác thực
+        clearAuthToken();
         clearAuth();
-
-        // Xóa các localStorage cũ để tránh conflict
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("token");
-          localStorage.removeItem("authData");
-          localStorage.removeItem("user");
-        }
-
-        console.log("No token found, auth state cleared");
+        console.log("Token invalid, cleared auth data");
       }
     } catch (error) {
       console.error("Error initializing auth:", error);

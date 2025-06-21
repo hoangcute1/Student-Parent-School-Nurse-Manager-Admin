@@ -81,12 +81,13 @@ export function StaffLoginForm() {
 
     setErrors(newErrors);
     return isValid;
-  };
-  const verifyOTP = async (otp: string) => {
+  };  const verifyOTP = async (otp: string) => {
     try {
       console.log("Verifying OTP in staff login:", otp);
       console.log("Using email:", formData.email);
-      console.log("Using password:", formData.password);
+      
+      // Thêm thông báo nhưng không hiển thị mật khẩu thực tế
+      console.log("Password provided:", formData.password ? "Yes" : "No");
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
       const success = await loginStaffOTP(formData.email, otp);
@@ -99,8 +100,11 @@ export function StaffLoginForm() {
 
         setShowOTP(false);
 
-        // Redirect to home page
-        router.push("/cms");
+        // Thêm độ trễ nhỏ để đảm bảo token được lưu trước khi chuyển hướng
+        setTimeout(() => {
+          // Đối với staff, chuyển hướng đến trang dashboard thay vì cms
+          router.push("/dashboard");
+        }, 500);
       } else {
         throw new Error("Xác thực OTP thất bại");
       }
@@ -127,18 +131,25 @@ export function StaffLoginForm() {
     } catch (error) {
       throw error;
     }
-  };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  };  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm(formData)) return;
 
     setIsLoading(true);
     try {
+      // Hiển thị thông tin chi tiết hơn để debug
+      console.log("Đang yêu cầu OTP cho staff login với dữ liệu:", {
+        email: formData.email,
+        passwordProvided: formData.password ? "Yes" : "No",
+        passwordLength: formData.password.length
+      });
+      
       // First step: request OTP
-      console.log("Requesting OTP with data:", { ...formData });
-      await requestStaffLoginOTP({
+      const result = await requestStaffLoginOTP({
         ...formData,
       });
+      console.log("Kết quả yêu cầu OTP:", result);
+      
       setShowOTP(true);
       toast({
         title: "Thành công",
@@ -149,10 +160,15 @@ export function StaffLoginForm() {
       let message = "Có lỗi xảy ra khi đăng nhập";
 
       if (error instanceof Error) {
+        console.error("Chi tiết lỗi:", error.message);
         if (error.message.includes("401")) {
           message = "Email hoặc mật khẩu không chính xác";
         } else if (error.message.includes("403")) {
           message = "Tài khoản của bạn không có quyền truy cập";
+        } else if (error.message.includes("404")) {
+          message = "Không tìm thấy tài khoản với email này";
+        } else if (error.message.includes("network")) {
+          message = "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn";
         }
       }
 
@@ -161,18 +177,16 @@ export function StaffLoginForm() {
         variant: "destructive",
         title: "Đăng nhập thất bại",
         description: message,
-      });
-    } finally {
+      });    } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Đăng nhập dành cho phụ huynh</CardTitle>
+        <CardTitle>Đăng nhập dành cho nhân viên y tế</CardTitle>
         <CardDescription>
-          Theo dõi sức khỏe và lịch tiêm chủng của con bạn
+          Quản lý và theo dõi sức khỏe học sinh
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>

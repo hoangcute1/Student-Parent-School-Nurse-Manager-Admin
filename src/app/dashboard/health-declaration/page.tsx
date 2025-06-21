@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Plus,
@@ -11,16 +11,23 @@ import {
   Heart,
   Shield,
 } from "lucide-react";
+import { useHealthRecordStore } from "@/stores/health-record-store";
+import { useStudentStore } from "@/stores/student-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { HealthRecord as ApiHealthRecord } from "@/lib/type/health-record";
+import { Student } from "@/lib/type/students";
 
-// Health Record Interface
+// UI Health Record Interface for compatibility with existing UI
 interface HealthRecord {
-  id: number;
+  id: string;
   studentName: string;
   class: string;
   allergies: string | null;
   chronicDisease: string | null;
   vision: string;
   lastUpdated: string;
+  rawData: ApiHealthRecord | null; // Store the complete API data
+  studentData: Student | null; // Store the student data
 }
 
 interface AllergyRecord {
@@ -92,14 +99,53 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-export default function ParentHealthRecords() {
-  const [searchTerm, setSearchTerm] = useState("");
+export default function ParentHealthRecords() {  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAddRecordOpen, setIsAddRecordOpen] = useState(false);
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<HealthRecord | null>(
     null
   );
+  
+  const { records, isLoading: isLoadingRecords, error: recordsError, fetchRecords } = useHealthRecordStore();
+  const { students, isLoading: isLoadingStudents, error: studentsError, fetchStudents } = useStudentStore();
+  const { user, isAuthenticated, role } = useAuthStore();
+  
+  useEffect(() => {
+    if (isAuthenticated && role === "parent") {
+      fetchStudents();
+      fetchRecords();
+    }
+  }, [isAuthenticated, role, fetchRecords, fetchStudents]);
+  
+  // Map student data to UI health records
+  const healthRecords: HealthRecord[] = students.map((student) => {
+    // Find health record for this student if it exists
+    const studentRecord = records.find(record => record.student_id === student._id);
+    
+    return {
+      id: student._id,
+      studentName: student.name || "Không có tên",
+      class: student.class || "Chưa có lớp",
+      allergies: studentRecord?.allergies && studentRecord.allergies.length > 0 ? "Có" : null,
+      chronicDisease: studentRecord?.chronic_conditions && studentRecord.chronic_conditions.length > 0 ? "Có" : null,
+      vision: studentRecord?.vision || "Chưa cập nhật",
+      lastUpdated: studentRecord?.updated_at 
+        ? new Date(studentRecord.updated_at).toLocaleDateString("vi-VN") 
+        : "Chưa cập nhật",
+      rawData: studentRecord || null,
+      studentData: student
+    };
+  });
+  
+  // Filter records based on search term and category
+  const filteredRecords = healthRecords.filter((record) => {
+    const matchesSearch = record.studentName.toLowerCase().includes(searchTerm.toLowerCase());
+    if (selectedCategory === "all") return matchesSearch;
+    if (selectedCategory === "allergies") return matchesSearch && record.allergies;
+    if (selectedCategory === "chronic") return matchesSearch && record.chronicDisease;
+    return matchesSearch;
+  });
 
   const handleSubmitRecord = () => {
     setIsAddRecordOpen(false);
@@ -135,9 +181,7 @@ export default function ParentHealthRecords() {
           Hồ sơ Sức khỏe
         </h1>
         <p className="text-blue-600">Quản lý thông tin sức khỏe của học sinh</p>
-      </div>
-
-      {/* Stats Cards */}
+      </div>      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-blue-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -147,7 +191,7 @@ export default function ParentHealthRecords() {
             <FileText className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">5</div>
+            <div className="text-2xl font-bold text-blue-800">{healthRecords.length}</div>
             <p className="text-xs text-blue-600">Học sinh đã khai báo</p>
           </CardContent>
         </Card>
@@ -160,7 +204,9 @@ export default function ParentHealthRecords() {
             <AlertTriangle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-800">2</div>
+            <div className="text-2xl font-bold text-red-800">
+              {healthRecords.filter(record => record.allergies).length}
+            </div>
             <p className="text-xs text-red-600">Cần chú ý đặc biệt</p>
           </CardContent>
         </Card>
@@ -173,7 +219,9 @@ export default function ParentHealthRecords() {
             <Heart className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-800">1</div>
+            <div className="text-2xl font-bold text-orange-800">
+              {healthRecords.filter(record => record.chronicDisease).length}
+            </div>
             <p className="text-xs text-orange-600">Cần theo dõi</p>
           </CardContent>
         </Card>
@@ -181,13 +229,20 @@ export default function ParentHealthRecords() {
         <Card className="border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-green-700">
-              Tiêm chủng
+              BMI bình thường
             </CardTitle>
             <Shield className="h-4 w-4 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800">95%</div>
-            <p className="text-xs text-green-600">Tỷ lệ hoàn thành</p>
+          <CardContent>            <div className="text-2xl font-bold text-green-800">
+              {healthRecords.filter(record => {
+                if (!record.rawData || !record.rawData.height || !record.rawData.weight) return false;
+                const height = record.rawData.height / 100; // cm to m
+                const weight = record.rawData.weight;
+                const bmi = weight / (height * height);
+                return bmi >= 18.5 && bmi <= 24.9;
+              }).length}
+            </div>
+            <p className="text-xs text-green-600">Có chỉ số BMI tốt</p>
           </CardContent>
         </Card>
       </div>
@@ -612,75 +667,91 @@ export default function ParentHealthRecords() {
                       <TableHead>Cập nhật lần cuối</TableHead>
                       <TableHead className="text-right">Chi tiết</TableHead>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {healthRecordsData.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-medium">
-                          {record.studentName}
-                        </TableCell>
-                        <TableCell>{record.class}</TableCell>
-                        <TableCell>
-                          {record.allergies ? (
-                            <Badge
-                              variant="destructive"
-                              className="bg-red-100 text-red-800"
-                            >
-                              {record.allergies}
-                            </Badge>
-                          ) : (
-                            <span className="text-gray-500">Không</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {record.chronicDisease ? (
-                            <Badge
-                              variant="secondary"
-                              className="bg-orange-100 text-orange-800"
-                            >
-                              {record.chronicDisease}
-                            </Badge>
-                          ) : (
-                            <span className="text-gray-500">Không</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              record.vision === "Bình thường"
-                                ? "default"
-                                : "secondary"
-                            }
-                            className={
-                              record.vision === "Bình thường"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }
-                          >
-                            {record.vision}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{record.lastUpdated}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetail(record)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditRecord(record)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                  </TableHeader>                  <TableBody>
+                    {isLoadingRecords || isLoadingStudents ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          <div className="flex justify-center">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                           </div>
+                          <p className="mt-2 text-sm text-gray-500">Đang tải dữ liệu...</p>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : filteredRecords.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          <p className="text-gray-500">Không có dữ liệu hồ sơ sức khỏe</p>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredRecords.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell className="font-medium">
+                            {record.studentName}
+                          </TableCell>
+                          <TableCell>{record.class}</TableCell>
+                          <TableCell>
+                            {record.allergies ? (
+                              <Badge
+                                variant="destructive"
+                                className="bg-red-100 text-red-800"
+                              >
+                                {record.allergies}
+                              </Badge>
+                            ) : (
+                              <span className="text-gray-500">Không</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {record.chronicDisease ? (
+                              <Badge
+                                variant="secondary"
+                                className="bg-orange-100 text-orange-800"
+                              >
+                                {record.chronicDisease}
+                              </Badge>
+                            ) : (
+                              <span className="text-gray-500">Không</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                record.vision === "Bình thường"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                              className={
+                                record.vision === "Bình thường"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }
+                            >
+                              {record.vision}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{record.lastUpdated}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewDetail(record)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditRecord(record)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -863,8 +934,7 @@ export default function ParentHealthRecords() {
           </DialogHeader>
 
           {selectedRecord && (
-            <div className="space-y-6">
-              {/* Thông tin cơ bản */}
+            <div className="space-y-6">              {/* Thông tin cơ bản */}
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">
                   Thông tin cơ bản
@@ -891,83 +961,61 @@ export default function ParentHealthRecords() {
                     <p className="text-sm font-semibold">
                       {selectedRecord.lastUpdated}
                     </p>
-                  </div>
-                  <div>
+                  </div>                  <div>
                     <p className="text-sm font-medium text-gray-500">
                       Nhóm máu:
                     </p>
-                    <p className="text-sm font-semibold">A (mẫu dữ liệu)</p>
+                    <p className="text-sm font-semibold">{selectedRecord.rawData?.blood_type || "Chưa cập nhật"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">
+                      Chiều cao:
+                    </p>
+                    <p className="text-sm font-semibold">{selectedRecord.rawData?.height ? `${selectedRecord.rawData.height} cm` : "Chưa cập nhật"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">
+                      Cân nặng:
+                    </p>
+                    <p className="text-sm font-semibold">{selectedRecord.rawData?.weight ? `${selectedRecord.rawData.weight} kg` : "Chưa cập nhật"}</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Dị ứng */}
-              <div className="rounded-lg border border-red-100 bg-red-50 p-4">
-                <h3 className="text-lg font-semibold text-red-800 mb-3">
+              </div>              {/* Dị ứng */}
+              <div className="rounded-lg border border-red-100 bg-red-50 p-4">                <h3 className="text-lg font-semibold text-red-800 mb-3">
                   Dị ứng
                 </h3>
                 {selectedRecord.allergies ? (
                   <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Badge className="bg-red-100 text-red-800">
-                        {selectedRecord.allergies}
-                      </Badge>
-                    </div>
-                    <p className="text-sm mt-2">
-                      <strong>Mô tả:</strong> Dị ứng {selectedRecord.allergies}{" "}
-                      có thể gây phản ứng nghiêm trọng, cần tránh tiếp xúc.
-                    </p>
-                    <p className="text-sm">
-                      <strong>Xử lý khẩn cấp:</strong> Nếu có dấu hiệu phản ứng,
-                      sử dụng thuốc kháng histamine và thông báo cho phụ huynh
-                      ngay lập tức.
+                    {selectedRecord.rawData?.allergies?.map((allergy, index) => (
+                      <div key={index} className="flex items-center">
+                        <Badge className="bg-red-100 text-red-800 mr-2">
+                          {allergy}
+                        </Badge>
+                      </div>
+                    ))}
+                    <p className="text-sm mt-3">
+                      <strong>Lưu ý:</strong> Các dị ứng trên cần được theo dõi và tránh tiếp xúc với tác nhân gây dị ứng.
                     </p>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">Không có dị ứng</p>
                 )}
-              </div>
-
-              {/* Bệnh mãn tính */}
-              <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">
-                <h3 className="text-lg font-semibold text-orange-800 mb-3">
+              </div>              {/* Bệnh mãn tính */}
+              <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">                <h3 className="text-lg font-semibold text-orange-800 mb-3">
                   Bệnh mãn tính
                 </h3>
                 {selectedRecord.chronicDisease ? (
                   <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Badge className="bg-orange-100 text-orange-800">
-                        {selectedRecord.chronicDisease}
-                      </Badge>
-                    </div>
-                    {selectedRecord.chronicDisease === "Hen suyễn" && (
-                      <>
-                        <p className="text-sm mt-2">
-                          <strong>Tình trạng:</strong> Kiểm soát tốt
-                        </p>
-                        <p className="text-sm">
-                          <strong>Thuốc:</strong> Salbutamol xịt khi cần
-                        </p>
-                        <p className="text-sm">
-                          <strong>Lưu ý:</strong> Tránh vận động mạnh, có sẵn
-                          thuốc xịt
-                        </p>
-                      </>
-                    )}
-                    {selectedRecord.chronicDisease === "Tiểu đường type 1" && (
-                      <>
-                        <p className="text-sm mt-2">
-                          <strong>Tình trạng:</strong> Ổn định
-                        </p>
-                        <p className="text-sm">
-                          <strong>Thuốc:</strong> Insulin theo chỉ định bác sĩ
-                        </p>
-                        <p className="text-sm">
-                          <strong>Lưu ý:</strong> Kiểm tra đường huyết định kỳ,
-                          chế độ ăn đặc biệt
-                        </p>
-                      </>
-                    )}
+                    {selectedRecord.rawData?.chronic_conditions?.map((condition, index) => (
+                      <div key={index} className="flex items-center mb-2">
+                        <Badge className="bg-orange-100 text-orange-800 mr-2">
+                          {condition}
+                        </Badge>
+                      </div>
+                    ))}
+                    <p className="text-sm mt-3">
+                      <strong>Lưu ý:</strong> Các bệnh mãn tính trên cần được theo dõi thường xuyên và có kế hoạch điều trị phù hợp.
+                    </p>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">
@@ -1005,13 +1053,12 @@ export default function ParentHealthRecords() {
                       Bình thường
                     </Badge>
                   </div>
-                </div>
-              </div>
+                </div>              </div>
 
-              {/* Tiêm chủng */}
-              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-                <h3 className="text-lg font-semibold text-blue-800 mb-3">
-                  Lịch sử tiêm chủng
+              {/* Lịch sử điều trị */}
+              <div className="rounded-lg border border-purple-100 bg-purple-50 p-4">
+                <h3 className="text-lg font-semibold text-purple-800 mb-3">
+                  Lịch sử điều trị
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   {[

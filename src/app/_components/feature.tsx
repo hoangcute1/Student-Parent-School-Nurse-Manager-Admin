@@ -27,7 +27,6 @@ export default function Feature() {
     feature: (typeof features)[number]
   ) => {
     e.preventDefault();
-    console.log(user);
     if (!user) {
       setOpen(true);
       return;

@@ -9,10 +9,16 @@ interface LoginVerifyCredentials {
   email: string;
   otp: string;
 }
-interface AuthResponse {
+
+interface TokenResponse {
   token: string;
+}
+interface GetMeResponse {
   user: UserLoginResponse;
   profile: UserProfile;
+}
+interface AuthResponse extends GetMeResponse {
+  token: string;
 }
 interface AuthState {
   // Thông tin người dùng
@@ -30,6 +36,8 @@ interface AuthState {
 
 export type {
   AuthResponse,
+  GetMeResponse,
+  TokenResponse,
   AuthState,
   LoginRequestCredentials,
   LoginVerifyCredentials,
