@@ -94,13 +94,14 @@ export function AdminLoginForm() {
       });
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const { success, role } = await loginAdminOTP(formData.email, otp);
+      const { success } = await loginAdminOTP(formData.email, otp);
 
       if (success) {
         toast({
           title: "Đăng nhập thành công",
           description: "Đang chuyển hướng...",
         });
+        router.push("/cms");
         setShowOTP(false);
       } else {
         throw new Error("Xác thực OTP thất bại");
