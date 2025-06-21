@@ -1,14 +1,45 @@
 // Authentication utilities
 
 import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/env";
+import { useAuthStore } from "@/stores/auth-store";
+import { fetchData } from "../api";
+import { GetMeResponse } from "@/lib/type/auth";
 
 // Trong hàm xử lý đăng nhập thành công
-export const handleTokenLoginSuccess = (response: string) => {
+export const handleTokenLoginSuccess = async (response: string) => {
   const token = response;
   document.cookie = `authToken=${token}; path=/; max-age=86400; SameSite=Lax`;
   setAuthToken(token);
-  
+
+  // Extract role from token
+  const decodedToken = parseJwt(token);
+  const role = decodedToken?.role || null;
+
+  // Update role in auth store
+  const { updateUserRole } = useAuthStore.getState();
+  updateUserRole(role);
+
+  // Optionally fetch user data immediately
+  try {
+    const response = await fetchData<GetMeResponse>(`/auth/me`, {
+      headers: {
+        method: "GET",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Update user info in auth store
+    const { updateUserInfo } = useAuthStore.getState();
+    updateUserInfo(response.user, response.profile);
+
+    return { success: true, role };
+  } catch (error) {
+    console.error("Error fetching user data after login:", error);
+    return { success: true, role };
+  }
 };
+
 export const getAuthToken = (): string | null => {
   if (typeof window === "undefined") return null;
   const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);

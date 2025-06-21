@@ -22,7 +22,6 @@ import { toast } from "@/components/ui/use-toast";
 import { loginAdminOTP, requestAdminLoginOTP } from "@/lib/api/auth";
 import { LoginRequestCredentials } from "@/lib/type/auth";
 
-
 export function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginRequestCredentials>({
@@ -87,16 +86,29 @@ export function AdminLoginForm() {
     try {
       console.log("Verifying OTP in admin login:", otp);
       console.log("Using email:", formData.email);
-      console.log("Using password:", formData.password);
+
+      // Hiển thị loading trước khi xác thực
+      toast({
+        title: "Đang xác thực",
+        description: "Vui lòng đợi trong giây lát...",
+      });
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const success = await loginAdminOTP(formData.email, otp);
+      const { success, role } = await loginAdminOTP(formData.email, otp);
 
       if (success) {
         toast({
           title: "Đăng nhập thành công",
           description: "Đang chuyển hướng...",
         });
+
+        // Chuyển hướng dựa trên vai trò
+        if (role === "admin") {
+          router.push("/cms");
+        } else {
+          // Fallback nếu không phải admin
+          router.push("/dashboard");
+        }
 
         setShowOTP(false);
       } else {
@@ -168,9 +180,9 @@ export function AdminLoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Đăng nhập dành cho phụ huynh</CardTitle>
+        <CardTitle>Đăng nhập dành cho admin</CardTitle>
         <CardDescription>
-          Theo dõi sức khỏe và lịch tiêm chủng của con bạn
+          Quản lý hệ thống và dữ liệu người dùng
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
