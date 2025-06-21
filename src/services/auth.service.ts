@@ -58,11 +58,7 @@ export class AuthService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
     const updated = await this.userModel
-      .findByIdAndUpdate(
-        id,
-        { ...updateUserDto, updated_at: new Date() },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, { ...updateUserDto, updated_at: new Date() }, { new: true })
       .exec();
     if (!updated) throw new NotFoundException('Không tìm thấy user');
     return updated;
@@ -92,9 +88,7 @@ export class AuthService {
     const user_id = (user as any)._id?.toString();
     const parent = await this.parentService.validateParent(user_id);
     if (!parent)
-      throw new UnauthorizedException(
-        'Email này không được đăng ký làm tài khoản phụ huynh',
-      );
+      throw new UnauthorizedException('Email này không được đăng ký làm tài khoản phụ huynh');
     await this.otpService.createOTP(email);
     // Return only status
     return {
@@ -106,8 +100,7 @@ export class AuthService {
     const user = await this.validateUser(email, password);
     const user_id = (user as any)._id?.toString();
     const staff = await this.staffService.findByuser(user_id);
-    if (!staff)
-      throw new UnauthorizedException('Không phải tài khoản nhân viên');
+    if (!staff) throw new UnauthorizedException('Không phải tài khoản nhân viên');
 
     await this.otpService.createOTP(email);
     // Return only status
@@ -134,27 +127,19 @@ export class AuthService {
   }
 
   // Parent login with OTP
-  async loginParentWithOtp(
-    email: string,
-    otp: string,
-  ): Promise<{ token: string }> {
+  async loginParentWithOtp(email: string, otp: string): Promise<{ token: string }> {
     await this.otpService.verifyOTP(email, otp);
     const user = await this.UserService.findByEmail(email);
     const user_id = (user as any)._id?.toString();
 
     const parent = await this.parentService.validateParent(user_id);
     if (!parent)
-      throw new UnauthorizedException(
-        'Email này không được đăng ký làm tài khoản phụ huynh',
-      );
+      throw new UnauthorizedException('Email này không được đăng ký làm tài khoản phụ huynh');
     const tokens = await this.generateTokens(user_id, email, 'parent');
     return { token: tokens.accessToken };
   }
 
-  async loginStaffWithOtp(
-    email: string,
-    otp: string,
-  ): Promise<{ token: string }> {
+  async loginStaffWithOtp(email: string, otp: string): Promise<{ token: string }> {
     await this.otpService.verifyOTP(email, otp);
     const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
@@ -172,10 +157,7 @@ export class AuthService {
     return { token: tokens.accessToken };
   }
   // Admin login with OTP
-  async loginAdminWithOtp(
-    email: string,
-    otp: string,
-  ): Promise<{ token: string }> {
+  async loginAdminWithOtp(email: string, otp: string): Promise<{ token: string }> {
     // Xác thực OTP
     await this.otpService.verifyOTP(email, otp);
 
@@ -193,7 +175,6 @@ export class AuthService {
       throw new UnauthorizedException('Không phải tài khoản admin');
     }
 
-    // Generate tokens
     const tokens = await this.generateTokens(user_id, email, 'admin');
 
     return { token: tokens.accessToken };
@@ -256,9 +237,7 @@ export class AuthService {
    * @param refreshToken New refresh token
    */
   async updateRefreshToken(user: string, refreshToken: string): Promise<void> {
-    await this.userModel
-      .updateOne({ _id: user }, { refresh_token: refreshToken })
-      .exec();
+    await this.userModel.updateOne({ _id: user }, { refresh_token: refreshToken }).exec();
   }
 
   // Phương thức xác thực tài khoản phụ huynh
@@ -277,6 +256,113 @@ export class AuthService {
       throw new UnauthorizedException('Không phải tài khoản nhân viên');
     }
     return true;
+  }
+  // Lấy thông tin người dùng từ token
+  async getMe(req: any): Promise<any> {
+    let token: string | undefined;
+    let userId: string | undefined;
+
+    // Xử lý nhận token từ frontend
+    if (typeof req === 'string') {
+      // Nếu token được gửi trực tiếp
+      token = req;
+    } else if (req.headers && req.headers.authorization) {
+      // Nếu token trong authorization header
+      const authHeader = req.headers.authorization;
+      token = authHeader && authHeader.split(' ')[1];
+    } else if (req.body && req.body.token) {
+      // Nếu token trong request body
+      token = req.body.token;
+    } else if (req.user && req.user.user) {
+      // Nếu đã được giải mã bởi JwtAuthGuard
+      userId = req.user.user;
+    } else {
+      throw new UnauthorizedException('Token không hợp lệ hoặc không được cung cấp');
+    }
+
+    // Nếu có token, giải mã nó để lấy userId
+    if (token && !userId) {
+      try {
+        const decoded = this.tokenService.verifyToken(token);
+        if (!decoded || !decoded.sub) {
+          throw new UnauthorizedException('Token không hợp lệ');
+        }
+        userId = decoded.sub;
+      } catch (error) {
+        throw new UnauthorizedException('Token không hợp lệ');
+      }
+    }
+
+    if (!userId) {
+      throw new UnauthorizedException('Không thể xác định người dùng từ token');
+    }
+
+    // Lấy thông tin user
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    // Kiểm tra vai trò
+    let role = 'user';
+    let roleData: any = null;
+    let profile: any = null;
+
+    // Check if admin
+    const admin = await this.adminService.findByuser(userId);
+    if (admin) {
+      role = 'admin';
+      roleData = {
+        _id: admin._id,
+        // Thêm các trường khác của admin nếu cần
+      };
+    } else {
+      // Check if staff
+      const staff = await this.staffService.findByuser(userId);
+      if (staff) {
+        role = 'staff';
+        roleData = {
+          _id: staff._id,
+          // Thêm các trường khác của staff nếu cần
+        };
+      } else {
+        // Check if parent
+        const parent = await this.parentService.findByuser(userId);
+        if (parent) {
+          role = 'parent';
+          roleData = {
+            _id: parent._id,
+            // Thêm các trường khác của parent nếu cần
+          };
+        }
+      }
+    } // Lấy thông tin profile
+    const userProfile = await this.profileService.findByuser(userId);
+
+    if (userProfile) {
+      profile = {
+        _id: userProfile._id,
+        name: userProfile.name,
+        phone: userProfile.phone,
+        gender: userProfile.gender,
+        birth: userProfile.birth,
+        address: userProfile.address,
+        avatar: userProfile.avatar,
+        created_at: userProfile.created_at,
+        updated_at: userProfile.updated_at,
+      };
+    } // Trả về thông tin người dùng
+    return {
+      user: {
+        _id: user._id,
+        email: user.email,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
+      role: role,
+      profile: profile,
+      [role]: roleData,
+    };
   }
 
   // Phương thức xác thực tài khoản admin

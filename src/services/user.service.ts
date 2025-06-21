@@ -3,6 +3,8 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -23,7 +25,9 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     private profileService: ProfileService,
     private adminService: AdminService,
+    @Inject(forwardRef(() => StaffService))
     private staffService: StaffService,
+    @Inject(forwardRef(() => ParentService))
     private parentService: ParentService,
   ) {}
 
@@ -36,7 +40,6 @@ export class UserService {
     }[]
   > {
     const users = await this.userModel.find().exec();
-
     return users.map((user) => {
       return {
         _id: user._id,
@@ -78,10 +81,7 @@ export class UserService {
     return this.userModel.findOne({ refresh_token: refreshToken }).exec();
   }
 
-  async updateRefreshToken(
-    id: string,
-    refreshToken: string | null,
-  ): Promise<User | null> {
+  async updateRefreshToken(id: string, refreshToken: string | null): Promise<User | null> {
     return this.userModel
       .findByIdAndUpdate(
         id,

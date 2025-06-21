@@ -20,10 +20,7 @@ import {
   UpdateMedicineStorageDto,
   UpdateStockDto,
 } from '@/decorations/dto/medicine-storage.dto';
-import {
-  MedicineStorage,
-  MedicineStatus,
-} from '@/schemas/medicine-storage.schema';
+import { MedicineStorage, MedicineStatus } from '@/schemas/medicine-storage.schema';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -39,9 +36,7 @@ import {
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class MedicineStorageController {
-  constructor(
-    private readonly medicineStorageService: MedicineStorageService,
-  ) {}
+  constructor(private readonly medicineStorageService: MedicineStorageService) {}
 
   /**
    * Format the medicine response to return only the necessary fields
@@ -49,18 +44,8 @@ export class MedicineStorageController {
   private formatMedicineResponse(medicine: MedicineStorage) {
     if (!medicine) return null;
 
-    const {
-      _id,
-      name,
-      type,
-      unit,
-      amount_left,
-      total,
-      status,
-      expired,
-      description,
-      image,
-    } = medicine;
+    const { _id, name, type, unit, amount_left, total, status, expired, description, image } =
+      medicine;
 
     return {
       id: _id,
@@ -123,9 +108,7 @@ export class MedicineStorageController {
   async findAll() {
     const result = await this.medicineStorageService.findAll();
     return {
-      data: result.data.map((medicine) =>
-        this.formatMedicineResponse(medicine),
-      ),
+      data: result.data.map((medicine) => this.formatMedicineResponse(medicine)),
       total: result.total,
     };
   }
@@ -199,8 +182,7 @@ export class MedicineStorageController {
       throw new BadRequestException('Số ngày phải lớn hơn 0');
     }
 
-    const medicines =
-      await this.medicineStorageService.findExpiring(daysToExpire);
+    const medicines = await this.medicineStorageService.findExpiring(daysToExpire);
 
     return {
       data: medicines.map((medicine) => this.formatMedicineResponse(medicine)),
@@ -261,8 +243,7 @@ export class MedicineStorageController {
   @Get(':id')
   @ApiOperation({
     summary: 'Lấy thông tin thuốc theo ID',
-    description:
-      'Truy xuất thông tin chi tiết của một loại thuốc cụ thể theo ID.',
+    description: 'Truy xuất thông tin chi tiết của một loại thuốc cụ thể theo ID.',
   })
   @ApiParam({
     name: 'id',
@@ -342,9 +323,7 @@ export class MedicineStorageController {
   async create(@Body() createMedicineDto: CreateMedicineStorageDto) {
     // Validate amount_left không lớn hơn total
     if (createMedicineDto.amountLeft > createMedicineDto.total) {
-      throw new BadRequestException(
-        'Số lượng còn lại không thể lớn hơn tổng số lượng',
-      );
+      throw new BadRequestException('Số lượng còn lại không thể lớn hơn tổng số lượng');
     }
 
     // Validate ngày hết hạn không thể trong quá khứ
@@ -364,16 +343,14 @@ export class MedicineStorageController {
       createMedicineDto.status = MedicineStatus.AVAILABLE;
     }
 
-    const medicine =
-      await this.medicineStorageService.create(createMedicineDto);
+    const medicine = await this.medicineStorageService.create(createMedicineDto);
     return this.formatMedicineResponse(medicine);
   }
 
   @Patch(':id')
   @ApiOperation({
     summary: 'Cập nhật thông tin thuốc',
-    description:
-      'Cập nhật thông tin chi tiết của một loại thuốc cụ thể theo ID.',
+    description: 'Cập nhật thông tin chi tiết của một loại thuốc cụ thể theo ID.',
   })
   @ApiParam({
     name: 'id',
@@ -411,22 +388,16 @@ export class MedicineStorageController {
     status: 400,
     description: 'Dữ liệu đầu vào không hợp lệ.',
   })
-  async update(
-    @Param('id') id: string,
-    @Body() updateMedicineDto: UpdateMedicineStorageDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateMedicineDto: UpdateMedicineStorageDto) {
     // Kiểm tra xem thuốc có tồn tại không
     const existingMedicine = await this.medicineStorageService.findById(id);
 
     // Validate amount_left không lớn hơn total
-    const newAmountLeft =
-      updateMedicineDto.amountLeft ?? existingMedicine.amount_left;
+    const newAmountLeft = updateMedicineDto.amountLeft ?? existingMedicine.amount_left;
     const newTotal = updateMedicineDto.total ?? existingMedicine.total;
 
     if (newAmountLeft > newTotal) {
-      throw new BadRequestException(
-        'Số lượng còn lại không thể lớn hơn tổng số lượng',
-      );
+      throw new BadRequestException('Số lượng còn lại không thể lớn hơn tổng số lượng');
     }
 
     // Validate ngày hết hạn không thể trong quá khứ
@@ -450,10 +421,7 @@ export class MedicineStorageController {
       }
     }
 
-    const medicine = await this.medicineStorageService.update(
-      id,
-      updateMedicineDto,
-    );
+    const medicine = await this.medicineStorageService.update(id, updateMedicineDto);
     return this.formatMedicineResponse(medicine);
   }
 
@@ -496,10 +464,7 @@ export class MedicineStorageController {
     status: 400,
     description: 'Dữ liệu đầu vào không hợp lệ.',
   })
-  async updateStock(
-    @Param('id') id: string,
-    @Body() updateStockDto: UpdateStockDto,
-  ) {
+  async updateStock(@Param('id') id: string, @Body() updateStockDto: UpdateStockDto) {
     // Kiểm tra xem thuốc có tồn tại không
     const existingMedicine = await this.medicineStorageService.findById(id);
 
@@ -512,9 +477,7 @@ export class MedicineStorageController {
       newTotal += updateStockDto.quantity;
     } else if (updateStockDto.action === 'remove') {
       if (existingMedicine.amount_left < updateStockDto.quantity) {
-        throw new BadRequestException(
-          'Số lượng lấy ra không thể lớn hơn số lượng hiện có',
-        );
+        throw new BadRequestException('Số lượng lấy ra không thể lớn hơn số lượng hiện có');
       }
       newAmountLeft -= updateStockDto.quantity;
     }
@@ -568,8 +531,7 @@ export class MedicineStorageController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Tạo nhiều thuốc cùng lúc',
-    description:
-      'Thêm nhiều loại thuốc mới vào hệ thống kho trong một yêu cầu.',
+    description: 'Thêm nhiều loại thuốc mới vào hệ thống kho trong một yêu cầu.',
   })
   @ApiBody({
     type: CreateMedicineStorageDto,
@@ -642,12 +604,9 @@ export class MedicineStorageController {
       }
     }
 
-    const createdMedicines =
-      await this.medicineStorageService.createMany(medicines);
+    const createdMedicines = await this.medicineStorageService.createMany(medicines);
     return {
-      data: createdMedicines.map((medicine) =>
-        this.formatMedicineResponse(medicine),
-      ),
+      data: createdMedicines.map((medicine) => this.formatMedicineResponse(medicine)),
       total: createdMedicines.length,
     };
   }

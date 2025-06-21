@@ -25,16 +25,20 @@ import {
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateHealthRecordDto } from '@/decorations/dto/create-health-record.dto';
 import { UpdateHealthRecordDto } from '@/decorations/dto/update-health-record.dto';
+import { Roles } from '@/decorations/roles.decorator';
+import { RolesGuard } from '@/guards/roles.guard';
+import { Role } from '@/enums/role.enum';
 
 @ApiTags('health-records')
 @Controller('health-records')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class HealthRecordController {
   constructor(private readonly healthRecordService: HealthRecordService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE)
   @ApiOperation({ 
     summary: 'Get all health records',
     description: 'Retrieves a list of all health records. Can be filtered by query parameters.'
@@ -63,6 +67,7 @@ export class HealthRecordController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE, Role.PARENT, Role.STUDENT)
   @ApiOperation({ 
     summary: 'Get health record by ID',
     description: 'Retrieves a health record by its ID.'
@@ -76,6 +81,7 @@ export class HealthRecordController {
 
   @Get('student/:studentId')
   @HttpCode(HttpStatus.OK)
+  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE, Role.PARENT, Role.STUDENT)
   @ApiOperation({ 
     summary: 'Get health record by student ID',
     description: 'Retrieves the health record for a specific student by their ID.'
@@ -89,6 +95,7 @@ export class HealthRecordController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE)
   @ApiOperation({ 
     summary: 'Create new health record',
     description: 'Creates a new health record for a student.'
@@ -115,6 +122,7 @@ export class HealthRecordController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
+  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE)
   @ApiOperation({ 
     summary: 'Update health record',
     description: 'Updates an existing health record by its ID.'
@@ -145,9 +153,10 @@ export class HealthRecordController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @Roles(Role.ADMIN)
   @ApiOperation({ 
     summary: 'Delete health record',
-    description: 'Deletes a health record by its ID.'
+    description: 'Deletes a health record by its ID. Admin only.'
   })
   @ApiParam({ name: 'id', description: 'Health record ID' })
   @ApiResponse({ status: 200, description: 'Health record deleted successfully.' })

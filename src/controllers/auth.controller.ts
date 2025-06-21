@@ -11,7 +11,6 @@ import {
 import { AuthService } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
 import { ProfileService } from '@/services/profile.service';
-import { LocalAuthGuard } from '@/guards/local-auth.guard';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginDto, LoginWithOtpDto } from '@/decorations/dto/login.dto';
@@ -127,14 +126,14 @@ export class AuthController {
         refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
       },
     },
-  })
-  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ.' })
+  })  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(
       refreshTokenDto.user,
       refreshTokenDto.refresh_token,
     );
   }
+  
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Lấy thông tin người dùng đã đăng nhập' })
@@ -142,27 +141,102 @@ export class AuthController {
   getProfile(@Req() req) {
     return req.user;
   }
+  
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  @ApiOperation({ summary: 'Lấy thông tin chi tiết người dùng hiện tại' })
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết người dùng hiện tại từ token trong header' })
   @ApiResponse({
     status: 200,
     description: 'Thông tin chi tiết của người dùng.',
+    schema: {
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '60d0fe4f5311236168a109ca' },
+            email: { type: 'string', example: 'user@example.com' },
+            created_at: { type: 'string', format: 'date-time' },
+            updated_at: { type: 'string', format: 'date-time' }
+          }
+        },
+        role: { type: 'string', example: 'parent', enum: ['user', 'parent', 'staff', 'admin'] },
+        profile: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            phone: { type: 'string' },
+            gender: { type: 'string' },
+            birth: { type: 'string', format: 'date-time' },
+            address: { type: 'string' },
+            avatar: { type: 'string' }
+          },
+          nullable: true
+        },
+        parent: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' }
+          },
+          nullable: true
+        }
+      }
+    }
   })
   @ApiResponse({ status: 401, description: 'Chưa xác thực.' })
   async getMe(@Req() req) {
-    // Get detailed user information from the database using the ID in the JWT
-    const user = await this.userService.findById(req.user.user);
-
-    // Get user's profile
-    const profile = await this.profileService.findByuser(req.user.user);
-
-    // Remove sensitive information
-    const { password, refreshToken, ...userResult } = user.toObject();
-
-    return {
-      user: userResult,
-      profile: profile,
-    };
+    return this.authService.getMe(req);
+  }
+  @Post('me/token')
+  @ApiOperation({ summary: 'Lấy thông tin người dùng từ token trong body' })
+  @ApiResponse({
+    status: 200,
+    description: 'Thông tin chi tiết của người dùng từ token.',
+    schema: {
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '60d0fe4f5311236168a109ca' },
+            email: { type: 'string', example: 'user@example.com' },
+            created_at: { type: 'string', format: 'date-time' },
+            updated_at: { type: 'string', format: 'date-time' }
+          }
+        },
+        role: { type: 'string', example: 'parent', enum: ['user', 'parent', 'staff', 'admin'] },
+        profile: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            phone: { type: 'string' },
+            gender: { type: 'string' },
+            birth: { type: 'string', format: 'date-time' },
+            address: { type: 'string' },
+            avatar: { type: 'string' }
+          },
+          nullable: true
+        },
+        parent: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' }
+          },
+          nullable: true
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Token không hợp lệ.' })
+  @ApiBody({
+    schema: {
+      properties: {
+        token: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
+      },
+      required: ['token']
+    },
+  })
+  async getMeFromToken(@Body('token') token: string) {
+    return this.authService.getMe(token);
   }
 }
