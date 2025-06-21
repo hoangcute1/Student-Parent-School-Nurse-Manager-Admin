@@ -87,18 +87,20 @@ export function StaffLoginForm() {
       console.log("Verifying OTP in staff login:", otp);
       console.log("Using email:", formData.email);
 
-      // Thêm thông báo nhưng không hiển thị mật khẩu thực tế
-      console.log("Password provided:", formData.password ? "Yes" : "No");
+      // Hiển thị loading trước khi xác thực
+      toast({
+        title: "Đang xác thực",
+        description: "Vui lòng đợi trong giây lát...",
+      });
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const success = await loginStaffOTP(formData.email, otp);
+      const { success, role } = await loginStaffOTP(formData.email, otp);
 
       if (success) {
         toast({
           title: "Đăng nhập thành công",
           description: "Đang chuyển hướng...",
         });
-
         setShowOTP(false);
       } else {
         throw new Error("Xác thực OTP thất bại");

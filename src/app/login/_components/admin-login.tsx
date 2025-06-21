@@ -101,15 +101,6 @@ export function AdminLoginForm() {
           title: "Đăng nhập thành công",
           description: "Đang chuyển hướng...",
         });
-
-        // Chuyển hướng dựa trên vai trò
-        if (role === "admin") {
-          router.push("/cms");
-        } else {
-          // Fallback nếu không phải admin
-          router.push("/dashboard");
-        }
-
         setShowOTP(false);
       } else {
         throw new Error("Xác thực OTP thất bại");
