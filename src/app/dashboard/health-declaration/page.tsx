@@ -21,7 +21,11 @@ import { Student } from "@/lib/type/students";
 interface HealthRecord {
   id: string;
   studentName: string;
-  class: string;
+  class: {
+    name: string;
+    id: string;
+  } | null; // Class can be null if not assigned
+  
   allergies: string | null;
   chronicDisease: string | null;
   vision: string;
@@ -121,12 +125,17 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
   // Map student data to UI health records
   const healthRecords: HealthRecord[] = students.map((student) => {
     // Find health record for this student if it exists
-    const studentRecord = records.find(record => record.student_id === student._id);
+    const studentRecord = records.find(record => record.student?.studentId === student._id);
+    
+    // Transform class data to match HealthRecord interface
+    const classData = typeof student.class === 'object' && student.class 
+      ? { name: student.class.name, id: student.class._id }
+      : null;
     
     return {
       id: student._id,
       studentName: student.name || "Không có tên",
-      class: student.class || "Chưa có lớp",
+      class: classData,
       allergies: studentRecord?.allergies && studentRecord.allergies.length > 0 ? "Có" : null,
       chronicDisease: studentRecord?.chronic_conditions && studentRecord.chronic_conditions.length > 0 ? "Có" : null,
       vision: studentRecord?.vision || "Chưa cập nhật",
@@ -318,7 +327,7 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                           {selectedRecord ? (
                             <SelectItem value="selected-student">
                               {selectedRecord.studentName} -{" "}
-                              {selectedRecord.class}
+                              {selectedRecord.class?.name}
                             </SelectItem>
                           ) : (
                             <>
@@ -689,7 +698,7 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                           <TableCell className="font-medium">
                             {record.studentName}
                           </TableCell>
-                          <TableCell>{record.class}</TableCell>
+                          <TableCell>{record.class?.name}</TableCell>
                           <TableCell>
                             {record.allergies ? (
                               <Badge
@@ -951,7 +960,7 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                   <div>
                     <p className="text-sm font-medium text-gray-500">Lớp:</p>
                     <p className="text-sm font-semibold">
-                      {selectedRecord.class}
+                      {selectedRecord.class?.name}
                     </p>
                   </div>
                   <div>

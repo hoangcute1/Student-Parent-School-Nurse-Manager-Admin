@@ -42,13 +42,13 @@ export default function StudentsPage() {
         return (
           student.name.toLowerCase().includes(query) ||
           student.studentId.toLowerCase().includes(query) ||
-          (student.class && student.class.toLowerCase().includes(query))
+          (student.class?.name && student.class.name.toLowerCase().includes(query))
         );
       }
 
       // Apply class filter if not "all"
       if (classFilter !== "all") {
-        return student.class === classFilter;
+        return student.class?.name === classFilter;
       }
 
       return true;

@@ -9,10 +9,11 @@ export interface HealthRecord {
   blood_type: string;
   treatment_history: string[];
   notes: string;
-  student_id: string;
   created_at?: string;
   updated_at?: string;
   student?: {
+    _id: string;
+    studentId: string;
     name: string;
     class: string;
   };

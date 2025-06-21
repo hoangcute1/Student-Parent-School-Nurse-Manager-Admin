@@ -24,7 +24,11 @@ export interface Student {
   birth?: string;
   gender?: string;
   grade?: string;
-  class?: string;
+  class?: {
+    _id: string;
+    name: string;
+    grade: string;
+  };
   parentId?: string;
   createdAt: string;
   updatedAt: string;
