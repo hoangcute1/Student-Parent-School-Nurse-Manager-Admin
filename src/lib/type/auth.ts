@@ -26,11 +26,14 @@ interface AuthState {
   profile: UserProfile | null;
   isAuthenticated: boolean;
   role: UserRoleType | null;
+  isLoading: boolean;
   // Các hàm cập nhật state
   setUser: (user: UserLoginResponse | null) => void;
   setProfile: (profile: UserProfile | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
+  setIsLoading: (isLoading: boolean) => void;
   clearAuth: () => void;
+  updateUserRole: (role: UserRoleType | null) => void;
   updateUserInfo: (user: UserLoginResponse, profile?: UserProfile) => void;
 }
 

@@ -13,7 +13,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, profile } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Effect for handling initial state
@@ -32,6 +32,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     localStorage.setItem("sidebarOpen", JSON.stringify(newState));
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-lg">Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex min-h-screen">
       <Sidebar isOpen={isSidebarOpen} />
@@ -52,7 +62,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            {user && profile ? <User /> : null}
+            <User />
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>

@@ -1,6 +1,6 @@
-import { LoginRequestCredentials } from "@/lib/type/auth";
+import { LoginRequestCredentials, TokenResponse } from "@/lib/type/auth";
 import { fetchData } from "../api";
-import { setAuthToken } from "./token";
+import { handleTokenLoginSuccess, setAuthToken } from "./token";
 
 const requestStaffLoginOTP = (
   credentials: LoginRequestCredentials
@@ -14,7 +14,7 @@ const requestStaffLoginOTP = (
 const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
   try {
     // API mới chỉ trả về token
-    const token = await fetchData<string>(`/auth/login-staff/verify`, {
+    const data = await fetchData<TokenResponse>(`/auth/login-staff/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,12 +22,14 @@ const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
       body: JSON.stringify({ email, otp }),
     });
 
-    if (!token) {
+    if (!data || !data.token) {
       throw new Error("OTP verification failed");
     }
 
-    // Lưu token vào localStorage
-    setAuthToken(token);
+    // Lưu token
+    handleTokenLoginSuccess(data.token);
+    console.log("Token saved successfully after OTP verification");
+
     return true;
   } catch (error) {
     console.error("OTP verification error:", error);

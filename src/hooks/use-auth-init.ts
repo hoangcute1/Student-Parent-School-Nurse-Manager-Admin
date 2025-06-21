@@ -3,24 +3,27 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { API_URL } from "@/lib/env";
-import { getAuthToken, clearAuthToken } from "@/lib/api/auth/token";
+import { getAuthToken, clearAuthToken, parseJwt } from "@/lib/api/auth/token";
 import { fetchData } from "@/lib/api/api";
 import { GetMeResponse } from "@/lib/type/auth";
-import { clear } from "console";
+import { set } from "react-hook-form";
 
 // Hook này giúp khôi phục trạng thái xác thực khi tải trang
 export function useAuthInit() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Sử dụng các actions cụ thể từ store thay vì toàn bộ store
-  const updateUserInfo = useAuthStore((state) => state.updateUserInfo);
-  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const {
+    updateUserInfo,
+    clearAuth,
+    updateUserRole,
+    setIsLoading: setStoreLoading,
+  } = useAuthStore();
 
   // Sử dụng useCallback để tránh tạo hàm mới mỗi khi render
   const initializeAuth = useCallback(async () => {
     try {
       setIsLoading(true);
+      setStoreLoading(true);
       const token = getAuthToken();
 
       if (token) {
@@ -33,6 +36,8 @@ export function useAuthInit() {
             Authorization: `Bearer ${token}`,
           },
         });
+        const role = parseJwt(token).role;
+        updateUserRole(role);
         updateUserInfo(response.user, response.profile);
       } else {
         // Token không hợp lệ, xóa token và thông tin xác thực
@@ -45,6 +50,7 @@ export function useAuthInit() {
       clearAuth();
     } finally {
       setIsLoading(false);
+      setStoreLoading(false);
       setIsInitialized(true);
     }
   }, [updateUserInfo, clearAuth]);

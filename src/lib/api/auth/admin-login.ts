@@ -1,6 +1,6 @@
 import { fetchData } from "../api";
-import { LoginRequestCredentials } from "@/lib/type/auth";
-import { setAuthToken } from "./token";
+import { LoginRequestCredentials, TokenResponse } from "@/lib/type/auth";
+import { handleTokenLoginSuccess, setAuthToken } from "./token";
 
 const requestAdminLoginOTP = (
   credentials: LoginRequestCredentials
@@ -13,7 +13,8 @@ const requestAdminLoginOTP = (
 
 const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
   try {
-    const token = await fetchData<string>(`/auth/login-admin/verify`, {
+    // API mới chỉ trả về token
+    const data = await fetchData<TokenResponse>(`/auth/login-admin/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,12 +22,14 @@ const loginAdminOTP = async (email: string, otp: string): Promise<boolean> => {
       body: JSON.stringify({ email, otp }),
     });
 
-    if (!token) {
+    if (!data || !data.token) {
       throw new Error("OTP verification failed");
     }
 
-    // Lưu token vào localStorage
-    setAuthToken(token);
+    // Lưu token
+    handleTokenLoginSuccess(data.token);
+    console.log("Token saved successfully after OTP verification");
+
     return true;
   } catch (error) {
     console.error("OTP verification error:", error);

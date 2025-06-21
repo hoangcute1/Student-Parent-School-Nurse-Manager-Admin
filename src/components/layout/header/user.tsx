@@ -89,7 +89,9 @@ export default function User() {
                   ? "Quản trị viên"
                   : role === "staff"
                   ? "Nhân viên y tế"
-                  : "Phụ huynh"}
+                  : role === "parent"
+                  ? "Phụ huynh"
+                  : null}
               </span>
             </div>
           </Button>
