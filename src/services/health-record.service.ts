@@ -7,13 +7,12 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  HealthRecord,
-  HealthRecordDocument,
-} from '@/schemas/health-record.schema';
+import { HealthRecord, HealthRecordDocument } from '@/schemas/health-record.schema';
 import { CreateHealthRecordDto } from '@/decorations/dto/create-health-record.dto';
 import { UpdateHealthRecordDto } from '@/decorations/dto/update-health-record.dto';
 import { StudentService } from './student.service';
+import { ParentService } from './parent.service';
+import { ParentStudentService } from './parent-student.service';
 
 @Injectable()
 export class HealthRecordService {
@@ -22,6 +21,10 @@ export class HealthRecordService {
     private healthRecordModel: Model<HealthRecordDocument>,
     @Inject(forwardRef(() => StudentService))
     private studentService: StudentService,
+    @Inject(forwardRef(() => ParentService))
+    private parentService: ParentService,
+    @Inject(forwardRef(() => ParentStudentService))
+    private parentStudentService: ParentStudentService,
   ) {}
 
   /**
@@ -76,9 +79,7 @@ export class HealthRecordService {
   /**
    * Create a new health record
    */
-  async create(
-    createHealthRecordDto: CreateHealthRecordDto,
-  ): Promise<any> {
+  async create(createHealthRecordDto: CreateHealthRecordDto): Promise<any> {
     // Verify student exists unless called from StudentService
     if (createHealthRecordDto.student_id) {
       try {
@@ -107,21 +108,19 @@ export class HealthRecordService {
     });
 
     if (existingRecord) {
-      throw new BadRequestException(
-        'Health record already exists for this student',
-      );
+      throw new BadRequestException('Health record already exists for this student');
     }
 
     // Create new health record
     const newHealthRecord = new this.healthRecordModel(createHealthRecordDto);
     const savedRecord = await newHealthRecord.save();
-    
+
     // Return the created health record after populating student data
     const populatedRecord = await this.healthRecordModel
       .findById(savedRecord._id)
       .populate('student_id')
       .exec();
-    
+
     return this.formatHealthRecordResponse(populatedRecord);
   }
 
@@ -135,7 +134,7 @@ export class HealthRecordService {
       .sort({ created_at: -1 })
       .exec();
 
-    return healthRecords.map(record => this.formatHealthRecordResponse(record));
+    return healthRecords.map((record) => this.formatHealthRecordResponse(record));
   }
 
   /**
@@ -166,17 +165,14 @@ export class HealthRecordService {
       .sort({ created_at: -1 })
       .exec();
 
-    return healthRecords.map(record => this.formatHealthRecordResponse(record));
+    return healthRecords.map((record) => this.formatHealthRecordResponse(record));
   }
 
   /**
    * Find health record by ID
    */
   async findById(id: string): Promise<any> {
-    const healthRecord = await this.healthRecordModel
-      .findById(id)
-      .populate('student_id')
-      .exec();
+    const healthRecord = await this.healthRecordModel.findById(id).populate('student_id').exec();
 
     if (!healthRecord) {
       throw new NotFoundException('Health record not found');
@@ -189,25 +185,19 @@ export class HealthRecordService {
    * Find health record by student ID
    */
   async findByStudentId(studentId: string): Promise<any> {
-    const healthRecord = await this.healthRecordModel
-      .findOne({ student_id: studentId })
-      .populate('student_id')
-      .exec();
+    const record = await this.healthRecordModel.findOne({ student_id: studentId }).exec();
 
-    if (!healthRecord) {
-      throw new NotFoundException('Health record not found for this student');
+    if (!record) {
+      return null;
     }
 
-    return this.formatHealthRecordResponse(healthRecord);
+    return this.formatHealthRecordResponse(record);
   }
 
   /**
    * Update health record
    */
-  async update(
-    id: string,
-    updateHealthRecordDto: UpdateHealthRecordDto,
-  ): Promise<any> {
+  async update(id: string, updateHealthRecordDto: UpdateHealthRecordDto): Promise<any> {
     const healthRecord = await this.healthRecordModel
       .findByIdAndUpdate(id, updateHealthRecordDto, { new: true })
       .populate('student_id')
@@ -234,5 +224,32 @@ export class HealthRecordService {
       success: true,
       message: 'Health record deleted successfully',
     };
+  }
+
+  /**
+   * Find health records for a parent's children
+   * @param parentId The parent's user ID
+   * @returns An array of health records for the parent's children
+   */
+  async findHealthRecordsForParentChildren(parentId: string): Promise<any[]> {
+    try {
+      // First, find the parent by user ID
+      const parent = await this.parentService.findByuser(parentId);
+
+      if (!parent) {
+        throw new NotFoundException(`Parent with user ID "${parentId}" not found`);
+      }
+
+      // Find parent-student relationships for this parent
+      const studentsWithHealthRecords =
+        await this.parentStudentService.findStudentsWithHealthRecordsByParentId(
+          (parent as any)._id.toString(),
+        );
+
+      return studentsWithHealthRecords;
+    } catch (error) {
+      console.error('Error in findHealthRecordsForParentChildren:', error);
+      throw error;
+    }
   }
 }
