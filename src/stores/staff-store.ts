@@ -1,57 +1,76 @@
-import { createStaff, getStaffs } from "@/lib/api/staff";
-import { ApiStaff, DisplayStaff, StaffStore } from "../lib/type/staff";
+import { Staff } from "@/lib/type/staff";
 import { create } from "zustand";
+import { getAllStaffs, createStaff } from "@/lib/api/staff";
+import type { StaffStore } from "@/lib/type/staff";
 import type { StaffFormValues } from "@/app/cms/manage-staffs/_components/add-staff-dialog";
+import { UserProfile } from "@/lib/type/users";
 
-const mapToDisplayStaff = (apiStaff: ApiStaff): DisplayStaff => ({
-  _id: apiStaff._id,
-  user_id: apiStaff._id,
-  roleId: "staff",
-  name: apiStaff.name || "N/A",
-  email: apiStaff.email || "N/A",
-});
+// Define DisplayParent for the UI
+interface DisplayStaff {
+  name: string;
+  phone: string;
+  address: string;
+  email: string;
+  createdAt: string;
+}
+
+const mapToDisplayStaff = (staff: Staff): DisplayStaff => {
+  const profile = staff.profile || {};
+  const user = staff.user || {};
+
+  return {
+    name: profile?.name || "N/A",
+    phone: profile?.phone || "N/A",
+    address: profile?.address || "N/A",
+    email: user?.email || "N/A",
+    createdAt: user?.created_at
+      ? new Date(user.created_at).toLocaleDateString("vi-VN")
+      : "N/A",
+  };
+};
 
 export const useStaffStore = create<StaffStore>((set) => ({
-  staff: [],
+  staffs: [],
   isLoading: false,
   error: null,
-  fetchStaff: async () => {
+  fetchStaffs: async () => {
     try {
       set({ isLoading: true, error: null });
       console.log("Fetching staffs...");
-      const response = await getStaffs();
-      console.log("Staffs response:", response);
+      const response = await getAllStaffs();
+      console.log("Parents response:", response);
 
-      // Kiểm tra nếu response là array thì dùng luôn, không thì check response.data
-      const staffList = Array.isArray(response)
-        ? response
-        : (response as { data: ApiStaff[] }).data;
+      // Process the response into an array
+      const staffsList = Array.isArray(response) ? response : [];
+
       set({
-        staff: staffList.map(mapToDisplayStaff),
+        staffs: staffsList,
         error: null,
       });
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch staffs";
       console.error("Failed to fetch staffs:", err);
-      set({ error: errorMessage, staff: [] });
+      set({ error: errorMessage, staffs: [] });
     } finally {
       set({ isLoading: false });
     }
   },
 
-  createStaff: async (data: StaffFormValues) => {
-    // try {
-    //   set({ isLoading: true, error: null });
-    //   const newStaff = await createStaff(data);
-    //   set((state) => ({
-    //     staff: [...state.staff, maptoDisplaystaff(newStaff)],
-    //   }));
-    // } catch (err: any) {
-    //   set({ error: err.message });
-    //   console.error("Failed to create staff:", err);
-    //   throw err;
-    // } finally {
-    //   set({ isLoading: false });
-    // }
+  addStaff: async (data: StaffFormValues) => {
+    try {
+      set({ isLoading: true, error: null });
+      const newStaff = await createStaff(data);
+
+      // Update the store with the new parent
+      set((state) => ({
+        staffs: [...state.staffs, newStaff],
+      }));
+    } catch (err: any) {
+      set({ error: err.message });
+      console.error("Failed to create parent:", err);
+      throw err;
+    } finally {
+      set({ isLoading: false });
+    }
   },
 }));

@@ -43,8 +43,9 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
             <TableHead className="text-blue-700">Địa chỉ</TableHead>
             <TableHead className="text-blue-700">Email</TableHead>
             <TableHead className="text-blue-700">Ngày tạo</TableHead>
-            <TableHead className="text-right text-blue-700">Hành động</TableHead>
-
+            <TableHead className="text-right text-blue-700">
+              Hành động
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,36 +73,36 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                 Không có dữ liệu học sinh
               </TableCell>
             </TableRow>
-          ) : (            parents.map((parent, index) => (
-              <TableRow key={`parent-${parent.phone}-${index}`} className="hover:bg-blue-50 cursor-pointer">
+          ) : (
+            parents.map((parent, index) => (
+              <TableRow
+                key={`parent-${parent.phone}-${index}`}
+                className="hover:bg-blue-50 cursor-pointer"
+              >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8 border border-blue-200">
                       <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32&text=${parent.name.charAt(
-                          0
-                        )}`}
+                        src={`/placeholder.svg?height=32&width=32&text=${
+                          parent.name?.charAt(0) || "P"
+                        }`}
                       />
                       <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
-                        {parent.name.charAt(0)}
+                        {parent.name?.charAt(0) || "P"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-medium text-blue-800">
-                        {parent.name}
+                        {parent.name || "Chưa có tên"}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-blue-700">
-                  {parent.phone}
-                </TableCell>
+                <TableCell className="text-blue-700">{parent.phone}</TableCell>
                 <TableCell className="text-blue-700">
                   {parent.address}
                 </TableCell>
-                <TableCell className="text-blue-700">
-                  {parent.email}
-                </TableCell>
+                <TableCell className="text-blue-700">{parent.email}</TableCell>
                 <TableCell className="text-blue-700">
                   {parent.createdAt}
                 </TableCell>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Staff as ApiStaff } from "../../../lib/type/staff";
 import {
   Card,
   CardContent,
@@ -9,50 +8,71 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { StaffTable } from "./_components/staff-table";
 import { FilterBar } from "./_components/filter-bar";
 import { useStaffStore } from "@/stores/staff-store";
-import { StaffFormValues } from "./_components/add-staff-dialog";
-import { StaffTable } from "./_components/staff-table";
-import { DisplayStaff } from "@/lib/type/staff";
 
-export default function ParentsPage() {
+// Define the mapping function to transform staff data for display
+const mapStaffForDisplay = (staff: any) => {
+  const user = staff.user || {};
+  const profile = staff.profile || {};
+
+  return {
+    id: staff._id,
+    name: profile.name || "",
+    phone: profile.phone || "",
+    address: profile.address || "",
+    email: user.email || "",
+    createdAt: user.created_at
+      ? new Date(user.created_at).toLocaleDateString("vi-VN")
+      : "Không rõ",
+  };
+};
+
+export default function StaffsPage() {
+  const { staffs, isLoading, error, fetchStaffs, addStaff } = useStaffStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [healthFilter, setHealthFilter] = useState("all");
 
-  const onSubmit = async (data: StaffFormValues) => {
-    // try {
-    //   const newStaff = await createStaff({
-    //     name: data.name,
-    //     phone: data.phone,
-    //     address: data.address,
-    //     email: data.email,
-    //   });
-    //   const newDisplayStaff = mapToDisplayStaff(newStaff);
-    //   setStaffData((prev) => [...prev, newDisplayParent]);
-    // } catch (err: any) {
-    //   console.error("Failed to create parent:", err);
-    //   setError(err.message);
-    // }
-  };
+  // Transform staff data for display
+  const displayStaffs = staffs.map(mapStaffForDisplay).filter((staff) => {
+    // Apply search filter if exists
+    if (searchQuery && searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      return (
+        staff.name.toLowerCase().includes(query) ||
+        staff.email.toLowerCase().includes(query) ||
+        staff.phone.toLowerCase().includes(query) ||
+        staff.address.toLowerCase().includes(query)
+      );
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    // Chỉ fetch khi chưa có data
+    if (staffs.length === 0) {
+      fetchStaffs();
+    }
+  }, [fetchStaffs, staffs.length]);
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Quản lý nhân viên
+          Quản lý phụ huynh
         </h1>
         <p className="text-blue-600">
-          Danh sách nhân viên và thông tin liên hệ
+          Danh sách phụ huynh và thông tin liên hệ
         </p>
       </div>
 
-      {/* Bộ lọc và tìm kiếm */}
       <Card className="border-blue-100">
         <CardHeader>
-          <CardTitle className="text-blue-800">Danh sách nhân viên</CardTitle>
+          <CardTitle className="text-blue-800">Danh sách phụ huynh</CardTitle>
           <CardDescription className="text-blue-600">
-            Quản lý thông tin nhân viên trong trường
+            Quản lý thông tin và liên lạc với phụ huynh trong trường
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,9 +80,13 @@ export default function ParentsPage() {
             onSearchChange={setSearchQuery}
             onClassFilterChange={setClassFilter}
             onHealthStatusChange={setHealthFilter}
-            onAddStaff={onSubmit}
+            onAddStaff={addStaff}
           />
-          <StaffTable />
+          <StaffTable
+            staffs={displayStaffs}
+            isLoading={isLoading}
+            error={error}
+          />
         </CardContent>
       </Card>
     </div>

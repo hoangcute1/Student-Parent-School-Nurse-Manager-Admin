@@ -1,74 +1,69 @@
 "use client";
 
-import { Users, AlertTriangle } from "lucide-react";
+import { Users, UserCircle2, UserRoundCog } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-interface StatsData {
-  total: number;
-  healthy: number;
-  monitoring: number;
-  urgent: number;
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatsCardsProps {
-  stats: StatsData;
+  totalStudents: number;
+  maleStudents: number;
+  femaleStudents: number;
+  isLoading: boolean;
 }
 
-export function StatsCards({ stats }: StatsCardsProps) {
+export function StatsCards({
+  totalStudents,
+  maleStudents,
+  femaleStudents,
+  isLoading,
+}: StatsCardsProps) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="border-blue-100">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <Users className="h-8 w-8 text-blue-600" />
             <div>
               <div className="text-2xl font-bold text-blue-800">
-                {stats.total}
+                {totalStudents}
               </div>
-              <div className="text-sm text-blue-600">Tổng học sinh</div>
+              <div className="text-sm text-blue-600">Total Students</div>
             </div>
           </div>
         </CardContent>
       </Card>
-      <Card className="border-green-100">
+      <Card className="border-sky-100">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-              <span className="text-green-600 font-bold">✓</span>
-            </div>
+            <UserCircle2 className="h-8 w-8 text-sky-600" />
             <div>
-              <div className="text-2xl font-bold text-green-800">
-                {stats.healthy}
+              <div className="text-2xl font-bold text-sky-800">
+                {maleStudents}
               </div>
-              <div className="text-sm text-green-600">Sức khỏe tốt</div>
+              <div className="text-sm text-sky-600">Male Students</div>
             </div>
           </div>
         </CardContent>
       </Card>
-      <Card className="border-yellow-100">
+      <Card className="border-pink-100">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-8 w-8 text-yellow-600" />
+            <UserRoundCog className="h-8 w-8 text-pink-600" />
             <div>
-              <div className="text-2xl font-bold text-yellow-800">
-                {stats.monitoring}
+              <div className="text-2xl font-bold text-pink-800">
+                {femaleStudents}
               </div>
-              <div className="text-sm text-yellow-600">Cần theo dõi</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="border-red-100">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-              <span className="text-red-600 font-bold">!</span>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-red-800">
-                {stats.urgent}
-              </div>
-              <div className="text-sm text-red-600">Khẩn cấp</div>
+              <div className="text-sm text-pink-600">Female Students</div>
             </div>
           </div>
         </CardContent>

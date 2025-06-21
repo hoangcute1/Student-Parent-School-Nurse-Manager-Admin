@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { User as AppUser } from "@/lib/type/types";
+import type { User as AppUser } from "@/lib/type/users";
 import {
   Select,
   SelectContent,
@@ -97,13 +97,12 @@ export function AddStudentDialog({ onSubmit }: AddStudentDialogProps) {
       });
     }
   };
-
   return (
-    user?.role == "admin" && (
+    user?.role === "admin" && (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="ml-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Thêm học sinh
           </Button>
         </DialogTrigger>

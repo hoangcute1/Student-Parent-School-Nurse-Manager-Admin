@@ -1,39 +1,34 @@
-import { ApiStaff } from "../type/staff";
+import { API_URL } from "@/lib/env";
+import { Staff } from "@/lib/type/staff";
+import { StaffFormValues } from "@/app/cms/manage-staffs/_components/add-staff-dialog";
 import { fetchData } from "./api";
-import type { StaffFormValues } from "@/app/cms/manage-staffs/_components/add-staff-dialog";
 
-/**
- * Get all staff members
- */
-export const getStaffs = async (): Promise<ApiStaff[]> => {
+// Get all parents
+export const getAllStaffs = async (): Promise<Staff[]> => {
   try {
-    return await fetchData<ApiStaff[]>("/staffs");
+    return await fetchData<Staff[]>("/staff");
   } catch (error) {
     console.error("Error fetching staffs:", error);
     throw error;
   }
 };
 
-/**
- * Get a staff member by ID
- */
-export const getStaffById = async (id: string): Promise<ApiStaff> => {
-  try {
-    return await fetchData<ApiStaff>(`/staffs/${id}`);
-  } catch (error) {
-    console.error(`Error fetching staff with ID ${id}:`, error);
-    throw error;
-  }
-};
-
-/**
- * Create a new staff member
- */
+// Create a new Staff
 export const createStaff = async (
-  staffData: StaffFormValues
-): Promise<ApiStaff> => {
+  formData: StaffFormValues
+): Promise<Staff> => {
   try {
-    return await fetchData<ApiStaff>("/staffs", {
+    // Convert StaffFormValues to the format expected by the API
+    const staffData = {
+      ...formData,
+      user: {
+        username: formData.email,
+        password: "defaultPassword123", // This might need to be generated or prompted
+        role: "staff",
+      },
+    };
+
+    return await fetchData<Staff>("/staff", {
       method: "POST",
       body: JSON.stringify(staffData),
     });
@@ -43,34 +38,30 @@ export const createStaff = async (
   }
 };
 
-/**
- * Update a staff member
- */
+// Update a staff
 export const updateStaff = async (
-  id: string,
-  staffData: Partial<StaffFormValues>
-): Promise<ApiStaff> => {
+  staffId: string,
+  formData: Partial<StaffFormValues>
+): Promise<Staff> => {
   try {
-    return await fetchData<ApiStaff>(`/staffs/${id}`, {
+    return await fetchData<Staff>(`/staff/${staffId}`, {
       method: "PUT",
-      body: JSON.stringify(staffData),
+      body: JSON.stringify(formData),
     });
   } catch (error) {
-    console.error(`Error updating staff with ID ${id}:`, error);
+    console.error("Error updating staff:", error);
     throw error;
   }
 };
 
-/**
- * Delete a staff member
- */
-export const deleteStaff = async (id: string): Promise<void> => {
+// Delete a parent
+export const deleteStaff = async (staffId: string): Promise<void> => {
   try {
-    await fetchData<void>(`/staffs/${id}`, {
+    await fetchData<void>(`/staff/${staffId}`, {
       method: "DELETE",
     });
   } catch (error) {
-    console.error(`Error deleting staff with ID ${id}:`, error);
+    console.error("Error deleting staff:", error);
     throw error;
   }
 };

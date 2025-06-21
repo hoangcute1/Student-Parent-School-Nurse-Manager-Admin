@@ -15,14 +15,16 @@ interface DisplayParent {
 }
 
 const mapToDisplayParent = (parent: Parent): DisplayParent => {
-  const profile = parent.user as unknown as UserProfile & { email: string };
+  const profile = parent.profile || {};
+  const user = parent.user || {};
+
   return {
     name: profile?.name || "N/A",
     phone: profile?.phone || "N/A",
     address: profile?.address || "N/A",
-    email: profile?.email || "N/A",
-    createdAt: profile?.created_at
-      ? new Date(profile.created_at).toLocaleDateString("vi-VN")
+    email: user?.email || "N/A",
+    createdAt: user?.created_at
+      ? new Date(user.created_at).toLocaleDateString("vi-VN")
       : "N/A",
   };
 };

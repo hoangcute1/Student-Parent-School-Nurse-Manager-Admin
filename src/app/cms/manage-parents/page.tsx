@@ -12,12 +12,44 @@ import { ParentTable } from "./_components/parent-table";
 import { FilterBar } from "./_components/filter-bar";
 import { useParentStore } from "@/stores/parent-store";
 
+// Define the mapping function to transform parent data for display
+const mapParentForDisplay = (parent: any) => {
+  const user = parent.user || {};
+  const profile = parent.profile || {};
+
+  return {
+    id: parent._id,
+    name: profile.name || "",
+    phone: profile.phone || "",
+    address: profile.address || "",
+    email: user.email || "",
+    createdAt: user.created_at
+      ? new Date(user.created_at).toLocaleDateString("vi-VN")
+      : "Không rõ",
+  };
+};
+
 export default function ParentsPage() {
   const { parents, isLoading, error, fetchParents, addParent } =
     useParentStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [healthFilter, setHealthFilter] = useState("all");
+
+  // Transform parent data for display
+  const displayParents = parents.map(mapParentForDisplay).filter((parent) => {
+    // Apply search filter if exists
+    if (searchQuery && searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      return (
+        parent.name.toLowerCase().includes(query) ||
+        parent.email.toLowerCase().includes(query) ||
+        parent.phone.toLowerCase().includes(query) ||
+        parent.address.toLowerCase().includes(query)
+      );
+    }
+    return true;
+  });
 
   useEffect(() => {
     // Chỉ fetch khi chưa có data
@@ -51,7 +83,11 @@ export default function ParentsPage() {
             onHealthStatusChange={setHealthFilter}
             onAddParent={addParent}
           />
-          <ParentTable parents={parents} isLoading={isLoading} error={error} />
+          <ParentTable
+            parents={displayParents}
+            isLoading={isLoading}
+            error={error}
+          />
         </CardContent>
       </Card>
     </div>

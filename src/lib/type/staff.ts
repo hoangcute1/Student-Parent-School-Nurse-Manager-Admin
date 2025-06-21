@@ -1,49 +1,50 @@
 import { StaffFormValues } from "@/app/cms/manage-staffs/_components/add-staff-dialog";
+import { User, UserProfile } from "./users";
 
-export interface Staff {
+interface Staff {
   _id: string;
-  user_id: string;
-  roleId: string;
-  name: string;
-  phone: string;
-  address: string;
-  email: string;
-  createdAt: string;
+  user: User;
+  profile: UserProfile;
 }
 
-export interface StaffResponse {
+interface StaffAccount extends User {}
+interface StaffProfile extends UserProfile {}
+interface StaffsTableRow {
+  data: StaffAccount[];
+  total: number;
+  page: number;
+  limit: number;
+}
+interface StaffStore {
+  staffs: Staff[];
+  isLoading: boolean;
+  error: string | null;
+  fetchStaffs: () => Promise<void>;
+  addStaff: (data: StaffFormValues) => Promise<void>;
+}
+
+interface GetAllStaffsResponse {
   data: Staff[];
   total: number;
   page: number;
   limit: number;
 }
 
-export interface StaffTableProps {
-  staffs: DisplayStaff[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface ApiStaff {
-  _id: string;
-  user_id: string;
-  name: string;
+interface UpdateStaffForm
+  extends Partial<
+    Omit<StaffAccount & StaffProfile, "_id" | "created_at" | "updated_at">
+  > {}
+interface UpdateStaffResponse {
+  message: string;
   email: string;
-  createdAt: string;
 }
-
-export interface DisplayStaff {
-  _id: string;
-  user_id: string;
-  email: string;
-  name: string;
-  roleId: string;
-}
-
-export interface StaffStore {
-  staff: DisplayStaff[];
-  isLoading: boolean;
-  error: string | null;
-  fetchStaff: () => Promise<void>;
-  createStaff: (data: StaffFormValues) => Promise<void>;
-}
+export type {
+  Staff,
+  StaffAccount,
+  StaffProfile,
+  StaffsTableRow,
+  StaffStore,
+  GetAllStaffsResponse,
+  UpdateStaffResponse,
+  UpdateStaffForm,
+};
