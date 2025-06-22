@@ -14,7 +14,7 @@ export class ParentStudentService {
   constructor(
     @InjectModel(ParentStudent.name)
     private parentStudentModel: Model<ParentStudentDocument>,
-    @Inject(forwardRef(() => StudentService))
+    @Inject(forwardRef(() => HealthRecordService))
     private healthRecordService: HealthRecordService,
     private parentService: ParentService,
   ) {}
@@ -25,6 +25,7 @@ export class ParentStudentService {
   }
 
   async findAll(): Promise<ParentStudent[]> {
+    this.healthRecordService.getHealthRecordsByStudentId;
     return this.parentStudentModel.find().populate('parent').populate('student').exec();
   }
 
@@ -40,21 +41,6 @@ export class ParentStudentService {
     }
 
     return parentStudent;
-  }
-
-  async findByUserId(userId: string): Promise<ParentStudent[]> {
-    const parentId = await this.parentService.findByUserId(userId);
-    return this.parentStudentModel
-      .find({ parent: parentId })
-      .populate({
-        path: 'student',
-        populate: {
-          path: 'class',
-          select: 'name',
-        },
-        select: 'studentId name birth gender created_at updated_at',
-      })
-      .exec();
   }
 
   async findByStudentId(studentId: string): Promise<ParentStudent[]> {
@@ -88,47 +74,36 @@ export class ParentStudentService {
   /**
    * Find all students for a parent including their health records
    */
-  async findStudentsWithHealthRecordsByParentId(parentId: string): Promise<any[]> {
-    // Find all parent-student relationships for this parent
+  async findByUserId(userId: string): Promise<any[]> {
+    const parent = (await this.parentService.findByUserId(userId)) as Parent;
+    if (!parent) {
+      throw new NotFoundException(`Parent with user ID "${userId}" not found`);
+    }
+    const parentId = (parent as any)._id.toString();
     const parentStudents = await this.parentStudentModel
       .find({ parent: parentId })
-      .populate({
-        path: 'student',
-        populate: {
-          path: 'class',
-          select: 'name grade',
-        },
-      })
+      .populate('student')
+      .populate('parent')
+      .lean() // <-- Add lean() to get plain JS objects
       .exec();
-
-    // If no relationships found, return empty array
     if (!parentStudents || parentStudents.length === 0) {
       return [];
     }
-
-    // For each student, fetch their health record
     const studentsWithHealthRecords = await Promise.all(
-      parentStudents.map(async (ps) => {
-        const student = ps.student as any; // Type assertion to avoid compilation errors
+      parentStudents.map(async (ps: any) => {
+        const student = ps.student;
+        const parentObj = ps.parent;
+        const healthRecord = await this.healthRecordService.getHealthRecordsByStudentId(
+          student._id.toString(),
+        );
 
-        // Fetch the health record for this student
-        const healthRecord = await this.healthRecordService.findByStudentId(student._id.toString());
-
-        // Return combined data
         return {
-          _id: student._id,
-          studentId: student.studentId,
-          firstName: student.firstName,
-          lastName: student.lastName,
-          dateOfBirth: student.dateOfBirth,
-          gender: student.gender,
-          address: student.address,
-          class: student.class,
+          student,
+          parent: parentObj,
           healthRecord: healthRecord || null,
         };
       }),
     );
-
     return studentsWithHealthRecords;
   }
 }

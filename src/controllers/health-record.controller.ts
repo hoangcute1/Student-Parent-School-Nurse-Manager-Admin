@@ -73,6 +73,19 @@ export class HealthRecordController {
     return this.healthRecordService.findById(id);
   }
 
+
+  @Get('/student/:studentId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get health record by Student ID',
+    description: 'Retrieves a health record by its ID.',
+  })
+  @ApiResponse({ status: 200, description: 'Health record retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Health record not found.' })
+  async getHealthRecordbyStudentId(@Param('studentId') studentId: string) {
+    return this.healthRecordService.getHealthRecordsByStudentId(studentId);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE)

@@ -62,6 +62,7 @@ export class MedicineDeliveryService {
     const data = await Promise.all(
       medicineDeliveryList.map(async (item) => {
         const { _id, parent, staff, ...rest } = item.toObject();
+
         const parentUserId = (item.parent as any).user.toString();
         const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)
           .name;
@@ -72,6 +73,7 @@ export class MedicineDeliveryService {
           id: item._id,
           parentName: parentName,
           staffName: staffName,
+        
           ...rest,
         };
       }),

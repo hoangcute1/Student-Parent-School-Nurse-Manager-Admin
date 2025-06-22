@@ -102,28 +102,6 @@ export class ParentStudentController {
     return this.parentStudentService.remove(id);
   }
 
-  @Get('parent/:parentId/students-with-health-records')
-  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE, Role.PARENT)
-  @ApiOperation({
-    summary: 'Get all students with health records for a parent',
-  })
-  @ApiParam({ name: 'parentId', description: 'Parent ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return all students with their health records for a parent.',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden. User does not have sufficient permissions.',
-  })
-  async findStudentsWithHealthRecordsByParentId(@Param('parentId') parentId: string, @Req() req) {
-    // For additional security, if user is a parent, verify they're only accessing their own data
-    if (req.user && req.user.role === Role.PARENT) {
-      // Get the parent record for the logged-in user
-      const parentIdFromToken = req.user.user;
-      // You can add additional verification here if needed
-    }
-    return this.parentStudentService.findStudentsWithHealthRecordsByParentId(parentId);
-  }
+
 
 }

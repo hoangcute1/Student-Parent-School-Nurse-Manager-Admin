@@ -226,30 +226,20 @@ export class HealthRecordService {
     };
   }
 
-  /**
-   * Find health records for a parent's children
-   * @param parentId The parent's user ID
-   * @returns An array of health records for the parent's children
-   */
-  async findHealthRecordsForParentChildren(parentId: string): Promise<any[]> {
+  async getHealthRecordsByStudentId(studentId: string): Promise<any> {
     try {
-      // First, find the parent by user ID
-      const parent = await this.parentService.findById(parentId);
-
-      if (!parent) {
-        throw new NotFoundException(`Parent with user ID "${parentId}" not found`);
+      const healthRecords = await this.healthRecordModel
+        .findOne({
+          student_id: studentId,
+        })
+        .exec();
+      if (!healthRecords) {
+        throw new NotFoundException(`Health records for student ID "${studentId}" not found`);
       }
-
-      // Find parent-student relationships for this parent
-      const studentsWithHealthRecords =
-        await this.parentStudentService.findStudentsWithHealthRecordsByParentId(
-          (parent as any)._id.toString(),
-        );
-
-      return studentsWithHealthRecords;
+      return this.formatHealthRecordResponse(healthRecords);
     } catch (error) {
-      console.error('Error in findHealthRecordsForParentChildren:', error);
-      throw error;
+      console.error(`Error fetching health records for student ID ${studentId}:`, error);
+      throw new NotFoundException(`Health records for student ID "${studentId}" not found`);
     }
   }
 }
