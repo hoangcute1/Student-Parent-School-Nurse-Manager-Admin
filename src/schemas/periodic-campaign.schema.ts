@@ -31,4 +31,5 @@ export class PeriodicCampaign extends Document {
   created_at: Date;
 }
 
-export const PeriodicCampaignSchema = SchemaFactory.createForClass(PeriodicCampaign);
+export const PeriodicCampaignSchema =
+  SchemaFactory.createForClass(PeriodicCampaign);

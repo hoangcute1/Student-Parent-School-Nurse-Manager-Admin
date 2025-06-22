@@ -5,8 +5,6 @@ export type MedicineDeliveryDocument = MedicineDelivery & Document;
 
 export enum MedicineDeliveryStatus {
   PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
@@ -37,11 +35,10 @@ export class MedicineDelivery extends Document {
 
   @Prop({ trim: true, required: false, default: null })
   note: string;
-
   @Prop({ required: true })
   reason: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: Date.now })
   sent_at: Date;
 
   @Prop({ required: true })
@@ -50,12 +47,23 @@ export class MedicineDelivery extends Document {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Student', required: true })
   student: MongooseSchema.Types.ObjectId;
 
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Parent', required: true })
+  parent: MongooseSchema.Types.ObjectId;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Staff', required: true })
   staff: MongooseSchema.Types.ObjectId;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Medicine', required: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Medicine',
+    required: true,
+  })
   medicine: MongooseSchema.Types.ObjectId;
+  @Prop({ default: Date.now })
+  created_at: Date;
+
+  @Prop({ default: Date.now })
+  updated_at: Date;
 }
 
-export const MedicineDeliverySchema =
-  SchemaFactory.createForClass(MedicineDelivery);
+export const MedicineDeliverySchema = SchemaFactory.createForClass(MedicineDelivery);

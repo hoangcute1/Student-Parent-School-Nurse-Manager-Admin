@@ -3,6 +3,8 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -23,7 +25,9 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     private profileService: ProfileService,
     private adminService: AdminService,
+    @Inject(forwardRef(() => StaffService))
     private staffService: StaffService,
+    @Inject(forwardRef(() => ParentService))
     private parentService: ParentService,
   ) {}
 
@@ -36,7 +40,6 @@ export class UserService {
     }[]
   > {
     const users = await this.userModel.find().exec();
-
     return users.map((user) => {
       return {
         _id: user._id,
@@ -78,10 +81,7 @@ export class UserService {
     return this.userModel.findOne({ refresh_token: refreshToken }).exec();
   }
 
-  async updateRefreshToken(
-    id: string,
-    refreshToken: string | null,
-  ): Promise<User | null> {
+  async updateRefreshToken(id: string, refreshToken: string | null): Promise<User | null> {
     return this.userModel
       .findByIdAndUpdate(
         id,
@@ -122,9 +122,6 @@ export class UserService {
 
   async getUserProfile(user_id: string) {
     const user = await this.findById(user_id);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${user} not found`);
-    }
 
     const profile = await this.profileService.findByuser(user_id);
     return { user, profile };
@@ -291,8 +288,7 @@ export class UserService {
    * Create a new staff user
    * @param createUserStaffDto DTO containing staff user data
    * @returns The created staff user with staff document
-   */
-  async createStaff(createUserStaffDto: CreateUserStaffDto): Promise<any> {
+   */ async createStaff(createUserStaffDto: CreateUserStaffDto): Promise<any> {
     // First create the user
     const createdUser = await this.create({
       email: createUserStaffDto.email,
@@ -302,7 +298,6 @@ export class UserService {
     // Then create the staff record with the user's ID
     const createdStaff = await this.staffService.create({
       user: createdUser['_id'],
-      position: createUserStaffDto.position,
     });
 
     return {

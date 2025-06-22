@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -22,7 +23,6 @@ export class StudentService {
     @InjectModel(Student.name) private studentModel: Model<Student>,
     private parentService: ParentService,
   ) {}
-
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
     // Check if student with this ID already exists
     const existingStudent = await this.studentModel
@@ -44,10 +44,29 @@ export class StudentService {
           `Phụ huynh với ID "${createStudentDto.parentId}" không tồn tại`,
         );
       }
+    } // Create student data with mapping parentId to parent field
+    const studentData = {
+      ...createStudentDto,
+      parent: createStudentDto.parentId, // Map parentId to parent field
+      class: createStudentDto.classId, // Map classId to class field
+    };
+
+    const createdStudent = new this.studentModel(studentData);
+    const savedStudent = await createdStudent.save();
+
+    // Populate parent and class before returning
+    const populatedStudent = await this.studentModel
+      .findById(savedStudent._id)
+      .populate('parent')
+      .populate('class');
+
+    if (!populatedStudent) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve created student',
+      );
     }
 
-    const createdStudent = new this.studentModel(createStudentDto);
-    return createdStudent.save();
+    return populatedStudent;
   }
   async batchCreate(createStudentDtos: CreateStudentDto[]): Promise<{
     success: Student[];
@@ -84,12 +103,22 @@ export class StudentService {
             reason: `Mã sinh viên ${dto.studentId} đã tồn tại`,
           });
           continue;
-        }
-
-        // Create new student
-        const createdStudent = new this.studentModel(dto);
+        } // Create new student with parent mapping
+        const studentData = {
+          ...dto,
+          parent: dto.parentId, // Map parentId to parent field
+          class: dto.classId, // Map classId to class field
+        };
+        const createdStudent = new this.studentModel(studentData);
         const savedStudent = await createdStudent.save();
-        results.success.push(savedStudent);
+
+        // Populate and add to results
+        const populatedStudent = await this.studentModel
+          .findById(savedStudent._id)
+          .populate('parent')
+          .populate('class');
+
+        results.success.push(populatedStudent || savedStudent);
 
         // Add to set to catch duplicates within the batch
         existingStudentIds.add(dto.studentId);
@@ -211,14 +240,14 @@ export class StudentService {
     } else {
       // Default sort by createdAt if no sort is specified
       sort.createdAt = -1;
-    }
-
-    // Execute query with pagination
+    } // Execute query with pagination
     const data = await this.studentModel
       .find(query)
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .populate('parent')
+      .populate('class')
       .exec();
 
     // Get total count for pagination metadata
@@ -231,17 +260,23 @@ export class StudentService {
       limit,
     };
   }
-
   async findById(id: string): Promise<Student> {
-    const student = await this.studentModel.findById(id).exec();
+    const student = await this.studentModel
+      .findById(id)
+      .populate('parent')
+      .populate('class')
+      .exec();
     if (!student) {
       throw new NotFoundException(`Sinh viên với ID "${id}" không tìm thấy`);
     }
     return student;
   }
-
   async findByStudentId(studentId: string): Promise<Student> {
-    const student = await this.studentModel.findOne({ studentId }).exec();
+    const student = await this.studentModel
+      .findOne({ studentId })
+      .populate('parent')
+      .populate('class')
+      .exec();
     if (!student) {
       throw new NotFoundException(
         `Sinh viên với mã "${studentId}" không tìm thấy`,
@@ -266,16 +301,17 @@ export class StudentService {
       if (existingStudent) {
         throw new ConflictException('Mã sinh viên đã tồn tại');
       }
-    }
-
-    // Add updated date
+    } // Add updated date and map parentId to parent field
     const updatedData = {
       ...updateStudentDto,
+      parent: updateStudentDto.parentId, // Map parentId to parent field
+      class: updateStudentDto.classId, // Map classId to class field
       updatedAt: new Date(),
     };
-
     const updatedStudent = await this.studentModel
       .findByIdAndUpdate(id, updatedData, { new: true })
+      .populate('parent')
+      .populate('class')
       .exec();
 
     if (!updatedStudent) {
@@ -364,16 +400,17 @@ export class StudentService {
             });
             continue;
           }
-        }
-
-        // Add updated date
+        } // Add updated date and map fields
         const updatedData = {
           ...update.data,
+          parent: update.data.parentId, // Map parentId to parent field
+          class: update.data.classId, // Map classId to class field
           updatedAt: new Date(),
         };
-
         const updatedStudent = await this.studentModel
           .findByIdAndUpdate(update.id, updatedData, { new: true })
+          .populate('parent')
+          .populate('class')
           .exec();
 
         if (!updatedStudent) {
@@ -401,12 +438,19 @@ export class StudentService {
   async remove(id: string): Promise<Student> {
     return this.delete(id);
   }
-
   async findByParentId(parentId: string): Promise<Student[]> {
-    return this.studentModel.find({ parentId }).exec();
+    return this.studentModel
+      .find({ parent: parentId })
+      .populate('parent')
+      .populate('class')
+      .exec();
   }
 
   async findByClassId(classId: string): Promise<Student[]> {
-    return this.studentModel.find({ classId }).exec();
+    return this.studentModel
+      .find({ class: classId })
+      .populate('parent')
+      .populate('class')
+      .exec();
   }
 }

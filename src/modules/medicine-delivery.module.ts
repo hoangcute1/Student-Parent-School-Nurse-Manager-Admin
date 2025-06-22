@@ -6,12 +6,19 @@ import {
   MedicineDelivery,
   MedicineDeliverySchema,
 } from '@/schemas/medicine-delivery.schema';
+import { ParentModule } from './parent.module';
+import { Staff } from '@/schemas/staff.schema';
+import { StaffModule } from './staff.module';
+import { UserModule } from './user.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: MedicineDelivery.name, schema: MedicineDeliverySchema },
     ]),
+    ParentModule,
+    StaffModule,
+    UserModule
   ],
   controllers: [MedicineDeliveryController],
   providers: [MedicineDeliveryService],

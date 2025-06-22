@@ -42,10 +42,15 @@ export class CreateStudentDto {
   @IsString({ message: 'Khối lớp phải là chuỗi' })
   grade?: string;
 
-  @ApiProperty({ example: '10A1', description: 'Lớp' })
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109cb',
+    description: 'ID của lớp (MongoDB ObjectID)',
+    required: false,
+  })
   @IsOptional()
-  @IsString({ message: 'Lớp phải là chuỗi' })
-  class?: string;
+  @IsMongoId({ message: 'ID lớp không hợp lệ' })
+  classId?: string;
+
   @ApiProperty({
     example: '60d0fe4f5311236168a109ca',
     description: 'ID của phụ huynh (MongoDB ObjectID)',

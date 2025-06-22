@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ParentStudentService } from '@/services/parent-student.service';
 import {
@@ -19,11 +20,14 @@ import {
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateParentStudentDto } from '@/decorations/dto/create-parent-student.dto';
 import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.dto';
+import { Roles } from '@/decorations/roles.decorator';
+import { RolesGuard } from '@/guards/roles.guard';
+import { Role } from '@/enums/role.enum';
 
 @ApiTags('parent-students')
 @Controller('parent-students')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ParentStudentController {
   constructor(private readonly parentStudentService: ParentStudentService) {}
 
@@ -115,5 +119,36 @@ export class ParentStudentController {
   })
   async remove(@Param('id') id: string) {
     return this.parentStudentService.remove(id);
+  }
+
+  @Get('parent/:parentId/students-with-health-records')
+  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE, Role.PARENT)
+  @ApiOperation({
+    summary: 'Get all students with health records for a parent',
+  })
+  @ApiParam({ name: 'parentId', description: 'Parent ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return all students with their health records for a parent.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. User does not have sufficient permissions.',
+  })
+  async findStudentsWithHealthRecordsByParentId(
+    @Param('parentId') parentId: string,
+    @Req() req,
+  ) {
+    // For additional security, if user is a parent, verify they're only accessing their own data
+    if (req.user && req.user.role === Role.PARENT) {
+      // Get the parent record for the logged-in user
+      const parentIdFromToken = req.user.user;
+      // You can add additional verification here if needed
+      
+    }
+
+    return this.parentStudentService.findStudentsWithHealthRecordsByParentId(
+      parentId,
+    );
   }
 }

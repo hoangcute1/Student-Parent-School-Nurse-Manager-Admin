@@ -53,13 +53,6 @@ export class StaffController {
   async findOne(@Param('id') id: string) {
     return this.staffService.findById(id);
   }
-  @Post()
-  @ApiOperation({ summary: 'Tạo nhân viên mới' })
-  @ApiResponse({ status: 201, description: 'Nhân viên đã được tạo.' })
-  @ApiResponse({ status: 403, description: 'Không có quyền tạo nhân viên.' })
-  async create(@Body() createStaffDto: CreateStaffDto) {
-    return this.staffService.create(createStaffDto);
-  }
 
   @Post('/create-with-user')
   @ApiOperation({ summary: 'Tạo mới user nhân viên' })

@@ -21,6 +21,43 @@ import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateStudentDto } from '@/decorations/dto/create-student.dto';
 import { UpdateStudentDto } from '@/decorations/dto/update-student.dto';
 
+// Helper function to format student data
+const formatStudentResponse = (student: any) => {
+  if (!student) return null;
+
+  const result: any = {
+    _id: student._id,
+    studentId: student.studentId,
+    name: student.name,
+    birth: student.birth,
+    gender: student.gender,
+    created_at: student.created_at,
+    updated_at: student.updated_at,
+  };
+
+  // Format class if available
+  if (student.class && typeof student.class === 'object') {
+    result.class = {
+      _id: student.class._id,
+      name: student.class.name,
+      grade: student.class.grade,
+      created_at: student.class.created_at,
+      updated_at: student.class.updated_at,
+    };
+  }
+
+  // Format parent if available
+  if (student.parent && typeof student.parent === 'object') {
+    result.parent = {
+      _id: student.parent._id,
+      user: student.parent.user,
+      __v: student.parent.__v,
+    };
+  }
+
+  return result;
+};
+
 @ApiTags('students')
 @Controller('students')
 @ApiBearerAuth()
@@ -36,7 +73,17 @@ export class StudentController {
     description: 'Không có quyền thực hiện thao tác này.',
   })
   async findAll() {
-    return this.studentService.findAll();
+    const result = await this.studentService.findAll();
+
+    // Format the student data
+    const formattedData = result.data.map((student) =>
+      formatStudentResponse(student),
+    );
+
+    return {
+      ...result,
+      data: formattedData,
+    };
   }
 
   @Get(':id')
@@ -45,14 +92,16 @@ export class StudentController {
   @ApiResponse({ status: 200, description: 'Thông tin sinh viên.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
   async findOne(@Param('id') id: string) {
-    return this.studentService.findById(id);
+    const student = await this.studentService.findById(id);
+    return formatStudentResponse(student);
   }
   @Post()
   @ApiOperation({ summary: 'Tạo sinh viên mới' })
   @ApiResponse({ status: 201, description: 'Sinh viên đã được tạo.' })
   @ApiResponse({ status: 403, description: 'Không có quyền tạo sinh viên.' })
   async create(@Body() createStudentDto: CreateStudentDto) {
-    return this.studentService.create(createStudentDto);
+    const student = await this.studentService.create(createStudentDto);
+    return formatStudentResponse(student);
   }
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin sinh viên' })
@@ -66,7 +115,8 @@ export class StudentController {
     @Param('id') id: string,
     @Body() updateStudentDto: UpdateStudentDto,
   ) {
-    return this.studentService.update(id, updateStudentDto);
+    const student = await this.studentService.update(id, updateStudentDto);
+    return formatStudentResponse(student);
   }
 
   @Delete(':id')
@@ -76,7 +126,8 @@ export class StudentController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
   @ApiResponse({ status: 403, description: 'Không có quyền xóa sinh viên.' })
   async remove(@Param('id') id: string) {
-    return this.studentService.remove(id);
+    const student = await this.studentService.remove(id);
+    return formatStudentResponse(student);
   }
 
   @Get('parent/:parentId')
@@ -87,7 +138,8 @@ export class StudentController {
     description: 'Danh sách học sinh theo parentId.',
   })
   async findByParent(@Param('parentId') parentId: string) {
-    return this.studentService.findByParentId(parentId);
+    const students = await this.studentService.findByParentId(parentId);
+    return students.map((student) => formatStudentResponse(student));
   }
 
   @Get('class/:classId')
@@ -95,6 +147,7 @@ export class StudentController {
   @ApiParam({ name: 'classId', description: 'ID của lớp học' })
   @ApiResponse({ status: 200, description: 'Danh sách học sinh theo classId.' })
   async findByClass(@Param('classId') classId: string) {
-    return this.studentService.findByClassId(classId);
+    const students = await this.studentService.findByClassId(classId);
+    return students.map((student) => formatStudentResponse(student));
   }
 }
