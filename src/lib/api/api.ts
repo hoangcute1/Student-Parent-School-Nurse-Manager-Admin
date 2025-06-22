@@ -2,7 +2,7 @@
 
 import { API_URL } from "../env";
 import { UserProfile } from "../type/users";
-import { getAuthToken } from "./auth";
+import { getAuthToken } from "./auth/token";
 
 // Generic fetch function with error handling
 export async function fetchData<T>(

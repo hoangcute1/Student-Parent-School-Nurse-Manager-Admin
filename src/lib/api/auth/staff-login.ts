@@ -1,7 +1,6 @@
-import { useAuthStore } from "@/stores/auth-store";
-import { AuthResponse, LoginRequestCredentials } from "@/lib/type/auth";
+import { LoginRequestCredentials, TokenResponse } from "@/lib/type/auth";
 import { fetchData } from "../api";
-import { setAuthToken } from "./token";
+import { handleTokenLoginSuccess, parseJwt } from "./token";
 
 const requestStaffLoginOTP = (
   credentials: LoginRequestCredentials
@@ -12,9 +11,13 @@ const requestStaffLoginOTP = (
   });
 };
 
-const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
+const loginStaffOTP = async (
+  email: string,
+  otp: string
+): Promise<{ success: boolean; role: string | null }> => {
   try {
-    const response = await fetchData<AuthResponse>(`/auth/login-staff/verify`, {
+    // API mới chỉ trả về token
+    const data = await fetchData<TokenResponse>(`/auth/login-staff/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,15 +25,20 @@ const loginStaffOTP = async (email: string, otp: string): Promise<boolean> => {
       body: JSON.stringify({ email, otp }),
     });
 
-    if (!response) {
+    if (!data || !data.token) {
       throw new Error("OTP verification failed");
     }
-    setAuthToken(response.token);
-    useAuthStore.getState().updateUserInfo(response.user, response.profile);
-    return true;
+
+    // Lưu token và khởi tạo user state
+    const result = await handleTokenLoginSuccess(data.token);
+    console.log(
+      "Token saved and user state initialized after OTP verification"
+    );
+
+    return result;
   } catch (error) {
     console.error("OTP verification error:", error);
-    return false;
+    return { success: false, role: null };
   }
 };
 

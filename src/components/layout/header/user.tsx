@@ -15,11 +15,36 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Notification from "./noti";
 import { useAuthStore } from "@/stores/auth-store";
-import { logout } from "@/lib/api";
+import { logout, getAuthToken } from "@/lib/api/auth/token";
+import { useEffect, useState } from "react";
 
 export default function User() {
   const router = useRouter();
   const { user, profile, isAuthenticated, role, clearAuth } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Kiểm tra nếu có token trong localStorage nhưng chưa đăng nhập
+  useEffect(() => {
+    const token = getAuthToken();
+    if (token && !isAuthenticated) {
+      setIsLoading(true);
+      // Đợi một khoảng thời gian ngắn để authInit hoàn thành
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated]);
+
+  // Hiển thị trạng thái loading khi đang xác thực
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+      </div>
+    );
+  }
+
   // Nếu không đăng nhập, hiển thị nút đăng nhập
   if (!isAuthenticated || !user) {
     return (
@@ -64,7 +89,9 @@ export default function User() {
                   ? "Quản trị viên"
                   : role === "staff"
                   ? "Nhân viên y tế"
-                  : "Phụ huynh"}
+                  : role === "parent"
+                  ? "Phụ huynh"
+                  : null}
               </span>
             </div>
           </Button>

@@ -86,21 +86,23 @@ export function StaffLoginForm() {
     try {
       console.log("Verifying OTP in staff login:", otp);
       console.log("Using email:", formData.email);
-      console.log("Using password:", formData.password);
+
+      // Hiển thị loading trước khi xác thực
+      toast({
+        title: "Đang xác thực",
+        description: "Vui lòng đợi trong giây lát...",
+      });
 
       // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const success = await loginStaffOTP(formData.email, otp);
+      const { success } = await loginStaffOTP(formData.email, otp);
 
       if (success) {
         toast({
           title: "Đăng nhập thành công",
           description: "Đang chuyển hướng...",
         });
-
+        router.push("/cms");
         setShowOTP(false);
-
-        // Redirect to home page
-        router.push("/");
       } else {
         throw new Error("Xác thực OTP thất bại");
       }
@@ -134,11 +136,19 @@ export function StaffLoginForm() {
 
     setIsLoading(true);
     try {
+      // Hiển thị thông tin chi tiết hơn để debug
+      console.log("Đang yêu cầu OTP cho staff login với dữ liệu:", {
+        email: formData.email,
+        passwordProvided: formData.password ? "Yes" : "No",
+        passwordLength: formData.password.length,
+      });
+
       // First step: request OTP
-      console.log("Requesting OTP with data:", { ...formData });
-      await requestStaffLoginOTP({
+      const result = await requestStaffLoginOTP({
         ...formData,
       });
+      console.log("Kết quả yêu cầu OTP:", result);
+
       setShowOTP(true);
       toast({
         title: "Thành công",
@@ -149,10 +159,16 @@ export function StaffLoginForm() {
       let message = "Có lỗi xảy ra khi đăng nhập";
 
       if (error instanceof Error) {
+        console.error("Chi tiết lỗi:", error.message);
         if (error.message.includes("401")) {
           message = "Email hoặc mật khẩu không chính xác";
         } else if (error.message.includes("403")) {
           message = "Tài khoản của bạn không có quyền truy cập";
+        } else if (error.message.includes("404")) {
+          message = "Không tìm thấy tài khoản với email này";
+        } else if (error.message.includes("network")) {
+          message =
+            "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn";
         }
       }
 
@@ -166,14 +182,11 @@ export function StaffLoginForm() {
       setIsLoading(false);
     }
   };
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Đăng nhập dành cho phụ huynh</CardTitle>
-        <CardDescription>
-          Theo dõi sức khỏe và lịch tiêm chủng của con bạn
-        </CardDescription>
+        <CardTitle>Đăng nhập dành cho nhân viên y tế</CardTitle>
+        <CardDescription>Quản lý và theo dõi sức khỏe học sinh</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

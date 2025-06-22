@@ -54,6 +54,11 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // Khi dữ liệu từ useAuthStore đã được nạp, đặt loading thành false
+    setLoading(false);
+  }, [user, profile]);
+
   if (loading) {
     return <div className="flex justify-center p-8">Đang tải thông tin...</div>;
   }

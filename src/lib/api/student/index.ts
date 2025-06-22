@@ -1,22 +1,76 @@
-import { HealthRecord, Student, StudentResponse } from "@/lib/type/students";
+import { Student, StudentResponse } from "@/lib/type/students";
 import { fetchData } from "../api";
 
-export const getAllStudents = (
-  page: number = 1,
-  pageSize: number = 10
-): Promise<StudentResponse> => {
-  return fetchData<StudentResponse>(
-    `/students?page=${page}&pageSize=${pageSize}`
-  );
+
+/**
+ * Get all students for the current authenticated parent
+ */
+export const getStudentsForCurrentParent = async (): Promise<Student[]> => {
+  try {
+    const response = await fetchData<StudentResponse>(`/students/me`);
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching students for current parent:", error);
+    throw error;
+  }
 };
 
-export const getStudentById = (id: string): Promise<Student> => {
-  return fetchData<Student>(`/children/${id}`);
+/**
+ * Get all students for a specific parent ID
+ */
+export const getStudentsByParentId = async (
+  parentId: string
+): Promise<Student[]> => {
+  try {
+    const response = await fetchData<StudentResponse>(
+      `/students/parent/${parentId}`
+    );
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error fetching students for parent ${parentId}:`, error);
+    throw error;
+  }
 };
 
-// Get health record by child ID
-export const getHealthRecordByChildId = (
-  childId: string
-): Promise<HealthRecord> => {
-  return fetchData<HealthRecord>(`/health-records/${childId}`);
+/**
+ * Get a student by ID
+ */
+export const getStudentById = async (id: string): Promise<Student> => {
+  try {
+    return await fetchData<Student>(`/students/${id}`);
+  } catch (error) {
+    console.error(`Error fetching student with ID ${id}:`, error);
+    throw error;
+  }
 };
+
+/**
+ * Get all students
+ */
+export const getAllStudents = async (): Promise<Student[]> => {
+  try {
+    const response = await fetchData<StudentResponse>(`/students`);
+    return response.data || [];
+  } catch (error) {
+    console.error("Error fetching all students:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get students by class ID
+ */
+export const getStudentsByClass = async (
+  classId: string
+): Promise<Student[]> => {
+  try {
+    const response = await fetchData<StudentResponse>(
+      `/students/class/${classId}`
+    );
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error fetching students for class ${classId}:`, error);
+    throw error;
+  }
+};
+

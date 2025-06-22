@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Pill,
   Plus,
@@ -47,6 +47,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
+import { set } from "react-hook-form";
+import { MedicineDelivery } from "@/lib/type/medicine-delivery";
 
 // Define types for our medicine data
 interface MedicineRequest {
@@ -100,7 +103,6 @@ interface InventoryItem {
 export default function ParentMedicine() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [isAddMedicineOpen, setIsAddMedicineOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isInventoryDetailOpen, setIsInventoryDetailOpen] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState<
@@ -108,22 +110,43 @@ export default function ParentMedicine() {
   >(null);
   const [selectedInventory, setSelectedInventory] =
     useState<InventoryItem | null>(null);
+  const {
+    medicineDeliveries,
+    fetchMedicineDeliveries,
+    isLoading,
+    error,
+    setIsLoading,
+    setError,
+  } = useMedicineDeliveryStore();
 
-  const handleViewDetail = (medicine: MedicineRequest | ApprovedMedicine) => {
-    setSelectedMedicine(medicine);
-    setIsDetailDialogOpen(true);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        await fetchMedicineDeliveries();
+      } catch (err) {
+        console.error("Failed to fetch medicine deliveries:", err);
+        setError("Failed to fetch medicine deliveries");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [fetchMedicineDeliveries, setIsLoading, setError]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <span className="text-teal-600 text-lg font-semibold">
+          Đang tải dữ liệu...
+        </span>
+      </div>
+    );
+  }
 
   const handleViewInventoryDetail = (inventory: InventoryItem) => {
     setSelectedInventory(inventory);
     setIsInventoryDetailOpen(true);
-  };
-
-  const handleSubmitMedicine = () => {
-    // Xử lý gửi thuốc ở đây
-    setIsAddMedicineOpen(false);
-    // Hiển thị thông báo thành công
-    alert("Đã gửi yêu cầu thuốc thành công!");
   };
 
   return (
@@ -230,139 +253,6 @@ export default function ParentMedicine() {
                     Danh sách yêu cầu gửi thuốc cần được xử lý
                   </CardDescription>
                 </div>
-                <Dialog
-                  open={isAddMedicineOpen}
-                  onOpenChange={setIsAddMedicineOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Thêm yêu cầu thuốc
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>Yêu cầu gửi thuốc cho học sinh</DialogTitle>
-                      <DialogDescription>
-                        Điền thông tin chi tiết về thuốc cần gửi cho con em
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="student">Học sinh</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn học sinh" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="student1">
-                              Nguyễn Văn An - Lớp 1A
-                            </SelectItem>
-                            <SelectItem value="student2">
-                              Trần Thị Bình - Lớp 2B
-                            </SelectItem>
-                            <SelectItem value="student3">
-                              Lê Hoàng Cường - Lớp 3A
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="medicineName">Tên thuốc</Label>
-                          <Input
-                            id="medicineName"
-                            placeholder="VD: Paracetamol 500mg"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="quantity">Số lượng</Label>
-                          <Input
-                            id="quantity"
-                            type="number"
-                            placeholder="VD: 10"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="dosage">Liều dùng</Label>
-                          <Input id="dosage" placeholder="VD: 1 viên/lần" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="frequency">Tần suất</Label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Chọn tần suất" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="once">1 lần/ngày</SelectItem>
-                              <SelectItem value="twice">2 lần/ngày</SelectItem>
-                              <SelectItem value="three">3 lần/ngày</SelectItem>
-                              <SelectItem value="asneeded">
-                                Khi cần thiết
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="startDate">Ngày bắt đầu</Label>
-                          <Input id="startDate" type="date" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="endDate">Ngày kết thúc</Label>
-                          <Input id="endDate" type="date" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="reason">Lý do sử dụng</Label>
-                        <Textarea
-                          id="reason"
-                          placeholder="VD: Điều trị cảm lạnh, sốt..."
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="instructions">Hướng dẫn đặc biệt</Label>
-                        <Textarea
-                          id="instructions"
-                          placeholder="VD: Uống sau ăn, không uống khi đói..."
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="parentContact">
-                          Số điện thoại liên hệ
-                        </Label>
-                        <Input
-                          id="parentContact"
-                          placeholder="Số điện thoại phụ huynh"
-                        />
-                      </div>
-
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsAddMedicineOpen(false)}
-                        >
-                          Hủy
-                        </Button>
-                        <Button
-                          className="bg-teal-600 hover:bg-teal-700"
-                          onClick={handleSubmitMedicine}
-                        >
-                          Gửi yêu cầu
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
               </div>
             </CardHeader>
             <CardContent>
@@ -394,7 +284,7 @@ export default function ParentMedicine() {
               </div>
 
               <div className="space-y-4">
-                {medicineRequests.map((request, index) => (
+                {medicineDeliveries.map((request, index) => (
                   <div
                     key={index}
                     className="p-4 rounded-lg border border-teal-100 hover:bg-teal-50 transition-colors"
@@ -406,23 +296,22 @@ export default function ParentMedicine() {
                         </div>
                         <div>
                           <h4 className="font-medium text-teal-800">
-                            {request.studentName}
+                            {request.student.name || "N/A"}
                           </h4>
                           <p className="text-sm text-teal-600">
-                            {request.class} • {request.parentName}
+                            {request.student.class?.name || "N/A"} •{" "}
+                            {request.parentName || "N/A"}
                           </p>
                         </div>
                       </div>
                       <Badge
                         variant={
-                          request.status === "Chờ xử lý"
-                            ? "secondary"
-                            : "default"
+                          request.status === "pending" ? "secondary" : "default"
                         }
                         className={
-                          request.status === "Chờ xử lý"
+                          request.status === "pending"
                             ? "bg-yellow-100 text-yellow-800"
-                            : request.status === "Đã duyệt"
+                            : request.status === "completed"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }
@@ -434,21 +323,30 @@ export default function ParentMedicine() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                       <div>
                         <p className="text-sm">
-                          <strong>Thuốc:</strong> {request.medicineName}
+                          <strong>Thuốc:</strong> {request.name}
                         </p>
                         <p className="text-sm">
-                          <strong>Số lượng:</strong> {request.quantity}
+                          <strong>Số lượng:</strong> {request.total}
                         </p>
                         <p className="text-sm">
-                          <strong>Liều dùng:</strong> {request.dosage}
+                          <strong>Liều dùng:</strong> {request.per_dose}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm">
-                          <strong>Tần suất:</strong> {request.frequency}
+                          <strong>Tần suất:</strong> {request.per_day}
                         </p>
                         <p className="text-sm">
-                          <strong>Thời gian:</strong> {request.duration}
+                          <strong>Thời gian:</strong>{" "}
+                          {request.date
+                            ? new Date(request.date).toLocaleDateString("vi-VN")
+                            : "không"}
+                          {" - "}
+                          {request.end_at
+                            ? new Date(request.end_at).toLocaleDateString(
+                                "vi-VN"
+                              )
+                            : "không"}
                         </p>
                         <p className="text-sm">
                           <strong>Lý do:</strong> {request.reason}
@@ -456,18 +354,23 @@ export default function ParentMedicine() {
                       </div>
                     </div>
 
-                    {request.instructions && (
+                    {request.note && (
                       <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-200">
                         <p className="text-sm text-blue-800">
-                          <strong>Hướng dẫn:</strong> {request.instructions}
+                          <strong>Hướng dẫn:</strong> {request.note}
                         </p>
                       </div>
                     )}
 
                     <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>Gửi lúc: {request.submittedAt}</span>
+                      <span>
+                        Gửi lúc:{" "}
+                        {request.created_at instanceof Date
+                          ? request.created_at.toLocaleString()
+                          : "không xác định"}
+                      </span>
                       <div className="flex gap-2">
-                        {request.status === "Chờ xử lý" && (
+                        {request.status === "pending" && (
                           <>
                             <Button
                               size="sm"
@@ -484,11 +387,7 @@ export default function ParentMedicine() {
                             </Button>
                           </>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleViewDetail(request)}
-                        >
+                        <Button size="sm" variant="outline">
                           Chi tiết
                         </Button>
                       </div>
@@ -561,11 +460,7 @@ export default function ParentMedicine() {
                             <Button variant="ghost" size="sm">
                               Cấp phát
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetail(medicine)}
-                            >
+                            <Button variant="ghost" size="sm">
                               Chi tiết
                             </Button>
                           </div>
@@ -1000,7 +895,6 @@ export default function ParentMedicine() {
                     className="bg-teal-600 hover:bg-teal-700"
                     onClick={() => {
                       setIsInventoryDetailOpen(false);
-                      setIsAddMedicineOpen(true);
                     }}
                   >
                     Thêm thuốc mới

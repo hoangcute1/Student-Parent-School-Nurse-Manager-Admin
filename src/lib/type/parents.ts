@@ -4,6 +4,7 @@ import { User, UserProfile } from "./users";
 interface Parent {
   _id: string;
   user: User;
+  profile: UserProfile;
 }
 
 interface ParentAccount extends User {}

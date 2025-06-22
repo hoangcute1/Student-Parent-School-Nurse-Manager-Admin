@@ -13,7 +13,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
-  const { user } = useAuthStore();
+  const { user, role } = useAuthStore();
 
   return (
     <aside
@@ -39,9 +39,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               variant="outline"
               className="bg-blue-100 text-blue-700 text-xs mt-1"
             >
-              {" "}
               <Shield className="mr-1 h-3 w-3" />
-              {user?.role === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
+              {role === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
             </Badge>
           </div>
         </Link>
@@ -59,8 +58,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           </div>
         </div>{" "}
         <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
-          {/* Admin navigation links */}
-          {user?.role === "admin" && (
+          {role === "admin" && (
             <>
               <div className="text-xs font-medium text-blue-500 uppercase tracking-wider mb-2 mt-2">
                 Quản lý hệ thống

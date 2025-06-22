@@ -16,7 +16,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, profile, setUser, setProfile } = useAuthStore();
+  const { user, profile } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Save sidebar state to localStorage when it changes

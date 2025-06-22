@@ -1,15 +1,32 @@
+import { Parent } from "@/lib/type/parents";
 import { create } from "zustand";
 import { getAllParents, createParent } from "@/lib/api/parent";
-import type { ParentStore } from "../lib/type/parents";
+import type { ParentStore } from "@/lib/type/parents";
 import type { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
 
-const mapToDisplayParent = (apiParent: ApiParent): DisplayParent => ({
-  name: apiParent.name,
-  phone: apiParent.phone || "N/A",
-  address: apiParent.address || "N/A",
-  email: apiParent.email || "N/A",
-  createdAt: new Date(apiParent.createdAt).toLocaleDateString("vi-VN"),
-});
+// Define DisplayParent for the UI
+interface DisplayParent {
+  name: string;
+  phone: string;
+  address: string;
+  email: string;
+  createdAt: string;
+}
+
+const mapToDisplayParent = (parent: Parent): DisplayParent => {
+  const profile = parent.profile || {};
+  const user = parent.user || {};
+
+  return {
+    name: profile?.name || "N/A",
+    phone: profile?.phone || "N/A",
+    address: profile?.address || "N/A",
+    email: user?.email || "N/A",
+    createdAt: user?.created_at
+      ? new Date(user.created_at).toLocaleDateString("vi-VN")
+      : "N/A",
+  };
+};
 
 export const useParentStore = create<ParentStore>((set) => ({
   parents: [],
@@ -22,12 +39,11 @@ export const useParentStore = create<ParentStore>((set) => ({
       const response = await getAllParents();
       console.log("Parents response:", response);
 
-      // Kiểm tra nếu response là array thì dùng luôn, không thì check response.data
-      const parentsList = Array.isArray(response)
-        ? response
-        : response?.data || [];
+      // Process the response into an array
+      const parentsList = Array.isArray(response) ? response : [];
+
       set({
-        parents: parentsList.map(mapToDisplayParent),
+        parents: parentsList,
         error: null,
       });
     } catch (err: any) {
@@ -43,8 +59,10 @@ export const useParentStore = create<ParentStore>((set) => ({
     try {
       set({ isLoading: true, error: null });
       const newParent = await createParent(data);
+
+      // Update the store with the new parent
       set((state) => ({
-        parents: [...state.parents, mapToDisplayParent(newParent)],
+        parents: [...state.parents, newParent],
       }));
     } catch (err: any) {
       set({ error: err.message });

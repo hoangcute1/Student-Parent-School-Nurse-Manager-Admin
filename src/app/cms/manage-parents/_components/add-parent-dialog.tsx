@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
+  DialogFooter, 
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -23,7 +23,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { User as AppUser } from "@/lib/type/types";
+import { useToast } from "@/hooks/use-toast";
+import type { User as AppUser } from "@/lib/type/users";
 
 const parentFormSchema = z.object({
   name: z.string().min(1, { message: "Họ và tên không được để trống" }),
@@ -34,13 +35,19 @@ const parentFormSchema = z.object({
 
 export type ParentFormValues = z.infer<typeof parentFormSchema>;
 
+interface AuthUser {
+  email: string;
+  role: string;
+}
+
 interface AddParentDialogProps {
   onSubmit: (data: ParentFormValues) => Promise<void>;
 }
 
 export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<AppUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Get user data from localStorage
@@ -71,22 +78,32 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
       await onSubmit(data);
       setOpen(false);
       form.reset();
+      toast({
+        title: "Thành công",
+        description: "Đã thêm phụ huynh mới vào hệ thống",
+        variant: "default",
+      });
     } catch (err: any) {
       console.error("Failed to submit form:", err);
       // Set form error
       form.setError("root", {
         type: "serverError",
-        message: err.message || "Failed to create student",
+        message: err.message || "Không thể thêm phụ huynh, vui lòng thử lại",
+      });
+      toast({
+        title: "Lỗi",
+        description:
+          err.message || "Không thể thêm phụ huynh, vui lòng thử lại",
+        variant: "destructive",
       });
     }
   };
-
   return (
-    user?.userType == "admin" && (
+    user?.role === "admin" && (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="ml-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Thêm phụ huynh
           </Button>
         </DialogTrigger>
@@ -99,6 +116,11 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
               onSubmit={form.handleSubmit(handleSubmit)}
               className="space-y-4"
             >
+              {form.formState.errors.root && (
+                <div className="bg-red-50 p-3 rounded-md text-red-600 text-sm">
+                  {form.formState.errors.root.message}
+                </div>
+              )}
               <FormField
                 control={form.control}
                 name="name"
@@ -145,14 +167,20 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="" {...field} />
+                      <Input placeholder="example@gmail.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <DialogFooter>
-                <Button type="submit">Lưu</Button>
+                <Button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? "Đang lưu..." : "Lưu"}
+                </Button>
               </DialogFooter>
             </form>
           </Form>

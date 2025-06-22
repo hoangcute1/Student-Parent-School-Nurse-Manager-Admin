@@ -1,7 +1,6 @@
-import { useAuthStore } from "@/stores/auth-store";
-import { setAuthToken } from "./token";
 import { fetchData } from "../api";
-import { AuthResponse, LoginRequestCredentials } from "@/lib/type/auth";
+import { LoginRequestCredentials, TokenResponse } from "@/lib/type/auth";
+import { handleTokenLoginSuccess, setAuthToken } from "./token";
 
 const requestParentLoginOTP = (
   credentials: LoginRequestCredentials
@@ -14,22 +13,23 @@ const requestParentLoginOTP = (
 
 const loginParentOTP = async (email: string, otp: string): Promise<boolean> => {
   try {
-    const response = await fetchData<AuthResponse>(
-      `/auth/login-parent/verify`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, otp }),
-      }
-    );
+    // API mới chỉ trả về token
+    const data = await fetchData<TokenResponse>(`/auth/login-parent/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
+    });
 
-    if (!response) {
+    if (!data || !data.token) {
       throw new Error("OTP verification failed");
     }
-    setAuthToken(response.token);
-    useAuthStore.getState().updateUserInfo(response.user, response.profile);
+
+    // Lưu token
+    handleTokenLoginSuccess(data.token);
+    console.log("Token saved successfully after OTP verification");
+
     return true;
   } catch (error) {
     console.error("OTP verification error:", error);
