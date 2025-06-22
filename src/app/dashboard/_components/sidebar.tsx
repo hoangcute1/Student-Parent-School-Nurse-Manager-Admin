@@ -1,28 +1,42 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  Heart,
-  MessageSquare,
-  ChevronDown,
-} from "lucide-react";
+import { Heart, MessageSquare, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { parentNav, studentNav } from "../_constants/sidebar";
-import { studentList } from "../_constants/students";
+
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useStudentStore } from "@/stores/student-store";
+import { useStudentParentStore } from "@/stores/student-parent-store";
+import { Student, StudentParentResponse } from "@/lib/type/students";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
 export default function Sidebar({ isOpen }: SidebarProps) {
+  const { studentsData, fetchStudentsByParent, isLoading } =
+    useStudentParentStore();
+
   const [showStudentSection, setShowStudentSection] = useState(true);
   const [showStudentList, setShowStudentList] = useState(false);
   const [showParentSection, setShowParentSection] = useState(true);
-  const [selectedStudent, setSelectedStudent] = useState(studentList[0]);
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentParentResponse | null>(studentsData[0] || null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
+  useEffect(() => {
+    if (studentsData.length > 0) {
+      setSelectedStudent(studentsData[0]);
+    } else {
+      setSelectedStudent(null);
+    }
+  }, [studentsData]);
 
   return (
     <aside
@@ -39,7 +53,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             <Heart className="h-7 w-7 text-white" />
           </div>
           <Link href="/" className="flex-1">
-            <div className="font-bold text-blue-800 text-lg">Y Tế Học Đường </div>
+            <div className="font-bold text-blue-800 text-lg">
+              Y Tế Học Đường{" "}
+            </div>
             <div className="text-xs text-blue-600">Dành cho phụ huynh</div>
             <Badge
               variant="outline"
@@ -137,31 +153,19 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   {/* Student info card */}
                   <div className="bg-white rounded-lg border border-blue-200 p-3">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10 border-2 border-blue-200">
-                        <AvatarImage
-                          src={selectedStudent.avatar}
-                          alt={selectedStudent.name}
-                        />
-                        <AvatarFallback className="bg-blue-100 text-blue-700">
-                          {selectedStudent.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
                       <div className="flex-1">
-                        {studentList.length > 1 ? (
+                        {studentsData.length > 1 ? (
                           <button
                             onClick={() => setShowStudentList(!showStudentList)}
                             className="flex items-center gap-2 group transition-all duration-300 hover:text-blue-600 w-full"
                           >
                             <div className="flex-1 text-left">
-                              <div className="text-sm text-blue-800">
-                                {selectedStudent.name}
+                              <div className="text-md text-blue-800">
+                                {selectedStudent?.student.name || "N/A"}
                               </div>
                               <div className="text-xs text-blue-600">
-                                Lớp {selectedStudent.class} •{" "}
-                                {selectedStudent.id}
+                                Lớp{" "}
+                                {selectedStudent?.student.class.name || "N/A"}
                               </div>
                             </div>
                             <ChevronDown
@@ -174,10 +178,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         ) : (
                           <div className="text-left">
                             <div className="font-medium text-blue-800">
-                              {selectedStudent.name}
+                              {selectedStudent?.student.name || "N/A"}
                             </div>
                             <div className="text-xs text-blue-600">
-                              Lớp {selectedStudent.class} • {selectedStudent.id}
+                              Lớp{" "}
+                              {(selectedStudent?.student.class.name as any) ||
+                                "N/A"}{" "}
                             </div>
                           </div>
                         )}
@@ -186,7 +192,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   </div>
 
                   {/* Student list */}
-                  {studentList.length > 1 && (
+                  {studentsData.length > 1 && (
                     <div
                       className={cn(
                         "grid transition-all duration-300 ease-in-out",
@@ -197,35 +203,26 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     >
                       <div className="overflow-hidden">
                         <div className="space-y-2 p-2 bg-white rounded-lg border border-blue-200">
-                          {studentList.map(
-                            (student) =>
-                              student.id !== selectedStudent.id && (
+                          {studentsData.map(
+                            (studentData) =>
+                              selectedStudent &&
+                              studentData._id !== selectedStudent._id && (
                                 <button
-                                  key={student.id}
+                                  key={studentData._id}
                                   onClick={() => {
-                                    setSelectedStudent(student);
+                                    setSelectedStudent(studentData);
                                     setShowStudentList(false);
                                   }}
                                   className="flex items-center gap-2 w-full p-2 rounded-md hover:bg-blue-50 transition-colors"
                                 >
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarImage
-                                      src={student.avatar}
-                                      alt={student.name}
-                                    />
-                                    <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
-                                      {student.name
-                                        .split(" ")
-                                        .map((n) => n[0])
-                                        .join("")}
-                                    </AvatarFallback>
-                                  </Avatar>
                                   <div className="flex flex-col text-left">
-                                    <span className="font-medium text-sm text-blue-800">
-                                      {student.name}
+                                    <span className="font-medium text-md text-blue-800">
+                                      {studentData.student.name}
                                     </span>
                                     <span className="text-xs text-blue-600">
-                                      Lớp {student.class} • {student.id}
+                                      Lớp{" "}
+                                      {studentData.student.class.name || "N/A"}{" "}
+                                      •{" "}
                                     </span>
                                   </div>
                                 </button>

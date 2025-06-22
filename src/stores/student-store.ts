@@ -1,22 +1,10 @@
 import { create } from "zustand";
-import { Student } from "@/lib/type/students";
+import { StudentStore } from "@/lib/type/students";
 import {
-  getStudentsForCurrentParent,
-  getStudentsByClass,
   getAllStudents,
+  getStudentsByClass,
 } from "@/lib/api/student";
 import { useAuthStore } from "./auth-store";
-
-interface StudentStore {
-  students: Student[];
-  isLoading: boolean;
-  error: string | null;
-  selectedClassId: string | null;
-  fetchStudents: () => Promise<void>;
-  fetchStudentsByClass: (classId: string) => Promise<void>;
-  fetchAllStudents: () => Promise<void>;
-  setSelectedClassId: (classId: string | null) => void;
-}
 
 export const useStudentStore = create<StudentStore>((set) => ({
   students: [],
@@ -35,9 +23,7 @@ export const useStudentStore = create<StudentStore>((set) => ({
         throw new Error("User not authenticated or not a parent");
       }
 
-      console.log("Fetching students for current parent");
-
-      const studentList = await getStudentsForCurrentParent();
+      const studentList = await getAllStudents();
       console.log("Students fetched:", studentList);
 
       set({
@@ -75,29 +61,6 @@ export const useStudentStore = create<StudentStore>((set) => ({
       set({ isLoading: false });
     }
   },
-
-  fetchAllStudents: async () => {
-    try {
-      set({ isLoading: true, error: null, selectedClassId: null });
-
-      console.log("Fetching all students");
-
-      const studentList = await getAllStudents();
-      console.log("All students fetched:", studentList);
-
-      set({
-        students: studentList,
-        error: null,
-      });
-    } catch (err: any) {
-      const errorMessage = err.message || "Failed to fetch all students";
-      console.error("Failed to fetch all students:", err);
-      set({ error: errorMessage, students: [] });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
   setSelectedClassId: (classId: string | null) => {
     set({ selectedClassId: classId });
   },

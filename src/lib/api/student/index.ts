@@ -1,36 +1,10 @@
-import { Student, StudentResponse } from "@/lib/type/students";
+import {
+  Student,
+  StudentParentResponse,
+  StudentResponse,
+} from "@/lib/type/students";
 import { fetchData } from "../api";
 
-
-/**
- * Get all students for the current authenticated parent
- */
-export const getStudentsForCurrentParent = async (): Promise<Student[]> => {
-  try {
-    const response = await fetchData<StudentResponse>(`/students/me`);
-    return response.data || [];
-  } catch (error) {
-    console.error("Error fetching students for current parent:", error);
-    throw error;
-  }
-};
-
-/**
- * Get all students for a specific parent ID
- */
-export const getStudentsByParentId = async (
-  parentId: string
-): Promise<Student[]> => {
-  try {
-    const response = await fetchData<StudentResponse>(
-      `/students/parent/${parentId}`
-    );
-    return response.data || [];
-  } catch (error) {
-    console.error(`Error fetching students for parent ${parentId}:`, error);
-    throw error;
-  }
-};
 
 /**
  * Get a student by ID
@@ -73,4 +47,3 @@ export const getStudentsByClass = async (
     throw error;
   }
 };
-
