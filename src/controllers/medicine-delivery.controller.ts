@@ -18,7 +18,6 @@ import { MedicineDeliveryService } from '@/services/medicine-delivery.service';
 import {
   CreateMedicineDeliveryDto,
   UpdateMedicineDeliveryDto,
-  ApproveRejectDeliveryDto,
   DateRangeDto,
 } from '@/decorations/dto/medicine-delivery.dto';
 import {
@@ -34,10 +33,7 @@ import {
   ApiNoContentResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import {
-  MedicineDelivery,
-  MedicineDeliveryStatus,
-} from '@/schemas/medicine-delivery.schema';
+import { MedicineDelivery, MedicineDeliveryStatus } from '@/schemas/medicine-delivery.schema';
 import { GetUser } from '@/decorations/get-user.decorator';
 
 @ApiTags('medicine-deliveries')
@@ -45,14 +41,7 @@ import { GetUser } from '@/decorations/get-user.decorator';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class MedicineDeliveryController {
-  constructor(
-    private readonly medicineDeliveryService: MedicineDeliveryService,
-  ) {}
-
-  /**
-   * Format medicine delivery response to standardize the output
-   * and handle MongoDB document references
-   */
+  constructor(private readonly medicineDeliveryService: MedicineDeliveryService) {}
   private formatDeliveryResponse(delivery: MedicineDelivery) {
     if (!delivery) return null;
 
@@ -190,175 +179,19 @@ export class MedicineDeliveryController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async create(
-    @Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto,
-    @GetUser() user: any,
-  ) {
-    try {
-      // Validate dates
-      const endAt = new Date(createMedicineDeliveryDto.end_at);
-      const now = new Date();
-
-      if (isNaN(endAt.getTime())) {
-        throw new BadRequestException('Invalid date format');
-      }
-
-      // If sent_at is provided, validate it, otherwise use current time
-      if (createMedicineDeliveryDto.sent_at) {
-        const sentAt = new Date(createMedicineDeliveryDto.sent_at);
-        if (isNaN(sentAt.getTime())) {
-          throw new BadRequestException('Invalid sent_at date format');
-        }
-
-        // Don't check if sent_at is in the past, it's allowed for backdating purposes
-
-        if (endAt <= sentAt) {
-          throw new BadRequestException('End date must be after start date');
-        }
-      } else {
-        // If not provided, sent_at will use the default Date.now from schema
-      }
-
-      if (endAt <= now) {
-        throw new BadRequestException('End date must be in the future');
-      }
-
-      // Set default status to pending
-      createMedicineDeliveryDto.status = MedicineDeliveryStatus.PENDING;
-
-      // Set staff to current user if not provided
-      if (!createMedicineDeliveryDto.staff) {
-        createMedicineDeliveryDto.staff = user.userId;
-      }
-
-      const delivery = await this.medicineDeliveryService.create(
-        createMedicineDeliveryDto,
-      );
-      return this.formatDeliveryResponse(delivery);
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new BadRequestException(
-        `Error creating medicine delivery: ${error.message}`,
-      );
-    }
+  async create(@Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto, @GetUser() user: any) {
+    return this.medicineDeliveryService.create(createMedicineDeliveryDto);
   }
 
-  /**
-   * Get all medicine deliveries with optional filters
-   */
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all medicine deliveries',
     description: 'Get a list of all medicine deliveries with optional filters',
   })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    enum: MedicineDeliveryStatus,
-    description: 'Filter by status',
-  })
-  @ApiQuery({
-    name: 'from',
-    required: false,
-    type: String,
-    description: 'Filter from date (ISO format)',
-  })
-  @ApiQuery({
-    name: 'to',
-    required: false,
-    type: String,
-    description: 'Filter to date (ISO format)',
-  })
-  @ApiOkResponse({
-    description: 'List of medicine deliveries.',
-    schema: {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              name: { type: 'string' },
-              date: { type: 'string', format: 'date-time' },
-              total: { type: 'number' },
-              status: {
-                type: 'string',
-                enum: [
-                  'pending',
-                  'approved',
-                  'rejected',
-                  'completed',
-                  'cancelled',
-                ],
-              },
-              student: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  name: { type: 'string' },
-                  studentId: { type: 'string' },
-                },
-              },
-              medicine: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  name: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        total: { type: 'number' },
-      },
-    },
-  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async findAll(
-    @Query('status') status?: MedicineDeliveryStatus,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    try {
-      // Validate dates if provided
-      if (from && to) {
-        const fromDate = new Date(from);
-        const toDate = new Date(to);
-
-        if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-          throw new BadRequestException('Invalid date format');
-        }
-
-        if (toDate < fromDate) {
-          throw new BadRequestException('End date must be after start date');
-        }
-      }
-
-      const result = await this.medicineDeliveryService.findAll({
-        status,
-        from,
-        to,
-      });
-
-      return {
-        data: result.data.map((delivery) =>
-          this.formatDeliveryResponse(delivery),
-        ),
-        total: result.total,
-      };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new BadRequestException(
-        `Error fetching medicine deliveries: ${error.message}`,
-      );
-    }
+  async findAll() {
+    return this.medicineDeliveryService.findAll();
   }
 
   /**
@@ -414,18 +247,13 @@ export class MedicineDeliveryController {
     }
 
     try {
-      const deliveries =
-        await this.medicineDeliveryService.findByStatus(status);
+      const deliveries = await this.medicineDeliveryService.findByStatus(status);
       return {
-        data: deliveries.map((delivery) =>
-          this.formatDeliveryResponse(delivery),
-        ),
+        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
         total: deliveries.length,
       };
     } catch (error) {
-      throw new BadRequestException(
-        `Error fetching deliveries by status: ${error.message}`,
-      );
+      throw new BadRequestException(`Error fetching deliveries by status: ${error.message}`);
     }
   }
 
@@ -466,13 +294,7 @@ export class MedicineDeliveryController {
               total: { type: 'number' },
               status: {
                 type: 'string',
-                enum: [
-                  'pending',
-                  'approved',
-                  'rejected',
-                  'completed',
-                  'cancelled',
-                ],
+                enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
               },
               per_dose: { type: 'string' },
               per_day: { type: 'string' },
@@ -492,28 +314,18 @@ export class MedicineDeliveryController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'Student not found.' })
-  async findByStudent(
-    @Param('id') id: string,
-    @Query('status') status?: MedicineDeliveryStatus,
-  ) {
+  async findByStudent(@Param('id') id: string, @Query('status') status?: MedicineDeliveryStatus) {
     try {
-      const deliveries = await this.medicineDeliveryService.findByStudent(
-        id,
-        status,
-      );
+      const deliveries = await this.medicineDeliveryService.findByStudent(id, status);
       return {
-        data: deliveries.map((delivery) =>
-          this.formatDeliveryResponse(delivery),
-        ),
+        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
         total: deliveries.length,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException(
-        `Error fetching deliveries for student: ${error.message}`,
-      );
+      throw new BadRequestException(`Error fetching deliveries for student: ${error.message}`);
     }
   }
 
@@ -590,20 +402,13 @@ export class MedicineDeliveryController {
     }
 
     try {
-      const deliveries = await this.medicineDeliveryService.findByDateRange(
-        from,
-        to,
-      );
+      const deliveries = await this.medicineDeliveryService.findByDateRange(from, to);
       return {
-        data: deliveries.map((delivery) =>
-          this.formatDeliveryResponse(delivery),
-        ),
+        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
         total: deliveries.length,
       };
     } catch (error) {
-      throw new BadRequestException(
-        `Error fetching deliveries in date range: ${error.message}`,
-      );
+      throw new BadRequestException(`Error fetching deliveries in date range: ${error.message}`);
     }
   }
 
@@ -654,21 +459,14 @@ export class MedicineDeliveryController {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const deliveries = await this.medicineDeliveryService.findByDateRange(
-        today,
-        tomorrow,
-      );
+      const deliveries = await this.medicineDeliveryService.findByDateRange(today, tomorrow);
 
       return {
-        data: deliveries.map((delivery) =>
-          this.formatDeliveryResponse(delivery),
-        ),
+        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
         total: deliveries.length,
       };
     } catch (error) {
-      throw new BadRequestException(
-        `Error fetching today's deliveries: ${error.message}`,
-      );
+      throw new BadRequestException(`Error fetching today's deliveries: ${error.message}`);
     }
   }
 
@@ -717,15 +515,11 @@ export class MedicineDeliveryController {
       );
 
       return {
-        data: deliveries.map((delivery) =>
-          this.formatDeliveryResponse(delivery),
-        ),
+        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
         total: deliveries.length,
       };
     } catch (error) {
-      throw new BadRequestException(
-        `Error fetching pending deliveries: ${error.message}`,
-      );
+      throw new BadRequestException(`Error fetching pending deliveries: ${error.message}`);
     }
   }
 
@@ -796,18 +590,14 @@ export class MedicineDeliveryController {
     try {
       const delivery = await this.medicineDeliveryService.findById(id);
       if (!delivery) {
-        throw new NotFoundException(
-          `Medicine delivery with ID ${id} not found`,
-        );
+        throw new NotFoundException(`Medicine delivery with ID ${id} not found`);
       }
       return this.formatDeliveryResponse(delivery);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException(
-        `Error fetching medicine delivery: ${error.message}`,
-      );
+      throw new BadRequestException(`Error fetching medicine delivery: ${error.message}`);
     }
   }
 
@@ -855,21 +645,15 @@ export class MedicineDeliveryController {
 
       // Check if delivery can be updated
       if (
-        [
-          MedicineDeliveryStatus.COMPLETED,
-          MedicineDeliveryStatus.CANCELLED,
-        ].includes(current.status)
+        [MedicineDeliveryStatus.COMPLETED, MedicineDeliveryStatus.CANCELLED].includes(
+          current.status,
+        )
       ) {
-        throw new ForbiddenException(
-          `Cannot update delivery in ${current.status} status`,
-        );
+        throw new ForbiddenException(`Cannot update delivery in ${current.status} status`);
       }
 
       // Validate date logic if dates are being updated
-      if (
-        updateMedicineDeliveryDto.sent_at ||
-        updateMedicineDeliveryDto.end_at
-      ) {
+      if (updateMedicineDeliveryDto.sent_at || updateMedicineDeliveryDto.end_at) {
         const sentAt = updateMedicineDeliveryDto.sent_at
           ? new Date(updateMedicineDeliveryDto.sent_at)
           : current.sent_at;
@@ -891,23 +675,7 @@ export class MedicineDeliveryController {
         }
       }
 
-      // Validate status changes
-      if (updateMedicineDeliveryDto.status) {
-        if (
-          updateMedicineDeliveryDto.status ===
-            MedicineDeliveryStatus.COMPLETED &&
-          current.status !== MedicineDeliveryStatus.APPROVED
-        ) {
-          throw new BadRequestException(
-            'Only approved deliveries can be completed',
-          );
-        }
-      }
-
-      const delivery = await this.medicineDeliveryService.update(
-        id,
-        updateMedicineDeliveryDto,
-      );
+      const delivery = await this.medicineDeliveryService.update(id, updateMedicineDeliveryDto);
 
       return this.formatDeliveryResponse(delivery);
     } catch (error) {
@@ -918,84 +686,10 @@ export class MedicineDeliveryController {
       ) {
         throw error;
       }
-      throw new BadRequestException(
-        `Error updating medicine delivery: ${error.message}`,
-      );
+      throw new BadRequestException(`Error updating medicine delivery: ${error.message}`);
     }
   }
 
-  /**
-   * Approve or reject a medicine delivery
-   */
-  @Patch(':id/approve-reject')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Approve or reject a medicine delivery',
-    description: 'Approve or reject a pending medicine delivery request',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Medicine delivery ID',
-    type: String,
-    required: true,
-  })
-  @ApiBody({ type: ApproveRejectDeliveryDto })
-  @ApiOkResponse({
-    description:
-      'The medicine delivery has been successfully approved or rejected.',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        status: { type: 'string', enum: ['approved', 'rejected'] },
-        note: { type: 'string', nullable: true },
-      },
-    },
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'Medicine delivery not found.' })
-  @ApiResponse({
-    status: 400,
-    description: 'Can only approve or reject pending deliveries.',
-  })
-  async approveOrReject(
-    @Param('id') id: string,
-    @Body() dto: ApproveRejectDeliveryDto,
-    @GetUser() user: any,
-  ) {
-    try {
-      // Validate the delivery exists and is in pending status
-      const current = await this.medicineDeliveryService.findById(id);
-
-      if (current.status !== MedicineDeliveryStatus.PENDING) {
-        throw new BadRequestException(
-          'Can only approve or reject pending deliveries',
-        );
-      }
-
-      const delivery = await this.medicineDeliveryService.approveOrReject(
-        id,
-        dto,
-        user.userId,
-      );
-
-      return {
-        id: delivery._id,
-        status: delivery.status,
-        note: delivery.note,
-      };
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
-        throw error;
-      }
-      throw new BadRequestException(
-        `Error approving/rejecting delivery: ${error.message}`,
-      );
-    }
-  }
 
   /**
    * Mark a medicine delivery as completed
@@ -1033,10 +727,6 @@ export class MedicineDeliveryController {
       // Validate the delivery exists and is in approved status
       const current = await this.medicineDeliveryService.findById(id);
 
-      if (current.status !== MedicineDeliveryStatus.APPROVED) {
-        throw new BadRequestException('Can only complete approved deliveries');
-      }
-
       const delivery = await this.medicineDeliveryService.complete(id);
 
       return {
@@ -1044,15 +734,10 @@ export class MedicineDeliveryController {
         status: delivery.status,
       };
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException(
-        `Error completing delivery: ${error.message}`,
-      );
+      throw new BadRequestException(`Error completing delivery: ${error.message}`);
     }
   }
 
@@ -1111,15 +796,10 @@ export class MedicineDeliveryController {
         status: delivery.status,
       };
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException(
-        `Error cancelling delivery: ${error.message}`,
-      );
+      throw new BadRequestException(`Error cancelling delivery: ${error.message}`);
     }
   }
 
@@ -1130,8 +810,7 @@ export class MedicineDeliveryController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete a medicine delivery',
-    description:
-      'Delete a medicine delivery that is not yet approved or completed',
+    description: 'Delete a medicine delivery that is not yet approved or completed',
   })
   @ApiParam({
     name: 'id',
@@ -1153,28 +832,12 @@ export class MedicineDeliveryController {
       // Check if delivery exists and can be deleted
       const current = await this.medicineDeliveryService.findById(id);
 
-      if (
-        [
-          MedicineDeliveryStatus.APPROVED,
-          MedicineDeliveryStatus.COMPLETED,
-        ].includes(current.status)
-      ) {
-        throw new ForbiddenException(
-          `Cannot delete delivery in ${current.status} status`,
-        );
-      }
-
       await this.medicineDeliveryService.remove(id);
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
         throw error;
       }
-      throw new BadRequestException(
-        `Error deleting medicine delivery: ${error.message}`,
-      );
+      throw new BadRequestException(`Error deleting medicine delivery: ${error.message}`);
     }
   }
 }

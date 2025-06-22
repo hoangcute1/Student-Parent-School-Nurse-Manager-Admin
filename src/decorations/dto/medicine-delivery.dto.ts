@@ -104,6 +104,13 @@ export class CreateMedicineDeliveryDto {
 
   @ApiProperty({
     example: '60d0fe4f5311236168a109cb',
+    description: 'ID của phụ huynh',
+  })
+  @IsMongoId()
+  parent: string;
+
+  @ApiProperty({
+    example: '60d0fe4f5311236168a109cb',
     description: 'ID của thuốc',
     required: true,
   })
@@ -151,7 +158,6 @@ export class UpdateMedicineDeliveryDto {
   total?: number;
 
   @ApiProperty({
-    example: MedicineDeliveryStatus.APPROVED,
     enum: MedicineDeliveryStatus,
     description: 'Trạng thái giao thuốc',
     required: false,
@@ -231,25 +237,6 @@ export class UpdateMedicineDeliveryDto {
   @IsMongoId()
   @IsOptional()
   medicine?: string;
-}
-
-export class ApproveRejectDeliveryDto {
-  @ApiProperty({
-    example: MedicineDeliveryStatus.APPROVED,
-    enum: [MedicineDeliveryStatus.APPROVED, MedicineDeliveryStatus.REJECTED],
-    description: 'Trạng thái phê duyệt',
-  })
-  @IsEnum([MedicineDeliveryStatus.APPROVED, MedicineDeliveryStatus.REJECTED])
-  status: MedicineDeliveryStatus;
-
-  @ApiProperty({
-    example: 'Approved due to medical necessity',
-    description: 'Lý do phê duyệt hoặc từ chối',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  note?: string;
 }
 
 export class DateRangeDto {

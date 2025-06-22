@@ -1,8 +1,6 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { UserService } from './user.service';
+import { StaffService } from './staff.service';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -13,14 +11,17 @@ import {
 import {
   CreateMedicineDeliveryDto,
   UpdateMedicineDeliveryDto,
-  ApproveRejectDeliveryDto,
 } from '@/decorations/dto/medicine-delivery.dto';
+import { ParentService } from './parent.service';
 
 @Injectable()
 export class MedicineDeliveryService {
   constructor(
     @InjectModel(MedicineDelivery.name)
     private medicineDeliveryModel: Model<MedicineDeliveryDocument>,
+    private parentService: ParentService,
+    private userService: UserService,
+    private staffService: StaffService,
   ) {}
 
   async create(
@@ -30,12 +31,10 @@ export class MedicineDeliveryService {
     if (!createMedicineDeliveryDto.sent_at) {
       createMedicineDeliveryDto.sent_at = new Date();
     }
-    
-    const createdDelivery = new this.medicineDeliveryModel(
-      createMedicineDeliveryDto,
-    );
+
+    const createdDelivery = new this.medicineDeliveryModel(createMedicineDeliveryDto);
     await createdDelivery.save();
-    
+
     // Populate data sau khi lưu để có thông tin đầy đủ
     const populatedDelivery = await this.medicineDeliveryModel
       .findById(createdDelivery._id)
@@ -43,44 +42,40 @@ export class MedicineDeliveryService {
       .populate('staff', 'name email role')
       .populate('medicine', 'name dosage unit type')
       .exec();
-      
+
     if (!populatedDelivery) {
       throw new Error('Failed to find created delivery');
     }
-    
+
     return populatedDelivery;
   }
-
-  async findAll(filters?: {
-    status?: MedicineDeliveryStatus;
-    from?: string;
-    to?: string;
-  }): Promise<{ data: MedicineDeliveryDocument[]; total: number }> {
-    const query: any = {};
-
-    // Apply status filter if provided
-    if (filters?.status) {
-      query.status = filters.status;
-    }
-
-    // Apply date range filter if provided
-    if (filters?.from || filters?.to) {
-      query.date = {};
-      if (filters.from) {
-        query.date.$gte = new Date(filters.from);
-      }
-      if (filters.to) {
-        query.date.$lte = new Date(filters.to);
-      }
-    }
-
-    const data = await this.medicineDeliveryModel
-      .find(query)
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .sort({ createdAt: -1 })
+  async findAll(): Promise<{ data: any; total: number }> {
+    const medicineDeliveryList = await this.medicineDeliveryModel
+      .find()
+      .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+      .populate('staff')
+      .populate('parent')
+      .populate('medicine')
+      .sort({ created_at: -1 })
       .exec();
+    console.log('Medicine Delivery List:', medicineDeliveryList);
+    const data = await Promise.all(
+      medicineDeliveryList.map(async (item) => {
+        const { _id, parent, staff, ...rest } = item.toObject();
+        const parentUserId = (item.parent as any).user.toString();
+        const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)
+          .name;
+        const staffUserId = (item.staff as any).user.toString();
+        const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)
+          .name;
+        return {
+          id: item._id,
+          parentName: parentName,
+          staffName: staffName,
+          ...rest,
+        };
+      }),
+    );
 
     return {
       data,
@@ -107,9 +102,7 @@ export class MedicineDeliveryService {
       .exec();
   }
 
-  async findByStatus(
-    status: MedicineDeliveryStatus,
-  ): Promise<MedicineDeliveryDocument[]> {
+  async findByStatus(status: MedicineDeliveryStatus): Promise<MedicineDeliveryDocument[]> {
     return this.medicineDeliveryModel
       .find({ status })
       .populate('student', 'name studentId class')
@@ -143,9 +136,7 @@ export class MedicineDeliveryService {
       .exec();
 
     if (!delivery) {
-      throw new NotFoundException(
-        `Medicine delivery with ID "${id}" not found`,
-      );
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
     return delivery;
   }
@@ -161,9 +152,7 @@ export class MedicineDeliveryService {
       delivery.status === MedicineDeliveryStatus.COMPLETED ||
       delivery.status === MedicineDeliveryStatus.CANCELLED
     ) {
-      throw new BadRequestException(
-        `Cannot update a delivery with status "${delivery.status}"`,
-      );
+      throw new BadRequestException(`Cannot update a delivery with status "${delivery.status}"`);
     }
 
     const updatedDelivery = await this.medicineDeliveryModel
@@ -174,49 +163,7 @@ export class MedicineDeliveryService {
       .exec();
 
     if (!updatedDelivery) {
-      throw new NotFoundException(
-        `Medicine delivery with ID "${id}" not found`,
-      );
-    }
-
-    return updatedDelivery;
-  }
-
-  async approveOrReject(
-    id: string,
-    dto: ApproveRejectDeliveryDto,
-    staffId: string,
-  ): Promise<MedicineDeliveryDocument> {
-    const delivery = await this.findById(id);
-
-    // Only pending deliveries can be approved or rejected
-    if (delivery.status !== MedicineDeliveryStatus.PENDING) {
-      throw new BadRequestException(
-        `Cannot approve or reject a delivery with status "${delivery.status}"`,
-      );
-    }
-
-    // Update status and staff
-    const update: any = {
-      status: dto.status,
-    };
-
-    // Add note if provided
-    if (dto.note) {
-      update.note = dto.note;
-    }
-
-    const updatedDelivery = await this.medicineDeliveryModel
-      .findByIdAndUpdate(id, update, { new: true })
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .exec();
-
-    if (!updatedDelivery) {
-      throw new NotFoundException(
-        `Medicine delivery with ID "${id}" not found`,
-      );
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
 
     return updatedDelivery;
@@ -225,28 +172,15 @@ export class MedicineDeliveryService {
   async complete(id: string): Promise<MedicineDeliveryDocument> {
     const delivery = await this.findById(id);
 
-    // Only approved deliveries can be completed
-    if (delivery.status !== MedicineDeliveryStatus.APPROVED) {
-      throw new BadRequestException(
-        `Cannot complete a delivery with status "${delivery.status}". Only approved deliveries can be completed.`,
-      );
-    }
-
     const updatedDelivery = await this.medicineDeliveryModel
-      .findByIdAndUpdate(
-        id,
-        { status: MedicineDeliveryStatus.COMPLETED },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, { status: MedicineDeliveryStatus.COMPLETED }, { new: true })
       .populate('student', 'name studentId class')
       .populate('staff', 'name email role')
       .populate('medicine', 'name dosage unit type')
       .exec();
 
     if (!updatedDelivery) {
-      throw new NotFoundException(
-        `Medicine delivery with ID "${id}" not found`,
-      );
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
 
     return updatedDelivery;
@@ -277,9 +211,7 @@ export class MedicineDeliveryService {
       .exec();
 
     if (!updatedDelivery) {
-      throw new NotFoundException(
-        `Medicine delivery with ID "${id}" not found`,
-      );
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
 
     return updatedDelivery;
@@ -291,21 +223,15 @@ export class MedicineDeliveryService {
     // Cannot delete completed or approved deliveries
     if (
       delivery.status === MedicineDeliveryStatus.COMPLETED ||
-      delivery.status === MedicineDeliveryStatus.APPROVED
+      delivery.status === MedicineDeliveryStatus.CANCELLED
     ) {
-      throw new BadRequestException(
-        `Cannot delete a delivery with status "${delivery.status}"`,
-      );
+      throw new BadRequestException(`Cannot delete a delivery with status "${delivery.status}"`);
     }
 
-    const result = await this.medicineDeliveryModel
-      .deleteOne({ _id: id })
-      .exec();
+    const result = await this.medicineDeliveryModel.deleteOne({ _id: id }).exec();
 
     if (result.deletedCount === 0) {
-      throw new NotFoundException(
-        `Medicine delivery with ID "${id}" not found`,
-      );
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
   }
 }
