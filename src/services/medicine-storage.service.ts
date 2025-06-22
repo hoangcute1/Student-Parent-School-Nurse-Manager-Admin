@@ -8,8 +8,12 @@ import { Model } from 'mongoose';
 import {
   MedicineStorage,
   MedicineStorageDocument,
+  MedicineStatus,
 } from '@/schemas/medicine-storage.schema';
-import { CreateMedicineStorageDto } from '@/decorations/dto/medicine-storage.dto';
+import {
+  CreateMedicineStorageDto,
+  UpdateMedicineStorageDto,
+} from '@/decorations/dto/medicine-storage.dto';
 
 @Injectable()
 export class MedicineStorageService {
@@ -21,7 +25,19 @@ export class MedicineStorageService {
   async create(
     addMedicine: CreateMedicineStorageDto,
   ): Promise<MedicineStorage> {
-    const createdMedicine = new this.medicineStorageModel(addMedicine);
+    // Map from camelCase in DTO to snake_case in schema
+    const medicineData = {
+      name: addMedicine.name,
+      type: addMedicine.type,
+      unit: addMedicine.unit,
+      amount_left: addMedicine.amountLeft,
+      total: addMedicine.total,
+      status: addMedicine.status,
+      expired: addMedicine.expired,
+      description: addMedicine.description,
+    };
+
+    const createdMedicine = new this.medicineStorageModel(medicineData);
     return createdMedicine.save();
   }
 
@@ -45,32 +61,77 @@ export class MedicineStorageService {
   }
 
   async findExpiring(days: number): Promise<MedicineStorage[]> {
+    if (days <= 0) {
+      throw new BadRequestException('Days parameter must be greater than 0');
+    }
+
+    const currentDate = new Date();
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + days);
+    expiryDate.setDate(currentDate.getDate() + days);
 
     return this.medicineStorageModel
       .find({
-        expired: { $lte: expiryDate },
-        status: { $ne: 'out_of_stock' },
+        expired: {
+          $gte: currentDate, // Chưa hết hạn
+          $lte: expiryDate, // Nhưng sẽ hết hạn trong số ngày yêu cầu
+        },
+        status: { $ne: MedicineStatus.OUT_OF_STOCK }, // Không lấy thuốc đã hết hàng
       })
-      .sort({ expired: 1 })
+      .sort({ expired: 1 }) // Sắp xếp theo ngày hết hạn tăng dần
       .exec();
   }
 
   async findLowStock(): Promise<MedicineStorage[]> {
+    // Tìm tất cả các thuốc có trạng thái 'low'
     return this.medicineStorageModel
       .find({
-        $expr: {
-          $lte: ['$amountLeft', '$minimumStockLevel'],
-        },
+        status: MedicineStatus.LOW,
       })
-      .sort({ amountLeft: 1 })
+      .sort({ amount_left: 1 }) // Sắp xếp theo số lượng còn lại tăng dần
       .exec();
   }
 
-  async update(id: string, updateMedicineDto: any): Promise<MedicineStorage> {
+  async update(
+    id: string,
+    updateMedicineDto: UpdateMedicineStorageDto,
+  ): Promise<MedicineStorage> {
+    // Map from camelCase in DTO to snake_case in schema
+    const updateData: any = {};
+
+    if (updateMedicineDto.name !== undefined) {
+      updateData.name = updateMedicineDto.name;
+    }
+
+    if (updateMedicineDto.type !== undefined) {
+      updateData.type = updateMedicineDto.type;
+    }
+
+    if (updateMedicineDto.unit !== undefined) {
+      updateData.unit = updateMedicineDto.unit;
+    }
+
+    if (updateMedicineDto.amountLeft !== undefined) {
+      updateData.amount_left = updateMedicineDto.amountLeft;
+    }
+
+    if (updateMedicineDto.total !== undefined) {
+      updateData.total = updateMedicineDto.total;
+    }
+
+    if (updateMedicineDto.status !== undefined) {
+      updateData.status = updateMedicineDto.status;
+    }
+
+    if (updateMedicineDto.expired !== undefined) {
+      updateData.expired = updateMedicineDto.expired;
+    }
+
+    if (updateMedicineDto.description !== undefined) {
+      updateData.description = updateMedicineDto.description;
+    }
+
     const medicine = await this.medicineStorageModel
-      .findByIdAndUpdate(id, updateMedicineDto, { new: true })
+      .findByIdAndUpdate(id, updateData, { new: true })
       .exec();
 
     if (!medicine) {
@@ -88,13 +149,42 @@ export class MedicineStorageService {
     }
   }
 
-  async createMany(medicines: any[]): Promise<MedicineStorage[]> {
-    const created = await this.medicineStorageModel.insertMany(medicines);
+  async createMany(
+    medicines: CreateMedicineStorageDto[],
+  ): Promise<MedicineStorage[]> {
+    // Map each medicine from camelCase in DTO to snake_case in schema
+    const medicineData = medicines.map((medicine) => ({
+      name: medicine.name,
+      type: medicine.type,
+      unit: medicine.unit,
+      amount_left: medicine.amountLeft,
+      total: medicine.total,
+      status: medicine.status,
+      expired: medicine.expired,
+      description: medicine.description,
+    }));
+
+    const created = await this.medicineStorageModel.insertMany(medicineData);
     return created.map((doc) => doc.toObject());
   }
 
   async removeMany(ids: string[]): Promise<void> {
-    await this.medicineStorageModel.deleteMany({ _id: { $in: ids } }).exec();
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new BadRequestException('Invalid or empty IDs array');
+    }
+
+    const result = await this.medicineStorageModel
+      .deleteMany({ _id: { $in: ids } })
+      .exec();
+
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('No medicines found with the provided IDs');
+    }
+
+    if (result.deletedCount !== ids.length) {
+      // Xóa thành công một số nhưng không phải tất cả
+      // Có thể log cảnh báo ở đây
+    }
   }
 
   async getStockStatusReport(): Promise<any> {

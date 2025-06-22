@@ -63,6 +63,9 @@ export class MedicineStorage extends Document {
 
   @Prop({ trim: true, required: false, default: null })
   description?: string;
+
+  @Prop({ trim: true, required: false, default: null })
+  image?: string;
 }
 
 export const MedicineStorageSchema =

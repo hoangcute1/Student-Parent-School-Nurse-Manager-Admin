@@ -6,7 +6,7 @@ export class TokenBlacklistService {
   private readonly expirationTimes: Map<string, number> = new Map();
 
   // Add a token to the blacklist
-  blacklistToken(token: string, expiresIn: number): void {
+  blacklistToken(token: string, expiresIn: number) {
     const expirationTime = Date.now() + expiresIn * 1000;
     this.blacklist.add(token);
     this.expirationTimes.set(token, expirationTime);

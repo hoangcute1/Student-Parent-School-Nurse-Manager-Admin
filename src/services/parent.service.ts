@@ -2,26 +2,65 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parent, ParentDocument } from '@/schemas/parent.schema';
 import { CreateParentDto } from '@/decorations/dto/create-parent.dto';
 import { UpdateParentDto } from '@/decorations/dto/update-parent.dto';
+import { ProfileService } from './profile.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class ParentService {
   constructor(
-    @InjectModel(Parent.name) private parentModel: Model<ParentDocument>,
+    @InjectModel(Parent.name)
+    private parentModel: Model<ParentDocument>,
+    private profileService: ProfileService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
   ) {}
 
   async findAll(): Promise<any[]> {
     const parents = await this.parentModel.find().populate('user').exec();
 
-    return parents.map((parent) => ({
-      id: parent._id,
-      user: parent.user,
-    }));
+    // Fetch profiles for all parents
+    const parentsWithProfiles = await Promise.all(
+      parents.map(async (parent) => {
+        // Get the user ID - need to use type assertion since parent.user is populated
+        const userId = (parent.user as any)._id;
+
+        // Fetch the profile for this parent's user
+        const profile = await this.profileService.findByuser(userId);
+
+        return {
+          _id: parent._id,
+          user: {
+            _id: (parent.user as any)._id,
+            email: (parent.user as any).email,
+            created_at: (parent.user as any).created_at,
+            updated_at: (parent.user as any).updated_at,
+          },
+          profile: profile
+            ? {
+                _id: profile._id,
+                name: profile.name,
+                gender: profile.gender,
+                birth: profile.birth,
+                address: profile.address,
+                avatar: profile.avatar,
+                phone: profile.phone,
+                created_at: profile.created_at,
+                updated_at: profile.updated_at,
+              }
+            : null,
+        };
+      }),
+    );
+
+    return parentsWithProfiles;
   }
   async validateParent(user: string): Promise<ParentDocument | null> {
     const parent = await this.parentModel.findOne({ user }).exec();
@@ -45,9 +84,7 @@ export class ParentService {
   }
 
   async create(createParentDto: CreateParentDto): Promise<ParentDocument> {
-    const existingParent = await this.parentModel
-      .findOne({ user: createParentDto.user })
-      .exec();
+    const existingParent = await this.parentModel.findOne({ user: createParentDto.user }).exec();
 
     if (existingParent) {
       throw new ConflictException('A parent with this user ID already exists');
@@ -60,10 +97,7 @@ export class ParentService {
     return createdParent.save();
   }
 
-  async update(
-    id: string,
-    updateParentDto: UpdateParentDto,
-  ): Promise<ParentDocument> {
+  async update(id: string, updateParentDto: UpdateParentDto): Promise<ParentDocument> {
     const updatedParent = await this.parentModel
       .findByIdAndUpdate(id, updateParentDto, { new: true })
       .exec();

@@ -62,12 +62,12 @@ export class AdminService {
   }
 
   async validateAdmin(user: string): Promise<AdminDocument | null> {
-        const admin = await this.adminModel.findOne({ user }).exec();
-        if (!admin) {
-          throw new NotFoundException(`Admin with user ID "${user}" not found`);
-        }
-        return admin;
-      }
+    const admin = await this.adminModel.findOne({ user }).exec();
+    if (!admin) {
+      throw new NotFoundException(`Admin with user ID "${user}" not found`);
+    }
+    return admin;
+  }
 
   async findByuser(user: string): Promise<AdminDocument | null> {
     console.log('Finding admin by user:', user);

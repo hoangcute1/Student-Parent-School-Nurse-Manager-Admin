@@ -65,4 +65,13 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsMongoId()
   readonly user?: string;
+
+  @ApiProperty({
+    example: '0123456789',
+    description: 'Số điện thoại',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  readonly phone?: string;
 }

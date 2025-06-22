@@ -4,7 +4,7 @@ import { User } from './user.schema';
 
 export type ParentDocument = Parent & Document;
 
-@Schema()
+@Schema({ versionKey: false })
 export class Parent {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   user: User;
