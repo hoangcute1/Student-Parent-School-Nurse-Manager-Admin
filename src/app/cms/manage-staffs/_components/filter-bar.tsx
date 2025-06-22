@@ -37,31 +37,7 @@ export function FilterBar({
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
       </div>
-      <Select onValueChange={onClassFilterChange}>
-        <SelectTrigger className="w-[180px] border-blue-200">
-          <SelectValue placeholder="Chọn lớp" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Tất cả lớp</SelectItem>
-          <SelectItem value="1A">Lớp 1A</SelectItem>
-          <SelectItem value="1B">Lớp 1B</SelectItem>
-          <SelectItem value="2A">Lớp 2A</SelectItem>
-          <SelectItem value="2B">Lớp 2B</SelectItem>
-          <SelectItem value="3A">Lớp 3A</SelectItem>
-          <SelectItem value="3B">Lớp 3B</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select onValueChange={onHealthStatusChange}>
-        <SelectTrigger className="w-[180px] border-blue-200">
-          <SelectValue placeholder="Tình trạng sức khỏe" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Tất cả</SelectItem>
-          <SelectItem value="good">Sức khỏe tốt</SelectItem>
-          <SelectItem value="monitor">Cần theo dõi</SelectItem>
-          <SelectItem value="urgent">Khẩn cấp</SelectItem>
-        </SelectContent>
-      </Select>
+      
       <Button
         variant="outline"
         size="icon"

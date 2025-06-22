@@ -1,41 +1,55 @@
-export interface HealthRecord {
+interface HealthRecord {
   _id: string;
   allergies: string[];
-  chronic_conditions: string[];
-  height: number;
-  weight: number;
+  medications: string[];
+  height: string;
+  weight: string;
   vision: string;
   hearing: string;
   blood_type: string;
-  treatment_history: string[];
   notes: string;
-  created_at?: string;
-  updated_at?: string;
-  student?: {
-    _id: string;
-    studentId: string;
-    name: string;
-    class: string;
-  };
+  created_at: Date;
+  updated_at: Date;
 }
-
-export interface HealthRecordFormValues {
+interface HealthRecordFormValues {
   allergies: string[];
-  chronic_conditions: string[];
-  height: number;
-  weight: number;
+  medications: string[];
+  height: string;
+  weight: string;
   vision: string;
   hearing: string;
   blood_type: string;
-  treatment_history: string[];
   notes: string;
-  student_id: string;
 }
-
-export interface HealthRecordStore {
-  records: HealthRecord[];
+interface HealthRecordStore {
+  healthRecords: HealthRecord[];
   isLoading: boolean;
   error: string | null;
-  fetchRecords: () => Promise<void>;
-  addRecord: (data: HealthRecordFormValues) => Promise<void>;
+  fetchHealthRecords: () => Promise<void>;
+  addHealthRecord: (data: HealthRecordFormValues) => Promise<void>;
+  updateHealthRecord: (
+    id: string,
+    data: HealthRecordFormValues
+  ) => Promise<void>;
+  deleteHealthRecord: (id: string) => Promise<void>;
 }
+interface GetAllHealthRecordsResponse {
+  data: HealthRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+interface UpdateHealthRecordForm
+  extends Partial<Omit<HealthRecord, "_id" | "created_at" | "updated_at">> {}
+interface UpdateHealthRecordResponse {
+  message: string;
+  healthRecord: HealthRecord;
+}
+export type {
+  HealthRecord,
+  HealthRecordFormValues,
+  HealthRecordStore,
+  GetAllHealthRecordsResponse,
+  UpdateHealthRecordResponse,
+  UpdateHealthRecordForm,
+};

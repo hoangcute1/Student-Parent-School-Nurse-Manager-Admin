@@ -13,7 +13,6 @@ import { FilterBar } from "./_components/filter-bar";
 import { useMedicationStore } from "@/stores/medication-store";
 import { MedicationTable } from "./_components/medication-table";
 
-
 // Define the mapping function to transform medication data for display
 const mapMedicationForDisplay = (medication: any) => {
   return {
@@ -24,10 +23,11 @@ const mapMedicationForDisplay = (medication: any) => {
     unit: medication.unit !== undefined ? medication.unit : 0,
     usage_instructions: medication.usage_instructions || "Không có hướng dẫn",
     side_effects: medication.side_effects || "Không có tác dụng phụ",
-    contraindications: medication.contraindications || "Không có chống chỉ định",
+    contraindications:
+      medication.contraindications || "Không có chống chỉ định",
     description: medication.description || "Không có mô tả",
-    created_at: medication.created_at 
-      ? new Date(medication.created_at).toLocaleDateString("vi-VN") 
+    created_at: medication.created_at
+      ? new Date(medication.created_at).toLocaleDateString("vi-VN")
       : "Không rõ",
     updated_at: medication.updated_at
       ? new Date(medication.updated_at).toLocaleDateString("vi-VN")
@@ -54,43 +54,49 @@ export default function MedicationsPage() {
 
   const handleDeleteMedication = (medication: any) => {
     console.log("Delete medication:", medication);
-    if (window.confirm(`Bạn có chắc chắn muốn xóa thuốc "${medication.name}"?`)) {
-      useMedicationStore.getState().deleteMedication(medication.id)
+    if (
+      window.confirm(`Bạn có chắc chắn muốn xóa thuốc "${medication.name}"?`)
+    ) {
+      useMedicationStore
+        .getState()
+        .deleteMedication(medication.id)
         .then(() => {
           console.log("Medication deleted successfully");
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Failed to delete medication:", err);
         });
     }
   };
 
   // Transform Medication data for display
-  const displayMedications = Array.isArray(medications) 
-  ? medications.map(mapMedicationForDisplay).filter((medication : any) => {
-    // Apply search filter if exists
-    if (searchQuery && searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      return (
-        medication.name.toLowerCase().includes(query) ||
-        medication.type.toLowerCase().includes(query) ||
-        medication.description.toLowerCase().includes(query)
-      );
-    }
-    return true;
-  })
-  // Apply type filter if not "all"
-  .filter((medication) => {
-    if (typeFilter !== "all") {
-      return medication.type.toLowerCase() === typeFilter.toLowerCase();
-    }
-    return true;
-  })
-  : [];
+  const displayMedications = Array.isArray(medications)
+    ? medications
+        .map(mapMedicationForDisplay)
+        .filter((medication: any) => {
+          // Apply search filter if exists
+          if (searchQuery && searchQuery.trim() !== "") {
+            const query = searchQuery.toLowerCase();
+            return (
+              medication.name.toLowerCase().includes(query) ||
+              medication.type.toLowerCase().includes(query) ||
+              medication.description.toLowerCase().includes(query)
+            );
+          }
+          return true;
+        })
+        // Apply type filter if not "all"
+        .filter((medication) => {
+          if (typeFilter !== "all") {
+            return medication.type.toLowerCase() === typeFilter.toLowerCase();
+          }
+          return true;
+        })
+    : [];
 
   useEffect(() => {
     // Fetch medications when component mounts
-    fetchMedications().catch(err => 
+    fetchMedications().catch((err) =>
       console.error("Failed to fetch medications:", err)
     );
   }, [fetchMedications]);
@@ -101,9 +107,7 @@ export default function MedicationsPage() {
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
           Quản lý thuốc
         </h1>
-        <p className="text-blue-600">
-          Danh sách thuốc và thông tin chi tiết
-        </p>
+        <p className="text-blue-600">Danh sách thuốc và thông tin chi tiết</p>
       </div>
 
       <Card className="border-blue-100">

@@ -1,41 +1,67 @@
-import {
-  GetAllParentsResponse,
-  Parent,
-  UpdateParentForm,
-  UpdateParentResponse,
-} from "@/lib/type/parents";
+import { API_URL } from "@/lib/env";
+import { Parent } from "@/lib/type/parents";
+import { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
 import { fetchData } from "../api";
 
-export const getAllParents = (
-  page: number = 1,
-  pageSize: number = 10
-): Promise<GetAllParentsResponse> => {
-  return fetchData<GetAllParentsResponse>(
-    `/parents?page=${page}&pageSize=${pageSize}`
-  );
+// Get all parents
+export const getAllParents = async (): Promise<Parent[]> => {
+  try {
+    return await fetchData<Parent[]>("/parents");
+  } catch (error) {
+    console.error("Error fetching parents:", error);
+    throw error;
+  }
 };
 
-export const createParent = (
-  data: Omit<Parent, "_id" | "createdAt" | "updatedAt">
+// Create a new parent
+export const createParent = async (
+  formData: ParentFormValues
 ): Promise<Parent> => {
-  return fetchData<Parent>("/parents", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  try {
+    // Convert ParentFormValues to the format expected by the API
+    const parentData = {
+      ...formData,
+      user: {
+        username: formData.email,
+        password: "defaultPassword123", // This might need to be generated or prompted
+        role: "parent",
+      },
+    };
+
+    return await fetchData<Parent>("/parents", {
+      method: "POST",
+      body: JSON.stringify(parentData),
+    });
+  } catch (error) {
+    console.error("Error creating parent:", error);
+    throw error;
+  }
 };
 
-export const updateParent = (
-  id: string,
-  data: UpdateParentForm
-): Promise<UpdateParentResponse> => {
-  return fetchData<UpdateParentResponse>(`/parents/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
+// Update a parent
+export const updateParent = async (
+  parentId: string,
+  formData: Partial<ParentFormValues>
+): Promise<Parent> => {
+  try {
+    return await fetchData<Parent>(`/parents/${parentId}`, {
+      method: "PUT",
+      body: JSON.stringify(formData),
+    });
+  } catch (error) {
+    console.error("Error updating parent:", error);
+    throw error;
+  }
 };
 
-export const deleteParent = (id: string): Promise<void> => {
-  return fetchData<void>(`/parents/${id}`, {
-    method: "DELETE",
-  });
+// Delete a parent
+export const deleteParent = async (parentId: string): Promise<void> => {
+  try {
+    await fetchData<void>(`/parents/${parentId}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error("Error deleting parent:", error);
+    throw error;
+  }
 };

@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
-import { AuthState } from "@/lib/type/auth";
+import { AuthStore } from "@/lib/type/auth";
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   profile: null,
   isAuthenticated: false,

@@ -6,7 +6,7 @@ interface User {
   updated_at: Date;
 }
 
-interface UserProfile {
+interface UserProfile { 
   name: string;
   gender: string;
   birth: string;

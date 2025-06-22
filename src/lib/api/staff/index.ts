@@ -1,7 +1,6 @@
-import { API_URL } from "@/lib/env";
 import { Staff } from "@/lib/type/staff";
 import { StaffFormValues } from "@/app/cms/manage-staffs/_components/add-staff-dialog";
-import { fetchData } from "./api";
+import { fetchData } from "../api";
 
 // Get all parents
 export const getAllStaffs = async (): Promise<Staff[]> => {

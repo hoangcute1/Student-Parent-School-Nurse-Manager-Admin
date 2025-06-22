@@ -2,7 +2,6 @@
 
 // FormValues type used by medication forms
 export interface Medication {
-  _id: string;
   name: string;
   dosage: string;
   unit: string;

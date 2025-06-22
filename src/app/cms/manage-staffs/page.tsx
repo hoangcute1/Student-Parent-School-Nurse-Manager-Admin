@@ -61,18 +61,18 @@ export default function StaffsPage() {
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Quản lý phụ huynh
+          Quản lý Nhân viên
         </h1>
         <p className="text-blue-600">
-          Danh sách phụ huynh và thông tin liên hệ
+          Quản lý thông tin và liên lạc với nhân viên trong trường học. 
         </p>
       </div>
 
       <Card className="border-blue-100">
         <CardHeader>
-          <CardTitle className="text-blue-800">Danh sách phụ huynh</CardTitle>
+          <CardTitle className="text-blue-800">Quản Lý Nhân Viên</CardTitle>
           <CardDescription className="text-blue-600">
-            Quản lý thông tin và liên lạc với phụ huynh trong trường
+            Tìm kiếm, lọc và thêm mới nhân viên vào hệ thống.
           </CardDescription>
         </CardHeader>
         <CardContent>

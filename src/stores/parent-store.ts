@@ -3,7 +3,6 @@ import { create } from "zustand";
 import { getAllParents, createParent } from "@/lib/api/parent";
 import type { ParentStore } from "@/lib/type/parents";
 import type { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
-import { UserProfile } from "@/lib/type/users";
 
 // Define DisplayParent for the UI
 interface DisplayParent {

@@ -1,10 +1,9 @@
 import { create } from "zustand";
 import { Student } from "@/lib/type/students";
-import { 
-  getStudentsForCurrentParent, 
-  getStudentHealthRecord, 
+import {
+  getStudentsForCurrentParent,
   getStudentsByClass,
-  getAllStudents
+  getAllStudents,
 } from "@/lib/api/student";
 import { useAuthStore } from "./auth-store";
 
@@ -28,19 +27,19 @@ export const useStudentStore = create<StudentStore>((set) => ({
   fetchStudents: async () => {
     try {
       set({ isLoading: true, error: null });
-      
+
       // Check if user is authenticated and is a parent
       const { user } = useAuthStore.getState();
-      
+
       if (!user || user.role !== "parent") {
         throw new Error("User not authenticated or not a parent");
       }
-      
+
       console.log("Fetching students for current parent");
-      
+
       const studentList = await getStudentsForCurrentParent();
       console.log("Students fetched:", studentList);
-      
+
       set({
         students: studentList,
         error: null,
@@ -57,18 +56,19 @@ export const useStudentStore = create<StudentStore>((set) => ({
   fetchStudentsByClass: async (classId: string) => {
     try {
       set({ isLoading: true, error: null, selectedClassId: classId });
-      
+
       console.log(`Fetching students for class ${classId}`);
-      
+
       const studentList = await getStudentsByClass(classId);
       console.log("Students fetched for class:", studentList);
-      
+
       set({
         students: studentList,
         error: null,
       });
     } catch (err: any) {
-      const errorMessage = err.message || `Failed to fetch students for class ${classId}`;
+      const errorMessage =
+        err.message || `Failed to fetch students for class ${classId}`;
       console.error(`Failed to fetch students for class ${classId}:`, err);
       set({ error: errorMessage, students: [] });
     } finally {
@@ -79,12 +79,12 @@ export const useStudentStore = create<StudentStore>((set) => ({
   fetchAllStudents: async () => {
     try {
       set({ isLoading: true, error: null, selectedClassId: null });
-      
+
       console.log("Fetching all students");
-      
+
       const studentList = await getAllStudents();
       console.log("All students fetched:", studentList);
-      
+
       set({
         students: studentList,
         error: null,
@@ -100,5 +100,5 @@ export const useStudentStore = create<StudentStore>((set) => ({
 
   setSelectedClassId: (classId: string | null) => {
     set({ selectedClassId: classId });
-  }
+  },
 }));

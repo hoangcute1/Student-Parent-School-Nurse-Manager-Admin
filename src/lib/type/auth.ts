@@ -20,7 +20,7 @@ interface GetMeResponse {
 interface AuthResponse extends GetMeResponse {
   token: string;
 }
-interface AuthState {
+interface AuthStore {
   // Thông tin người dùng
   user: UserLoginResponse | null;
   profile: UserProfile | null;
@@ -41,7 +41,7 @@ export type {
   AuthResponse,
   GetMeResponse,
   TokenResponse,
-  AuthState,
+  AuthStore,
   LoginRequestCredentials,
   LoginVerifyCredentials,
 };
