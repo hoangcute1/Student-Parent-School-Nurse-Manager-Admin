@@ -234,7 +234,7 @@ export class HealthRecordService {
   async findHealthRecordsForParentChildren(parentId: string): Promise<any[]> {
     try {
       // First, find the parent by user ID
-      const parent = await this.parentService.findByuser(parentId);
+      const parent = await this.parentService.findById(parentId);
 
       if (!parent) {
         throw new NotFoundException(`Parent with user ID "${parentId}" not found`);

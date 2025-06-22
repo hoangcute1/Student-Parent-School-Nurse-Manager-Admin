@@ -1,22 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
 import { ParentStudentService } from '@/services/parent-student.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateParentStudentDto } from '@/decorations/dto/create-parent-student.dto';
 import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.dto';
@@ -56,15 +40,15 @@ export class ParentStudentController {
     return this.parentStudentService.findById(id);
   }
 
-  @Get('parent/:parentId')
-  @ApiOperation({ summary: 'Get parent-student relationships by parent ID' })
-  @ApiParam({ name: 'parentId', description: 'Parent ID' })
+  @Get('parent/:userId')
+  @ApiOperation({ summary: 'Get parent-student relationships by user ID' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
   @ApiResponse({
     status: 200,
     description: 'Return parent-student relationships for a parent.',
   })
-  async findByParentId(@Param('parentId') parentId: string) {
-    return this.parentStudentService.findByParentId(parentId);
+  async findByParentId(@Param('userId') userId: string) {
+    return this.parentStudentService.findByUserId(userId);
   }
 
   @Get('student/:studentId')
@@ -99,10 +83,7 @@ export class ParentStudentController {
     status: 404,
     description: 'Parent-Student relationship not found.',
   })
-  async update(
-    @Param('id') id: string,
-    @Body() updateParentStudentDto: UpdateParentStudentDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateParentStudentDto: UpdateParentStudentDto) {
     return this.parentStudentService.update(id, updateParentStudentDto);
   }
 
@@ -135,20 +116,14 @@ export class ParentStudentController {
     status: 403,
     description: 'Forbidden. User does not have sufficient permissions.',
   })
-  async findStudentsWithHealthRecordsByParentId(
-    @Param('parentId') parentId: string,
-    @Req() req,
-  ) {
+  async findStudentsWithHealthRecordsByParentId(@Param('parentId') parentId: string, @Req() req) {
     // For additional security, if user is a parent, verify they're only accessing their own data
     if (req.user && req.user.role === Role.PARENT) {
       // Get the parent record for the logged-in user
       const parentIdFromToken = req.user.user;
       // You can add additional verification here if needed
-      
     }
-
-    return this.parentStudentService.findStudentsWithHealthRecordsByParentId(
-      parentId,
-    );
+    return this.parentStudentService.findStudentsWithHealthRecordsByParentId(parentId);
   }
+
 }

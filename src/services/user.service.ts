@@ -94,28 +94,6 @@ export class UserService {
       .exec();
   }
 
-  async updateRole(id: string, roleName: string): Promise<User> {
-    // Verify user exists
-    const user = await this.userModel.findById(id).exec();
-    if (!user) {
-      throw new NotFoundException(`User với ID "${id}" không tìm thấy`);
-    }
-
-    try {
-      // Find the role by name
-
-      // Update user's role
-      user.roleId = role.id as any;
-      user.updatedAt = new Date();
-
-      return user.save();
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(`Vai trò "${roleName}" không tìm thấy`);
-      }
-      throw error;
-    }
-  }
   async deleteById(id: string) {
     return this.userModel.findByIdAndDelete(id).exec();
   }

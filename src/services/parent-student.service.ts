@@ -1,3 +1,4 @@
+import { Parent } from '@/schemas/parent.schema';
 import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -6,6 +7,7 @@ import { CreateParentStudentDto } from '@/decorations/dto/create-parent-student.
 import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.dto';
 import { StudentService } from './student.service';
 import { HealthRecordService } from './health-record.service';
+import { ParentService } from './parent.service';
 
 @Injectable()
 export class ParentStudentService {
@@ -14,6 +16,7 @@ export class ParentStudentService {
     private parentStudentModel: Model<ParentStudentDocument>,
     @Inject(forwardRef(() => StudentService))
     private healthRecordService: HealthRecordService,
+    private parentService: ParentService,
   ) {}
 
   async create(createParentStudentDto: CreateParentStudentDto): Promise<ParentStudent> {
@@ -39,8 +42,19 @@ export class ParentStudentService {
     return parentStudent;
   }
 
-  async findByParentId(parentId: string): Promise<ParentStudent[]> {
-    return this.parentStudentModel.find({ parent: parentId }).populate('student').exec();
+  async findByUserId(userId: string): Promise<ParentStudent[]> {
+    const parentId = await this.parentService.findByUserId(userId);
+    return this.parentStudentModel
+      .find({ parent: parentId })
+      .populate({
+        path: 'student',
+        populate: {
+          path: 'class',
+          select: 'name',
+        },
+        select: 'studentId name birth gender created_at updated_at',
+      })
+      .exec();
   }
 
   async findByStudentId(studentId: string): Promise<ParentStudent[]> {

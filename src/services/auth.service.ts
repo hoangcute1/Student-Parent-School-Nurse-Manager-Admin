@@ -212,7 +212,7 @@ export class AuthService {
           role = 'staff';
         } else {
           // Try to determine if the user is a parent
-          const parent = await this.parentService.findByuser(user);
+          const parent = await this.parentService.findByUserId(user);
           if (parent) {
             role = 'parent';
           } else {
@@ -242,7 +242,7 @@ export class AuthService {
 
   // Phương thức xác thực tài khoản phụ huynh
   async validateParentAccount(userId: string): Promise<boolean> {
-    const parent = await this.parentService.findByuser(userId);
+    const parent = await this.parentService.findByUserId(userId);
     if (!parent) {
       throw new UnauthorizedException('Không phải tài khoản phụ huynh');
     }
@@ -327,7 +327,7 @@ export class AuthService {
         };
       } else {
         // Check if parent
-        const parent = await this.parentService.findByuser(userId);
+        const parent = await this.parentService.findByUserId(userId);
         if (parent) {
           role = 'parent';
           roleData = {
@@ -381,7 +381,7 @@ export class AuthService {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
 
-    const parent = await this.parentService.findByuser(userId);
+    const parent = await this.parentService.findByUserId(userId);
     if (!parent) {
       throw new UnauthorizedException('Không phải tài khoản phụ huynh');
     }
@@ -514,27 +514,4 @@ export class AuthService {
    * @param email Email của người dùng
    * @returns Thông tin đăng nhập
    */
-  async loginParentGoogle(email: string): Promise<any> {
-    // Tìm user với email
-    const user = await this.userService.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedException('Email chưa được đăng ký trong hệ thống');
-    }
-
-    const userId = user._id?.toString();
-    if (!userId) {
-      throw new UnauthorizedException('Invalid user ID');
-    }
-
-    // Kiểm tra xem user có phải là phụ huynh không
-    const parent = await this.parentService.findByUserId(userId);
-    if (!parent) {
-      throw new UnauthorizedException(
-        'Email này không được đăng ký làm tài khoản phụ huynh',
-      );
-    }
-
-    // Đăng nhập bình thường
-    return this.login(user);
-  }
 }

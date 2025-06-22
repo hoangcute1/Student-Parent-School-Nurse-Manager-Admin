@@ -79,8 +79,12 @@ export class ParentService {
     return parent;
   }
 
-  async findByuser(user: string): Promise<ParentDocument | null> {
-    return this.parentModel.findOne({ user: user }).exec();
+  async findByUserId(userId: string): Promise<ParentDocument> {
+    const parent = await this.parentModel.findOne({ user: userId }).populate('user').exec();
+    if (!parent) {
+      throw new NotFoundException(`Parent with user ID "${userId}" not found`);
+    }
+    return parent;
   }
 
   async create(createParentDto: CreateParentDto): Promise<ParentDocument> {
