@@ -19,11 +19,7 @@ export default function Overall() {
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
           Thông tin tổng quan sức khỏe
         </h1>
-        <p className="text-blue-600">
-            Đây là mục tổng quan về sức khỏe của học sinh, bao gồm các thông tin
-            cơ bản và các chỉ số sức khỏe quan trọng. Bạn có thể xem chi tiết từng
-            mục bằng cách nhấp vào các liên kết bên dưới.
-        </p>
+        
       </div>
       <Card className="border-blue-100 bg-blue-50/30">
         <CardHeader>

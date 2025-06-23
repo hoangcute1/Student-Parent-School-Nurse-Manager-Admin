@@ -11,20 +11,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AddStudentDialog } from "./add-student-dialog";
-import type { StudentFormValues } from "./add-student-dialog";
 
 interface FilterBarProps {
   onSearchChange?: (value: string) => void;
   onClassFilterChange?: (value: string) => void;
   onHealthStatusChange?: (value: string) => void;
-  onAddStudent: (data: StudentFormValues) => Promise<void>;
 }
 
 export function FilterBar({
   onSearchChange,
   onClassFilterChange,
   onHealthStatusChange,
-  onAddStudent,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -72,7 +69,6 @@ export function FilterBar({
       <Button className="bg-blue-600 hover:bg-blue-700">
         <Download className="h-4 w-4" />
       </Button>
-      <AddStudentDialog onSubmit={onAddStudent} />
     </div>
   );
 }

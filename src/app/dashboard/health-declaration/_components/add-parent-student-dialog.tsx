@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import type { User as AppUser } from "@/lib/type/users";
-import { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
+
 
 const ParentStudentFormSchema = z.object({
     
@@ -38,11 +38,11 @@ interface AuthUser {
   role: string;
 }
 
-interface AddParentDialogProps {
-  onSubmit: (data: ParentFormValues) => Promise<void>;
+interface AddParentStudentDialogProps {
+  onSubmit: (data: ParentStudentFormValues) => Promise<void>;
 }
 
-export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
+export function AddParentStudentDialog({ onSubmit }: AddParentStudentDialogProps) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const { toast } = useToast();
@@ -61,8 +61,8 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
       console.error("Error parsing auth data:", error);
     }
   }, []);
-  const form = useForm<ParentFormValues>({
-    resolver: zodResolver(parentFormSchema),
+  const form = useForm<ParentStudentFormValues>({
+    resolver: zodResolver(ParentStudentFormSchema),
     defaultValues: {
       name: "",
       phone: "",
@@ -71,7 +71,7 @@ export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
     },
   });
 
-  const handleSubmit = async (data: ParentFormValues) => {
+  const handleSubmit = async (data: ParentStudentFormValues) => {
     try {
       await onSubmit(data);
       setOpen(false);

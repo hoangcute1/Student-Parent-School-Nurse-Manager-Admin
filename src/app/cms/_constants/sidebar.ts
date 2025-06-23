@@ -39,39 +39,39 @@ const navLinks = [
     href: "/cms/medications",
     icon: Box,
     label: "Quản lý Kho Thuốc ",
-    description: "Sự kiện thuốc",
+    description: "Thông tin thuốc",
   },
   {
     href: "/cms/sent-medicines",
     icon: Pill,
-    label: "Thuốc gửi từ phụ huynh ",
+    label: "Phụ huynh gửi thuốc",
     description: "Sự kiện thuốc",
   },
   {
     href: "/cms/health-result",
     icon: Heart,
-    label: "Kết quả khám",
-    description: "Kết quả khám",
+    label: "Quản lý Khám sức khỏe",
+    description: "Theo dõi sức khỏe định kỳ",
   },
   
   {
     href: "/cms/events",
     icon: ClipboardCheck,
     label: "Sự kiện y tế",
-    description: "Sự kiện y tế",
+    description: "Xử lý y tế khẩn cấp",
   },
   {
     href: "/cms/vaccinations",
     icon: Syringe,
-    label: "Sự kiện tiêm chủng",
-    description: "Sự kiện tiêm chủng",
+    label: "Quản lý tiêm chủng ",
+    description: "Giám sát tiêm chủng",
   },
 
   {
     href: "/cms/responses",
     icon: MessageCircleMore,
     label: "Quản lý phản hổi",
-    description: "Quản lý phản hồi",
+    description: "phản hồi từ phụ huynh",
   },
 ];
 

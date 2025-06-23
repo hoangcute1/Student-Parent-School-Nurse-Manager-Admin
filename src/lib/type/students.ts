@@ -10,9 +10,31 @@ interface Student {
     name: string;
     grade: string;
   };
-  parentId?: string;
+  parent?: {
+    _id: string;
+    user: string;
+  };
   created_at: string;
   updated_at: string;
+}
+
+interface CreateStudentData {
+  name: string;
+  studentId: string;
+  birth?: string;
+  gender?: string;
+  classId?: string;
+  parentId?: string;
+}
+
+
+interface UpdateStudentData {
+  name: string;
+  studentId: string;
+  birth?: string;
+  gender?: string;
+  classId?: string;
+  parentId?: string;
 }
 interface StudentResponse {
   data: Student[];
@@ -44,9 +66,15 @@ interface StudentStore {
   isLoading: boolean;
   error: string | null;
   selectedClassId: string | null;
+  selectedStudent: Student | null;
+
   fetchStudents: () => Promise<void>;
   fetchStudentsByClass: (classId: string) => Promise<void>;
   setSelectedClassId: (classId: string | null) => void;
+  deleteStudent: (id: string) => Promise<void>;
+  updateStudent: (id: string, studentData: Partial<UpdateStudentData>) => Promise<void>;
+  fetchStudentById: (id: string) => Promise<void>;
+  createStudent: (studentData: Partial<CreateStudentData>) => Promise<void>;
 }
 
-export type { Student, StudentResponse, StudentStore, StudentParentResponse };
+export type { Student, StudentResponse, StudentStore, StudentParentResponse, CreateStudentData, UpdateStudentData };

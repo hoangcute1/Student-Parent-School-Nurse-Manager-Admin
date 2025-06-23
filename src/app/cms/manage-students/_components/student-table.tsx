@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Edit, Plus, MoreHorizontal } from "lucide-react";
+import { Eye, Edit, Plus, MoreHorizontal, Delete } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -24,15 +23,36 @@ interface StudentTableProps {
   students: Student[];
   isLoading: boolean;
   error?: string | null;
+  onView?: (student: Student) => void;
+  onEdit?: (student: Student) => void;
+  onDelete?: (student: Student) => void;
+  onAddHealthEvent?: (student: Student) => void;
+  onAddStudent?: () => void; // Updated prop to trigger dialog opening
 }
 
 export function StudentTable({
   students,
   isLoading,
   error,
+  onView,
+  onEdit,
+  onAddHealthEvent,
+  onDelete,
+  onAddStudent,
 }: StudentTableProps) {
   return (
     <div className="rounded-md border border-blue-200">
+      {/* Add Student Button */}
+      <div className="p-4">
+        <Button
+          onClick={onAddStudent}
+          className="bg-blue-600 hover:bg-blue-700"
+          disabled={!onAddStudent}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Thêm học sinh
+        </Button>
+      </div>
+
       <Table>
         <TableHeader className="bg-blue-50">
           <TableRow>
@@ -122,17 +142,33 @@ export function StudentTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="text-blue-700">
+                      <DropdownMenuItem
+                        className="text-blue-700"
+                        onClick={() => onView?.(student)}
+                      >
                         <Eye className="mr-2 h-4 w-4" />
                         Xem hồ sơ
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-blue-700">
+                      <DropdownMenuItem
+                        className="text-blue-700"
+                        onClick={() => onEdit?.(student)}
+                      >
                         <Edit className="mr-2 h-4 w-4" />
                         Chỉnh sửa
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-blue-700">
+                      <DropdownMenuItem
+                        className="text-blue-700"
+                        onClick={() => onAddHealthEvent?.(student)}
+                      >
                         <Plus className="mr-2 h-4 w-4" />
                         Thêm sự kiện y tế
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-700"
+                        onClick={() => onDelete?.(student)}
+                      >
+                        <Delete className="mr-2 h-4 w-4" />
+                        Xoá
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

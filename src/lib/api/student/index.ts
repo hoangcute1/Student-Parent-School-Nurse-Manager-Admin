@@ -1,9 +1,13 @@
+import { create } from 'zustand';
 import {
+  CreateStudentData,
   Student,
   StudentParentResponse,
   StudentResponse,
+  UpdateStudentData,
 } from "@/lib/type/students";
 import { fetchData } from "../api";
+import { Update } from 'next/dist/build/swc/types';
 
 
 /**
@@ -44,6 +48,54 @@ export const getStudentsByClass = async (
     return response.data || [];
   } catch (error) {
     console.error(`Error fetching students for class ${classId}:`, error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+export const deleteStudent = async (id: string): Promise<void> => {
+  try {
+    await fetchData(`/students/${id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error(`Error deleting student with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updateStudent = async (
+  id: string,
+  studentData: Partial<UpdateStudentData> 
+): Promise<any> => {
+  try {
+    const response = await fetchData<UpdateStudentData>(`/students/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(studentData),
+    });
+    return response;
+  } catch (error) {
+    console.error(`Error updating student with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+
+export const createStudent = async (
+  studentData: Partial<CreateStudentData>
+): Promise<any> => {
+  try { 
+    const response = await fetchData<CreateStudentData>("/students", {
+      method: "POST",
+      body: JSON.stringify(studentData),
+    });
+    return response;
+  } catch (error) {
+    console.error("Error creating student:", error);
     throw error;
   }
 };

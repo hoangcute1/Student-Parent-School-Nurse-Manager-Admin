@@ -153,7 +153,7 @@ export default function ParentMedicine() {
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-teal-800">
-          Thuốc từ Phụ huynh
+          Thuốc gửi từ Phụ huynh
         </h1>
         <p className="text-teal-600">
           Quản lý thuốc cá nhân học sinh do phụ huynh gửi

@@ -59,7 +59,7 @@ export default function CMSPage() {
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Dashboard Quản trị viên
+          Tổng quan hệ thống 
         </h1>
         <p className="text-blue-600">
           Tổng quan hệ thống quản lý sức khỏe học đường

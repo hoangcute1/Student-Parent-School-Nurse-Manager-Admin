@@ -5,19 +5,19 @@ const parentNav = [
     href: "/dashboard/health-declaration",
     icon: UserRoundPen,
     label: "Khai báo sức khoẻ ",
-    description: " khái báo sức khoẻ học sinh",
+    description: " khái báo sức khoẻ của con",
   },
   {
     href: "/dashboard/medications",
     icon: Pill,
     label: "Gửi thuốc",
-    description: "Mục gửi thuốc",
+    description: "Gửi thuốc cho con",
   },
   {
     href: "/dashboard/events",
     icon: BookmarkCheck,
-    label: "Sự kiện y tế",
-    description: "Sự kiện y tế và thông báo",
+    label: "Thông báo sự kiện",
+    description: "Sự kiện y tế của nhà trường",
   },
   
 
@@ -33,13 +33,13 @@ const studentNav = [
     href: "/dashboard/resources",
     icon: Users,
     label: "Lịch sử bệnh án",
-    description: "Lịch sử bệnh án",
+    description: "Hồ sơ bệnh án học sinh",
   },
 
   {
     href: "/dashboard/feedback",
     icon: MessageCircle,
-    label: "Phản hồi",
+    label: "Gửi phản hồi",
     description: "Gửi phản hồi và ý kiến",
   },
 ];

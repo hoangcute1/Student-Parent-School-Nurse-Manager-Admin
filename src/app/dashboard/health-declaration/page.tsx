@@ -25,7 +25,7 @@ interface HealthRecord {
     name: string;
     id: string;
   } | null; // Class can be null if not assigned
-  
+
   allergies: string | null;
   chronicDisease: string | null;
   vision: string;
@@ -103,56 +103,81 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-export default function ParentHealthRecords() {  const [searchTerm, setSearchTerm] = useState("");
+export default function ParentHealthRecords() {
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAddRecordOpen, setIsAddRecordOpen] = useState(false);
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<HealthRecord | null>(
     null
   );
-  
-  const { records, isLoading: isLoadingRecords, error: recordsError, fetchRecords } = useHealthRecordStore();
-  const { students, isLoading: isLoadingStudents, error: studentsError, fetchStudents } = useStudentStore();
+
+  const {
+    records,
+    isLoading: isLoadingRecords,
+    error: recordsError,
+    fetchRecords,
+  } = useHealthRecordStore();
+  const {
+    students,
+    isLoading: isLoadingStudents,
+    error: studentsError,
+    fetchStudents,
+  } = useStudentStore();
   const { user, isAuthenticated, role } = useAuthStore();
-  
+
   useEffect(() => {
     if (isAuthenticated && role === "parent") {
       fetchStudents();
       fetchRecords();
     }
   }, [isAuthenticated, role, fetchRecords, fetchStudents]);
-  
+
   // Map student data to UI health records
   const healthRecords: HealthRecord[] = students.map((student) => {
     // Find health record for this student if it exists
-    const studentRecord = records.find(record => record.student?.studentId === student._id);
-    
+    const studentRecord = records.find(
+      (record) => record.student?.studentId === student._id
+    );
+
     // Transform class data to match HealthRecord interface
-    const classData = typeof student.class === 'object' && student.class 
-      ? { name: student.class.name, id: student.class._id }
-      : null;
-    
+    const classData =
+      typeof student.class === "object" && student.class
+        ? { name: student.class.name, id: student.class._id }
+        : null;
+
     return {
       id: student._id,
       studentName: student.name || "Không có tên",
       class: classData,
-      allergies: studentRecord?.allergies && studentRecord.allergies.length > 0 ? "Có" : null,
-      chronicDisease: studentRecord?.chronic_conditions && studentRecord.chronic_conditions.length > 0 ? "Có" : null,
+      allergies:
+        studentRecord?.allergies && studentRecord.allergies.length > 0
+          ? "Có"
+          : null,
+      chronicDisease:
+        studentRecord?.chronic_conditions &&
+        studentRecord.chronic_conditions.length > 0
+          ? "Có"
+          : null,
       vision: studentRecord?.vision || "Chưa cập nhật",
-      lastUpdated: studentRecord?.updated_at 
-        ? new Date(studentRecord.updated_at).toLocaleDateString("vi-VN") 
+      lastUpdated: studentRecord?.updated_at
+        ? new Date(studentRecord.updated_at).toLocaleDateString("vi-VN")
         : "Chưa cập nhật",
       rawData: studentRecord || null,
-      studentData: student
+      studentData: student,
     };
   });
-  
+
   // Filter records based on search term and category
   const filteredRecords = healthRecords.filter((record) => {
-    const matchesSearch = record.studentName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = record.studentName
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     if (selectedCategory === "all") return matchesSearch;
-    if (selectedCategory === "allergies") return matchesSearch && record.allergies;
-    if (selectedCategory === "chronic") return matchesSearch && record.chronicDisease;
+    if (selectedCategory === "allergies")
+      return matchesSearch && record.allergies;
+    if (selectedCategory === "chronic")
+      return matchesSearch && record.chronicDisease;
     return matchesSearch;
   });
 
@@ -190,72 +215,7 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
           Hồ sơ Sức khỏe
         </h1>
         <p className="text-blue-600">Quản lý thông tin sức khỏe của học sinh</p>
-      </div>      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-blue-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">
-              Tổng hồ sơ
-            </CardTitle>
-            <FileText className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-800">{healthRecords.length}</div>
-            <p className="text-xs text-blue-600">Học sinh đã khai báo</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-red-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">
-              Có dị ứng
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-800">
-              {healthRecords.filter(record => record.allergies).length}
-            </div>
-            <p className="text-xs text-red-600">Cần chú ý đặc biệt</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-orange-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">
-              Bệnh mãn tính
-            </CardTitle>
-            <Heart className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">
-              {healthRecords.filter(record => record.chronicDisease).length}
-            </div>
-            <p className="text-xs text-orange-600">Cần theo dõi</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">
-              BMI bình thường
-            </CardTitle>
-            <Shield className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>            <div className="text-2xl font-bold text-green-800">
-              {healthRecords.filter(record => {
-                if (!record.rawData || !record.rawData.height || !record.rawData.weight) return false;
-                const height = record.rawData.height / 100; // cm to m
-                const weight = record.rawData.weight;
-                const bmi = weight / (height * height);
-                return bmi >= 18.5 && bmi <= 24.9;
-              }).length}
-            </div>
-            <p className="text-xs text-green-600">Có chỉ số BMI tốt</p>
-          </CardContent>
-        </Card>
       </div>
-
       <Tabs defaultValue="all" className="w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <TabsList className="bg-blue-50">
@@ -676,20 +636,25 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                       <TableHead>Cập nhật lần cuối</TableHead>
                       <TableHead className="text-right">Chi tiết</TableHead>
                     </TableRow>
-                  </TableHeader>                  <TableBody>
+                  </TableHeader>
+                  <TableBody>
                     {isLoadingRecords || isLoadingStudents ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-4">
                           <div className="flex justify-center">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                           </div>
-                          <p className="mt-2 text-sm text-gray-500">Đang tải dữ liệu...</p>
+                          <p className="mt-2 text-sm text-gray-500">
+                            Đang tải dữ liệu...
+                          </p>
                         </TableCell>
                       </TableRow>
                     ) : filteredRecords.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-4">
-                          <p className="text-gray-500">Không có dữ liệu hồ sơ sức khỏe</p>
+                          <p className="text-gray-500">
+                            Không có dữ liệu hồ sơ sức khỏe
+                          </p>
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -929,7 +894,6 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
           </Card>
         </TabsContent>
       </Tabs>
-
       {/* Health Record Detail View Dialog */}
       <Dialog open={isDetailViewOpen} onOpenChange={setIsDetailViewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -943,7 +907,9 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
           </DialogHeader>
 
           {selectedRecord && (
-            <div className="space-y-6">              {/* Thông tin cơ bản */}
+            <div className="space-y-6">
+              {" "}
+              {/* Thông tin cơ bản */}
               <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
                 <h3 className="text-lg font-semibold text-blue-800 mb-3">
                   Thông tin cơ bản
@@ -970,60 +936,74 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                     <p className="text-sm font-semibold">
                       {selectedRecord.lastUpdated}
                     </p>
-                  </div>                  <div>
+                  </div>{" "}
+                  <div>
                     <p className="text-sm font-medium text-gray-500">
                       Nhóm máu:
                     </p>
-                    <p className="text-sm font-semibold">{selectedRecord.rawData?.blood_type || "Chưa cập nhật"}</p>
+                    <p className="text-sm font-semibold">
+                      {selectedRecord.rawData?.blood_type || "Chưa cập nhật"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">
                       Chiều cao:
                     </p>
-                    <p className="text-sm font-semibold">{selectedRecord.rawData?.height ? `${selectedRecord.rawData.height} cm` : "Chưa cập nhật"}</p>
+                    <p className="text-sm font-semibold">
+                      {selectedRecord.rawData?.height
+                        ? `${selectedRecord.rawData.height} cm`
+                        : "Chưa cập nhật"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">
                       Cân nặng:
                     </p>
-                    <p className="text-sm font-semibold">{selectedRecord.rawData?.weight ? `${selectedRecord.rawData.weight} kg` : "Chưa cập nhật"}</p>
+                    <p className="text-sm font-semibold">
+                      {selectedRecord.rawData?.weight
+                        ? `${selectedRecord.rawData.weight} kg`
+                        : "Chưa cập nhật"}
+                    </p>
                   </div>
                 </div>
-              </div>              {/* Dị ứng */}
-              <div className="rounded-lg border border-red-100 bg-red-50 p-4">                <h3 className="text-lg font-semibold text-red-800 mb-3">
+              </div>{" "}
+              {/* Dị ứng */}
+              <div className="rounded-lg border border-red-100 bg-red-50 p-4">
+                {" "}
+                <h3 className="text-lg font-semibold text-red-800 mb-3">
                   Dị ứng
                 </h3>
                 {selectedRecord.allergies ? (
                   <div className="space-y-2">
-                    {selectedRecord.rawData?.allergies?.map((allergy, index) => (
-                      <div key={index} className="flex items-center">
-                        <Badge className="bg-red-100 text-red-800 mr-2">
-                          {allergy}
-                        </Badge>
-                      </div>
-                    ))}
+                    {selectedRecord.rawData?.allergies?.map(
+                      (allergy, index) => (
+                        <div key={index} className="flex items-center">
+                          <Badge className="bg-red-100 text-red-800 mr-2">
+                            {allergy}
+                          </Badge>
+                        </div>
+                      )
+                    )}
                     <p className="text-sm mt-3">
-                      <strong>Lưu ý:</strong> Các dị ứng trên cần được theo dõi và tránh tiếp xúc với tác nhân gây dị ứng.
+                      <strong>Lưu ý:</strong> Các dị ứng trên cần được theo dõi
+                      và tránh tiếp xúc với tác nhân gây dị ứng.
                     </p>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">Không có dị ứng</p>
                 )}
-              </div>              {/* Bệnh mãn tính */}
-              <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">                <h3 className="text-lg font-semibold text-orange-800 mb-3">
+              </div>{" "}
+              {/* Bệnh mãn tính */}
+              <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">
+                {" "}
+                <h3 className="text-lg font-semibold text-orange-800 mb-3">
                   Bệnh mãn tính
                 </h3>
                 {selectedRecord.chronicDisease ? (
                   <div className="space-y-2">
-                    {selectedRecord.rawData?.chronic_conditions?.map((condition, index) => (
-                      <div key={index} className="flex items-center mb-2">
-                        <Badge className="bg-orange-100 text-orange-800 mr-2">
-                          {condition}
-                        </Badge>
-                      </div>
-                    ))}
                     <p className="text-sm mt-3">
-                      <strong>Lưu ý:</strong> Các bệnh mãn tính trên cần được theo dõi thường xuyên và có kế hoạch điều trị phù hợp.
+                      <strong>Lưu ý:</strong> Các bệnh mãn tính trên cần được
+                      theo dõi thường xuyên và có kế hoạch điều trị phù hợp.
                     </p>
                   </div>
                 ) : (
@@ -1032,7 +1012,6 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                   </p>
                 )}
               </div>
-
               {/* Thị lực và thính lực */}
               <div className="rounded-lg border border-green-100 bg-green-50 p-4">
                 <h3 className="text-lg font-semibold text-green-800 mb-3">
@@ -1062,8 +1041,8 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                       Bình thường
                     </Badge>
                   </div>
-                </div>              </div>
-
+                </div>{" "}
+              </div>
               {/* Lịch sử điều trị */}
               <div className="rounded-lg border border-purple-100 bg-purple-50 p-4">
                 <h3 className="text-lg font-semibold text-purple-800 mb-3">
@@ -1093,7 +1072,6 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                   <strong>Tỷ lệ hoàn thành:</strong> 95%
                 </p>
               </div>
-
               {/* Thông tin liên hệ khẩn cấp */}
               <div className="rounded-lg border border-red-100 bg-red-50 p-4">
                 <h3 className="text-lg font-semibold text-red-800 mb-3">
@@ -1112,7 +1090,6 @@ export default function ParentHealthRecords() {  const [searchTerm, setSearchTer
                   </p>
                 </div>
               </div>
-
               <div className="flex justify-end gap-2 pt-4">
                 <Button
                   variant="outline"
