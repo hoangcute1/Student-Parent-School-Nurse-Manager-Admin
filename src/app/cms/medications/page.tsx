@@ -8,10 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 import { FilterBar } from "./_components/filter-bar";
 import { useMedicationStore } from "@/stores/medication-store";
 import { MedicationTable } from "./_components/medication-table";
+import { MedicationFormDialog } from "./_components/medication-form-dialog";
 
 // Define the mapping function to transform medication data for display
 const mapMedicationForDisplay = (medication: any) => {
@@ -40,6 +43,7 @@ export default function MedicationsPage() {
     useMedicationStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [openAddDialog, setOpenAddDialog] = useState(false);
 
   // Action handlers for medications
   const handleViewMedication = (medication: any) => {
@@ -67,6 +71,12 @@ export default function MedicationsPage() {
           console.error("Failed to delete medication:", err);
         });
     }
+  };
+
+  // Thêm thuốc mới
+  const handleAddMedication = (data: any) => {
+    addMedication(data);
+    setOpenAddDialog(false);
   };
 
   // Transform Medication data for display
@@ -111,11 +121,22 @@ export default function MedicationsPage() {
       </div>
 
       <Card className="border-blue-100">
-        <CardHeader>
-          <CardTitle className="text-blue-800">Danh sách thuốc</CardTitle>
-          <CardDescription className="text-blue-600">
-            Quản lý thông tin về thuốc và hướng dẫn sử dụng
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-blue-800">Danh sách thuốc</CardTitle>
+            <CardDescription className="text-blue-600">
+              Quản lý thông tin về thuốc và hướng dẫn sử dụng
+            </CardDescription>
+          </div>
+          <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
+            <DialogTrigger asChild>
+              <Button variant="default">+ Thêm thuốc mới</Button>
+            </DialogTrigger>
+            <MedicationFormDialog
+              onSubmit={handleAddMedication}
+              onCancel={() => setOpenAddDialog(false)}
+            />
+          </Dialog>
         </CardHeader>
         <CardContent>
           <FilterBar
