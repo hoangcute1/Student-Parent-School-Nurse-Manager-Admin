@@ -17,6 +17,11 @@ import { StaffService } from './staff.service';
 import { AdminService } from './admin.service';
 import { ProfileService } from './profile.service';
 import { TokenService } from './token-generator.service';
+import { OAuth2Client } from 'google-auth-library';
+import { ProfileDocument } from 'src/services/profile.service';
+
+const googleClient = new OAuth2Client('485501319962-sh11atcehvgcfdfeoem7fv6igdqql6ud.apps.googleusercontent.com');
+
 
 @Injectable()
 export class AuthService {
@@ -514,4 +519,76 @@ export class AuthService {
    * @param email Email của người dùng
    * @returns Thông tin đăng nhập
    */
+  async loginGoogle(token: string): Promise<any> {
+  // 1. Xác thực token với Google
+  const ticket = await googleClient.verifyIdToken({
+    idToken: token,
+    audience: '485501319962-sh11atcehvgcfdfeoem7fv6igdqql6ud.apps.googleusercontent.com',
+  });
+  const payload = ticket.getPayload();
+  const email = payload?.email;
+
+  if (!email)
+    throw new NotFoundException('Email không xác định từ Google token');
+
+  // 2. Kiểm tra email trong hệ thống
+  const user = await this.UserService.findByEmail(email);
+
+  console.log("login user info",user);
+  if (!user)
+    throw new NotFoundException('Email không tồn tại trong hệ thống');
+
+  const user_id = (user as any)._id?.toString();
+
+  // 3. Xác định role
+  let role = 'user';
+ let profile: ProfileDocument | null = null;
+
+
+  const admin = await this.adminService.findByuser(user_id);
+  if (admin) {
+    role = 'admin';
+    profile = await this.profileService.findByuser(user_id);
+  } else {
+    const staff = await this.staffService.findByuser(user_id);
+    if (staff) {
+      role = 'staff';
+      profile = await this.profileService.findByuser(user_id);
+    } else {
+      const parent = await this.parentService.findByUserId(user_id);
+      if (parent) {
+        role = 'parent';
+        profile = await this.profileService.findByuser(user_id);
+      }
+    }
+  }
+
+  // 4. Generate tokens
+  const tokens = await this.generateTokens(user_id, email, role);
+
+  // 5. Return data with tokens
+  return {
+    tokens: {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    },
+    user: {
+      email: user.email,
+      role,
+    },
+    profile: profile
+      ? {
+          name: profile.name,
+          phone: profile.phone,
+          gender: profile.gender,
+          birth: profile.birth,
+          address: profile.address,
+          avatar: profile.avatar,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at,
+        }
+      : null,
+  };
+}
+// ...existing code...
 }

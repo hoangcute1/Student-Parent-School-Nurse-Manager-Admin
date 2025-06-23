@@ -239,4 +239,16 @@ export class AuthController {
   async getMeFromToken(@Body('token') token: string) {
     return this.authService.getMe(token);
   }
+
+  @Post('login-google')
+@ApiOperation({ summary: 'Đăng nhập bằng Google token' })
+@ApiBody({ schema: { properties: { token: { type: 'string' } } } })
+@ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
+@ApiResponse({
+  status: 401,
+  description: 'Token không hợp lệ hoặc email không tồn tại.',
+})
+async loginGoogle(@Body('token') token: string) {
+  return this.authService.loginGoogle(token);
+}
 }

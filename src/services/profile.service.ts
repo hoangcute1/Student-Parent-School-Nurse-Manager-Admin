@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { Profile, ProfileDocument } from '../schemas/profile.schema';
 import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
 import { UpdateProfileDto } from '@/decorations/dto/update-profile.dto';
-
+ export { ProfileDocument }; 
 @Injectable()
 export class ProfileService {
   constructor(
@@ -81,4 +81,5 @@ export class ProfileService {
 
     return deletedProfile;
   }
+ 
 }
