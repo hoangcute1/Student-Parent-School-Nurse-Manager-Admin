@@ -1,16 +1,16 @@
-import { StudentParentResponse } from "@/lib/type/students";
+import { ParentStudents } from "@/lib/type/parent-students";
 import { fetchData } from "../api";
 
 export const getStudentsByParentId = async (
-  parentId: string
-): Promise<StudentParentResponse[]> => {
+  userId: string
+): Promise<ParentStudents[]> => {
   try {
-    const response = await fetchData<StudentParentResponse[]>(
-      `/parent-students/parent/${parentId}`
+    const response = await fetchData<ParentStudents[]>(
+      `/parent-students/parent/${userId}`
     );
     return response || [];
   } catch (error) {
-    console.error(`Error fetching students for parent ${parentId}:`, error);
+    console.error(`Error fetching students for parent ${userId}:`, error);
     throw error;
   }
 };

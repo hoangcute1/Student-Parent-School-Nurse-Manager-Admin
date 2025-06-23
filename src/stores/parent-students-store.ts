@@ -1,9 +1,9 @@
 import { getAuthToken, parseJwt } from "@/lib/api/auth/token";
 import { getStudentsByParentId } from "@/lib/api/parent-students/parent-students";
-import { StudentParentStore } from "@/lib/type/student-parent";
+import { ParentStudentsStore } from "@/lib/type/parent-students";
 import { create } from "zustand";
 
-export const useStudentParentStore = create<StudentParentStore>((set, get) => ({
+export const  useParentStudentsStore = create<ParentStudentsStore>((set, get) => ({
   studentsData: [],
   isLoading: false,
   error: null,

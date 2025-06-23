@@ -1,35 +1,35 @@
 import { Parent } from "@/lib/type/parents";
 import { Student } from "./students";
-import { HealthRecord } from "@/lib/type/health-record";
-import { ParentStudentFormValues } from "@/app/dashboard/health-declaration/_components/add-parent-student-dialog";
+import { HealthRecord } from "./health-record";
 
-interface ParentStudent {
+
+
+interface ParentStudents {
   _id: string;
   parent: Parent;
   student: Student;
-  health_record: HealthRecord;
+  healthRecord: HealthRecord;
 }
-interface ParentStore extends Parent {}
-interface StudentStore extends Student {}
+interface ParentData extends Parent {}
+interface StudentData extends Student {}
 interface ParentStudentHealthRecord extends HealthRecord {}
 
 interface ParentStudentTableRow {
-  data: StudentStore[];
+  data: StudentData[];
   total: number;
   page: number;
   limit: number;
 }
 
-interface ParentStudentStore {
-  parentStudents: ParentStudent[];
+interface ParentStudentsStore {
+  studentsData: ParentStudents[];
   isLoading: boolean;
   error: string | null;
-  fetchParentStudents: () => Promise<void>;
-  addParentStudent: (data: ParentStudentFormValues) => Promise<void>;
+  fetchStudentsByParent: () => Promise<void>;
 }
 
 interface GetAllParentsResponse {
-  data: ParentStudent[];
+  data: ParentStudents[];
   total: number;
   page: number;
   limit: number;
@@ -38,18 +38,18 @@ interface GetAllParentsResponse {
 interface UpdateParentStudentForm
   extends Partial<
     Omit<
-      StudentStore & ParentStudentHealthRecord,
+      StudentData & ParentStudentHealthRecord,
       "_id" | "created_at" | "updated_at"
     >
   > {}
 
 export type {
-  ParentStudent,
-  ParentStore,
-  StudentStore,
+  ParentStudents,
+  ParentData,
+  StudentData,
   ParentStudentHealthRecord,
   ParentStudentTableRow,
-  ParentStudentStore,
+  ParentStudentsStore,
   GetAllParentsResponse,
   UpdateParentStudentForm,
 };

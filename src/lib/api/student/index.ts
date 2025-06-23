@@ -2,12 +2,10 @@ import { create } from 'zustand';
 import {
   CreateStudentData,
   Student,
-  StudentParentResponse,
   StudentResponse,
   UpdateStudentData,
 } from "@/lib/type/students";
 import { fetchData } from "../api";
-import { Update } from 'next/dist/build/swc/types';
 
 
 /**
@@ -51,10 +49,6 @@ export const getStudentsByClass = async (
     throw error;
   }
 };
-
-
-
-
 
 
 export const deleteStudent = async (id: string): Promise<void> => {

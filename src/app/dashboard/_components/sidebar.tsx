@@ -3,14 +3,12 @@ import { cn } from "@/lib/utils";
 import { Heart, MessageSquare, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { parentNav, studentNav } from "../_constants/sidebar";
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useStudentStore } from "@/stores/student-store";
-import { useStudentParentStore } from "@/stores/student-parent-store";
-import { Student, StudentParentResponse } from "@/lib/type/students";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
+import { ParentStudents } from "@/lib/type/parent-students";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,13 +16,14 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const { studentsData, fetchStudentsByParent, isLoading } =
-    useStudentParentStore();
+    useParentStudentsStore();
 
   const [showStudentSection, setShowStudentSection] = useState(true);
   const [showStudentList, setShowStudentList] = useState(false);
   const [showParentSection, setShowParentSection] = useState(true);
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentParentResponse | null>(studentsData[0] || null);
+  const [selectedStudent, setSelectedStudent] = useState<ParentStudents | null>(
+    studentsData[0] || null
+  );
   const pathname = usePathname();
 
   useEffect(() => {
@@ -182,7 +181,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                             </div>
                             <div className="text-xs text-blue-600">
                               Lớp{" "}
-                              {(selectedStudent?.student.class.name as any) ||
+                              {(selectedStudent?.student.class?.name as any) ||
                                 "N/A"}{" "}
                             </div>
                           </div>
@@ -221,7 +220,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                                     </span>
                                     <span className="text-xs text-blue-600">
                                       Lớp{" "}
-                                      {studentData.student.class.name || "N/A"}{" "}
+                                      {studentData.student.class?.name || "N/A"}{" "}
                                       •{" "}
                                     </span>
                                   </div>

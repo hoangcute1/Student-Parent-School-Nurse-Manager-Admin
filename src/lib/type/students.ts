@@ -5,7 +5,7 @@ interface Student {
   birth?: string;
   gender?: string;
   grade?: string;
-  class?: {
+  class: {
     _id: string;
     name: string;
     grade: string;
@@ -43,24 +43,6 @@ interface StudentResponse {
   limit: number;
 }
 
-interface StudentParentResponse {
-  _id: string;
-  name: string;
-  parent: string;
-  student: {
-    _id: string;
-    studentId: string;
-    name: string;
-    birth: string;
-    gender: string;
-    class: {
-      _id: string;
-      name: string;
-    };
-  };
-  created_at: string;
-  updated_at: string;
-}
 interface StudentStore {
   students: Student[];
   isLoading: boolean;
@@ -77,4 +59,4 @@ interface StudentStore {
   createStudent: (studentData: Partial<CreateStudentData>) => Promise<void>;
 }
 
-export type { Student, StudentResponse, StudentStore, StudentParentResponse, CreateStudentData, UpdateStudentData };
+export type { Student, StudentResponse, StudentStore,  CreateStudentData, UpdateStudentData };
