@@ -21,6 +21,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { loginStaffOTP, requestStaffLoginOTP } from "@/lib/api/auth";
 import { LoginRequestCredentials } from "@/lib/type/auth";
+import LoginGoogle from "./login-google";
 
 export function StaffLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -267,7 +268,7 @@ export function StaffLoginForm() {
               Quay lại
             </Button>
           </div>
-
+            <LoginGoogle/>
           <OTPDialog
             open={showOTP}
             onOpenChange={setShowOTP}

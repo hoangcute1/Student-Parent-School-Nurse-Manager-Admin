@@ -21,6 +21,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { loginParentOTP, requestParentLoginOTP } from "@/lib/api/auth";
 import { LoginRequestCredentials } from "@/lib/type/auth";
+import LoginGoogle from "./login-google";
 
 export function ParentLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -258,7 +259,7 @@ export function ParentLoginForm() {
               Quay lại
             </Button>
           </div>
-
+            <LoginGoogle/>
           <OTPDialog
             open={showOTP}
             onOpenChange={setShowOTP}
