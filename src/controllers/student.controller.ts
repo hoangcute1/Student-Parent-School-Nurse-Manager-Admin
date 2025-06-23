@@ -1,14 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
-import { StudentService } from '@/services/student.service';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { formatStudentResponse, StudentService } from '@/services/student.service';
 import {
   ApiTags,
   ApiOperation,
@@ -20,43 +11,6 @@ import {
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateStudentDto } from '@/decorations/dto/create-student.dto';
 import { UpdateStudentDto } from '@/decorations/dto/update-student.dto';
-
-// Helper function to format student data
-const formatStudentResponse = (student: any) => {
-  if (!student) return null;
-
-  const result: any = {
-    _id: student._id,
-    studentId: student.studentId,
-    name: student.name,
-    birth: student.birth,
-    gender: student.gender,
-    created_at: student.created_at,
-    updated_at: student.updated_at,
-  };
-
-  // Format class if available
-  if (student.class && typeof student.class === 'object') {
-    result.class = {
-      _id: student.class._id,
-      name: student.class.name,
-      grade: student.class.grade,
-      created_at: student.class.created_at,
-      updated_at: student.class.updated_at,
-    };
-  }
-
-  // Format parent if available
-  if (student.parent && typeof student.parent === 'object') {
-    result.parent = {
-      _id: student.parent._id,
-      user: student.parent.user,
-      __v: student.parent.__v,
-    };
-  }
-
-  return result;
-};
 
 @ApiTags('students')
 @Controller('students')
@@ -74,12 +28,7 @@ export class StudentController {
   })
   async findAll() {
     const result = await this.studentService.findAll();
-
-    // Format the student data
-    const formattedData = result.data.map((student) =>
-      formatStudentResponse(student),
-    );
-
+    const formattedData = result.data.map((student) => formatStudentResponse(student));
     return {
       ...result,
       data: formattedData,
@@ -92,8 +41,7 @@ export class StudentController {
   @ApiResponse({ status: 200, description: 'Thông tin sinh viên.' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
   async findOne(@Param('id') id: string) {
-    const student = await this.studentService.findById(id);
-    return formatStudentResponse(student);
+    return await this.studentService.findById(id);
   }
   @Post()
   @ApiOperation({ summary: 'Tạo sinh viên mới' })
@@ -111,10 +59,7 @@ export class StudentController {
     description: 'Thông tin sinh viên đã được cập nhật.',
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateStudentDto: UpdateStudentDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     const student = await this.studentService.update(id, updateStudentDto);
     return formatStudentResponse(student);
   }
