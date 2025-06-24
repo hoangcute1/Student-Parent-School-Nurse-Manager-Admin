@@ -10,7 +10,7 @@ export enum MedicineDeliveryStatus {
 }
 
 @Schema({ timestamps: true, versionKey: false })
-export class MedicineDelivery extends Document {
+export class MedicineDelivery extends Document { 
   @Prop({ required: true })
   name: string;
 

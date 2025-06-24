@@ -14,7 +14,7 @@ import {
 } from '@/decorations/dto/medicine-delivery.dto';
 import { ParentService } from './parent.service';
 
-@Injectable()
+@Injectable() 
 export class MedicineDeliveryService {
   constructor(
     @InjectModel(MedicineDelivery.name)
@@ -236,4 +236,56 @@ export class MedicineDeliveryService {
       throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
   }
+
 }
+// export const formatMedicalDeliveryList = (list: any) => {
+//   if (!list) return null;
+
+//   const result: any = {
+//     medical_deli: {
+//       _id: list._id,
+//       name: list.name,
+//       date: list.date,
+//       total: list.total,
+//       per_dose: list.per_dose,
+//       per_day: list.per_day,
+//       note: list.note,
+//       reason: list.reason,
+//       sent_at: list.sent_at,
+//       end_at: list.end_at,
+//       status: list.status,
+//       created_at: list.created_at,
+//       updated_at: list.updated_at,
+//     },
+//   };
+
+//   // Format class if available
+//   if (list.student && typeof list.student === 'object') {
+//     result.student = {
+//       _id: list.student._id,
+//       studentId: list.student.studentId,
+//       name: list.student.name,
+//       birth: list.student.birth,
+//       gender: list.student.gender,
+//       class: {
+//         _id: list.student.class._id,
+//         name: list.student.class.name,
+//         grade: list.student.class.grade,
+//       }
+//     };
+//   }
+
+//   // Format parent if available
+//   if (list.parent && typeof list.parent === 'object') {
+//     result.parent = {
+//       _id: student.parent._id,
+//       user: student.parent.user,
+//     };
+//   }
+
+//   if (healthRecord && typeof healthRecord === 'object') {
+//     result.healthRecord = healthRecord;
+//   }
+
+//   return result;
+// };
