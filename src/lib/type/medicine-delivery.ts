@@ -16,7 +16,17 @@ interface MedicineDelivery {
   end_at: Date;
   created_at: Date;
   updated_at: Date;
-  student: Student;
+  student: {
+    _id: string;
+    studentId: string;
+    name: string;
+    birth: Date;
+    gender: string;
+    class: {
+      _id: string;
+      name: string;
+    };
+  };
   staffName: string;
   parentName: string;
   medicine: Medication;

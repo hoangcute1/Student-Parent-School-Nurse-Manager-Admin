@@ -20,6 +20,7 @@ interface Student {
     user: string
   }
 }
+
 interface ViewStudent {
   student: {
     _id: string,

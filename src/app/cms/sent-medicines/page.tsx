@@ -160,87 +160,8 @@ export default function ParentMedicine() {
         </p>
       </div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-teal-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-teal-700">
-              Yêu cầu mới
-            </CardTitle>
-            <Pill className="h-4 w-4 text-teal-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-teal-800">8</div>
-            <p className="text-xs text-teal-600">Chờ xử lý</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-orange-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">
-              Đang xử lý
-            </CardTitle>
-            <Clock className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">12</div>
-            <p className="text-xs text-orange-600">Đang kiểm tra</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">
-              Đã duyệt
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800">45</div>
-            <p className="text-xs text-green-600">Tháng này</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-red-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">
-              Từ chối
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-800">3</div>
-            <p className="text-xs text-red-600">Cần xem lại</p>
-          </CardContent>
-        </Card>
-      </div>
+      
       <Tabs defaultValue="requests" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-teal-50">
-          <TabsTrigger
-            value="requests"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Yêu cầu mới
-          </TabsTrigger>
-          <TabsTrigger
-            value="approved"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Đã duyệt
-          </TabsTrigger>
-          <TabsTrigger
-            value="inventory"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Kho thuốc PH
-          </TabsTrigger>
-          <TabsTrigger
-            value="history"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Lịch sử
-          </TabsTrigger>
-        </TabsList>
-
         <TabsContent value="requests" className="mt-6">
           <Card>
             <CardHeader>
@@ -312,8 +233,8 @@ export default function ParentMedicine() {
                           request.status === "pending"
                             ? "bg-yellow-100 text-yellow-800"
                             : request.status === "completed"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                         }
                       >
                         {request.status}
@@ -344,8 +265,8 @@ export default function ParentMedicine() {
                           {" - "}
                           {request.end_at
                             ? new Date(request.end_at).toLocaleDateString(
-                                "vi-VN"
-                              )
+                              "vi-VN"
+                            )
                             : "không"}
                         </p>
                         <p className="text-sm">
@@ -399,174 +320,11 @@ export default function ParentMedicine() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="approved" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-teal-800">
-                Thuốc đã được duyệt
-              </CardTitle>
-              <CardDescription className="text-teal-600">
-                Danh sách thuốc từ phụ huynh đã được phê duyệt
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Học sinh</TableHead>
-                      <TableHead>Thuốc</TableHead>
-                      <TableHead>Liều dùng</TableHead>
-                      <TableHead>Tần suất</TableHead>
-                      <TableHead>Còn lại</TableHead>
-                      <TableHead>Ngày hết hạn</TableHead>
-                      <TableHead className="text-right">Thao tác</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {approvedMedicines.map((medicine) => (
-                      <TableRow key={medicine.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {medicine.studentName}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {medicine.class}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{medicine.medicineName}</TableCell>
-                        <TableCell>{medicine.dosage}</TableCell>
-                        <TableCell>{medicine.frequency}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              medicine.remaining > 5 ? "default" : "destructive"
-                            }
-                            className={
-                              medicine.remaining > 5
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }
-                          >
-                            {medicine.remaining} viên
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{medicine.expiryDate}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            {" "}
-                            <Button variant="ghost" size="sm">
-                              Cấp phát
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              Chi tiết
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="inventory" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-teal-800">
-                Kho thuốc phụ huynh
-              </CardTitle>
-              <CardDescription className="text-teal-600">
-                Tổng hợp thuốc cá nhân của học sinh do phụ huynh gửi
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {parentMedicineInventory.map((item, index) => (
-                  <Card key={index} className="border-teal-100">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg text-teal-800">
-                        {item.studentName}
-                      </CardTitle>
-                      <CardDescription className="text-teal-600">
-                        {item.class}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {item.medicines.map((med, medIndex) => (
-                          <div
-                            key={medIndex}
-                            className="p-2 bg-gray-50 rounded border"
-                          >
-                            <div className="font-medium text-sm">
-                              {med.name}
-                            </div>
-                            <div className="text-xs text-gray-600">
-                              Còn: {med.quantity} • HSD: {med.expiry}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <Button
-                        className="w-full mt-3 bg-teal-600 hover:bg-teal-700"
-                        size="sm"
-                        onClick={() => handleViewInventoryDetail(item)}
-                      >
-                        Xem chi tiết
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="history" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-teal-800">Lịch sử cấp phát</CardTitle>
-              <CardDescription className="text-teal-600">
-                Lịch sử cấp phát thuốc từ phụ huynh cho học sinh
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {medicineHistory.map((history, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Pill className="h-5 w-5 text-teal-600" />
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {history.action}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {history.studentName} - {history.medicineName}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-gray-900">
-                        {history.quantity}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {history.time}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+
+
       </Tabs>{" "}
       {/* Detail Dialog */}
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
@@ -592,8 +350,8 @@ export default function ParentMedicine() {
                       selectedMedicine.status === "Chờ xử lý"
                         ? "bg-yellow-100 text-yellow-800"
                         : selectedMedicine.status === "Đã duyệt"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                     }
                   >
                     {selectedMedicine.status}
@@ -630,7 +388,7 @@ export default function ParentMedicine() {
                 <div className="space-y-2">
                   <Label>Số lượng</Label>
                   {"quantity" in selectedMedicine &&
-                  selectedMedicine.quantity ? (
+                    selectedMedicine.quantity ? (
                     <Input value={selectedMedicine.quantity} readOnly />
                   ) : (
                     "remaining" in selectedMedicine && (
@@ -798,7 +556,7 @@ export default function ParentMedicine() {
                               new Date(
                                 medicine.expiry.split("/").reverse().join("-")
                               ) <
-                              new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+                                new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
                                 ? "bg-red-100 text-red-800"
                                 : "bg-green-100 text-green-800"
                             }
@@ -859,10 +617,10 @@ export default function ParentMedicine() {
                     (history) =>
                       history.studentName === selectedInventory.studentName
                   ).length === 0 && (
-                    <p className="text-sm text-gray-500 text-center py-2">
-                      Chưa có lịch sử cấp phát
-                    </p>
-                  )}
+                      <p className="text-sm text-gray-500 text-center py-2">
+                        Chưa có lịch sử cấp phát
+                      </p>
+                    )}
                 </div>
               </div>
 
