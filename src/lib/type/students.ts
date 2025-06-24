@@ -1,23 +1,63 @@
 interface Student {
-  _id: string;
-  name: string;
-  studentId: string;
-  birth?: string;
-  gender?: string;
-  grade?: string;
+  student: {
+    _id: string,
+    studentId: string,
+    name: string,
+    birth: string,
+    gender: string,
+    created_at: string,
+    updated_at: string
+  },
   class: {
-    _id: string;
-    name: string;
-    grade: string;
-  };
-  parent?: {
-    _id: string;
-    user: string;
-  };
-  created_at: string;
-  updated_at: string;
+    _id: string,
+    name: string,
+    grade: string,
+    created_at: string,
+    updated_at: string
+  },
+  parent: {
+    _id: string,
+    user: string
+  }
 }
 
+interface ViewStudent {
+  student: {
+    _id: string,
+    studentId: string,
+    name: string,
+    birth: Date,
+    gender: string,
+    created_at: Date,
+    updated_at: Date
+  },
+  class: {
+    _id: string,
+    name: string,
+    grade: string,
+    created_at: string,
+    updated_at: string
+  },
+  parent: {
+    _id: string,
+    user: string
+  },
+  healthRecord: {
+    _id: string,
+    allergies: string,
+    chronic_conditions: string,
+    height: string,
+    weight: string,
+    vision: string,
+    hearing: string,
+    blood_type: string,
+    treatment_history: string,
+    notes: string,
+    created_at: string,
+    updated_at: string,
+
+  }
+}
 interface CreateStudentData {
   name: string;
   studentId: string;
@@ -49,6 +89,8 @@ interface StudentStore {
   error: string | null;
   selectedClassId: string | null;
   selectedStudent: Student | null;
+  selectedStudentId: ViewStudent | null;
+
 
   fetchStudents: () => Promise<void>;
   fetchStudentsByClass: (classId: string) => Promise<void>;

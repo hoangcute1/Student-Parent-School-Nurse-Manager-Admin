@@ -114,7 +114,7 @@ export default function ParentHealthRecords() {
                   studentsData.map((eachStudent, idx) => (
                     <TableRow key={eachStudent._id || idx}>
                       <TableCell className="font-medium">
-                        {eachStudent.student.name}
+                        {eachStudent.student.student.name}
                       </TableCell>
                       <TableCell>{eachStudent.student.class.name}</TableCell>
                       <TableCell>

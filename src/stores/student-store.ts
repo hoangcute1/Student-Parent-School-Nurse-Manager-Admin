@@ -16,6 +16,7 @@ export const useStudentStore = create<StudentStore>((set) => ({
   error: null,
   selectedClassId: null,
   selectedStudent: null,
+  selectedStudentId: null,
 
   fetchStudents: async () => {
     try {
@@ -74,7 +75,7 @@ export const useStudentStore = create<StudentStore>((set) => ({
     try {
       set({ isLoading: true, error: null });  
       await deleteStudent(id);
-      set((state) => ({ students: state.students.filter((student) => student._id !== id) }));
+      set((state) => ({ students: state.students.filter((student) => student.student._id !== id) }));
       console.log(`Student with ID ${id} deleted successfully`);
     } catch (err: any) {
       const errorMessage = err.message || `Failed to delete student with ID ${id}`;
@@ -89,7 +90,7 @@ export const useStudentStore = create<StudentStore>((set) => ({
       const updatedStudent = await updateStudent(id, studentData);
       set((state) => ({
         students: state.students.map((student) =>
-          student._id === id ? { ...student, ...updatedStudent } : student
+          student.student._id === id ? { ...student, ...updatedStudent } : student
         ),
       }));
       console.log(`Student with ID ${id} updated successfully`);
@@ -111,7 +112,7 @@ export const useStudentStore = create<StudentStore>((set) => ({
     console.log(`Fetching student with ID ${id}`);
     const student = await getStudentById(id);
     set({
-      selectedStudent: student,
+      selectedStudentId: student,
       error: null,
     });
   } catch (err: any) {
