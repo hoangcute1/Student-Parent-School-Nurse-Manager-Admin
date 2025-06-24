@@ -92,7 +92,6 @@ export function StudentTable({
             </TableRow>
           ) : (
             students.map((eachStudent) => (
-
               <TableRow
                 key={eachStudent.student._id}
                 className="hover:bg-blue-50 cursor-pointer"
@@ -101,8 +100,9 @@ export function StudentTable({
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8 border border-blue-200">
                       <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32&text=${eachStudent.student.name?.charAt(0) || "S"
-                          }`}
+                        src={`/placeholder.svg?height=32&width=32&text=${
+                          eachStudent.student.name?.charAt(0) || "S"
+                        }`}
                       />
                       <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
                         {eachStudent.student.name?.charAt(0) || "S"}
@@ -122,15 +122,18 @@ export function StudentTable({
                   {eachStudent.class?.name || "Chưa phân lớp"}
                 </TableCell>
                 <TableCell className="text-blue-700">
-                  {eachStudent.student.birth ? new Date(eachStudent.student.birth).toISOString().split("T")[0]
-                : ""}
+                  {eachStudent.student.birth
+                    ? new Date(eachStudent.student.birth)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""}
                 </TableCell>
                 <TableCell className="text-blue-700">
                   {eachStudent.student.gender === "male"
                     ? "Nam"
                     : eachStudent.student.gender === "female"
-                      ? "Nữ"
-                      : "Không rõ"}
+                    ? "Nữ"
+                    : "Không rõ"}
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>

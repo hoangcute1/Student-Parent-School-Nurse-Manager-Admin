@@ -1,14 +1,28 @@
 import { Parent } from "@/lib/type/parents";
 import { Student } from "./students";
-import { HealthRecord } from "./health-record";
+import { EditHealthRecord, HealthRecord } from "./health-record";
 
 
 
 interface ParentStudents {
-  _id: string;
-  parent: Parent;
-  student: Student;
-  healthRecord: HealthRecord;
+  student: {
+    _id: string;
+    studentId: string;
+    name: string;
+    birth: Date
+    gender: string;
+    class: {
+      _id: string;
+      name: string;
+    };
+
+    
+  }
+  parent: {
+    _id: string;
+    user: string;
+  }
+  healthRecord: HealthRecord
 }
 interface ParentData extends Parent {}
 interface StudentData extends Student {}
@@ -25,7 +39,9 @@ interface ParentStudentsStore {
   studentsData: ParentStudents[];
   isLoading: boolean;
   error: string | null;
+  selectedStudent: ParentStudents | null;
   fetchStudentsByParent: () => Promise<void>;
+  updateStudent: (studentId: string, studentData: Partial<EditHealthRecord>) => Promise<void>;
 }
 
 interface GetAllParentsResponse {

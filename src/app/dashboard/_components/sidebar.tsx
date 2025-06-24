@@ -205,9 +205,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                           {studentsData.map(
                             (studentData) =>
                               selectedStudent &&
-                              studentData._id !== selectedStudent._id && (
+                              studentData.student._id !== selectedStudent.student._id && (
                                 <button
-                                  key={studentData._id}
+                                  key={studentData.student._id}
                                   onClick={() => {
                                     setSelectedStudent(studentData);
                                     setShowStudentList(false);
@@ -221,7 +221,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                                     <span className="text-xs text-blue-600">
                                       Lớp{" "}
                                       {studentData.student.class?.name || "N/A"}{" "}
-                                      •{" "}
                                     </span>
                                   </div>
                                 </button>

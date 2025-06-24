@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Eye, Edit } from "lucide-react";
+import { Search, Eye, Edit, MoreHorizontal } from "lucide-react";
 interface Vaccine {
   name: string;
   completed: boolean;
@@ -27,14 +27,37 @@ import {
 } from "@/components/ui/table";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import { ParentStudents } from "@/lib/type/parent-students";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  EditHealthRecordDialog,
+  EditHealthRecordFormValues,
+} from "./_components/edit-health-record-dialog";
 
 export default function ParentHealthRecords() {
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRecord, setSelectedRecord] = useState<ParentStudents | null>(
-    null
-  );
-  const { studentsData, isLoading, error, fetchStudentsByParent } =
-    useParentStudentsStore();
+  const [selectedRecord, setSelectedRecord] = useState<ParentStudents | null>(null);
+  const [selectedEditRecord, setSelectedEditRecord] = useState<ParentStudents | null>(null);
+
+  const {
+    studentsData,
+    isLoading,
+    error,
+    fetchStudentsByParent,
+    updateStudent,
+  } = useParentStudentsStore();
 
   useEffect(() => {
     fetchStudentsByParent();
@@ -42,11 +65,43 @@ export default function ParentHealthRecords() {
 
   const handleViewDetail = (record: ParentStudents) => {
     setSelectedRecord(record);
+    setIsViewDialogOpen(true);
   };
 
   const handleEditRecord = (record: ParentStudents) => {
-    setSelectedRecord(record);
+    setSelectedEditRecord(record);
+    setIsEditDialogOpen(true);
   };
+
+  const handleUpdateHealthRecord = async (data: EditHealthRecordFormValues) => {
+    if (selectedEditRecord) {
+      try {
+        await updateStudent(selectedEditRecord.student._id, {
+          allergies: data.allergies,
+          chronic_conditions: data.chronic_conditions,
+          height: data.height,
+          weight: data.weight,
+          vision: data.vision,
+          hearing: data.hearing,
+          blood_type: data.blood_type,
+          treatment_history: data.treatment_history,
+          notes: data.notes,
+        });
+        setIsEditDialogOpen(false);
+        setSelectedEditRecord(null);
+        alert("Cập nhật học sinh thành công");
+        fetchStudentsByParent();
+      } catch (error: any) {
+        console.error("Error updating student:", error.message, error);
+        alert(
+          `Không thể cập nhật học sinh: ${
+            error.message || "Lỗi không xác định"
+          }`
+        );
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
@@ -112,13 +167,13 @@ export default function ParentHealthRecords() {
                   </TableRow>
                 ) : (
                   studentsData.map((eachStudent, idx) => (
-                    <TableRow key={eachStudent._id || idx}>
+                    <TableRow key={eachStudent.student._id || idx}>
                       <TableCell className="font-medium">
-                        {eachStudent.student.student.name}
+                        {eachStudent.student.name}
                       </TableCell>
                       <TableCell>{eachStudent.student.class.name}</TableCell>
                       <TableCell>
-                        {eachStudent.healthRecord.allergies ? (
+                        {eachStudent.healthRecord?.allergies ? (
                           <Badge
                             variant="destructive"
                             className="bg-red-100 text-red-800"
@@ -149,7 +204,7 @@ export default function ParentHealthRecords() {
                               : "bg-yellow-100 text-yellow-800"
                           }
                         >
-                          {eachStudent.healthRecord?.vision}
+                          {eachStudent.healthRecord?.vision || "Không rõ"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -160,22 +215,36 @@ export default function ParentHealthRecords() {
                           : "Chưa cập nhật"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetail(eachStudent)}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-blue-700 hover:bg-blue-100 rounded-full p-2"
+                            >
+                              <MoreHorizontal className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="rounded-lg shadow-lg border border-blue-100 bg-white min-w-[160px] p-1"
                           >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditRecord(eachStudent)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
+                            <DropdownMenuItem
+                              className="flex items-center gap-2 px-3 py-2 rounded-md text-blue-700 hover:bg-blue-50 cursor-pointer transition"
+                              onClick={() => handleViewDetail(eachStudent)}
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span>Xem hồ sơ</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="flex items-center gap-2 px-3 py-2 rounded-md text-blue-700 hover:bg-blue-50 cursor-pointer transition"
+                              onClick={() => handleEditRecord(eachStudent)}
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span>Khai báo</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))
@@ -185,6 +254,116 @@ export default function ParentHealthRecords() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog for viewing student details */}
+      {selectedRecord && (
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border border-blue-100 bg-white">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-blue-700 mb-2">
+                Thông tin học sinh: {selectedRecord.student.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Mã học sinh:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.student.studentId}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Lớp:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.student.class?.name || "Chưa phân lớp"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Ngày sinh:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.student.birth
+                    ? new Date(selectedRecord.student.birth)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Giới tính:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.student.gender === "male"
+                    ? "Nam"
+                    : selectedRecord.student.gender === "female"
+                    ? "Nữ"
+                    : "Không rõ"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  ID phụ huynh:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.parent?._id || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Dị ứng:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.healthRecord?.allergies || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Bệnh mãn tính:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.healthRecord?.chronic_conditions || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Lịch sử bệnh án:
+                </span>
+                <span className="text-gray-900">
+                  {selectedRecord.healthRecord?.treatment_history || "N/A"}
+                </span>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+      {/* Dialog for editing student details */}
+      {selectedEditRecord && (
+        <EditHealthRecordDialog
+          onSubmit={handleUpdateHealthRecord}
+          open={isEditDialogOpen}
+          onOpenChange={(open) => {
+            setIsEditDialogOpen(open);
+            if (!open) setSelectedEditRecord(null);
+          }}
+          defaultValues={{
+            allergies: selectedEditRecord.healthRecord?.allergies || "",
+            chronic_conditions: selectedEditRecord.healthRecord?.chronic_conditions || "",
+            height: selectedEditRecord.healthRecord?.height || "",
+            weight: selectedEditRecord.healthRecord?.weight || "",
+            vision: selectedEditRecord.healthRecord?.vision || "",
+            hearing: selectedEditRecord.healthRecord?.hearing || "",
+            blood_type: selectedEditRecord.healthRecord?.blood_type || "",
+            treatment_history: selectedEditRecord.healthRecord?.treatment_history || "",
+            notes: selectedEditRecord.healthRecord?.notes || "",
+          }}
+          studentName={selectedEditRecord.student.name}
+        />
+      )}
     </div>
   );
 }

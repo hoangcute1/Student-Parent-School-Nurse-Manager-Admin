@@ -1,5 +1,6 @@
 import { ParentStudents } from "@/lib/type/parent-students";
 import { fetchData } from "../api";
+import { EditHealthRecord } from "@/lib/type/health-record";
 
 export const getStudentsByParentId = async (
   userId: string
@@ -11,6 +12,22 @@ export const getStudentsByParentId = async (
     return response || [];
   } catch (error) {
     console.error(`Error fetching students for parent ${userId}:`, error);
+    throw error;
+  }
+};
+
+export const updateStudentByStudentId = async (
+  studentId: string,
+  studentData: Partial<EditHealthRecord> 
+): Promise<any> => {
+  try {
+    const response = await fetchData<EditHealthRecord>(`health-records/student/${studentId}`, {
+      method: "PUT",
+      body: JSON.stringify(studentData),
+    });
+    return response;
+  } catch (error) {
+    console.error(`Error updating student with ID ${studentId}:`, error);
     throw error;
   }
 };

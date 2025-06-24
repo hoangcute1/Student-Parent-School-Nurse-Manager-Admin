@@ -1,3 +1,4 @@
+import { Edit } from 'lucide-react';
 interface HealthRecord {
   _id: string;
   allergies: string;
@@ -16,4 +17,16 @@ interface HealthRecord {
   };
 }
 
-export type { HealthRecord };
+interface EditHealthRecord {
+  allergies: string;
+  chronic_conditions: string;
+  height: string;
+  weight: string;
+  vision: string;
+  hearing: string;
+  blood_type: string;
+  treatment_history: string;
+  notes: string;
+}
+
+export type { HealthRecord, EditHealthRecord };

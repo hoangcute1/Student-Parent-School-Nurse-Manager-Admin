@@ -27,7 +27,7 @@ import { UpdateStudentDialog } from "./_components/update-student-dialog";
 
 const mapStudentForDisplay = (students: Student): Student => {
   return {
-    ...students
+    ...students,
   };
 };
 
@@ -115,7 +115,9 @@ export default function StudentsPage() {
       alert("Thêm học sinh thành công");
     } catch (error: any) {
       console.error("Error adding student:", error.message, error);
-      alert(`Không thể thêm học sinh: ${error.message || "Lỗi không xác định"}`);
+      alert(
+        `Không thể thêm học sinh: ${error.message || "Lỗi không xác định"}`
+      );
     }
   };
 
@@ -130,13 +132,19 @@ export default function StudentsPage() {
   };
 
   const handleDeleteStudent = async (studentData: Student) => {
-    if (window.confirm(`Bạn có chắc muốn xoá học sinh ${studentData.student.name}?`)) {
+    if (
+      window.confirm(
+        `Bạn có chắc muốn xoá học sinh ${studentData.student.name}?`
+      )
+    ) {
       try {
         await deleteStudent(studentData.student._id);
         alert(`Đã xoá học sinh ${studentData.student.name}`);
       } catch (error: any) {
         console.error("Error deleting student:", error.message, error);
-        alert(`Không thể xoá học sinh: ${error.message || "Lỗi không xác định"}`);
+        alert(
+          `Không thể xoá học sinh: ${error.message || "Lỗi không xác định"}`
+        );
       }
       setDeleteStudentId(null);
     }
@@ -161,7 +169,11 @@ export default function StudentsPage() {
         alert("Cập nhật học sinh thành công");
       } catch (error: any) {
         console.error("Error updating student:", error.message, error);
-        alert(`Không thể cập nhật học sinh: ${error.message || "Lỗi không xác định"}`);
+        alert(
+          `Không thể cập nhật học sinh: ${
+            error.message || "Lỗi không xác định"
+          }`
+        );
       }
     }
   };
@@ -203,24 +215,93 @@ export default function StudentsPage() {
       {/* Dialog for viewing student details */}
       {selectedStudentId && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border border-blue-100 bg-white">
             <DialogHeader>
-              <DialogTitle>Thông tin học sinh: {selectedStudentId.student.name}</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-blue-700 mb-2">
+                Thông tin học sinh: {selectedStudentId.student.name}
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-2">
-              <p><strong>Mã học sinh:</strong> {selectedStudentId.student.studentId}</p>
-              <p><strong>Lớp:</strong> {selectedStudentId.class?.name || "Chưa phân lớp"}</p>
-              <p><strong>Khối:</strong> {selectedStudentId.class?.grade || "N/A"}</p>
-              <p><strong>Ngày sinh:</strong> {selectedStudentId.student.birth
-                ? new Date(selectedStudentId.student.birth).toISOString().split("T")[0]
-                : ""}</p>
-              <p><strong>Giới tính:</strong>
-                {selectedStudentId.student.gender === "male" ? "Nam" : selectedStudentId.student.gender === "female" ? "Nữ" : "Không rõ"}
-              </p>
-              <p><strong>ID phụ huynh:</strong> {selectedStudentId.parent._id || "N/A"}</p>
-              <p><strong>Dị ứng:</strong> {selectedStudentId.healthRecord.allergies || "N/A"}</p>
-              <p><strong>Bệnh mãn tính</strong> {selectedStudentId.healthRecord.chronic_conditions || "N/A"}</p>
-              <p><strong>Lịch sử bệnh án:</strong> {selectedStudentId.healthRecord.treatment_history || "N/A"}</p>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Mã học sinh:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.student.studentId}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Lớp:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.class?.name || "Chưa phân lớp"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Khối:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.class?.grade || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Ngày sinh:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.student.birth
+                    ? new Date(selectedStudentId.student.birth)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Giới tính:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.student.gender === "male"
+                    ? "Nam"
+                    : selectedStudentId.student.gender === "female"
+                    ? "Nữ"
+                    : "Không rõ"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  ID phụ huynh:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.parent?._id || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Dị ứng:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.healthRecord.allergies || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Bệnh mãn tính:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.healthRecord.chronic_conditions || "N/A"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-semibold text-gray-600 min-w-[120px]">
+                  Lịch sử bệnh án:
+                </span>
+                <span className="text-gray-900">
+                  {selectedStudentId.healthRecord.treatment_history || "N/A"}
+                </span>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -243,11 +324,15 @@ export default function StudentsPage() {
             name: selectedStudent.student.name,
             studentId: selectedStudent.student.studentId,
             birth: selectedStudent.student.birth
-              ? new Date(selectedStudent.student.birth).toISOString().split("T")[0]
+              ? new Date(selectedStudent.student.birth)
+                  .toISOString()
+                  .split("T")[0]
               : "",
-            gender: selectedStudent.student.gender === "male" || selectedStudent.student.gender === "female"
-              ? selectedStudent.student.gender
-              : "male",
+            gender:
+              selectedStudent.student.gender === "male" ||
+              selectedStudent.student.gender === "female"
+                ? selectedStudent.student.gender
+                : "male",
             classId: selectedStudent.class?._id || "",
             parentId: selectedStudent.parent?._id || "",
           }}

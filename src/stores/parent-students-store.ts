@@ -1,5 +1,6 @@
 import { getAuthToken, parseJwt } from "@/lib/api/auth/token";
-import { getStudentsByParentId } from "@/lib/api/parent-students/parent-students";
+import { getStudentsByParentId, updateStudentByStudentId } from "@/lib/api/parent-students/parent-students";
+import { EditHealthRecord } from "@/lib/type/health-record";
 import { ParentStudentsStore } from "@/lib/type/parent-students";
 import { create } from "zustand";
 
@@ -7,6 +8,7 @@ export const  useParentStudentsStore = create<ParentStudentsStore>((set, get) =>
   studentsData: [],
   isLoading: false,
   error: null,
+  selectedStudent: null,
 
   fetchStudentsByParent: async () => {
     try {
@@ -38,6 +40,27 @@ export const  useParentStudentsStore = create<ParentStudentsStore>((set, get) =>
       const errorMessage = err.message || "Failed to fetch students";
       console.error("Failed to fetch students:", err);
       set({ error: errorMessage, studentsData: [] });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateStudent: async (studentId: string, studentData: Partial<EditHealthRecord>) => {
+    try {
+      set({ isLoading: true, error: null });
+
+      const updatedStudent = await updateStudentByStudentId(studentId, studentData);
+      console.log("Student updated:", updatedStudent);
+
+      // Optionally, refetch students after update
+
+      set({
+        error: null,
+      });
+    } catch (err: any) {
+      const errorMessage = err.message || "Failed to update student";
+      console.error("Failed to update student:", err);
+      set({ error: errorMessage });
     } finally {
       set({ isLoading: false });
     }
