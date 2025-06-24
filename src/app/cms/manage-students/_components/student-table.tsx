@@ -17,10 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Student } from "@/lib/type/students";
+import { Student, ViewStudent } from "@/lib/type/students";
 
 interface StudentTableProps {
   students: Student[];
+  // Added prop for student data
   isLoading: boolean;
   error?: string | null;
   onView?: (student: Student) => void;
@@ -90,45 +91,46 @@ export function StudentTable({
               </TableCell>
             </TableRow>
           ) : (
-            students.map((student) => (
+            students.map((eachStudent) => (
+
               <TableRow
-                key={student._id}
+                key={eachStudent.student._id}
                 className="hover:bg-blue-50 cursor-pointer"
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8 border border-blue-200">
                       <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32&text=${
-                          student.name?.charAt(0) || "S"
-                        }`}
+                        src={`/placeholder.svg?height=32&width=32&text=${eachStudent.student.name?.charAt(0) || "S"
+                          }`}
                       />
                       <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
-                        {student.name?.charAt(0) || "S"}
+                        {eachStudent.student.name?.charAt(0) || "S"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-medium text-blue-800">
-                        {student.name || "Chưa có tên"}
+                        {eachStudent.student.name || "Chưa có tên"}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="text-blue-700">
-                  {student.studentId}
+                  {eachStudent.student.studentId}
                 </TableCell>
                 <TableCell className="text-blue-700">
-                  {student.class?.name || "Chưa phân lớp"}
+                  {eachStudent.class?.name || "Chưa phân lớp"}
                 </TableCell>
                 <TableCell className="text-blue-700">
-                  {student.birth || "N/A"}
+                  {eachStudent.student.birth ? new Date(eachStudent.student.birth).toISOString().split("T")[0]
+                : ""}
                 </TableCell>
                 <TableCell className="text-blue-700">
-                  {student.gender === "male"
+                  {eachStudent.student.gender === "male"
                     ? "Nam"
-                    : student.gender === "female"
-                    ? "Nữ"
-                    : "Không rõ"}
+                    : eachStudent.student.gender === "female"
+                      ? "Nữ"
+                      : "Không rõ"}
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
@@ -144,28 +146,28 @@ export function StudentTable({
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         className="text-blue-700"
-                        onClick={() => onView?.(student)}
+                        onClick={() => onView?.(eachStudent)}
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         Xem hồ sơ
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-blue-700"
-                        onClick={() => onEdit?.(student)}
+                        onClick={() => onEdit?.(eachStudent)}
                       >
                         <Edit className="mr-2 h-4 w-4" />
                         Chỉnh sửa
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-blue-700"
-                        onClick={() => onAddHealthEvent?.(student)}
+                        onClick={() => onAddHealthEvent?.(eachStudent)}
                       >
                         <Plus className="mr-2 h-4 w-4" />
                         Thêm sự kiện y tế
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-700"
-                        onClick={() => onDelete?.(student)}
+                        onClick={() => onDelete?.(eachStudent)}
                       >
                         <Delete className="mr-2 h-4 w-4" />
                         Xoá

@@ -21,16 +21,13 @@ import { useClassStore } from "@/stores/class-store";
 import { useAuthStore } from "@/stores/auth-store";
 import type { AddStudentFormValues } from "./_components/add-student-dialog";
 import type { UpdateStudentFormValues } from "./_components/update-student-dialog";
-import { Student } from "@/lib/type/students";
+import { Student, ViewStudent } from "@/lib/type/students";
 import { AddStudentDialog } from "./_components/add-student-dialog";
 import { UpdateStudentDialog } from "./_components/update-student-dialog";
 
-const mapStudentForDisplay = (student: Student): Student => {
+const mapStudentForDisplay = (students: Student): Student => {
   return {
-    ...student,
-    birth: student.birth
-      ? new Date(student.birth).toLocaleDateString("vi-VN")
-      : "Không rõ",
+    ...students
   };
 };
 
@@ -47,6 +44,7 @@ export default function StudentsPage() {
     createStudent,
     selectedStudent,
     setSelectedClassId,
+    selectedStudentId,
   } = useStudentStore();
   const { classes, fetchClasses } = useClassStore();
   const { user } = useAuthStore();
@@ -61,21 +59,21 @@ export default function StudentsPage() {
   // Transform student data for display
   const displayStudents = students
     .map(mapStudentForDisplay)
-    .filter((student) => {
+    .filter((studentData) => {
       // Apply search filter if exists
       if (searchQuery && searchQuery.trim() !== "") {
         const query = searchQuery.toLowerCase();
         return (
-          student.name.toLowerCase().includes(query) ||
-          student.studentId.toLowerCase().includes(query) ||
-          (student.class?.name &&
-            student.class.name.toLowerCase().includes(query))
+          studentData.student.name.toLowerCase().includes(query) ||
+          studentData.student.studentId.toLowerCase().includes(query) ||
+          (studentData.class?.name &&
+            studentData.class.name.toLowerCase().includes(query))
         );
       }
 
       // Apply class filter if not "all"
       if (classFilter !== "all") {
-        return student.class?.name === classFilter;
+        return studentData.class?.name === classFilter;
       }
 
       return true;
@@ -121,21 +119,21 @@ export default function StudentsPage() {
     }
   };
 
-  const handleViewStudent = async (student: Student) => {
-    await fetchStudentById(student._id);
+  const handleViewStudent = async (studentData: Student) => {
+    await fetchStudentById(studentData.student._id);
     setIsViewDialogOpen(true);
   };
 
-  const handleEditStudent = async (student: Student) => {
-    await fetchStudentById(student._id);
+  const handleEditStudent = async (studentData: Student) => {
+    await fetchStudentById(studentData.student._id);
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteStudent = async (student: Student) => {
-    if (window.confirm(`Bạn có chắc muốn xoá học sinh ${student.name}?`)) {
+  const handleDeleteStudent = async (studentData: Student) => {
+    if (window.confirm(`Bạn có chắc muốn xoá học sinh ${studentData.student.name}?`)) {
       try {
-        await deleteStudent(student._id);
-        alert(`Đã xoá học sinh ${student.name}`);
+        await deleteStudent(studentData.student._id);
+        alert(`Đã xoá học sinh ${studentData.student.name}`);
       } catch (error: any) {
         console.error("Error deleting student:", error.message, error);
         alert(`Không thể xoá học sinh: ${error.message || "Lỗi không xác định"}`);
@@ -151,7 +149,7 @@ export default function StudentsPage() {
     }
     if (selectedStudent) {
       try {
-        await updateStudent(selectedStudent._id, {
+        await updateStudent(selectedStudent.student._id, {
           name: data.name,
           studentId: data.studentId,
           birth: data.birth,
@@ -203,23 +201,26 @@ export default function StudentsPage() {
       </Card>
 
       {/* Dialog for viewing student details */}
-      {selectedStudent && (
+      {selectedStudentId && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Thông tin học sinh: {selectedStudent.name}</DialogTitle>
+              <DialogTitle>Thông tin học sinh: {selectedStudentId.student.name}</DialogTitle>
             </DialogHeader>
             <div className="space-y-2">
-              <p><strong>Mã học sinh:</strong> {selectedStudent.studentId}</p>
-              <p><strong>Lớp:</strong> {selectedStudent.class?.name || "Chưa phân lớp"}</p>
-              <p><strong>Khối:</strong> {selectedStudent.class?.grade || "N/A"}</p>
-              <p><strong>Ngày sinh:</strong> {selectedStudent.birth
-                ? new Date(selectedStudent.birth).toISOString().split("T")[0]
+              <p><strong>Mã học sinh:</strong> {selectedStudentId.student.studentId}</p>
+              <p><strong>Lớp:</strong> {selectedStudentId.class?.name || "Chưa phân lớp"}</p>
+              <p><strong>Khối:</strong> {selectedStudentId.class?.grade || "N/A"}</p>
+              <p><strong>Ngày sinh:</strong> {selectedStudentId.student.birth
+                ? new Date(selectedStudentId.student.birth).toISOString().split("T")[0]
                 : ""}</p>
               <p><strong>Giới tính:</strong>
-                {selectedStudent.gender === "male" ? "Nam" : selectedStudent.gender === "female" ? "Nữ" : "Không rõ"}
+                {selectedStudentId.student.gender === "male" ? "Nam" : selectedStudentId.student.gender === "female" ? "Nữ" : "Không rõ"}
               </p>
-              <p><strong>ID phụ huynh:</strong> {selectedStudent.parent?._id || "N/A"}</p>
+              <p><strong>ID phụ huynh:</strong> {selectedStudentId.parent._id || "N/A"}</p>
+              <p><strong>Dị ứng:</strong> {selectedStudentId.healthRecord.allergies || "N/A"}</p>
+              <p><strong>Bệnh mãn tính</strong> {selectedStudentId.healthRecord.chronic_conditions || "N/A"}</p>
+              <p><strong>Lịch sử bệnh án:</strong> {selectedStudentId.healthRecord.treatment_history || "N/A"}</p>
             </div>
           </DialogContent>
         </Dialog>
@@ -239,13 +240,13 @@ export default function StudentsPage() {
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           defaultValues={{
-            name: selectedStudent.name,
-            studentId: selectedStudent.studentId,
-            birth: selectedStudent.birth
-              ? new Date(selectedStudent.birth).toISOString().split("T")[0]
+            name: selectedStudent.student.name,
+            studentId: selectedStudent.student.studentId,
+            birth: selectedStudent.student.birth
+              ? new Date(selectedStudent.student.birth).toISOString().split("T")[0]
               : "",
-            gender: selectedStudent.gender === "male" || selectedStudent.gender === "female"
-              ? selectedStudent.gender
+            gender: selectedStudent.student.gender === "male" || selectedStudent.student.gender === "female"
+              ? selectedStudent.student.gender
               : "male",
             classId: selectedStudent.class?._id || "",
             parentId: selectedStudent.parent?._id || "",

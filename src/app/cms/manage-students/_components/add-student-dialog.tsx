@@ -154,7 +154,7 @@ export function AddStudentDialog({
               name="classId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ID lớp)</FormLabel>
+                  <FormLabel>ID lớp</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
