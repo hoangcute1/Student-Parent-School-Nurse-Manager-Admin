@@ -73,7 +73,6 @@ export class HealthRecordController {
     return this.healthRecordService.findById(id);
   }
 
-
   @Get('/student/:studentId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -116,7 +115,6 @@ export class HealthRecordController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE)
   @ApiOperation({
     summary: 'Update health record',
     description: 'Updates an existing health record by its ID.',
@@ -139,6 +137,35 @@ export class HealthRecordController {
       throw new BadRequestException(error.message || 'Failed to update health record');
     }
   }
+
+  @Put('/student/:studentId')
+@HttpCode(HttpStatus.OK)
+@ApiOperation({
+  summary: 'Update health record by studentId',
+  description: 'Updates an existing health record by studentId.',
+})
+@ApiResponse({ status: 200, description: 'Health record updated successfully.' })
+@ApiResponse({ status: 404, description: 'Health record not found.' })
+@ApiResponse({ status: 400, description: 'Bad request. Invalid input data.' })
+async updatebyStudentId(
+  @Param('studentId') studentId: string,
+  @Body() updateHealthRecordDto: UpdateHealthRecordDto,
+) {
+  try {
+    // Tìm health record theo studentId
+    const healthRecord = await this.healthRecordService.getHealthRecordsByStudentId(studentId);
+    if (!healthRecord) {
+      throw new BadRequestException('Health record not found for this student');
+    }
+    // Update theo _id của health record
+    return await this.healthRecordService.update(healthRecord._id, updateHealthRecordDto);
+  } catch (error) {
+    if (error instanceof BadRequestException) {
+      throw error;
+    }
+    throw new BadRequestException(error.message || 'Failed to update health record');
+  }
+}
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
