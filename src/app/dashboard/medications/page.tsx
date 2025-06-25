@@ -31,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
-import { MedicineDelivery, MedicineDeliveryByParentId } from "@/lib/type/medicine-delivery";
+import { MedicineDelivery } from "@/lib/type/medicine-delivery";
 
 // Giả sử bạn lấy parentId từ localStorage, context, hoặc store đăng nhập
 // Thay bằng cách lấy parentId thực tế
@@ -43,28 +43,13 @@ const mapDeliveriesForDisplay = (
   };
 };
 export default function MedicationsPage() {
-  const { medicineDeliveries, isLoading, fetchMedicineDeliveryByParentId } =
+  const { medicineDeliveryByParentId, isLoading, fetchMedicineDeliveryByParentId } =
     useMedicineDeliveryStore();
-  const [isAddMedicineOpen, setIsAddMedicineOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const displayDeliveries = medicineDeliveries
-    .map(mapDeliveriesForDisplay)
-    .filter((deliveriesData) => {
-      // Apply search filter if exists
-      if (searchQuery && searchQuery.trim() !== "") {
-        const query = searchQuery.toLowerCase();
-        return (
-          deliveriesData.student?.name.toLowerCase().includes(query) ||
-          deliveriesData.medicine.name.toLowerCase().includes(query) ||
-          deliveriesData.per_dose.toLowerCase().includes(query) ||
-          deliveriesData.status.toLowerCase().includes(query)
-        );
-      }
-      return true; // No filter applied
-    })
-
-
+  useEffect(() => {
+    fetchMedicineDeliveryByParentId();
+  }, [fetchMedicineDeliveryByParentId]);
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col space-y-2">
@@ -96,19 +81,19 @@ export default function MedicationsPage() {
                     Đang tải dữ liệu...
                   </TableCell>
                 </TableRow>
-              ) : medicineDeliveries.length === 0 ? (
+              ) : medicineDeliveryByParentId.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-4">
                     Không có đơn thuốc nào
                   </TableCell>
                 </TableRow>
               ) : (
-                medicineDeliveries.map((delivery, idx) => (
+                medicineDeliveryByParentId.map((delivery, idx) => (
                   <TableRow key={delivery.id || idx}>
                     <TableCell className="font-medium">
-                      {delivery.student?.name}
+                      {delivery.student.name || "N/A"}
                     </TableCell>
-                    <TableCell>{delivery.medicine?.name}</TableCell>
+                    <TableCell>{delivery.medicine}</TableCell>
                     <TableCell>{delivery.per_dose}</TableCell>
                     <TableCell>
                       <div className="flex items-center">

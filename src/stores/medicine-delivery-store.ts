@@ -1,12 +1,14 @@
+import { getAuthToken, parseJwt } from "@/lib/api/auth/token";
 import {
   createMedicineDeliveries,
   getAllMedicineDeliveries,
-  getMedicineDeliveriesByParentID,
+  getMedicineDeliveriesByParentId,
 } from "@/lib/api/medicine-delivery";
 import {
   CreateMedicineDelivery,
   MedicineDeliveryStore,
-  MedicineDeliveryByParentId,
+  MedicineDeliveryByParent,
+  MedicineDeliveryParentResponse,
 } from "@/lib/type/medicine-delivery";
 import { create } from "zustand";
 
@@ -36,12 +38,20 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       }
     },
 
-    fetchMedicineDeliveryByParentId: async (parentId: string): Promise<MedicineDeliveryByParentId[]> => {
+    fetchMedicineDeliveryByParentId: async (): Promise<void> => {
       try {
         set({ isLoading: true, error: null });
-        const response = await getMedicineDeliveriesByParentID(parentId);
+        const token = getAuthToken();
+        console.log(token)
+        if (!token) {
+          throw new Error("Không tìm thấy token xác thực");
+        }
+        const userId = parseJwt(token)?.sub;
+        if (!userId) {
+          throw new Error("Không tìm thấy ID người dùng trong token");
+        }
+        const response = await getMedicineDeliveriesByParentId(userId);
         set({ medicineDeliveryByParentId: response || [] });
-        return response;
       } catch (err: any) {
         const errorMessage =
           err.message || "Failed to fetch medicine delivery by parent ID";
@@ -57,11 +67,11 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         set({ isLoading: true, error: null });
         const response = await createMedicineDeliveries(data);
         // Ensure response is of type MedicineDeliveryByParentId before adding
-        set({ 
+        set({
           medicineDeliveryByParentId: [
             ...get().medicineDeliveryByParentId,
             ...(Array.isArray(response) ? response : [response]).filter(
-              (item): item is MedicineDeliveryByParentId =>
+              (item): item is MedicineDeliveryByParent =>
                 item && "student" in item && "staff" in item
             ),
           ],

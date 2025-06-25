@@ -41,7 +41,10 @@ interface MedicineDelivery {
   medicine: Medication;
 }
 
-interface MedicineDeliveryByParentId {
+interface MedicineDeliveryByParent {
+  id: string;
+  staffId: string;
+  staffName: string;
   name: string;
   date: string;
   total: number;
@@ -61,11 +64,12 @@ interface MedicineDeliveryByParentId {
       name: string;
     };
   };
-  medicine: string; // Giữ string để đơn giản
-  staff: string;
+  medicine: string;
+  created_at: Date;
+  updated_at: Date;
 }
 interface MedicineDeliveryParentResponse {
-  data: MedicineDeliveryByParentId[];
+  data: MedicineDeliveryByParent[];
   total: number;
 }
 interface CreateMedicineDelivery {
@@ -91,15 +95,12 @@ interface MedicineDeliveryResponse {
 }
 
 interface MedicineDeliveryStore {
-  students: Student[];
-  medicineDeliveryByParentId: MedicineDeliveryByParentId[];
   medicineDeliveries: MedicineDelivery[];
+  medicineDeliveryByParentId: MedicineDeliveryByParent[];
   isLoading: boolean;
   error: string | null;
   fetchMedicineDeliveries: () => Promise<void>;
-  fetchMedicineDeliveryByParentId: (
-    parentId: string
-  ) => Promise<MedicineDeliveryByParentId[]>;
+  fetchMedicineDeliveryByParentId: () => Promise<void>;
   addMedicineDelivery: (data: CreateMedicineDelivery) => Promise<any>;
   updateMedicineDelivery: (id: string, data: MedicineDelivery) => Promise<void>;
   deleteMedicineDelivery: (id: string) => Promise<void>;
@@ -113,6 +114,6 @@ export type {
   MedicineDeliveryResponse,
   MedicineDeliveryStore,
   CreateMedicineDelivery,
-  MedicineDeliveryByParentId,
+  MedicineDeliveryByParent,
   MedicineDeliveryParentResponse,
 };
