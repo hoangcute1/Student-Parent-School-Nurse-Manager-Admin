@@ -50,7 +50,52 @@ export class MedicineDeliveryService {
     return populatedDelivery;
   }
 
-  async findByParentId(parentId: string): Promise<{ data: any[]; total: number }> {
+  async findAll(): Promise<{ data: any; total: number }> {
+    const medicineDeliveryList = await this.medicineDeliveryModel
+      .find()
+      .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+      .populate('staff')
+      .populate('parent')
+      .populate('medicine')
+      .sort({ created_at: -1 })
+      .exec();
+
+    const data = await Promise.all(
+      medicineDeliveryList.map(async (item) => {
+        const { _id, parent, staff, ...rest } = item.toObject();
+
+        const parentUserId = (item.parent as any).user?.toString();
+        const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)
+          ?.name;
+        const staffUserId = (item.staff as any).user?.toString();
+        const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)
+          ?.name;
+
+        return {
+          id: item._id,
+          parentId:
+            typeof item.parent === 'object' && '_id' in item.parent
+              ? (item.parent as any)._id.toString()
+              : item.parent?.toString() || parent, // lấy id parent
+          staffId:
+            typeof item.staff === 'object' && '_id' in item.staff
+              ? (item.staff as any)._id.toString()
+              : item.staff?.toString() || staff, // lấy id staff
+          parentName: parentName,
+          staffName: staffName,
+          ...rest,
+        };
+      }),
+    );
+
+    return {
+      data,
+      total: data.length,
+    };
+  }
+
+  async findByUserId(userId: string): Promise<{ data: any[]; total: number }> {
+    const parentId = await this.parentService.findByUserId(userId);
     const medicineDeliveryList = await this.medicineDeliveryModel
       .find({ parent: parentId })
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
@@ -64,14 +109,6 @@ export class MedicineDeliveryService {
       medicineDeliveryList.map(async (item) => {
         const { _id, parent, staff, ...rest } = item.toObject();
 
-        // Lấy tên phụ huynh
-        let parentName = '';
-        if (item.parent && (item.parent as any).user) {
-          const parentUserId = (item.parent as any).user.toString();
-          parentName =
-            ((await this.userService.getUserProfile(parentUserId)).profile as any)?.name || '';
-        }
-
         // Lấy tên staff
         let staffName = '';
         if (item.staff && (item.staff as any).user) {
@@ -82,7 +119,7 @@ export class MedicineDeliveryService {
 
         return {
           id: item._id,
-          parentName,
+          staffId: staff ? (item.staff as any)._id.toString() : '',
           staffName,
           ...rest,
         };
@@ -141,46 +178,6 @@ export class MedicineDeliveryService {
 
     return populatedDelivery;
   }
-
- async findAll(): Promise<{ data: any; total: number }> {
-  const medicineDeliveryList = await this.medicineDeliveryModel
-    .find()
-    .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
-    .populate('staff')
-    .populate('parent')
-    .populate('medicine')
-    .sort({ created_at: -1 })
-    .exec();
-
-  const data = await Promise.all(
-    medicineDeliveryList.map(async (item) => {
-      const { _id, parent, staff, ...rest } = item.toObject();
-
-      const parentUserId = (item.parent as any).user?.toString();
-      const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)?.name;
-      const staffUserId = (item.staff as any).user?.toString();
-      const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name;
-
-      return {
-        id: item._id,
-        parentId: typeof item.parent === 'object' && '_id' in item.parent
-          ? (item.parent as any)._id.toString()
-          : item.parent?.toString() || parent, // lấy id parent
-        staffId: typeof item.staff === 'object' && '_id' in item.staff
-          ? (item.staff as any)._id.toString()
-          : item.staff?.toString() || staff,    // lấy id staff
-        parentName: parentName,
-        staffName: staffName,
-        ...rest,
-      };
-    }),
-  );
-
-  return {
-    data,
-    total: data.length,
-  };
-}
 
   async findByStudent(
     studentId: string,

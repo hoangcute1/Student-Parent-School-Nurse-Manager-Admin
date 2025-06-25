@@ -137,7 +137,6 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.create(createMedicineDeliveryDto);
   }
 
-
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -149,107 +148,16 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.findAll();
   }
 
-
-  @Get('parent/:parentId')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({
-  summary: 'Get medicine deliveries by parentId',
-  description: 'Get all medicine deliveries for a specific parent',
-})
-@ApiParam({
-  name: 'parentId',
-  description: 'Parent ID',
-  type: String,
-  required: true,
-})
-@ApiOkResponse({
-  description: 'List of medicine deliveries for the parent.',
-  schema: {
-    type: 'object',
-    properties: {
-      data: {
-        type: 'array',
-        items: { type: 'object' }, // hoặc mô tả chi tiết hơn nếu muốn
-      },
-      total: { type: 'number' },
-    },
-  },
-})
-@ApiResponse({ status: 401, description: 'Unauthorized.' })
-@ApiResponse({ status: 404, description: 'Parent not found.' })
-async findByParent(@Param('parentId') parentId: string) {
-  try {
-    const deliveries = await this.medicineDeliveryService.findByParentId(parentId);
-    return {
-      data: deliveries.data.map((delivery) => this.formatDeliveryResponse(delivery)),
-      total: deliveries.total,
-    };
-  } catch (error) {
-    if (error instanceof NotFoundException) throw error;
-    throw new BadRequestException(`Error fetching deliveries for parent: ${error.message}`);
-  }
-}
-  /**
-   * Get deliveries by status
-   */
-  @Get('status/:status')
+  @Get('parent/:userId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get deliveries by status',
-    description: 'Get all medicine deliveries with a specific status',
-  })
-  @ApiParam({
-    name: 'status',
-    description: 'Status of the deliveries',
-    enum: MedicineDeliveryStatus,
-    required: true,
-  })
-  @ApiOkResponse({
-    description: 'List of medicine deliveries with the specified status.',
-    schema: {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              name: { type: 'string' },
-              date: { type: 'string', format: 'date-time' },
-              status: { type: 'string' },
-              student: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  name: { type: 'string' },
-                  studentId: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        total: { type: 'number' },
-      },
-    },
+    summary: 'Get medicine deliveries by userId',
+    description: 'Get all medicine deliveries for a specific parent',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 400, description: 'Invalid status.' })
-  async findByStatus(@Param('status') status: MedicineDeliveryStatus) {
-    // Validate status
-    if (!Object.values(MedicineDeliveryStatus).includes(status)) {
-      throw new BadRequestException(`Invalid status: ${status}`);
-    }
-
-    try {
-      const deliveries = await this.medicineDeliveryService.findByStatus(status);
-      return {
-        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
-        total: deliveries.length,
-      };
-    } catch (error) {
-      throw new BadRequestException(`Error fetching deliveries by status: ${error.message}`);
-    }
+  @ApiResponse({ status: 404, description: 'Parent not found.' })
+  async findByParent(@Param('userId') userId: string) {
+    return this.medicineDeliveryService.findByUserId(userId);
   }
 
   /**
