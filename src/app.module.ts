@@ -16,7 +16,6 @@ import { StaffModule } from './modules/staff.module';
 import { AdminModule } from './modules/admin.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
-import { MedicineStorageModule } from './modules/medicine-storage.module';
 import { MedicineDeliveryModule } from './modules/medicine-delivery.module';
 import { FeedbackModule } from './modules/feedback.module';
 import { SuggestionModule } from './modules/suggestion.module';
@@ -51,7 +50,6 @@ import { TokenModule } from './modules/token.module';
     ParentModule,
     StaffModule,
     AdminModule,
-    MedicineStorageModule,
     MedicineDeliveryModule,
     FeedbackModule,
     SuggestionModule,

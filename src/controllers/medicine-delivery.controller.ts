@@ -131,57 +131,12 @@ export class MedicineDeliveryController {
     description: 'Create a new medicine delivery schedule for a student',
   })
   @ApiBody({ type: CreateMedicineDeliveryDto })
-  @ApiCreatedResponse({
-    description: 'The medicine delivery has been successfully created.',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        name: { type: 'string' },
-        date: { type: 'string', format: 'date-time' },
-        total: { type: 'number' },
-        status: {
-          type: 'string',
-          enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
-        },
-        per_dose: { type: 'string' },
-        per_day: { type: 'string' },
-        note: { type: 'string', nullable: true },
-        reason: { type: 'string' },
-        sent_at: { type: 'string', format: 'date-time' },
-        end_at: { type: 'string', format: 'date-time' },
-        student: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-            studentId: { type: 'string' },
-          },
-        },
-        staff: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-          },
-        },
-        medicine: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-          },
-        },
-        created_at: { type: 'string', format: 'date-time' },
-        updated_at: { type: 'string', format: 'date-time' },
-      },
-    },
-  })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async create(@Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto, @GetUser() user: any) {
     return this.medicineDeliveryService.create(createMedicineDeliveryDto);
   }
+
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -194,6 +149,46 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.findAll();
   }
 
+
+  @Get('parent/:parentId')
+@HttpCode(HttpStatus.OK)
+@ApiOperation({
+  summary: 'Get medicine deliveries by parentId',
+  description: 'Get all medicine deliveries for a specific parent',
+})
+@ApiParam({
+  name: 'parentId',
+  description: 'Parent ID',
+  type: String,
+  required: true,
+})
+@ApiOkResponse({
+  description: 'List of medicine deliveries for the parent.',
+  schema: {
+    type: 'object',
+    properties: {
+      data: {
+        type: 'array',
+        items: { type: 'object' }, // hoặc mô tả chi tiết hơn nếu muốn
+      },
+      total: { type: 'number' },
+    },
+  },
+})
+@ApiResponse({ status: 401, description: 'Unauthorized.' })
+@ApiResponse({ status: 404, description: 'Parent not found.' })
+async findByParent(@Param('parentId') parentId: string) {
+  try {
+    const deliveries = await this.medicineDeliveryService.findByParentId(parentId);
+    return {
+      data: deliveries.data.map((delivery) => this.formatDeliveryResponse(delivery)),
+      total: deliveries.total,
+    };
+  } catch (error) {
+    if (error instanceof NotFoundException) throw error;
+    throw new BadRequestException(`Error fetching deliveries for parent: ${error.message}`);
+  }
+}
   /**
    * Get deliveries by status
    */
@@ -689,7 +684,6 @@ export class MedicineDeliveryController {
       throw new BadRequestException(`Error updating medicine delivery: ${error.message}`);
     }
   }
-
 
   /**
    * Mark a medicine delivery as completed

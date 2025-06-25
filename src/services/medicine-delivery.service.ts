@@ -14,7 +14,7 @@ import {
 } from '@/decorations/dto/medicine-delivery.dto';
 import { ParentService } from './parent.service';
 
-@Injectable() 
+@Injectable()
 export class MedicineDeliveryService {
   constructor(
     @InjectModel(MedicineDelivery.name)
@@ -49,31 +49,41 @@ export class MedicineDeliveryService {
 
     return populatedDelivery;
   }
-  async findAll(): Promise<{ data: any; total: number }> {
+
+  async findByParentId(parentId: string): Promise<{ data: any[]; total: number }> {
     const medicineDeliveryList = await this.medicineDeliveryModel
-      .find()
+      .find({ parent: parentId })
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
       .populate('staff')
       .populate('parent')
       .populate('medicine')
       .sort({ created_at: -1 })
       .exec();
-    console.log('Medicine Delivery List:', medicineDeliveryList);
+
     const data = await Promise.all(
       medicineDeliveryList.map(async (item) => {
         const { _id, parent, staff, ...rest } = item.toObject();
 
-        const parentUserId = (item.parent as any).user.toString();
-        const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)
-          .name;
-        const staffUserId = (item.staff as any).user.toString();
-        const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)
-          .name;
+        // Lấy tên phụ huynh
+        let parentName = '';
+        if (item.parent && (item.parent as any).user) {
+          const parentUserId = (item.parent as any).user.toString();
+          parentName =
+            ((await this.userService.getUserProfile(parentUserId)).profile as any)?.name || '';
+        }
+
+        // Lấy tên staff
+        let staffName = '';
+        if (item.staff && (item.staff as any).user) {
+          const staffUserId = (item.staff as any).user.toString();
+          staffName =
+            ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
+        }
+
         return {
           id: item._id,
-          parentName: parentName,
-          staffName: staffName,
-        
+          parentName,
+          staffName,
           ...rest,
         };
       }),
@@ -84,6 +94,93 @@ export class MedicineDeliveryService {
       total: data.length,
     };
   }
+
+  async createByStudentId(
+    createMedicineDeliveryDto: CreateMedicineDeliveryDto,
+  ): Promise<MedicineDeliveryDocument> {
+    // Đảm bảo có studentId và parentId trong DTO
+    if (!createMedicineDeliveryDto.student) {
+      throw new BadRequestException('Missing studentId in request');
+    }
+    if (!createMedicineDeliveryDto.parent) {
+      throw new BadRequestException('Missing parentId in request');
+    }
+
+    // Nếu không có sent_at, mặc định sẽ dùng thời gian hiện tại từ schema
+    if (!createMedicineDeliveryDto.sent_at) {
+      createMedicineDeliveryDto.sent_at = new Date();
+    }
+
+    // Kiểm tra parent có tồn tại không
+    const parent = await this.parentService.findById(createMedicineDeliveryDto.parent);
+    if (!parent) {
+      throw new NotFoundException('Parent not found');
+    }
+
+    // (Tùy chọn) Có thể kiểm tra student tồn tại nếu muốn
+
+    const createdDelivery = new this.medicineDeliveryModel(createMedicineDeliveryDto);
+    await createdDelivery.save();
+
+    // Populate data sau khi lưu để có thông tin đầy đủ
+    const populatedDelivery = await this.medicineDeliveryModel
+      .findById(createdDelivery._id)
+      .populate({
+        path: 'student',
+        select: 'name studentId class',
+        populate: { path: 'class', select: 'name' },
+      })
+      .populate('staff', 'name email role')
+      .populate('medicine', 'name dosage unit type')
+      .populate('parent', 'user')
+      .exec();
+
+    if (!populatedDelivery) {
+      throw new Error('Failed to find created delivery');
+    }
+
+    return populatedDelivery;
+  }
+
+ async findAll(): Promise<{ data: any; total: number }> {
+  const medicineDeliveryList = await this.medicineDeliveryModel
+    .find()
+    .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+    .populate('staff')
+    .populate('parent')
+    .populate('medicine')
+    .sort({ created_at: -1 })
+    .exec();
+
+  const data = await Promise.all(
+    medicineDeliveryList.map(async (item) => {
+      const { _id, parent, staff, ...rest } = item.toObject();
+
+      const parentUserId = (item.parent as any).user?.toString();
+      const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)?.name;
+      const staffUserId = (item.staff as any).user?.toString();
+      const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name;
+
+      return {
+        id: item._id,
+        parentId: typeof item.parent === 'object' && '_id' in item.parent
+          ? (item.parent as any)._id.toString()
+          : item.parent?.toString() || parent, // lấy id parent
+        staffId: typeof item.staff === 'object' && '_id' in item.staff
+          ? (item.staff as any)._id.toString()
+          : item.staff?.toString() || staff,    // lấy id staff
+        parentName: parentName,
+        staffName: staffName,
+        ...rest,
+      };
+    }),
+  );
+
+  return {
+    data,
+    total: data.length,
+  };
+}
 
   async findByStudent(
     studentId: string,
@@ -236,7 +333,6 @@ export class MedicineDeliveryService {
       throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
     }
   }
-
 }
 // export const formatMedicalDeliveryList = (list: any) => {
 //   if (!list) return null;
