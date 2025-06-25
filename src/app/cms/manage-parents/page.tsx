@@ -11,6 +11,9 @@ import {
 import { ParentTable } from "./_components/parent-table";
 import { FilterBar } from "./_components/filter-bar";
 import { useParentStore } from "@/stores/parent-store";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { AddParentDialog } from "./_components/add-parent-dialog";
 
 // Define the mapping function to transform parent data for display
 const mapParentForDisplay = (parent: any) => {
@@ -35,6 +38,7 @@ export default function ParentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [healthFilter, setHealthFilter] = useState("all");
+  const [openAddParent, setOpenAddParent] = useState(false);
 
   // Transform parent data for display
   const displayParents = parents.map(mapParentForDisplay).filter((parent) => {
@@ -76,7 +80,24 @@ export default function ParentsPage() {
             Quản lý thông tin và liên lạc với phụ huynh trong trường
           </CardDescription>
         </CardHeader>
+
         <CardContent>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 shadow transition-all duration-150 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-300 font-normal"
+                onClick={() => setOpenAddParent(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Thêm phụ huynh
+              </Button>
+            </div>
+            <AddParentDialog
+              open={openAddParent}
+              onOpenChange={setOpenAddParent}
+              onSubmit={addParent}
+              onCancel={() => setOpenAddParent(false)}
+            />
+          </div>
           <FilterBar
             onSearchChange={setSearchQuery}
             onClassFilterChange={setClassFilter}
@@ -84,7 +105,7 @@ export default function ParentsPage() {
             onAddParent={addParent}
           />
           <ParentTable
-            parents={displayParents}
+            parents={parents}
             isLoading={isLoading}
             error={error}
           />
