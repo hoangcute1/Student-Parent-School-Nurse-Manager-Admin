@@ -1,19 +1,13 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schemas/profile.schema';
 import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
-import { UpdateProfileDto } from '@/decorations/dto/update-profile.dto';
+import { UpdateProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/update-profile.dto';
 
 @Injectable()
 export class ProfileService {
-  constructor(
-    @InjectModel(Profile.name) private profileModel: Model<ProfileDocument>,
-  ) {}
+  constructor(@InjectModel(Profile.name) private profileModel: Model<ProfileDocument>) {}
 
   async create(createProfileDto: CreateProfileDto): Promise<ProfileDocument> {
     // Check if a profile already exists for this user
@@ -69,6 +63,21 @@ export class ProfileService {
       throw new NotFoundException(`Profile with ID ${id} not found`);
     }
 
+    return updatedProfile;
+  }
+
+  async updateByUserId(
+    userId: string,
+    updateProfileDto: UpdateProfileWithoutUserDto,
+  ): Promise<ProfileDocument | null> {
+    const updateData = { ...updateProfileDto, updated_at: new Date() };
+    const updatedProfile = await this.profileModel
+      .findOneAndUpdate({ user: new Types.ObjectId(userId) }, updateData, { new: true })
+      .populate('user')
+      .exec();
+    if (!updatedProfile) {
+      throw new NotFoundException(`Profile with userId ${userId} not found`);
+    }
     return updatedProfile;
   }
 

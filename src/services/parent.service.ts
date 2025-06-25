@@ -101,6 +101,19 @@ export class ParentService {
     return createdParent.save();
   }
 
+  async createWithUser(
+    userDto: any,
+    profileDto: any,
+  ): Promise<{ user: any; profile: any; parent: ParentDocument }> {
+    // 1. Tạo user
+    const user = await this.userService.create(userDto);
+    // 2. Tạo profile với userId vừa tạo
+    const profile = await this.profileService.create({ ...profileDto, user: user['_id'] });
+    // 3. Tạo parent với userId vừa tạo
+    const parent = await this.create({ user: user['_id'] });
+    return { user, profile, parent };
+  }
+
   async update(id: string, updateParentDto: UpdateParentDto): Promise<ParentDocument> {
     const updatedParent = await this.parentModel
       .findByIdAndUpdate(id, updateParentDto, { new: true })

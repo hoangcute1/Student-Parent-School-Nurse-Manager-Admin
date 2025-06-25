@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ProfileService } from '../services/profile.service';
 import {
   ApiTags,
@@ -19,7 +10,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
-import { UpdateProfileDto } from '@/decorations/dto/update-profile.dto';
+import { UpdateProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/update-profile.dto';
 
 @ApiTags('profiles')
 @Controller('profiles')
@@ -66,10 +57,7 @@ export class ProfileController {
   @ApiParam({ name: 'id', description: 'ID của profile' })
   @ApiBody({ type: UpdateProfileDto })
   @ApiResponse({ status: 200, description: 'Profile đã được cập nhật.' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
     return this.profileService.updateById(id, updateProfileDto);
   }
 
@@ -79,5 +67,17 @@ export class ProfileController {
   @ApiResponse({ status: 200, description: 'Profile đã bị xoá.' })
   async delete(@Param('id') id: string) {
     return this.profileService.deleteById(id);
+  }
+
+  @Put('user/:userId')
+  @ApiOperation({ summary: 'Cập nhật profile theo userId' })
+  @ApiParam({ name: 'userId', description: 'ID của user' })
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiResponse({ status: 200, description: 'Profile đã được cập nhật theo userId.' })
+  async updateByUserId(
+    @Param('userId') userId: string,
+    @Body() updateProfileDto: UpdateProfileWithoutUserDto,
+  ) {
+    return this.profileService.updateByUserId(userId, updateProfileDto);
   }
 }
