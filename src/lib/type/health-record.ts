@@ -1,4 +1,3 @@
-import { Edit } from 'lucide-react';
 interface HealthRecord {
   _id: string;
   allergies: string;

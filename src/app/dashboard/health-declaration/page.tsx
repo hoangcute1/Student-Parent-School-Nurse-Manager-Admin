@@ -48,8 +48,11 @@ export default function ParentHealthRecords() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRecord, setSelectedRecord] = useState<ParentStudents | null>(null);
-  const [selectedEditRecord, setSelectedEditRecord] = useState<ParentStudents | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<ParentStudents | null>(
+    null
+  );
+  const [selectedEditRecord, setSelectedEditRecord] =
+    useState<ParentStudents | null>(null);
 
   const {
     studentsData,
@@ -258,84 +261,210 @@ export default function ParentHealthRecords() {
       {/* Dialog for viewing student details */}
       {selectedRecord && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border border-blue-100 bg-white">
+          <DialogContent className="max-w-2xl p-8 rounded-2xl shadow-2xl border border-blue-100 bg-white">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-blue-700 mb-2">
+              <DialogTitle
+                className="text-2xl font-bold text-blue-700 mb-4 truncate"
+                title={selectedRecord.student.name}
+              >
                 Thông tin học sinh: {selectedRecord.student.name}
               </DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 gap-3">
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Mã học sinh:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.student.studentId}
-                </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Thông tin học sinh */}
+              <div className="col-span-1 space-y-2">
+                <div className="font-bold text-blue-600 mb-2">
+                  Thông tin học sinh
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[110px]">
+                    Mã học sinh:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.student.studentId}
+                  >
+                    {selectedRecord.student.studentId}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[110px]">
+                    Lớp:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.student.class?.name}
+                  >
+                    {selectedRecord.student.class?.name || "Chưa phân lớp"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[110px]">
+                    Ngày sinh:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.student.birth
+                      ? new Date(
+                          selectedRecord.student.birth
+                        ).toLocaleDateString("vi-VN")
+                      : ""}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[110px]">
+                    Giới tính:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.student.gender === "male"
+                      ? "Nam"
+                      : selectedRecord.student.gender === "female"
+                      ? "Nữ"
+                      : "Không rõ"}
+                  </span>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Lớp:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.student.class?.name || "Chưa phân lớp"}
-                </span>
+              {/* Thông tin phụ huynh */}
+              <div className="col-span-1 space-y-2">
+                <div className="font-bold text-blue-600 mb-2">
+                  Thông tin phụ huynh
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[110px]">
+                    ID phụ huynh:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.parent?._id}
+                  >
+                    {selectedRecord.parent?._id || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[110px]">
+                    Tài khoản:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.parent?.user}
+                  >
+                    {selectedRecord.parent?.user || "N/A"}
+                  </span>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Ngày sinh:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.student.birth
-                    ? new Date(selectedRecord.student.birth)
-                        .toISOString()
-                        .split("T")[0]
-                    : ""}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Giới tính:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.student.gender === "male"
-                    ? "Nam"
-                    : selectedRecord.student.gender === "female"
-                    ? "Nữ"
-                    : "Không rõ"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  ID phụ huynh:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.parent?._id || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Dị ứng:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.healthRecord?.allergies || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Bệnh mãn tính:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.healthRecord?.chronic_conditions || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Lịch sử bệnh án:
-                </span>
-                <span className="text-gray-900">
-                  {selectedRecord.healthRecord?.treatment_history || "N/A"}
-                </span>
+            </div>
+            <div className="border-t border-blue-100 my-6"></div>
+            {/* Thông tin sức khỏe */}
+            <div className="space-y-2">
+              <div className="font-bold text-blue-600 mb-2">Hồ sơ sức khỏe</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Dị ứng:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.healthRecord?.allergies}
+                  >
+                    {selectedRecord.healthRecord?.allergies || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Bệnh mãn tính:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.healthRecord?.chronic_conditions}
+                  >
+                    {selectedRecord.healthRecord?.chronic_conditions || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Chiều cao:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord?.height || "N/A"} cm
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Cân nặng:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord?.weight || "N/A"} kg
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Thị lực:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord?.vision || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Thính lực:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord?.hearing || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Nhóm máu:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord?.blood_type || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Lịch sử bệnh án:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[180px] truncate"
+                    title={selectedRecord.healthRecord?.treatment_history}
+                  >
+                    {selectedRecord.healthRecord?.treatment_history || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap col-span-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Ghi chú:
+                  </span>
+                  <span
+                    className="text-gray-900 break-all max-w-[380px] truncate"
+                    title={selectedRecord.healthRecord?.notes}
+                  >
+                    {selectedRecord.healthRecord?.notes || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Ngày tạo hồ sơ:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord?.created_at
+                      ? new Date(
+                          selectedRecord.healthRecord.created_at
+                        ).toLocaleDateString("vi-VN")
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Cập nhật lần cuối:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedRecord.healthRecord.updated_at
+                      ? new Date(
+                          selectedRecord.healthRecord.updated_at
+                        ).toLocaleDateString("vi-VN")
+                      : "N/A"}
+                  </span>
+                </div>
               </div>
             </div>
           </DialogContent>
@@ -352,13 +481,15 @@ export default function ParentHealthRecords() {
           }}
           defaultValues={{
             allergies: selectedEditRecord.healthRecord?.allergies || "",
-            chronic_conditions: selectedEditRecord.healthRecord?.chronic_conditions || "",
+            chronic_conditions:
+              selectedEditRecord.healthRecord?.chronic_conditions || "",
             height: selectedEditRecord.healthRecord?.height || "",
             weight: selectedEditRecord.healthRecord?.weight || "",
             vision: selectedEditRecord.healthRecord?.vision || "",
             hearing: selectedEditRecord.healthRecord?.hearing || "",
             blood_type: selectedEditRecord.healthRecord?.blood_type || "",
-            treatment_history: selectedEditRecord.healthRecord?.treatment_history || "",
+            treatment_history:
+              selectedEditRecord.healthRecord?.treatment_history || "",
             notes: selectedEditRecord.healthRecord?.notes || "",
           }}
           studentName={selectedEditRecord.student.name}

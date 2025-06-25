@@ -1,5 +1,4 @@
 "use client";
-
 import { Eye, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import {
   Table,
@@ -10,29 +9,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  unit: string;
-  type: string;
-  usage_instructions: string;
-  side_effects: string;
-  contraindications: string;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import { Medication } from "@/lib/type/medications";
 
 interface MedicationTableProps {
   medications: Medication[];
@@ -59,6 +43,7 @@ export function MedicationTable({
             <TableHead className="text-blue-700">Tên thuốc</TableHead>
             <TableHead className="text-blue-700">Loại</TableHead>
             <TableHead className="text-blue-700">Liều lượng</TableHead>
+            <TableHead className="text-blue-700">Số lượng</TableHead>
             <TableHead className="text-blue-700">Hướng dẫn sử dụng</TableHead>
             <TableHead className="text-blue-700">Ngày cập nhật</TableHead>
             <TableHead className="text-right text-blue-700">
@@ -92,9 +77,9 @@ export function MedicationTable({
               </TableCell>
             </TableRow>
           ) : (
-            medications.map((medication) => (
+            medications.map((medication, index) => (
               <TableRow
-                key={medication.id}
+                key={medication._id || `${medication.name || "med"}-${index}`}
                 className="hover:bg-blue-50 cursor-pointer"
               >
                 <TableCell>
@@ -123,10 +108,15 @@ export function MedicationTable({
                   {medication.dosage} {medication.unit}
                 </TableCell>
                 <TableCell className="text-blue-700">
+                  {medication.quantity !== undefined ? medication.quantity : 0}
+                </TableCell>
+                <TableCell className="text-blue-700">
                   {medication.usage_instructions || "Không có hướng dẫn"}
                 </TableCell>
                 <TableCell className="text-blue-700">
-                  {medication.updated_at || "Chưa cập nhật"}
+                  {medication.updatedAt
+                    ? new Date(medication.updatedAt).toLocaleDateString("vi-VN")
+                    : "Không rõ"}
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>

@@ -37,13 +37,11 @@ export default function StudentsPage() {
     isLoading,
     error,
     fetchStudents,
-    fetchStudentsByClass,
     fetchStudentById,
     deleteStudent,
     updateStudent,
     createStudent,
     selectedStudent,
-    setSelectedClassId,
     selectedStudentId,
   } = useStudentStore();
   const { classes, fetchClasses } = useClassStore();

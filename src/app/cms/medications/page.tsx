@@ -8,64 +8,54 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 import { FilterBar } from "./_components/filter-bar";
 import { useMedicationStore } from "@/stores/medication-store";
 import { MedicationTable } from "./_components/medication-table";
 import { MedicationFormDialog } from "./_components/medication-form-dialog";
-
-// Define the mapping function to transform medication data for display
-const mapMedicationForDisplay = (medication: any) => {
-  return {
-    id: medication._id || "",
-    name: medication.name || "Không có tên",
-    type: medication.type || "Chưa phân loại",
-    dosage: medication.dosage || "Không có liều lượng",
-    unit: medication.unit !== undefined ? medication.unit : 0,
-    usage_instructions: medication.usage_instructions || "Không có hướng dẫn",
-    side_effects: medication.side_effects || "Không có tác dụng phụ",
-    contraindications:
-      medication.contraindications || "Không có chống chỉ định",
-    description: medication.description || "Không có mô tả",
-    created_at: medication.created_at
-      ? new Date(medication.created_at).toLocaleDateString("vi-VN")
-      : "Không rõ",
-    updated_at: medication.updated_at
-      ? new Date(medication.updated_at).toLocaleDateString("vi-VN")
-      : "Không rõ",
-  };
-};
+import { UpdateMedicationDialog } from "./_components/update-medication-dialog";
+import { ViewMedicationDialog } from "./_components/view-medication-dialog";
+import { Medication } from "@/lib/type/medications";
+import { AddMedicationDialog } from "./_components/add-medication-dialog";
 
 export default function MedicationsPage() {
-  const { medications, isLoading, error, fetchMedications, addMedication } =
-    useMedicationStore();
+  const {
+    medications,
+    isLoading,
+    error,
+    fetchMedications,
+    addMedication,
+    updateMedication,
+    deleteMedication,
+  } = useMedicationStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
+  const [selectedMedication, setSelectedMedication] =
+    useState<Medication | null>(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Action handlers for medications
-  const handleViewMedication = (medication: any) => {
-    console.log("View medication:", medication);
-    // TODO: Implement view medication detail dialog
+  const handleViewMedication = (medication: Medication) => {
+    setSelectedMedication(medication);
+    setOpenViewDialog(true);
   };
 
-  const handleEditMedication = (medication: any) => {
-    console.log("Edit medication:", medication);
-    // TODO: Implement edit medication dialog
+  const handleEditMedication = (medication: Medication) => {
+    setSelectedMedication(medication);
+    setOpenEditDialog(true);
   };
 
-  const handleDeleteMedication = (medication: any) => {
-    console.log("Delete medication:", medication);
+  const handleDeleteMedication = (medication: Medication) => {
     if (
       window.confirm(`Bạn có chắc chắn muốn xóa thuốc "${medication.name}"?`)
     ) {
-      useMedicationStore
-        .getState()
-        .deleteMedication(medication.id)
+      deleteMedication(medication._id)
         .then(() => {
-          console.log("Medication deleted successfully");
+          fetchMedications();
         })
         .catch((err) => {
           console.error("Failed to delete medication:", err);
@@ -74,31 +64,45 @@ export default function MedicationsPage() {
   };
 
   // Thêm thuốc mới
-  const handleAddMedication = (data: any) => {
-    addMedication(data);
-    setOpenAddDialog(false);
+  const handleAddMedication = async (data: any) => {
+    await addMedication(data);
+    await fetchMedications();
+    setShowAddDialog(false);
+  };
+
+  // Sửa thuốc
+  const handleUpdateMedication = (data: any) => {
+    if (!selectedMedication) return;
+    updateMedication(selectedMedication._id, data)
+      .then(() => {
+        fetchMedications();
+        setOpenEditDialog(false);
+        setSelectedMedication(null);
+      })
+      .catch((err) => {
+        console.error("Failed to update medication:", err);
+      });
   };
 
   // Transform Medication data for display
   const displayMedications = Array.isArray(medications)
     ? medications
-        .map(mapMedicationForDisplay)
         .filter((medication: any) => {
           // Apply search filter if exists
           if (searchQuery && searchQuery.trim() !== "") {
             const query = searchQuery.toLowerCase();
             return (
-              medication.name.toLowerCase().includes(query) ||
-              medication.type.toLowerCase().includes(query) ||
-              medication.description.toLowerCase().includes(query)
+              medication.name?.toLowerCase().includes(query) ||
+              medication.type?.toLowerCase().includes(query) ||
+              medication.description?.toLowerCase().includes(query)
             );
           }
           return true;
         })
         // Apply type filter if not "all"
-        .filter((medication) => {
+        .filter((medication: any) => {
           if (typeFilter !== "all") {
-            return medication.type.toLowerCase() === typeFilter.toLowerCase();
+            return medication.type?.toLowerCase() === typeFilter.toLowerCase();
           }
           return true;
         })
@@ -128,15 +132,19 @@ export default function MedicationsPage() {
               Quản lý thông tin về thuốc và hướng dẫn sử dụng
             </CardDescription>
           </div>
-          <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
-            <DialogTrigger asChild>
-              <Button variant="default">+ Thêm thuốc mới</Button>
-            </DialogTrigger>
-            <MedicationFormDialog
-              onSubmit={handleAddMedication}
-              onCancel={() => setOpenAddDialog(false)}
-            />
-          </Dialog>
+          <Button
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => setShowAddDialog(true)}
+          >
+            + Thêm thuốc mới
+          </Button>
+          <AddMedicationDialog
+            open={showAddDialog}
+            onOpenChange={setShowAddDialog}
+            onSubmit={handleAddMedication}
+            onCancel={() => setShowAddDialog(false)}
+          />
         </CardHeader>
         <CardContent>
           <FilterBar
@@ -154,6 +162,25 @@ export default function MedicationsPage() {
           />
         </CardContent>
       </Card>
+      <UpdateMedicationDialog
+        open={openEditDialog}
+        onOpenChange={setOpenEditDialog}
+        medication={selectedMedication}
+        onSubmit={handleUpdateMedication}
+        onCancel={() => {
+          setOpenEditDialog(false);
+          setSelectedMedication(null);
+        }}
+      />
+      <ViewMedicationDialog
+        open={openViewDialog}
+        onOpenChange={setOpenViewDialog}
+        medication={selectedMedication}
+        onClose={() => {
+          setOpenViewDialog(false);
+          setSelectedMedication(null);
+        }}
+      />
     </div>
   );
 }

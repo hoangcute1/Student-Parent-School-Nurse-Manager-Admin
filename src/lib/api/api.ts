@@ -67,7 +67,15 @@ export async function fetchData<T>(
       );
     }
 
-    return await response.json();
+    // Only parse JSON if response has content
+    if (response.status === 204) return undefined as T;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      return await response.json();
+    } else {
+      // If no content or not JSON, return undefined
+      return undefined as T;
+    }
   } catch (error) {
     console.error("API request failed:", error);
     throw error;

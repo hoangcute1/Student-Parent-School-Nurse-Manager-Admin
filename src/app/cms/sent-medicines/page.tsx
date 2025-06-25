@@ -160,7 +160,6 @@ export default function ParentMedicine() {
         </p>
       </div>
       {/* Stats Cards */}
-      
       <Tabs defaultValue="requests" className="w-full">
         <TabsContent value="requests" className="mt-6">
           <Card>
@@ -221,7 +220,7 @@ export default function ParentMedicine() {
                           </h4>
                           <p className="text-sm text-teal-600">
                             {request.student.class?.name || "N/A"} •{" "}
-                            {request.parentName || "N/A"}
+                            {request.parent.name || "N/A"}
                           </p>
                         </div>
                       </div>
@@ -233,8 +232,8 @@ export default function ParentMedicine() {
                           request.status === "pending"
                             ? "bg-yellow-100 text-yellow-800"
                             : request.status === "completed"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                         }
                       >
                         {request.status}
@@ -265,8 +264,8 @@ export default function ParentMedicine() {
                           {" - "}
                           {request.end_at
                             ? new Date(request.end_at).toLocaleDateString(
-                              "vi-VN"
-                            )
+                                "vi-VN"
+                              )
                             : "không"}
                         </p>
                         <p className="text-sm">
@@ -286,8 +285,8 @@ export default function ParentMedicine() {
                     <div className="flex justify-between items-center text-sm text-gray-500">
                       <span>
                         Gửi lúc:{" "}
-                        {request.created_at instanceof Date
-                          ? request.created_at.toLocaleString()
+                        {request.created_at
+                          ? new Date(request.created_at).toLocaleString("vi-VN")
                           : "không xác định"}
                       </span>
                       <div className="flex gap-2">
@@ -319,12 +318,6 @@ export default function ParentMedicine() {
             </CardContent>
           </Card>
         </TabsContent>
-
-
-
-
-
-
       </Tabs>{" "}
       {/* Detail Dialog */}
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
@@ -350,8 +343,8 @@ export default function ParentMedicine() {
                       selectedMedicine.status === "Chờ xử lý"
                         ? "bg-yellow-100 text-yellow-800"
                         : selectedMedicine.status === "Đã duyệt"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
                     }
                   >
                     {selectedMedicine.status}
@@ -388,7 +381,7 @@ export default function ParentMedicine() {
                 <div className="space-y-2">
                   <Label>Số lượng</Label>
                   {"quantity" in selectedMedicine &&
-                    selectedMedicine.quantity ? (
+                  selectedMedicine.quantity ? (
                     <Input value={selectedMedicine.quantity} readOnly />
                   ) : (
                     "remaining" in selectedMedicine && (
@@ -556,7 +549,7 @@ export default function ParentMedicine() {
                               new Date(
                                 medicine.expiry.split("/").reverse().join("-")
                               ) <
-                                new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+                              new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
                                 ? "bg-red-100 text-red-800"
                                 : "bg-green-100 text-green-800"
                             }
@@ -617,10 +610,10 @@ export default function ParentMedicine() {
                     (history) =>
                       history.studentName === selectedInventory.studentName
                   ).length === 0 && (
-                      <p className="text-sm text-gray-500 text-center py-2">
-                        Chưa có lịch sử cấp phát
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-500 text-center py-2">
+                      Chưa có lịch sử cấp phát
+                    </p>
+                  )}
                 </div>
               </div>
 
