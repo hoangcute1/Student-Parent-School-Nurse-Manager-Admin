@@ -14,6 +14,8 @@ import { FilterStudentDto, FilterOperator } from '@/decorations/dto/filter-stude
 import { SortOrder } from '@/decorations/dto/pagination.dto';
 import { ParentService } from '@/services/parent.service';
 import { HealthRecordService } from './health-record.service';
+import { ClassService } from './class.service';
+import { UserDocument } from '@/schemas/user.schema';
 
 @Injectable()
 export class StudentService {
@@ -21,112 +23,94 @@ export class StudentService {
     @InjectModel(Student.name) private studentModel: Model<Student>,
     private parentService: ParentService,
     private healthRecordService: HealthRecordService,
+    private classService: ClassService,
+    @InjectModel('User') private userModel: Model<UserDocument>,
   ) {}
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
-    // Check if student with this ID already exists
-    const existingStudent = await this.studentModel
-      .findOne({
-        studentId: createStudentDto.studentId,
-      })
-      .exec();
+    try {
+      // Check if student already exists
+      const existingStudent = await this.studentModel
+        .findOne({ studentId: createStudentDto.studentId })
+        .exec();
 
-    if (existingStudent) {
-      throw new ConflictException('Mã sinh viên đã tồn tại');
-    }
+      if (existingStudent) {
+        throw new ConflictException(`Mã sinh viên ${createStudentDto.studentId} đã tồn tại`);
+      }
 
-    // Check if parentId exists
-    if (createStudentDto.parentId) {
-      try {
-        await this.parentService.findById(createStudentDto.parentId);
-      } catch (error) {
-        throw new BadRequestException(
-          `Phụ huynh với ID "${createStudentDto.parentId}" không tồn tại`,
+      // Find class by name
+      const classDoc = await this.classService.findByName(createStudentDto.class);
+      if (!classDoc) {
+        throw new NotFoundException(`Không tìm thấy lớp ${createStudentDto.class}`);
+      }
+
+      // Find or create parent by email
+      let parent: any;
+        const existingUser = await this.userModel.findOne({ 
+       email: createStudentDto.parentEmail,
+      //  role: 'parent'
+      });
+
+      if (!existingUser) {
+        throw new NotFoundException(
+          `Không tìm thấy phụ huynh với email ${createStudentDto.parentEmail}`
         );
       }
-    } // Create student data with mapping parentId to parent field
-    const studentData = {
-      ...createStudentDto,
-      parent: createStudentDto.parentId, // Map parentId to parent field
-      class: createStudentDto.classId, // Map classId to class field
-    };
 
-    const createdStudent = new this.studentModel(studentData);
-    const savedStudent = await createdStudent.save();
-
-    // Populate parent and class before returning
-    const populatedStudent = await this.studentModel
-      .findById(savedStudent._id)
-      .populate('parent')
-      .populate('class');
-
-    if (!populatedStudent) {
-      throw new InternalServerErrorException('Failed to retrieve created student');
-    }
-
-    return populatedStudent;
-  }
-  async batchCreate(createStudentDtos: CreateStudentDto[]): Promise<{
-    success: Student[];
-    failures: Array<{ dto: CreateStudentDto; reason: string }>;
-  }> {
-    const results: {
-      success: Student[];
-      failures: Array<{ dto: CreateStudentDto; reason: string }>;
-    } = {
-      success: [],
-      failures: [],
-    };
-
-    // Extract all student IDs to check for duplicates
-    const studentIds = createStudentDtos.map((dto) => dto.studentId);
-
-    // Find existing student IDs in the database
-    const existingStudents = await this.studentModel
-      .find({ studentId: { $in: studentIds } })
-      .select('studentId')
-      .exec();
-
-    const existingStudentIds = new Set(existingStudents.map((s) => s.studentId));
-
-    // Process each student
-    for (const dto of createStudentDtos) {
+          parent = await this.parentService.findByUserId(existingUser._id as string);
+    if (!parent) {
+      // Create parent profile if user exists but doesn't have parent profile
       try {
-        // Check if already exists
-        if (existingStudentIds.has(dto.studentId)) {
-          results.failures.push({
-            dto,
-            reason: `Mã sinh viên ${dto.studentId} đã tồn tại`,
-          });
-          continue;
-        } // Create new student with parent mapping
-        const studentData = {
-          ...dto,
-          parent: dto.parentId, // Map parentId to parent field
-          class: dto.classId, // Map classId to class field
-        };
-        const createdStudent = new this.studentModel(studentData);
-        const savedStudent = await createdStudent.save();
-
-        // Populate and add to results
-        const populatedStudent = await this.studentModel
-          .findById(savedStudent._id)
-          .populate('parent')
-          .populate('class');
-
-        results.success.push(populatedStudent || savedStudent);
-
-        // Add to set to catch duplicates within the batch
-        existingStudentIds.add(dto.studentId);
-      } catch (error) {
-        results.failures.push({
-          dto,
-          reason: error.message || 'Lỗi không xác định',
+        parent = await this.parentService.create({
+          user: existingUser._id as string,
+          // name: `Phụ huynh của ${createStudentDto.name}`
         });
+
+        if (!parent) {
+          throw new BadRequestException('Không thể tạo thông tin phụ huynh');
+        }
+      } catch (error) {
+        throw new BadRequestException(
+          `Lỗi khi tạo thông tin phụ huynh: ${error.message}`
+        );
       }
     }
+      // Create student with resolved references
+      const studentData = {
+        name: createStudentDto.name,
+        studentId: createStudentDto.studentId,
+        birth: createStudentDto.birth,
+        gender: createStudentDto.gender,
+        class: classDoc._id,
+        parent: parent._id
+      };
 
-    return results;
+      const createdStudent = new this.studentModel(studentData);
+      const savedStudent = await createdStudent.save();
+
+      // Return populated student data
+      const student = await this.studentModel
+        .findById(savedStudent._id)
+        .populate('parent')
+        .populate('class')
+        .exec();
+
+      if (!student) {
+        throw new InternalServerErrorException('Không tìm thấy học sinh sau khi tạo');
+      }
+
+      return student;
+
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Có lỗi xảy ra khi tạo học sinh: ' + error.message
+      );
+    }
   }
+
+ 
   async findAll(
     filterDto?: FilterStudentDto,
   ): Promise<{ data: Student[]; total: number; page: number; limit: number }> {

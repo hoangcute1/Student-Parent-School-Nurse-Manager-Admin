@@ -36,6 +36,8 @@ export class ClassService {
     return found;
   }
 
+
+  
   async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {
     const updated = await this.classModel
       .findByIdAndUpdate(
@@ -51,5 +53,9 @@ export class ClassService {
   async remove(id: string): Promise<void> {
     const deleted = await this.classModel.findByIdAndDelete(id).exec();
     if (!deleted) throw new NotFoundException('Không tìm thấy lớp');
+  }
+
+  async findByName(name: string): Promise<Class | null> {
+    return this.classModel.findOne({ name }).exec();
   }
 }

@@ -6,57 +6,41 @@ import {
   IsDate,
   IsEnum,
   IsMongoId,
+  IsDateString,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female'
+}
+
 export class CreateStudentDto {
-  @ApiProperty({ example: 'Nguyen Van A', description: 'Họ tên học sinh' })
-  @IsNotEmpty({ message: 'Họ tên không được để trống' })
-  @IsString({ message: 'Họ tên phải là chuỗi' })
+  @ApiProperty({ example: 'Nguyen Van A' })
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
-  @ApiProperty({ example: 'SV001', description: 'Mã học sinh' })
-  @IsNotEmpty({ message: 'Mã học sinh không được để trống' })
-  @IsString({ message: 'Mã học sinh phải là chuỗi' })
+  @ApiProperty({ example: 'SV011' })
+  @IsNotEmpty()
+  @IsString()
   studentId: string;
 
-  @ApiProperty({ example: '2000-01-01', description: 'Ngày sinh' })
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate({ message: 'Ngày sinh không hợp lệ' })
-  birth?: Date;
+  @ApiProperty({ example: '2000-01-01' })
+  @IsDateString()
+  birth: string;
 
-  @ApiProperty({
-    example: 'male',
-    description: 'Giới tính',
-    enum: ['male', 'female', 'other'],
-  })
-  @IsOptional()
-  @IsEnum(['male', 'female', 'other'], {
-    message: 'Giới tính phải là male, female hoặc other',
-  })
-  gender?: string;
+  @ApiProperty({ enum: Gender, example: 'male' })
+  @IsEnum(Gender)
+  gender: Gender;
 
-  @ApiProperty({ example: '10', description: 'Khối lớp' })
-  @IsOptional()
-  @IsString({ message: 'Khối lớp phải là chuỗi' })
-  grade?: string;
+  @ApiProperty({ example: '2A' })
+  @IsString()
+  @IsNotEmpty()
+  class: string;
 
-  @ApiProperty({
-    example: '60d0fe4f5311236168a109cb',
-    description: 'ID của lớp (MongoDB ObjectID)',
-    required: false,
-  })
-  @IsOptional()
-  @IsMongoId({ message: 'ID lớp không hợp lệ' })
-  classId?: string;
-
-  @ApiProperty({
-    example: '60d0fe4f5311236168a109ca',
-    description: 'ID của phụ huynh (MongoDB ObjectID)',
-    required: false,
-  })
-  @IsOptional()
-  @IsMongoId({ message: 'ID phụ huynh không hợp lệ' })
-  parentId?: string;
+  @ApiProperty({ example: 'parent@example.com' })
+  @IsEmail()
+  parentEmail: string;
 }
