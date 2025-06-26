@@ -103,7 +103,8 @@ export default function MedicationsPage() {
                       delivery.medicine !== null &&
                       "name" in delivery.medicine
                         ? (delivery.medicine as any).name
-                        : medications.find((m) => m._id === delivery.medicine)?.name ||
+                        : medications.find((m) => m._id === delivery.medicine)
+                            ?.name ||
                           delivery.medicine ||
                           "N/A"}
                     </TableCell>
