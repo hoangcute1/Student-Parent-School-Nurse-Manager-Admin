@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
 
-export class UpdateHealthRecordDto {
+export class UpdateHealthRecordDto  {
   @ApiProperty({
     description: 'Allergies of the student',
     example: 'Peanuts, Seafood',

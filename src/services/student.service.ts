@@ -10,18 +10,17 @@ import { Model } from 'mongoose';
 import { Student } from '@/schemas/student.schema';
 import { CreateStudentDto } from '@/decorations/dto/create-student.dto';
 import { UpdateStudentDto } from '@/decorations/dto/update-student.dto';
-import {
-  FilterStudentDto,
-  FilterOperator,
-} from '@/decorations/dto/filter-student.dto';
+import { FilterStudentDto, FilterOperator } from '@/decorations/dto/filter-student.dto';
 import { SortOrder } from '@/decorations/dto/pagination.dto';
 import { ParentService } from '@/services/parent.service';
+import { HealthRecordService } from './health-record.service';
 
 @Injectable()
 export class StudentService {
   constructor(
     @InjectModel(Student.name) private studentModel: Model<Student>,
     private parentService: ParentService,
+    private healthRecordService: HealthRecordService,
   ) {}
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
     // Check if student with this ID already exists
@@ -61,9 +60,7 @@ export class StudentService {
       .populate('class');
 
     if (!populatedStudent) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve created student',
-      );
+      throw new InternalServerErrorException('Failed to retrieve created student');
     }
 
     return populatedStudent;
@@ -89,9 +86,7 @@ export class StudentService {
       .select('studentId')
       .exec();
 
-    const existingStudentIds = new Set(
-      existingStudents.map((s) => s.studentId),
-    );
+    const existingStudentIds = new Set(existingStudents.map((s) => s.studentId));
 
     // Process each student
     for (const dto of createStudentDtos) {
@@ -260,7 +255,8 @@ export class StudentService {
       limit,
     };
   }
-  async findById(id: string): Promise<Student> {
+  async findById(id: string): Promise<any> {
+    const studentHealthRecord = await this.healthRecordService.findByStudentId(id);
     const student = await this.studentModel
       .findById(id)
       .populate('parent')
@@ -269,7 +265,7 @@ export class StudentService {
     if (!student) {
       throw new NotFoundException(`Sinh viên với ID "${id}" không tìm thấy`);
     }
-    return student;
+    return formatStudentbyIdResponse(student, studentHealthRecord);
   }
   async findByStudentId(studentId: string): Promise<Student> {
     const student = await this.studentModel
@@ -278,17 +274,12 @@ export class StudentService {
       .populate('class')
       .exec();
     if (!student) {
-      throw new NotFoundException(
-        `Sinh viên với mã "${studentId}" không tìm thấy`,
-      );
+      throw new NotFoundException(`Sinh viên với mã "${studentId}" không tìm thấy`);
     }
     return student;
   }
 
-  async update(
-    id: string,
-    updateStudentDto: UpdateStudentDto,
-  ): Promise<Student> {
+  async update(id: string, updateStudentDto: UpdateStudentDto): Promise<Student> {
     // Check if updating studentId and if it exists already
     if (updateStudentDto.studentId) {
       const existingStudent = await this.studentModel
@@ -344,9 +335,7 @@ export class StudentService {
     // Process each ID
     for (const id of ids) {
       try {
-        const deletedStudent = await this.studentModel
-          .findByIdAndDelete(id)
-          .exec();
+        const deletedStudent = await this.studentModel.findByIdAndDelete(id).exec();
 
         if (!deletedStudent) {
           result.failed.push({
@@ -366,9 +355,7 @@ export class StudentService {
 
     return result;
   }
-  async batchUpdate(
-    updates: { id: string; data: UpdateStudentDto }[],
-  ): Promise<{
+  async batchUpdate(updates: { id: string; data: UpdateStudentDto }[]): Promise<{
     successful: Student[];
     failed: { id: string; data: UpdateStudentDto; reason: string }[];
   }> {
@@ -439,18 +426,91 @@ export class StudentService {
     return this.delete(id);
   }
   async findByParentId(parentId: string): Promise<Student[]> {
-    return this.studentModel
-      .find({ parent: parentId })
-      .populate('parent')
-      .populate('class')
-      .exec();
+    return this.studentModel.find({ parent: parentId }).populate('parent').populate('class').exec();
   }
 
   async findByClassId(classId: string): Promise<Student[]> {
-    return this.studentModel
-      .find({ class: classId })
-      .populate('parent')
-      .populate('class')
-      .exec();
+    return this.studentModel.find({ class: classId }).populate('parent').populate('class').exec();
   }
 }
+
+// Helper function to format student data
+export const formatStudentResponse = (student: any) => {
+  if (!student) return null;
+
+  const result: any = {
+    student: {
+      _id: student._id,
+      studentId: student.studentId,
+      name: student.name,
+      birth: student.birth,
+      gender: student.gender,
+      created_at: student.created_at,
+      updated_at: student.updated_at,
+    },
+  };
+
+  // Format class if available
+  if (student.class && typeof student.class === 'object') {
+    result.class = {
+      _id: student.class._id,
+      name: student.class.name,
+      grade: student.class.grade,
+      created_at: student.class.created_at,
+      updated_at: student.class.updated_at,
+    };
+  }
+
+  // Format parent if available
+  if (student.parent && typeof student.parent === 'object') {
+    result.parent = {
+      _id: student.parent._id,
+      user: student.parent.user,
+      __v: student.parent.__v,
+    };
+  }
+
+  return result;
+};
+
+// Helper function to format student data
+export const formatStudentbyIdResponse = (student: any, healthRecord: any) => {
+  if (!student) return null;
+
+  const result: any = {
+    student: {
+      _id: student._id,
+      studentId: student.studentId,
+      name: student.name,
+      birth: student.birth,
+      gender: student.gender,
+      created_at: student.created_at,
+      updated_at: student.updated_at,
+    },
+  };
+
+  // Format class if available
+  if (student.class && typeof student.class === 'object') {
+    result.class = {
+      _id: student.class._id,
+      name: student.class.name,
+      grade: student.class.grade,
+      created_at: student.class.created_at,
+      updated_at: student.class.updated_at,
+    };
+  }
+
+  // Format parent if available
+  if (student.parent && typeof student.parent === 'object') {
+    result.parent = {
+      _id: student.parent._id,
+      user: student.parent.user,
+    };
+  }
+
+  if (healthRecord && typeof healthRecord === 'object') {
+    result.healthRecord = healthRecord;
+  }
+
+  return result;
+};

@@ -131,52 +131,6 @@ export class MedicineDeliveryController {
     description: 'Create a new medicine delivery schedule for a student',
   })
   @ApiBody({ type: CreateMedicineDeliveryDto })
-  @ApiCreatedResponse({
-    description: 'The medicine delivery has been successfully created.',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        name: { type: 'string' },
-        date: { type: 'string', format: 'date-time' },
-        total: { type: 'number' },
-        status: {
-          type: 'string',
-          enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
-        },
-        per_dose: { type: 'string' },
-        per_day: { type: 'string' },
-        note: { type: 'string', nullable: true },
-        reason: { type: 'string' },
-        sent_at: { type: 'string', format: 'date-time' },
-        end_at: { type: 'string', format: 'date-time' },
-        student: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-            studentId: { type: 'string' },
-          },
-        },
-        staff: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-          },
-        },
-        medicine: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-          },
-        },
-        created_at: { type: 'string', format: 'date-time' },
-        updated_at: { type: 'string', format: 'date-time' },
-      },
-    },
-  })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async create(@Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto, @GetUser() user: any) {
@@ -194,67 +148,16 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.findAll();
   }
 
-  /**
-   * Get deliveries by status
-   */
-  @Get('status/:status')
+  @Get('parent/:userId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get deliveries by status',
-    description: 'Get all medicine deliveries with a specific status',
-  })
-  @ApiParam({
-    name: 'status',
-    description: 'Status of the deliveries',
-    enum: MedicineDeliveryStatus,
-    required: true,
-  })
-  @ApiOkResponse({
-    description: 'List of medicine deliveries with the specified status.',
-    schema: {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              name: { type: 'string' },
-              date: { type: 'string', format: 'date-time' },
-              status: { type: 'string' },
-              student: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  name: { type: 'string' },
-                  studentId: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        total: { type: 'number' },
-      },
-    },
+    summary: 'Get medicine deliveries by userId',
+    description: 'Get all medicine deliveries for a specific parent',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 400, description: 'Invalid status.' })
-  async findByStatus(@Param('status') status: MedicineDeliveryStatus) {
-    // Validate status
-    if (!Object.values(MedicineDeliveryStatus).includes(status)) {
-      throw new BadRequestException(`Invalid status: ${status}`);
-    }
-
-    try {
-      const deliveries = await this.medicineDeliveryService.findByStatus(status);
-      return {
-        data: deliveries.map((delivery) => this.formatDeliveryResponse(delivery)),
-        total: deliveries.length,
-      };
-    } catch (error) {
-      throw new BadRequestException(`Error fetching deliveries by status: ${error.message}`);
-    }
+  @ApiResponse({ status: 404, description: 'Parent not found.' })
+  async findByParent(@Param('userId') userId: string) {
+    return this.medicineDeliveryService.findByUserId(userId);
   }
 
   /**
@@ -689,7 +592,6 @@ export class MedicineDeliveryController {
       throw new BadRequestException(`Error updating medicine delivery: ${error.message}`);
     }
   }
-
 
   /**
    * Mark a medicine delivery as completed

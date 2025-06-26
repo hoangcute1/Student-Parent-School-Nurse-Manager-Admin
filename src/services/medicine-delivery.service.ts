@@ -49,6 +49,7 @@ export class MedicineDeliveryService {
 
     return populatedDelivery;
   }
+
   async findAll(): Promise<{ data: any; total: number }> {
     const medicineDeliveryList = await this.medicineDeliveryModel
       .find()
@@ -58,22 +59,30 @@ export class MedicineDeliveryService {
       .populate('medicine')
       .sort({ created_at: -1 })
       .exec();
-    console.log('Medicine Delivery List:', medicineDeliveryList);
+
     const data = await Promise.all(
       medicineDeliveryList.map(async (item) => {
         const { _id, parent, staff, ...rest } = item.toObject();
 
-        const parentUserId = (item.parent as any).user.toString();
+        const parentUserId = (item.parent as any).user?.toString();
         const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)
-          .name;
-        const staffUserId = (item.staff as any).user.toString();
+          ?.name;
+        const staffUserId = (item.staff as any).user?.toString();
         const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)
-          .name;
+          ?.name;
+
         return {
           id: item._id,
+          parentId:
+            typeof item.parent === 'object' && '_id' in item.parent
+              ? (item.parent as any)._id.toString()
+              : item.parent?.toString() || parent, // lấy id parent
+          staffId:
+            typeof item.staff === 'object' && '_id' in item.staff
+              ? (item.staff as any)._id.toString()
+              : item.staff?.toString() || staff, // lấy id staff
           parentName: parentName,
           staffName: staffName,
-        
           ...rest,
         };
       }),
@@ -83,6 +92,91 @@ export class MedicineDeliveryService {
       data,
       total: data.length,
     };
+  }
+
+  async findByUserId(userId: string): Promise<{ data: any[]; total: number }> {
+    const parentId = await this.parentService.findByUserId(userId);
+    const medicineDeliveryList = await this.medicineDeliveryModel
+      .find({ parent: parentId })
+      .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+      .populate('staff')
+      .populate('parent')
+      .populate('medicine')
+      .sort({ created_at: -1 })
+      .exec();
+
+    const data = await Promise.all(
+      medicineDeliveryList.map(async (item) => {
+        const { _id, parent, staff, ...rest } = item.toObject();
+
+        // Lấy tên staff
+        let staffName = '';
+        if (item.staff && (item.staff as any).user) {
+          const staffUserId = (item.staff as any).user.toString();
+          staffName =
+            ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
+        }
+
+        return {
+          id: item._id,
+          staffId: staff ? (item.staff as any)._id.toString() : '',
+          staffName,
+          ...rest,
+        };
+      }),
+    );
+
+    return {
+      data,
+      total: data.length,
+    };
+  }
+
+  async createByStudentId(
+    createMedicineDeliveryDto: CreateMedicineDeliveryDto,
+  ): Promise<MedicineDeliveryDocument> {
+    // Đảm bảo có studentId và parentId trong DTO
+    if (!createMedicineDeliveryDto.student) {
+      throw new BadRequestException('Missing studentId in request');
+    }
+    if (!createMedicineDeliveryDto.parent) {
+      throw new BadRequestException('Missing parentId in request');
+    }
+
+    // Nếu không có sent_at, mặc định sẽ dùng thời gian hiện tại từ schema
+    if (!createMedicineDeliveryDto.sent_at) {
+      createMedicineDeliveryDto.sent_at = new Date();
+    }
+
+    // Kiểm tra parent có tồn tại không
+    const parent = await this.parentService.findById(createMedicineDeliveryDto.parent);
+    if (!parent) {
+      throw new NotFoundException('Parent not found');
+    }
+
+    // (Tùy chọn) Có thể kiểm tra student tồn tại nếu muốn
+
+    const createdDelivery = new this.medicineDeliveryModel(createMedicineDeliveryDto);
+    await createdDelivery.save();
+
+    // Populate data sau khi lưu để có thông tin đầy đủ
+    const populatedDelivery = await this.medicineDeliveryModel
+      .findById(createdDelivery._id)
+      .populate({
+        path: 'student',
+        select: 'name studentId class',
+        populate: { path: 'class', select: 'name' },
+      })
+      .populate('staff', 'name email role')
+      .populate('medicine', 'name dosage unit type')
+      .populate('parent', 'user')
+      .exec();
+
+    if (!populatedDelivery) {
+      throw new Error('Failed to find created delivery');
+    }
+
+    return populatedDelivery;
   }
 
   async findByStudent(
@@ -237,3 +331,54 @@ export class MedicineDeliveryService {
     }
   }
 }
+// export const formatMedicalDeliveryList = (list: any) => {
+//   if (!list) return null;
+
+//   const result: any = {
+//     medical_deli: {
+//       _id: list._id,
+//       name: list.name,
+//       date: list.date,
+//       total: list.total,
+//       per_dose: list.per_dose,
+//       per_day: list.per_day,
+//       note: list.note,
+//       reason: list.reason,
+//       sent_at: list.sent_at,
+//       end_at: list.end_at,
+//       status: list.status,
+//       created_at: list.created_at,
+//       updated_at: list.updated_at,
+//     },
+//   };
+
+//   // Format class if available
+//   if (list.student && typeof list.student === 'object') {
+//     result.student = {
+//       _id: list.student._id,
+//       studentId: list.student.studentId,
+//       name: list.student.name,
+//       birth: list.student.birth,
+//       gender: list.student.gender,
+//       class: {
+//         _id: list.student.class._id,
+//         name: list.student.class.name,
+//         grade: list.student.class.grade,
+//       }
+//     };
+//   }
+
+//   // Format parent if available
+//   if (list.parent && typeof list.parent === 'object') {
+//     result.parent = {
+//       _id: student.parent._id,
+//       user: student.parent.user,
+//     };
+//   }
+
+//   if (healthRecord && typeof healthRecord === 'object') {
+//     result.healthRecord = healthRecord;
+//   }
+
+//   return result;
+// };

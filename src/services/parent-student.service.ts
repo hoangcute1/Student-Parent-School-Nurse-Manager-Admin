@@ -8,6 +8,7 @@ import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.
 import { StudentService } from './student.service';
 import { HealthRecordService } from './health-record.service';
 import { ParentService } from './parent.service';
+import path from 'path';
 
 @Injectable()
 export class ParentStudentService {
@@ -82,7 +83,13 @@ export class ParentStudentService {
     const parentId = (parent as any)._id.toString();
     const parentStudents = await this.parentStudentModel
       .find({ parent: parentId })
-      .populate('student')
+      .populate({
+        path: 'student',
+        populate: {
+          path: 'class',
+          select: 'name',
+        },
+  })
       .populate('parent')
       .lean() // <-- Add lean() to get plain JS objects
       .exec();

@@ -36,6 +36,9 @@ export class Medicine extends Document {
   @Prop({ required: true, trim: true })
   dosage: string;
 
+   @Prop({ required: true, trim: true })
+    quantity: number;
+
   @Prop({ required: true, enum: MedicineUnit, default: MedicineUnit.OTHER })
   unit: MedicineUnit;
 

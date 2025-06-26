@@ -51,6 +51,8 @@ export class ParentStudentController {
     return this.parentStudentService.findByUserId(userId);
   }
 
+  
+
   @Get('student/:studentId')
   @ApiOperation({ summary: 'Get parent-student relationships by student ID' })
   @ApiParam({ name: 'studentId', description: 'Student ID' })
@@ -61,6 +63,8 @@ export class ParentStudentController {
   async findByStudentId(@Param('studentId') studentId: string) {
     return this.parentStudentService.findByStudentId(studentId);
   }
+
+
 
   @Post()
   @ApiOperation({ summary: 'Create a new parent-student relationship' })
@@ -101,7 +105,4 @@ export class ParentStudentController {
   async remove(@Param('id') id: string) {
     return this.parentStudentService.remove(id);
   }
-
-
-
 }
