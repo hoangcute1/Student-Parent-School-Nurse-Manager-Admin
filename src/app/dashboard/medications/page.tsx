@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Clock, Plus, Search, Filter } from "lucide-react";
+import { useEffect } from "react";
+import { Clock, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,17 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -31,21 +21,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
-import { MedicineDelivery } from "@/lib/type/medicine-delivery";
+import { useMedicationStore } from "@/stores/medication-store";
+import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
 
-// Giả sử bạn lấy parentId từ localStorage, context, hoặc store đăng nhập
-// Thay bằng cách lấy parentId thực tế
-const mapDeliveriesForDisplay = (
-  deliveries: MedicineDelivery
-): MedicineDelivery => {
-  return {
-    ...deliveries,
-  };
-};
 export default function MedicationsPage() {
-  const { medicineDeliveryByParentId, isLoading, fetchMedicineDeliveryByParentId } =
-    useMedicineDeliveryStore();
-  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    medicineDeliveryByParentId,
+    isLoading,
+    fetchMedicineDeliveryByParentId,
+  } = useMedicineDeliveryStore();
+  const { medications } = useMedicationStore();
 
   useEffect(() => {
     fetchMedicineDeliveryByParentId();
@@ -60,7 +45,27 @@ export default function MedicationsPage() {
       </div>
 
       <div className="space-y-4">
-        {/* ...phần Dialog thêm thuốc giữ nguyên... */}
+        <div className="flex justify-end mb-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="default"
+                className="bg-blue-700 text-white hover:bg-blue-800 font-semibold"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Thêm đơn thuốc
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Thêm đơn thuốc mới</DialogTitle>
+                <DialogDescription>
+                  Nhập thông tin đơn thuốc cho học sinh
+                </DialogDescription>
+              </DialogHeader>
+              <AddMedicineDeliveryForm />
+            </DialogContent>
+          </Dialog>
+        </div>
 
         <div className="rounded-md border border-blue-200">
           <Table>
@@ -93,7 +98,15 @@ export default function MedicationsPage() {
                     <TableCell className="font-medium">
                       {delivery.student.name || "N/A"}
                     </TableCell>
-                    <TableCell>{delivery.medicine}</TableCell>
+                    <TableCell>
+                      {typeof delivery.medicine === "object" &&
+                      delivery.medicine !== null &&
+                      "name" in delivery.medicine
+                        ? (delivery.medicine as any).name
+                        : medications.find((m) => m._id === delivery.medicine)?.name ||
+                          delivery.medicine ||
+                          "N/A"}
+                    </TableCell>
                     <TableCell>{delivery.per_dose}</TableCell>
                     <TableCell>
                       <div className="flex items-center">

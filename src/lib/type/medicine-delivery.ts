@@ -1,7 +1,5 @@
 import { create } from "zustand";
 import { Medication } from "./medications";
-import { Staff } from "./staff";
-import { Student } from "./students";
 
 interface MedicineDelivery {
   id: string;
@@ -81,12 +79,11 @@ interface CreateMedicineDelivery {
   per_day: string;
   note?: string;
   reason?: string;
-  sent_at: string;
   end_at?: string;
-  student_id: string;
-  parent_id?: string;
+  student: string;
+  parent: string;
   medicine: string;
-  staff_id?: string;
+  staff: string;
 }
 
 interface MedicineDeliveryResponse {
