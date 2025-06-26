@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schemas/profile.schema';
 import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
+ export { ProfileDocument }; 
 import { UpdateProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/update-profile.dto';
 
 @Injectable()
@@ -90,4 +91,5 @@ export class ProfileService {
 
     return deletedProfile;
   }
+ 
 }
