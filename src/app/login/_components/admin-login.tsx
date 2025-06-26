@@ -21,6 +21,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { loginAdminOTP, requestAdminLoginOTP } from "@/lib/api/auth";
 import { LoginRequestCredentials } from "@/lib/type/auth";
+import LoginGoogle from "./login-google";
 
 export function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -256,7 +257,7 @@ export function AdminLoginForm() {
               Quay lại
             </Button>
           </div>
-
+            <LoginGoogle/>
           <OTPDialog
             open={showOTP}
             onOpenChange={setShowOTP}
