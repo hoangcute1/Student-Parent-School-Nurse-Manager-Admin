@@ -1,23 +1,23 @@
-import { BookmarkCheck, ContactRound, Heart, Home, House, MessageCircle, Pill, UserRoundPen, Users } from "lucide-react";
+import { Bell, BookmarkCheck, ContactRound, Heart, Home, House, MessageCircle, Pill, UserRoundPen, Users } from "lucide-react";
 
 const parentNav = [
   {
     href: "/dashboard/health-declaration",
     icon: UserRoundPen,
     label: "Khai báo sức khoẻ ",
-    description: " khái báo sức khoẻ của con",
+    description: "Thông tin sức khỏe học sinh",
   },
   {
     href: "/dashboard/medications",
     icon: Pill,
     label: "Gửi thuốc",
-    description: "Gửi thuốc cho con",
+    description: "Theo dõi thuốc học sinh",
   },
   {
     href: "/dashboard/events",
-    icon: BookmarkCheck,
-    label: "Thông báo sự kiện",
-    description: "Sự kiện y tế của nhà trường",
+    icon: Bell,
+    label: "Thông báo",
+    description: "",
   },
   
 
@@ -27,13 +27,13 @@ const studentNav = [
     href: "/dashboard/profile",
     icon: ContactRound,
     label: "Thông tin cá nhân",
-    description: "Trang sức khoẻ cá nhân",
+    description: "",
   },
   {
     href: "/dashboard/resources",
     icon: Users,
     label: "Lịch sử bệnh án",
-    description: "Hồ sơ bệnh án học sinh",
+    description: "",
   },
 
   {
