@@ -42,7 +42,7 @@ function LoginGoogle() {
           throw new Error('Không hợp lệ');
         }
       })
-      .catch((e) => {console.log(e); alert('Đăng nhập thất bại')});
+      .catch((e) => { console.log(e); alert('Đăng nhập thất bại') });
   };
 
   const handleFailure = () => {

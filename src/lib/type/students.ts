@@ -62,8 +62,8 @@ interface CreateStudentData {
   studentId: string;
   birth?: string;
   gender?: string;
-  classId?: string;
-  parentId?: string;
+  class: string;
+  parentEmail: string;
 }
 
 interface UpdateStudentData {

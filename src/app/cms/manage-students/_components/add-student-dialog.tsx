@@ -34,8 +34,8 @@ const formSchema = z.object({
   studentId: z.string().min(1, "Mã học sinh là bắt buộc"),
   birth: z.string().min(1, "Ngày sinh là bắt buộc"),
   gender: z.enum(["male", "female"]),
-  classId: z.string().min(1, "Lớp là bắt buộc"),
-  parentId: z.string().optional(),
+  class: z.string().min(1, "Lớp là bắt buộc"),
+  parentEmail: z.string().optional(),
 });
 
 export type AddStudentFormValues = z.infer<typeof formSchema>;
@@ -64,8 +64,8 @@ export function AddStudentDialog({
       studentId: "",
       birth: "",
       gender: "male",
-      classId: "",
-      parentId: "",
+      class: "",
+      parentEmail: "",
     },
   });
 
@@ -151,7 +151,7 @@ export function AddStudentDialog({
             />
             <FormField
               control={form.control}
-              name="classId"
+              name="class"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>ID lớp</FormLabel>
@@ -164,10 +164,10 @@ export function AddStudentDialog({
             />
             <FormField
               control={form.control}
-              name="parentId"
+              name="parentEmail"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ID phụ huynh (tuỳ chọn)</FormLabel>
+                  <FormLabel>Email phụ huynh</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>

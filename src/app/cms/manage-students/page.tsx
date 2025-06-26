@@ -89,13 +89,13 @@ export default function StudentsPage() {
   }, [fetchStudents, fetchClasses, students.length, classes.length]);
 
   const handleAddStudent = async (data: AddStudentFormValues) => {
-    if (!user || user.role !== "admin") {
-      alert("Bạn không có quyền thêm học sinh");
-      return;
-    }
+    // if (!user || user.role !== "admin") {
+    //   alert("Bạn không có quyền thêm học sinh");
+    //   return;
+    // }
     try {
       // Validate classId exists in classes
-      // const selectedClass = classes.find((cls) => cls._id === data.classId);
+      // const selectedClass = classes.find((cls) => cls._id === data.class);
       // if (!selectedClass) {
       //   alert("Lớp không tồn tại");
       //   return;
@@ -106,8 +106,8 @@ export default function StudentsPage() {
         studentId: data.studentId,
         birth: data.birth,
         gender: data.gender,
-        classId: data.classId,
-        parentId: data.parentId || undefined,
+        class: data.class,
+        parentEmail: data.parentEmail || undefined,
       });
       setIsAddDialogOpen(false);
       alert("Thêm học sinh thành công");
