@@ -1,9 +1,10 @@
+import { CampaignType } from '@/enums/campaign.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export enum NotificationType {
-  VACCINE = 'VaccineNotification',
-  PERIODIC = 'PeriodicNotification',
+  VACCINE = 'VaccineCampaign',
+  PERIODIC = 'PeriodicCampaign',
 }
 
 export enum NotificationStatus {
@@ -14,9 +15,9 @@ export enum NotificationStatus {
 export type NotificationDocument = Notification & Document;
 @Schema({ versionKey: false })
 export class Notification extends Document {
-  @Prop({
+   @Prop({
     type: MongooseSchema.Types.ObjectId,
-    ref: 'campaign_type',
+    refPath: 'campaign_type', // Sử dụng refPath thay vì ref
     required: true,
   })
   noti_campaign: MongooseSchema.Types.ObjectId;
@@ -24,7 +25,7 @@ export class Notification extends Document {
   @Prop({
     type: String,
     required: true,
-    enum: NotificationType,
+    enum: CampaignType, // Chỉ định rõ các model có thể tham chiếu
   })
   campaign_type: string;
 
