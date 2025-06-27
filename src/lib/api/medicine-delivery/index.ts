@@ -20,6 +20,29 @@ const getAllMedicineDeliveries =
     }
   };
 
+const getMedicineDeliveriesById = async (
+  id: string
+): Promise<MedicineDeliveryByParent> => {
+  try {
+    console.log("Fetching medicine delivery with ID:", id); // Thêm log
+
+    const response = await fetchData<MedicineDeliveryByParent>(
+      `/medicine-deliveries/${id}`
+    );
+
+    console.log("API Response:", response); // Thêm log để kiểm tra response
+
+    if (!response || !response) {
+      throw new Error("Không tìm thấy thông tin đơn thuốc");
+    }
+
+    return response;
+  } catch (error: any) {
+    console.error("Error fetching medicine delivery:", error);
+    throw new Error(error.message || "Không thể lấy thông tin đơn thuốc");
+  }
+};
+
 const getMedicineDeliveriesByParentId = async (
   userId: string
 ): Promise<MedicineDeliveryByParent[]> => {
@@ -60,8 +83,44 @@ const createMedicineDeliveries = async (
   }
 };
 
+const updateMedicineDelivery = async (
+  id: string,
+  data: Partial<MedicineDeliveryResponse>
+) => {
+  try {
+    const response = await fetchData(
+      `/medicine-deliveries/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }
+    );
+    return response;
+  } catch (error: any) {
+    console.error("Error updating medicine delivery:", error);
+    throw new Error(error.message || "Không thể cập nhật đơn thuốc");
+  }
+};
+
+const deleteMedicineDelivery = async (
+  id: string
+) => {
+  try {
+    const response = await fetchData(`/medicine-deliveries/${id}`, {
+      method: "DELETE",
+    });
+    return response;
+  } catch (error: any) {
+    console.error("Error deleting medicine delivery:", error);
+    throw new Error(error.message || "Không thể xóa đơn thuốc");
+  }
+};
+
 export {
   getAllMedicineDeliveries,
   createMedicineDeliveries,
   getMedicineDeliveriesByParentId,
+  getMedicineDeliveriesById,
+  updateMedicineDelivery,
+  deleteMedicineDelivery,
 };

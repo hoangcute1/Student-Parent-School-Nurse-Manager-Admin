@@ -62,7 +62,7 @@ interface MedicineDeliveryByParent {
       name: string;
     };
   };
-  medicine: string;
+  medicine: Medication;
   created_at: Date;
   updated_at: Date;
 }
@@ -99,9 +99,8 @@ interface MedicineDeliveryStore {
   fetchMedicineDeliveries: () => Promise<void>;
   fetchMedicineDeliveryByParentId: () => Promise<void>;
   addMedicineDelivery: (data: CreateMedicineDelivery) => Promise<any>;
-  updateMedicineDelivery: (id: string, data: MedicineDelivery) => Promise<void>;
-  deleteMedicineDelivery: (id: string) => Promise<void>;
-
+  deleteMedicineDelivery: (id: string) => Promise<any>;
+  viewMedicineDeliveries: (id: string) => Promise<any>;
   setIsLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }

@@ -1,8 +1,11 @@
 import { getAuthToken, parseJwt } from "@/lib/api/auth/token";
 import {
   createMedicineDeliveries,
+  deleteMedicineDelivery,
   getAllMedicineDeliveries,
+  getMedicineDeliveriesById,
   getMedicineDeliveriesByParentId,
+  updateMedicineDelivery,
 } from "@/lib/api/medicine-delivery";
 import {
   CreateMedicineDelivery,
@@ -32,6 +35,28 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         const errorMessage =
           err.message || "Failed to fetch medicine deliveries";
         set({ error: errorMessage });
+        throw err;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    viewMedicineDeliveries: async (id: string) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await getMedicineDeliveriesById(id);
+        console.log("Store Response:", response); // Thêm log
+
+        if (!response) {
+          throw new Error("Không tìm thấy thông tin đơn thuốc");
+        }
+
+        // Trả về dữ liệu đã được xử lý
+        return Array.isArray(response) ? response[0] : response;
+      } catch (err: any) {
+        const errorMessage = err.message || "Không thể lấy thông tin đơn thuốc";
+        set({ error: errorMessage });
+        console.error("Lỗi khi xem đơn thuốc:", err);
         throw err;
       } finally {
         set({ isLoading: false });
@@ -87,14 +112,28 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       }
     },
 
-    updateMedicineDelivery: async (id: string, data: any) => {
-      // TODO: Implement update logic
-      console.warn("updateMedicineDelivery not implemented");
-    },
-
     deleteMedicineDelivery: async (id: string) => {
-      // TODO: Implement delete logic
-      console.warn("deleteMedicineDelivery not implemented");
+      try {
+        set({ isLoading: true, error: null });
+        await deleteMedicineDelivery(id);
+
+        // Remove the deleted item from both lists in the store
+        set((state) => ({
+          medicineDeliveries: state.medicineDeliveries.filter(
+            (delivery) => delivery.id !== id
+          ),
+          medicineDeliveryByParentId: state.medicineDeliveryByParentId.filter(
+            (delivery) => delivery.id !== id
+          ),
+        }));
+      } catch (err: any) {
+        const errorMessage = err.message || "Không thể xóa đơn thuốc";
+        set({ error: errorMessage });
+        console.error("Lỗi khi xóa đơn thuốc:", err);
+        throw err;
+      } finally {
+        set({ isLoading: false });
+      }
     },
 
     setIsLoading: (loading: boolean) => {
