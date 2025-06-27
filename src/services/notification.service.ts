@@ -28,6 +28,7 @@ export class NotificationService {
   async findAll(): Promise<Notification[]> {
     return this.notificationModel
       .find()
+      .populate('noti_campaign')
       .populate('parent')
       .populate('student')
       .exec();

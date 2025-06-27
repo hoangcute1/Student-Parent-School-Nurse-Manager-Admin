@@ -8,7 +8,7 @@ export type CampaignClassDocument = CampaignClass & Document;
 export class CampaignClass extends Document {
   @Prop({
     type: MongooseSchema.Types.ObjectId,
-    ref: 'campaign_type',
+    refPath: 'campaign_type',
     required: true,
   })
   campaign: MongooseSchema.Types.ObjectId;
