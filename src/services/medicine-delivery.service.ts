@@ -208,120 +208,70 @@ export class MedicineDeliveryService {
       .exec();
   }
 
-  async findByDateRange(from: Date, to: Date): Promise<MedicineDeliveryDocument[]> {
-    return this.medicineDeliveryModel
-      .find({
-        date: {
-          $gte: from,
-          $lte: to,
-        },
-      })
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .sort({ createdAt: -1 })
-      .exec();
-  }
+ 
 
-  async findById(id: string): Promise<MedicineDeliveryDocument> {
-    const delivery = await this.medicineDeliveryModel
-      .findById(id)
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .exec();
-
-    if (!delivery) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
-    }
-    return delivery;
-  }
 
   async update(
     id: string,
-    updateMedicineDeliveryDto: UpdateMedicineDeliveryDto,
+    updateDto: UpdateMedicineDeliveryDto,
   ): Promise<MedicineDeliveryDocument> {
-    const delivery = await this.findById(id);
+    try {
+      const delivery = await this.medicineDeliveryModel
+        .findByIdAndUpdate(
+          id,
+          { $set: updateDto },
+          { new: true, runValidators: true }
+        )
+        .populate('student', 'name studentId class')
+        .populate('staff', 'name email role')
+        .populate('medicine', 'name dosage unit type');
 
-    // Don't allow updating completed or cancelled deliveries
-    if (
-      delivery.status === MedicineDeliveryStatus.COMPLETED ||
-      delivery.status === MedicineDeliveryStatus.CANCELLED
-    ) {
-      throw new BadRequestException(`Cannot update a delivery with status "${delivery.status}"`);
+      if (!delivery) {
+        throw new NotFoundException(`Medicine delivery with ID ${id} not found`);
+      }
+
+      return delivery;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to update medicine delivery: ${error.message}`);
     }
-
-    const updatedDelivery = await this.medicineDeliveryModel
-      .findByIdAndUpdate(id, updateMedicineDeliveryDto, { new: true })
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .exec();
-
-    if (!updatedDelivery) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
-    }
-
-    return updatedDelivery;
   }
 
-  async complete(id: string): Promise<MedicineDeliveryDocument> {
-    const delivery = await this.findById(id);
+  async findById(id: string): Promise<{ delivery: MedicineDeliveryDocument; staffName: string }> {
+  const delivery = await this.medicineDeliveryModel
+    .findById(id)
+    .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+    .populate('staff')
+    .populate('parent')
+    .populate('medicine')
+    .exec();
 
-    const updatedDelivery = await this.medicineDeliveryModel
-      .findByIdAndUpdate(id, { status: MedicineDeliveryStatus.COMPLETED }, { new: true })
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .exec();
-
-    if (!updatedDelivery) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
-    }
-
-    return updatedDelivery;
+  if (!delivery) {
+    throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
   }
 
-  async cancel(id: string, note?: string): Promise<MedicineDeliveryDocument> {
-    const delivery = await this.findById(id);
-
-    // Cannot cancel completed deliveries
-    if (delivery.status === MedicineDeliveryStatus.COMPLETED) {
-      throw new BadRequestException(`Cannot cancel a completed delivery`);
-    }
-
-    const update: any = {
-      status: MedicineDeliveryStatus.CANCELLED,
-    };
-
-    // Add cancellation note if provided
-    if (note) {
-      update.note = note;
-    }
-
-    const updatedDelivery = await this.medicineDeliveryModel
-      .findByIdAndUpdate(id, update, { new: true })
-      .populate('student', 'name studentId class')
-      .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .exec();
-
-    if (!updatedDelivery) {
-      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
-    }
-
-    return updatedDelivery;
+  let staffName = '';
+  if (delivery.staff && (delivery.staff as any).user) {
+    const staffUserId = (delivery.staff as any).user.toString();
+    staffName =
+      ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
   }
+
+  return { delivery, staffName };
+}
+
 
   async remove(id: string): Promise<void> {
     const delivery = await this.findById(id);
 
     // Cannot delete completed or approved deliveries
     if (
-      delivery.status === MedicineDeliveryStatus.COMPLETED ||
-      delivery.status === MedicineDeliveryStatus.CANCELLED
+      delivery.delivery.status === MedicineDeliveryStatus.COMPLETED ||
+      delivery.delivery.status === MedicineDeliveryStatus.CANCELLED
     ) {
-      throw new BadRequestException(`Cannot delete a delivery with status "${delivery.status}"`);
+      throw new BadRequestException(`Cannot delete a delivery with status "${delivery.delivery.status}"`);
     }
 
     const result = await this.medicineDeliveryModel.deleteOne({ _id: id }).exec();
@@ -331,54 +281,3 @@ export class MedicineDeliveryService {
     }
   }
 }
-// export const formatMedicalDeliveryList = (list: any) => {
-//   if (!list) return null;
-
-//   const result: any = {
-//     medical_deli: {
-//       _id: list._id,
-//       name: list.name,
-//       date: list.date,
-//       total: list.total,
-//       per_dose: list.per_dose,
-//       per_day: list.per_day,
-//       note: list.note,
-//       reason: list.reason,
-//       sent_at: list.sent_at,
-//       end_at: list.end_at,
-//       status: list.status,
-//       created_at: list.created_at,
-//       updated_at: list.updated_at,
-//     },
-//   };
-
-//   // Format class if available
-//   if (list.student && typeof list.student === 'object') {
-//     result.student = {
-//       _id: list.student._id,
-//       studentId: list.student.studentId,
-//       name: list.student.name,
-//       birth: list.student.birth,
-//       gender: list.student.gender,
-//       class: {
-//         _id: list.student.class._id,
-//         name: list.student.class.name,
-//         grade: list.student.class.grade,
-//       }
-//     };
-//   }
-
-//   // Format parent if available
-//   if (list.parent && typeof list.parent === 'object') {
-//     result.parent = {
-//       _id: student.parent._id,
-//       user: student.parent.user,
-//     };
-//   }
-
-//   if (healthRecord && typeof healthRecord === 'object') {
-//     result.healthRecord = healthRecord;
-//   }
-
-//   return result;
-// };

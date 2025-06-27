@@ -219,26 +219,7 @@ export class UpdateMedicineDeliveryDto {
   @IsDateString()
   @IsOptional()
   end_at?: Date;
-
-  @ApiProperty({
-    example: '60d0fe4f5311236168a109ca',
-    description: 'ID của học sinh',
-    required: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  student?: string;
-
-  @ApiProperty({
-    example: '60d0fe4f5311236168a109cb',
-    description: 'ID của thuốc',
-    required: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  medicine?: string;
 }
-
 export class DateRangeDto {
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',
