@@ -16,21 +16,6 @@ import { Plus } from "lucide-react";
 import { AddParentDialog } from "./_components/add-parent-dialog";
 
 // Define the mapping function to transform parent data for display
-const mapParentForDisplay = (parent: any) => {
-  const user = parent.user || {};
-  const profile = parent.profile || {};
-
-  return {
-    id: parent._id,
-    name: profile.name || "",
-    phone: profile.phone || "",
-    address: profile.address || "",
-    email: user.email || "",
-    createdAt: user.created_at
-      ? new Date(user.created_at).toLocaleDateString("vi-VN")
-      : "Không rõ",
-  };
-};
 
 export default function ParentsPage() {
   const { parents, isLoading, error, fetchParents, addParent } =
@@ -40,20 +25,7 @@ export default function ParentsPage() {
   const [healthFilter, setHealthFilter] = useState("all");
   const [openAddParent, setOpenAddParent] = useState(false);
 
-  // Transform parent data for display
-  const displayParents = parents.map(mapParentForDisplay).filter((parent) => {
-    // Apply search filter if exists
-    if (searchQuery && searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      return (
-        parent.name.toLowerCase().includes(query) ||
-        parent.email.toLowerCase().includes(query) ||
-        parent.phone.toLowerCase().includes(query) ||
-        parent.address.toLowerCase().includes(query)
-      );
-    }
-    return true;
-  });
+
 
   useEffect(() => {
     // Chỉ fetch khi chưa có data
@@ -94,7 +66,11 @@ export default function ParentsPage() {
             <AddParentDialog
               open={openAddParent}
               onOpenChange={setOpenAddParent}
-              onSubmit={addParent}
+              onSubmit={async (data) => {
+                await addParent(data);
+                await fetchParents(); // Reload lại danh sách nhân viên sau khi thêm thành công
+                setOpenAddParent(false);
+              }}
               onCancel={() => setOpenAddParent(false)}
             />
           </div>
@@ -104,11 +80,7 @@ export default function ParentsPage() {
             onHealthStatusChange={setHealthFilter}
             onAddParent={addParent}
           />
-          <ParentTable
-            parents={parents}
-            isLoading={isLoading}
-            error={error}
-          />
+          <ParentTable parents={parents} isLoading={isLoading} error={error} />
         </CardContent>
       </Card>
     </div>

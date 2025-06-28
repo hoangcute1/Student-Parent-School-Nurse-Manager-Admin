@@ -72,7 +72,6 @@ export function FilterBar({
       <Button className="bg-blue-600 hover:bg-blue-700">
         <Download className="h-4 w-4" />
       </Button>
-      <AddParentDialog onSubmit={onAddParent} />
     </div>
   );
 }

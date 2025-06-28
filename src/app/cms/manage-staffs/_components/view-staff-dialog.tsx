@@ -7,22 +7,22 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Parent } from "@/lib/type/parents";
+import { Staff } from "@/lib/type/staff";
 
-interface ViewParentDialogProps {
-  parent: Parent;
+interface ViewStaffDialogProps {
+  staff: Staff;
   onClose: () => void;
 }
 
-export function ViewParentDialog({ parent, onClose }: ViewParentDialogProps) {
-  const profile = parent.profile || {};
-  const user = parent.user || {};
+export function ViewStaffDialog({ staff, onClose }: ViewStaffDialogProps) {
+  const profile = staff.profile || {};
+  const user = staff.user || {};
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-md bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-xl border border-blue-200">
         <DialogHeader>
           <DialogTitle className="text-blue-800 text-2xl font-bold mb-4 text-left">
-            Thông tin phụ huynh:
+            Thông tin nhân viên:
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4 items-start">
@@ -63,7 +63,11 @@ export function ViewParentDialog({ parent, onClose }: ViewParentDialogProps) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} className="w-full mt-4 border-blue-300 text-blue-800 font-semibold text-lg hover:bg-blue-50">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="w-full mt-4 border-blue-300 text-blue-800 font-semibold text-lg hover:bg-blue-50"
+          >
             Đóng
           </Button>
         </DialogFooter>

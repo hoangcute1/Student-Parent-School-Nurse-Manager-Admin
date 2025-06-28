@@ -221,7 +221,6 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                       });
                       setDeleteParent(null);
                       // Có thể reload danh sách ở đây nếu cần
-                      window.location.reload();
                     } catch (err: any) {
                       toast({
                         title: "Lỗi khi xoá",
@@ -230,6 +229,7 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                       });
                     } finally {
                       setDeleting(false);
+                      await fetchParents();
                     }
                   }}
                 >

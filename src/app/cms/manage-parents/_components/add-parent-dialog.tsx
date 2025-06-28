@@ -36,7 +36,7 @@ export function AddParentDialog({
 }: AddParentDialogProps) {
   const [form, setForm] = useState<ParentFormValues>({
     email: "",
-    password: "",
+    password: "password123",
     name: "",
     phone: "",
     address: "",
@@ -46,7 +46,11 @@ export function AddParentDialog({
   const [error, setError] = useState("");
   const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    // Không cho phép thay đổi password
+    if (e.target.name === "password") return;
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -91,7 +95,7 @@ export function AddParentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Thêm phụ huynh mới</DialogTitle>
+          <DialogTitle className="text-blue-700">Thêm phụ huynh mới</DialogTitle>
         </DialogHeader>
         <form
           id="add-parent-form"
@@ -111,8 +115,8 @@ export function AddParentDialog({
             value={form.password}
             onChange={handleChange}
             placeholder="Mật khẩu"
-            type="password"
             required
+            readOnly
           />
           <Input
             name="name"
@@ -133,12 +137,16 @@ export function AddParentDialog({
             onChange={handleChange}
             placeholder="Địa chỉ"
           />
-          <Input
+          <select
             name="gender"
             value={form.gender}
             onChange={handleChange}
-            placeholder="Giới tính"
-          />
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+          >
+            <option value="">Chọn giới tính</option>
+            <option value="male">Nam</option>
+            <option value="female">Nữ</option>
+          </select>
           {error && <div className="text-red-600 text-sm">{error}</div>}
         </form>
         <DialogFooter>
@@ -150,7 +158,7 @@ export function AddParentDialog({
           >
             Huỷ
           </Button>
-          <Button type="submit" form="add-parent-form" disabled={loading}>
+          <Button type="submit" form="add-parent-form" disabled={loading} className="bg-blue-700 text-white hover:bg-blue-600 ">
             {loading ? "Đang thêm..." : "Thêm"}
           </Button>
         </DialogFooter>

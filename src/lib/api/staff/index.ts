@@ -17,22 +17,13 @@ export const createStaff = async (
   formData: StaffFormValues
 ): Promise<Staff> => {
   try {
-    // Convert StaffFormValues to the format expected by the API
-    const staffData = {
-      ...formData,
-      user: {
-        username: formData.email,
-        password: "defaultPassword123", // This might need to be generated or prompted
-        role: "staff",
-      },
-    };
-
-    return await fetchData<Staff>("/staff", {
+    // Gửi trực tiếp các trường phẳng, không thêm user lồng bên trong
+    return await fetchData<Staff>("/staff/create-staff-with-user-profile", {
       method: "POST",
-      body: JSON.stringify(staffData),
+      body: JSON.stringify(formData),
     });
   } catch (error) {
-    console.error("Error creating staff:", error);
+    console.error("Error creating parent:", error);
     throw error;
   }
 };
