@@ -1,5 +1,6 @@
 import {
   CreateMedicineDelivery,
+  MedicineDelivery,
   MedicineDeliveryByParent,
   MedicineDeliveryParentResponse,
   MedicineDeliveryResponse,
@@ -22,11 +23,11 @@ const getAllMedicineDeliveries =
 
 const getMedicineDeliveriesById = async (
   id: string
-): Promise<MedicineDeliveryByParent> => {
+): Promise<MedicineDeliveryResponse> => {
   try {
     console.log("Fetching medicine delivery with ID:", id); // Thêm log
 
-    const response = await fetchData<MedicineDeliveryByParent>(
+    const response = await fetchData<MedicineDeliveryResponse>(
       `/medicine-deliveries/${id}`
     );
 

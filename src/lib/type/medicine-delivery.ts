@@ -5,10 +5,12 @@ interface MedicineDelivery {
   id: string;
   parentId: string;
   staffId: string;
+  parentName: string;
+  staffName: string;
   name: string;
   date: string; // Chuyển sang string để đồng bộ với API
   total: number;
-  status: "pending" | "completed" | "cancelled";
+  status: "pending" | "progress" | "completed" | "cancelled";
   per_dose: string;
   per_day: string;
   note?: string; // Optional
@@ -99,6 +101,10 @@ interface MedicineDeliveryStore {
   fetchMedicineDeliveries: () => Promise<void>;
   fetchMedicineDeliveryByParentId: () => Promise<void>;
   addMedicineDelivery: (data: CreateMedicineDelivery) => Promise<any>;
+  updateMedicineDelivery: (
+    id: string,
+    data: Partial<MedicineDelivery>
+  ) => Promise<any>;
   deleteMedicineDelivery: (id: string) => Promise<any>;
   viewMedicineDeliveries: (id: string) => Promise<any>;
   setIsLoading: (loading: boolean) => void;

@@ -13,6 +13,7 @@ import {
   MedicineDeliveryByParent,
   MedicineDeliveryParentResponse,
 } from "@/lib/type/medicine-delivery";
+import type { MedicineDelivery } from "@/lib/type/medicine-delivery";
 import { create } from "zustand";
 
 export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
@@ -67,7 +68,7 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       try {
         set({ isLoading: true, error: null });
         const token = getAuthToken();
-        console.log(token)
+        console.log(token);
         if (!token) {
           throw new Error("Không tìm thấy token xác thực");
         }
@@ -130,6 +131,21 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         const errorMessage = err.message || "Không thể xóa đơn thuốc";
         set({ error: errorMessage });
         console.error("Lỗi khi xóa đơn thuốc:", err);
+        throw err;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    updateMedicineDelivery: async (
+      id: string,
+      data: Partial<MedicineDelivery>
+    ) => {
+      try {
+        set({ isLoading: true, error: null });
+        await updateMedicineDelivery(id, data);
+      } catch (err: any) {
+        set({ error: err.message || "Không thể cập nhật đơn thuốc" });
         throw err;
       } finally {
         set({ isLoading: false });
