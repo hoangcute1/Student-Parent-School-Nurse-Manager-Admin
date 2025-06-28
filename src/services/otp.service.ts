@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Otp, OtpDocument } from '@/schemas/otp.schema';
@@ -34,7 +30,7 @@ export class OtpService {
     });
 
     await otpRecord.save();
-
+    console.log(`OTP for ${email}: ${otp}`); // Log OTP for debugging
     // Gửi OTP qua email
     await this.mailService.sendOtpMail(email, otp);
 
