@@ -82,6 +82,55 @@ export class StaffController {
     );
   }
 
+
+  @Post('/create-staff-with-user-profile')
+  @ApiOperation({ summary: 'Tạo mới user, profile và parent cùng lúc' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        password: { type: 'string' },
+        name: { type: 'string' },
+        phone: { type: 'string' },
+        address: { type: 'string' },
+        gender: { type: 'string' },
+      },
+      required: ['email', 'password', 'name', 'phone', 'address', 'gender'],
+    },
+    description: 'email, password cho user và các trường profile cho parent',
+    required: true,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User, profile và parent đã được tạo thành công.',
+    type: SuccessResponseDto,
+  })
+  async createParentWithUserProfile(
+    @Body()
+    body: {
+      email: string;
+      password: string;
+      name: string;
+      phone: string;
+      address: string;
+      gender: string;
+    },
+  ) {
+    let { email, password, name, phone, address, gender } = body;
+    if (!email || !password || !name || !phone || !address || !gender) {
+      throw new Error('Phải có đủ email, password, name, phone, address, gender');
+    }
+    // Map gender từ tiếng Việt sang enum
+    if (gender.toLowerCase() === 'nam') gender = 'male';
+    else if (gender.toLowerCase() === 'nữ' || gender.toLowerCase() === 'nu') gender = 'female';
+    else if (gender.toLowerCase() === 'khác') gender = 'other';
+    const userDto = { email, password };
+    const profileDto = { name, phone, address, gender };
+    const result = await this.staffService.createWithUser(userDto, profileDto);
+    return new SuccessResponseDto('User, profile và parent đã được tạo thành công.', result);
+  }
+
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin nhân viên' })
   @ApiParam({ name: 'id', description: 'ID của nhân viên' })

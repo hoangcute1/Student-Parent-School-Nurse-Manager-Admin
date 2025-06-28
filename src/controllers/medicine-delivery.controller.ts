@@ -134,7 +134,7 @@ export class MedicineDeliveryController {
   @ApiBody({ type: CreateMedicineDeliveryDto })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async create(@Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto, @GetUser() user: any) {
+  async create(@Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto) {
     return this.medicineDeliveryService.create(createMedicineDeliveryDto);
   }
 

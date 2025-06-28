@@ -14,7 +14,7 @@ import { ParentModule } from './parent.module';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     ProfileModule,
     AdminModule,
-    StaffModule,
+    forwardRef(() => StaffModule),
     forwardRef(() => ParentModule),
   ],
   controllers: [UserController],

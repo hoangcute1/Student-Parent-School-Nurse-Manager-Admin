@@ -1,14 +1,17 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Staff, StaffDocument } from '@/schemas/staff.schema';
 import { ProfileService } from './profile.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class StaffService {
   constructor(
     @InjectModel(Staff.name) private staffModel: Model<StaffDocument>,
     private profileService: ProfileService,
+     @Inject(forwardRef(() => UserService))
+        private readonly userService: UserService,
   ) {}
   async findAll(): Promise<any[]> {
     const staffs = await this.staffModel.find().populate('user').exec();
@@ -118,6 +121,18 @@ export class StaffService {
     return updatedStaff;
   }
 
+  async createWithUser(
+    userDto: any,
+    profileDto: any,
+  ): Promise<{ user: any; profile: any; staff: StaffDocument }> {
+    // 1. Tạo user
+    const user = await this.userService.create(userDto);
+    // 2. Tạo profile với userId vừa tạo
+    const profile = await this.profileService.create({ ...profileDto, user: user['_id'] });
+    // 3. Tạo parent với userId vừa tạo
+    const staff = await this.create({ user: user['_id'] });
+    return { user, profile, staff };
+  }
   async remove(id: string): Promise<any> {
     const deletedStaff = await this.staffModel.findByIdAndDelete(id).exec();
 
