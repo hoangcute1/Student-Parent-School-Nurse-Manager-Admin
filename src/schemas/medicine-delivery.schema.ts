@@ -5,12 +5,13 @@ export type MedicineDeliveryDocument = MedicineDelivery & Document;
 
 export enum MedicineDeliveryStatus {
   PENDING = 'pending',
+  PROGRESS = 'progress',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
 
 @Schema({ timestamps: true, versionKey: false })
-export class MedicineDelivery extends Document { 
+export class MedicineDelivery extends Document {
   @Prop({ required: true })
   name: string;
 
