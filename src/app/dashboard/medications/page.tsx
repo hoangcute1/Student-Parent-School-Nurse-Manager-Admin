@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Clock, Plus, MoreHorizontal, Eye, Trash2 } from "lucide-react";
+import { useEffect } from "react";
+import { Clock, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,90 +20,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { useMedicationStore } from "@/stores/medication-store";
 import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
-import { MedicationDetailDialog } from "./_components/medication-detail-dialog";
-import { useToast } from "@/components/ui/use-toast";
 
 export default function MedicationsPage() {
   const {
     medicineDeliveryByParentId,
     isLoading,
     fetchMedicineDeliveryByParentId,
-    deleteMedicineDelivery,
-    viewMedicineDeliveries
   } = useMedicineDeliveryStore();
   const { medications } = useMedicationStore();
-  const { toast } = useToast();
-
-  const [selectedMedication, setSelectedMedication] = useState<any>(null);
-  const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [medicationToDelete, setMedicationToDelete] = useState<string | null>(null);
-
-  const handleDelete = async () => {
-    if (!medicationToDelete) return;
-
-    try {
-      await deleteMedicineDelivery(medicationToDelete);
-      await fetchMedicineDeliveryByParentId();
-      setMedicationToDelete(null);
-
-      toast({
-        title: "Thành công!",
-        description: "Đã xóa đơn thuốc thành công",
-        duration: 3000,
-        variant: "default",
-        className: "bg-green-500 text-white",
-      });
-    } catch (error) {
-      toast({
-        title: "Lỗi!",
-        description: "Không thể xóa đơn thuốc. Vui lòng thử lại sau.",
-        duration: 3000,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleViewDetails = async (id: string) => {
-    try {
-      const response = await viewMedicineDeliveries(id);
-      console.log("API Response:", response); // Thêm log để kiểm tra
-
-      // Kiểm tra và xử lý dữ liệu
-      if (response) {
-        // Thêm log để kiểm tra
-        setSelectedMedication(response);
-        setShowDetailDialog(true);
-      } else {
-        console.error("No data available or invalid response format:", response);
-      }
-    } catch (error) {
-      console.error("Error fetching medication details:", error);
-    }
-  };
 
   useEffect(() => {
     fetchMedicineDeliveryByParentId();
   }, [fetchMedicineDeliveryByParentId]);
-
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col space-y-2">
@@ -169,13 +100,14 @@ export default function MedicationsPage() {
                     </TableCell>
                     <TableCell>
                       {typeof delivery.medicine === "object" &&
-                        delivery.medicine !== null &&
-                        "name" in delivery.medicine
+                      delivery.medicine !== null &&
+                      "name" in delivery.medicine
                         ? (delivery.medicine as any).name
-                        : medications.find((m) => m._id === delivery.medicine._id)
-                          ?.name ||
-                        delivery.medicine ||
-                        "N/A"}
+                        : medications.find(
+                            (m) => m._id === delivery.medicine._id
+                          )?.name ||
+                          delivery.medicine ||
+                          "N/A"}
                     </TableCell>
                     <TableCell>{delivery.per_dose}</TableCell>
                     <TableCell>
@@ -196,29 +128,9 @@ export default function MedicationsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleViewDetails(delivery.id)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Xem chi tiết
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => setMedicationToDelete(delivery.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Xóa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button variant="ghost" size="sm">
+                        Chi tiết
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -227,29 +139,6 @@ export default function MedicationsPage() {
           </Table>
         </div>
       </div>
-
-      <AlertDialog open={!!medicationToDelete} onOpenChange={() => setMedicationToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa đơn thuốc này không? Hành động này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <MedicationDetailDialog
-        open={showDetailDialog}
-        onOpenChange={setShowDetailDialog}
-        medication={selectedMedication}
-      />
     </div>
   );
 }

@@ -23,17 +23,37 @@ export function UpdateParentDialog({
   onClose,
   onSubmit,
 }: UpdateParentDialogProps) {
+  const getToday = () => {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  };
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return getToday();
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return getToday();
+    return d.toISOString().slice(0, 10);
+  };
   // Đảm bảo profile và user luôn là object
   const [form, setForm] = useState({
     ...parent,
-    profile: parent.profile || { name: "", phone: "", address: "" },
+    profile: {
+      ...parent.profile,
+      name: parent.profile?.name || "",
+      phone: parent.profile?.phone || "",
+      address: parent.profile?.address || "",
+      gender: parent.profile?.gender || "",
+      birth: formatDate(parent.profile?.birth),
+      avatar: parent.profile?.avatar || "",
+    },
     user: parent.user || { email: "" },
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
@@ -95,12 +115,16 @@ export function UpdateParentDialog({
             placeholder="Họ và tên"
             required
           />
-          <Input
+          <select
             name="gender"
             value={form.profile.gender || ""}
             onChange={handleChange}
-            placeholder="Giới tính (male/female)"
-          />
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+          >
+            <option value="">Chọn giới tính</option>
+            <option value="male">Nam</option>
+            <option value="female">Nữ</option>
+          </select>
           <Input
             name="birth"
             value={form.profile.birth || ""}
