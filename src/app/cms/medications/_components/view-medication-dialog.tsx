@@ -24,26 +24,26 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Chi tiết thuốc</DialogTitle>
         </DialogHeader>
         {medication ? (
           <div className="grid grid-cols-1 gap-3 bg-blue-50 rounded-lg p-4 border border-blue-100 shadow-sm">
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Mã thuốc (ID):
               </span>
               <span className="ml-2 text-blue-900">{medication._id}</span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Tên thuốc:
               </span>
               <span className="ml-2 text-blue-900">{medication.name}</span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Loại thuốc:
               </span>
               <span className="ml-2 text-blue-900">
@@ -51,7 +51,7 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Liều lượng:
               </span>
               <span className="ml-2 text-blue-900">
@@ -59,7 +59,7 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Số lượng:
               </span>
               <span className="ml-2 text-blue-900">
@@ -67,13 +67,13 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">Đơn vị:</span>
+              <span className="w-50 font-semibold text-blue-700">Đơn vị:</span>
               <span className="ml-2 text-blue-900">
                 {medication.unit || "-"}
               </span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Nhà sản xuất:
               </span>
               <span className="ml-2 text-blue-900">
@@ -81,7 +81,7 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-start">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Hướng dẫn sử dụng:
               </span>
               <span className="ml-2 text-blue-900 whitespace-pre-line">
@@ -89,7 +89,7 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-start">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Tác dụng phụ:
               </span>
               <span className="ml-2 text-blue-900 whitespace-pre-line">
@@ -97,7 +97,7 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-start">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Chống chỉ định:
               </span>
               <span className="ml-2 text-blue-900 whitespace-pre-line">
@@ -105,13 +105,13 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-start">
-              <span className="w-40 font-semibold text-blue-700">Mô tả:</span>
+              <span className="w-50 font-semibold text-blue-700">Mô tả:</span>
               <span className="ml-2 text-blue-900 whitespace-pre-line">
                 {medication.description || "-"}
               </span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Ngày tạo:
               </span>
               <span className="ml-2 text-blue-900">
@@ -121,7 +121,7 @@ export const ViewMedicationDialog: React.FC<ViewMedicationDialogProps> = ({
               </span>
             </div>
             <div className="flex items-center">
-              <span className="w-40 font-semibold text-blue-700">
+              <span className="w-50 font-semibold text-blue-700">
                 Ngày cập nhật:
               </span>
               <span className="ml-2 text-blue-900">

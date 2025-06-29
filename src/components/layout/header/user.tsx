@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import Notification from "./noti";
 import { useAuthStore } from "@/stores/auth-store";
 import { logout, getAuthToken } from "@/lib/api/auth/token";
+import { toast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 
 export default function User() {
@@ -138,9 +139,16 @@ export default function User() {
           <DropdownMenuItem
             className="cursor-pointer text-red-600"
             onSelect={() => {
-              logout();
-              clearAuth();
-              router.push("/");
+              toast({
+                title: "Đăng xuất thành công",
+                description: "Bạn đã đăng xuất khỏi hệ thống.",
+                variant: "default",
+              });
+              setTimeout(() => {
+                logout();
+                clearAuth();
+                router.push("/");
+              }, 1500);
             }}
           >
             <LogOut className="mr-2 h-4 w-4" />

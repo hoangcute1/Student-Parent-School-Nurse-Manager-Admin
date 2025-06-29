@@ -1,3 +1,4 @@
+
 import { UserLoginResponse, UserProfile, UserRoleType } from "./users";
 
 interface LoginRequestCredentials {
@@ -9,7 +10,9 @@ interface LoginVerifyCredentials {
   email: string;
   otp: string;
 }
-
+interface ForgotPasswordRequest {
+  email: string;
+}
 interface TokenResponse {
   token: string;
 }
@@ -20,6 +23,7 @@ interface GetMeResponse {
 interface AuthResponse extends GetMeResponse {
   token: string;
 }
+
 interface AuthStore {
   // Thông tin người dùng
   user: UserLoginResponse | null;
@@ -35,7 +39,12 @@ interface AuthStore {
   clearAuth: () => void;
   updateUserRole: (role: UserRoleType | null) => void;
   updateUserInfo: (user: UserLoginResponse, profile?: UserProfile) => void;
+  // Forgot password actions
+  forgotPassword: (email: string) => Promise<void>;
+  verifyResetOTP: (email: string, otp: string) => Promise<any>;
+  resetPasswordWithToken: (resetToken: string, newPassword: string) => Promise<any>;
 }
+
 
 export type {
   AuthResponse,
@@ -44,4 +53,5 @@ export type {
   AuthStore,
   LoginRequestCredentials,
   LoginVerifyCredentials,
+  ForgotPasswordRequest
 };

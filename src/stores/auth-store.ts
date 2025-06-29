@@ -1,6 +1,11 @@
 import { create } from "zustand";
 
 import { AuthStore } from "@/lib/type/auth";
+import {
+  resetPasswordWithToken,
+  sendForgotPasswordOTP,
+  verifyResetOTP,
+} from "@/lib/api/auth/forgot-password";
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
@@ -45,6 +50,33 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       profile: profile || null,
       isAuthenticated: true,
     });
+  },
+  // Forgot password actions
+  forgotPassword: async (email: string) => {
+    try {
+      await sendForgotPasswordOTP(email);
+    } catch (error) {
+      console.error("Error sending forgot password request:", error);
+      throw error;
+    }
+  },
+  verifyResetOTP: async (email: string, otp: string) => {
+    try {
+      // Trả về response từ API (có thể chứa resetToken)
+      return await verifyResetOTP(email, otp);
+    } catch (error) {
+      console.error("Error verifying reset OTP:", error);
+      throw error;
+    }
+  },
+  resetPasswordWithToken: async (resetToken: string, newPassword: string) => {
+    try {
+      // Trả về response từ API (nếu có)
+      return await resetPasswordWithToken(resetToken, newPassword);
+    } catch (error) {
+      console.error("Error resetting password with token:", error);
+      throw error;
+    }
   },
 }));
 
