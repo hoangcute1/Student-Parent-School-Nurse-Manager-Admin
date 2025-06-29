@@ -20,8 +20,9 @@ import { TokenService } from './token-generator.service';
 import { OAuth2Client } from 'google-auth-library';
 import { ProfileDocument } from 'src/services/profile.service';
 
-const googleClient = new OAuth2Client('485501319962-sh11atcehvgcfdfeoem7fv6igdqql6ud.apps.googleusercontent.com');
-
+const googleClient = new OAuth2Client(
+  '485501319962-sh11atcehvgcfdfeoem7fv6igdqql6ud.apps.googleusercontent.com',
+);
 
 @Injectable()
 export class AuthService {
@@ -520,75 +521,108 @@ export class AuthService {
    * @returns Thông tin đăng nhập
    */
   async loginGoogle(token: string): Promise<any> {
-  // 1. Xác thực token với Google
-  const ticket = await googleClient.verifyIdToken({
-    idToken: token,
-    audience: '485501319962-sh11atcehvgcfdfeoem7fv6igdqql6ud.apps.googleusercontent.com',
-  });
-  const payload = ticket.getPayload();
-  const email = payload?.email;
+    // 1. Xác thực token với Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: '485501319962-sh11atcehvgcfdfeoem7fv6igdqql6ud.apps.googleusercontent.com',
+    });
+    const payload = ticket.getPayload();
+    const email = payload?.email;
 
-  if (!email)
-    throw new NotFoundException('Email không xác định từ Google token');
+    if (!email) throw new NotFoundException('Email không xác định từ Google token');
 
-  // 2. Kiểm tra email trong hệ thống
-  const user = await this.UserService.findByEmail(email);
+    // 2. Kiểm tra email trong hệ thống
+    const user = await this.UserService.findByEmail(email);
 
-  console.log("login user info",user);
-  if (!user)
-    throw new NotFoundException('Email không tồn tại trong hệ thống');
+    console.log('login user info', user);
+    if (!user) throw new NotFoundException('Email không tồn tại trong hệ thống');
 
-  const user_id = (user as any)._id?.toString();
+    const user_id = (user as any)._id?.toString();
 
-  // 3. Xác định role
-  let role = 'user';
- let profile: ProfileDocument | null = null;
+    // 3. Xác định role
+    let role = 'user';
+    let profile: ProfileDocument | null = null;
 
-
-  const admin = await this.adminService.findByuser(user_id);
-  if (admin) {
-    role = 'admin';
-    profile = await this.profileService.findByuser(user_id);
-  } else {
-    const staff = await this.staffService.findByuser(user_id);
-    if (staff) {
-      role = 'staff';
+    const admin = await this.adminService.findByuser(user_id);
+    if (admin) {
+      role = 'admin';
       profile = await this.profileService.findByuser(user_id);
     } else {
-      const parent = await this.parentService.findByUserId(user_id);
-      if (parent) {
-        role = 'parent';
+      const staff = await this.staffService.findByuser(user_id);
+      if (staff) {
+        role = 'staff';
         profile = await this.profileService.findByuser(user_id);
+      } else {
+        const parent = await this.parentService.findByUserId(user_id);
+        if (parent) {
+          role = 'parent';
+          profile = await this.profileService.findByuser(user_id);
+        }
       }
     }
+
+    // 4. Generate tokens
+    const tokens = await this.generateTokens(user_id, email, role);
+
+    // 5. Return data with tokens
+    return {
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+      user: {
+        email: user.email,
+        role,
+      },
+      profile: profile
+        ? {
+            name: profile.name,
+            phone: profile.phone,
+            gender: profile.gender,
+            birth: profile.birth,
+            address: profile.address,
+            avatar: profile.avatar,
+            created_at: profile.created_at,
+            updated_at: profile.updated_at,
+          }
+        : null,
+    };
   }
 
-  // 4. Generate tokens
-  const tokens = await this.generateTokens(user_id, email, role);
+  // --- Forgot password flow ---
+  // 1. Nhập email để nhận OTP
+  async forgotPassword(email: string) {
+    const user = await this.userModel.findOne({ email }).exec();
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+    await this.otpService.createOTP(email);
+    return { message: 'OTP đã được gửi đến email của bạn' };
+  }
 
-  // 5. Return data with tokens
-  return {
-    tokens: {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    },
-    user: {
-      email: user.email,
-      role,
-    },
-    profile: profile
-      ? {
-          name: profile.name,
-          phone: profile.phone,
-          gender: profile.gender,
-          birth: profile.birth,
-          address: profile.address,
-          avatar: profile.avatar,
-          created_at: profile.created_at,
-          updated_at: profile.updated_at,
-        }
-      : null,
-  };
-}
-// ...existing code...
+  // 2. Xác thực OTP, trả về resetToken (tạm thời, ví dụ dùng JWT hoặc random string)
+  async verifyResetOtp(email: string, otp: string) {
+    await this.otpService.verifyOTP(email, otp);
+    // Tạo resetToken, ví dụ dùng JWT hoặc random string, ở đây dùng JWT đơn giản
+    const resetToken = await this.tokenService.generateResetToken(email);
+    return { resetToken };
+  }
+
+  // 3. Đổi mật khẩu mới bằng resetToken
+  async resetPasswordWithToken(resetToken: string, newPassword: string) {
+    // Giải mã resetToken để lấy email
+    let email: string;
+    try {
+      const payload = await this.tokenService.verifyResetToken(resetToken);
+      email = payload.email;
+    } catch (e) {
+      throw new UnauthorizedException('Reset token không hợp lệ hoặc đã hết hạn');
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const user = await this.userModel.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true },
+    );
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+    return { message: 'Đặt lại mật khẩu thành công.' };
+  }
 }

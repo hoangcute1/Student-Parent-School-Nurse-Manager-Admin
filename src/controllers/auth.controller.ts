@@ -1,13 +1,5 @@
 import { IsEmail } from 'class-validator';
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Req,
-  Get,
-  NotFoundException,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, NotFoundException } from '@nestjs/common';
 import { AuthService } from '@/services/auth.service';
 import { UserService } from '@/services/user.service';
 import { ProfileService } from '@/services/profile.service';
@@ -16,6 +8,11 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginDto, LoginWithOtpDto } from '@/decorations/dto/login.dto';
 
 import { RefreshTokenDto } from '@/decorations/dto/refresh-token.dto';
+import { ForgotPasswordDto } from '@/decorations/dto/forgot-password.dto';
+import {
+  VerifyResetOtpDto,
+  ResetPasswordWithTokenDto,
+} from '@/decorations/dto/verify-reset-otp.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -45,10 +42,7 @@ export class AuthController {
     description: 'OTP không chính xác hoặc đã hết hạn.',
   })
   async loginParentOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
-    return this.authService.loginParentWithOtp(
-      loginWithOtpDto.email,
-      loginWithOtpDto.otp,
-    );
+    return this.authService.loginParentWithOtp(loginWithOtpDto.email, loginWithOtpDto.otp);
   }
 
   @Post('login-staff')
@@ -71,10 +65,7 @@ export class AuthController {
     description: 'OTP không chính xác hoặc đã hết hạn.',
   })
   async loginStaffOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
-    return this.authService.loginStaffWithOtp(
-      loginWithOtpDto.email,
-      loginWithOtpDto.otp,
-    );
+    return this.authService.loginStaffWithOtp(loginWithOtpDto.email, loginWithOtpDto.otp);
   }
 
   @Post('login-admin')
@@ -97,10 +88,7 @@ export class AuthController {
     description: 'OTP không chính xác hoặc đã hết hạn.',
   })
   async loginAdminOtp(@Body() loginWithOtpDto: LoginWithOtpDto) {
-    return this.authService.loginAdminWithOtp(
-      loginWithOtpDto.email,
-      loginWithOtpDto.otp,
-    );
+    return this.authService.loginAdminWithOtp(loginWithOtpDto.email, loginWithOtpDto.otp);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -126,12 +114,10 @@ export class AuthController {
         refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
       },
     },
-  })  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ.' })
+  })
+  @ApiResponse({ status: 401, description: 'Refresh token không hợp lệ.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(
-      refreshTokenDto.user,
-      refreshTokenDto.refresh_token,
-    );
+    return this.authService.refreshTokens(refreshTokenDto.user, refreshTokenDto.refresh_token);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -156,8 +142,8 @@ export class AuthController {
             _id: { type: 'string', example: '60d0fe4f5311236168a109ca' },
             email: { type: 'string', example: 'user@example.com' },
             created_at: { type: 'string', format: 'date-time' },
-            updated_at: { type: 'string', format: 'date-time' }
-          }
+            updated_at: { type: 'string', format: 'date-time' },
+          },
         },
         role: { type: 'string', example: 'parent', enum: ['user', 'parent', 'staff', 'admin'] },
         profile: {
@@ -169,19 +155,19 @@ export class AuthController {
             gender: { type: 'string' },
             birth: { type: 'string', format: 'date-time' },
             address: { type: 'string' },
-            avatar: { type: 'string' }
+            avatar: { type: 'string' },
           },
-          nullable: true
+          nullable: true,
         },
         parent: {
           type: 'object',
           properties: {
-            _id: { type: 'string' }
+            _id: { type: 'string' },
           },
-          nullable: true
-        }
-      }
-    }
+          nullable: true,
+        },
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Chưa xác thực.' })
   async getMe(@Req() req) {
@@ -200,8 +186,8 @@ export class AuthController {
             _id: { type: 'string', example: '60d0fe4f5311236168a109ca' },
             email: { type: 'string', example: 'user@example.com' },
             created_at: { type: 'string', format: 'date-time' },
-            updated_at: { type: 'string', format: 'date-time' }
-          }
+            updated_at: { type: 'string', format: 'date-time' },
+          },
         },
         role: { type: 'string', example: 'parent', enum: ['user', 'parent', 'staff', 'admin'] },
         profile: {
@@ -213,19 +199,19 @@ export class AuthController {
             gender: { type: 'string' },
             birth: { type: 'string', format: 'date-time' },
             address: { type: 'string' },
-            avatar: { type: 'string' }
+            avatar: { type: 'string' },
           },
-          nullable: true
+          nullable: true,
         },
         parent: {
           type: 'object',
           properties: {
-            _id: { type: 'string' }
+            _id: { type: 'string' },
           },
-          nullable: true
-        }
-      }
-    }
+          nullable: true,
+        },
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Token không hợp lệ.' })
   @ApiBody({
@@ -233,7 +219,7 @@ export class AuthController {
       properties: {
         token: { type: 'string', example: 'eyJhbGciOiJIUzI1...' },
       },
-      required: ['token']
+      required: ['token'],
     },
   })
   async getMeFromToken(@Body('token') token: string) {
@@ -241,14 +227,38 @@ export class AuthController {
   }
 
   @Post('login-google')
-@ApiOperation({ summary: 'Đăng nhập bằng Google token' })
-@ApiBody({ schema: { properties: { token: { type: 'string' } } } })
-@ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
-@ApiResponse({
-  status: 401,
-  description: 'Token không hợp lệ hoặc email không tồn tại.',
-})
-async loginGoogle(@Body('token') token: string) {
-  return this.authService.loginGoogle(token);
-}
+  @ApiOperation({ summary: 'Đăng nhập bằng Google token' })
+  @ApiBody({ schema: { properties: { token: { type: 'string' } } } })
+  @ApiResponse({ status: 200, description: 'Đăng nhập thành công.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Token không hợp lệ hoặc email không tồn tại.',
+  })
+  async loginGoogle(@Body('token') token: string) {
+    return this.authService.loginGoogle(token);
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Nhập email để nhận OTP đặt lại mật khẩu' })
+  @ApiResponse({ status: 200, description: 'OTP đã được gửi đến email.' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy người dùng.' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('verify-reset-otp')
+  @ApiOperation({ summary: 'Xác thực OTP để lấy reset token' })
+  @ApiResponse({ status: 200, description: 'OTP hợp lệ, trả về reset token.' })
+  @ApiResponse({ status: 400, description: 'OTP không hợp lệ hoặc đã hết hạn.' })
+  async verifyResetOtp(@Body() dto: VerifyResetOtpDto) {
+    return this.authService.verifyResetOtp(dto.email, dto.otp);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Đổi mật khẩu mới bằng reset token' })
+  @ApiResponse({ status: 200, description: 'Đặt lại mật khẩu thành công.' })
+  @ApiResponse({ status: 400, description: 'Reset token không hợp lệ.' })
+  async resetPassword(@Body() dto: ResetPasswordWithTokenDto) {
+    return this.authService.resetPasswordWithToken(dto.resetToken, dto.newPassword);
+  }
 }

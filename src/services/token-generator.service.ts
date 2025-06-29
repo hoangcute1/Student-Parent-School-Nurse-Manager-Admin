@@ -70,4 +70,23 @@ export class TokenService {
       return null;
     }
   }
+
+  /**
+   * Generate a reset password token (valid for 10 minutes)
+   * @param email User's email
+   * @returns Reset token string
+   */
+  generateResetToken(email: string): string {
+    const payload = { email };
+    return this.jwtService.sign(payload, { expiresIn: '10m' });
+  }
+
+  /**
+   * Verify a reset password token
+   * @param token Reset token
+   * @returns Decoded payload if valid, throws error if invalid/expired
+   */
+  verifyResetToken(token: string): any {
+    return this.jwtService.verify(token);
+  }
 }
