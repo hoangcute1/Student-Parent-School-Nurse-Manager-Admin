@@ -22,6 +22,10 @@ import {
 } from "@/components/ui/table";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { useMedicationStore } from "@/stores/medication-store";
+
+import React, { useState } from "react";
+import ViewDeliveryDialog from "./_components/view-delivery-dialog";
+import type { MedicineDeliveryByParent } from "@/lib/type/medicine-delivery";
 import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
 
 export default function MedicationsPage() {
@@ -29,12 +33,40 @@ export default function MedicationsPage() {
     medicineDeliveryByParentId,
     isLoading,
     fetchMedicineDeliveryByParentId,
+      deleteMedicineDelivery,
   } = useMedicineDeliveryStore();
   const { medications } = useMedicationStore();
+
+  const [selectedDelivery, setSelectedDelivery] =
+    useState<MedicineDeliveryByParent | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMedicineDeliveryByParentId();
   }, [fetchMedicineDeliveryByParentId]);
+
+  const handleShowDetail = (delivery: any) => {
+    setSelectedDelivery(delivery);
+    setShowDetail(true);
+  };
+
+  const handleDelete = async (id: string | undefined) => {
+    if (!id) {
+      alert("Không tìm thấy ID đơn thuốc để xoá!");
+      return;
+    }
+    if (!window.confirm("Bạn có chắc muốn xoá đơn thuốc này?")) return;
+    setDeletingId(id);
+    try {
+      await deleteMedicineDelivery(id);
+      await fetchMedicineDeliveryByParentId();
+    } catch (error) {
+      alert("Xoá thất bại!");
+    }
+    setDeletingId(null);
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex flex-col space-y-2">
@@ -127,9 +159,21 @@ export default function MedicationsPage() {
                         {delivery.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
+                    <TableCell className="text-right flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShowDetail(delivery)}
+                      >
                         Chi tiết
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(delivery.id)}
+                        disabled={deletingId === delivery.id}
+                      >
+                        {deletingId === delivery.id ? "Đang xoá..." : "Xoá"}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -139,6 +183,14 @@ export default function MedicationsPage() {
           </Table>
         </div>
       </div>
+      {/* Modal chi tiết đơn thuốc */}
+      {showDetail && selectedDelivery && (
+        <ViewDeliveryDialog
+          delivery={selectedDelivery as MedicineDeliveryByParent}
+          medications={medications}
+          onClose={() => setShowDetail(false)}
+        />
+      )}
     </div>
   );
 }

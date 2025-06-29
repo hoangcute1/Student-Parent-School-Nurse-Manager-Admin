@@ -117,26 +117,18 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       try {
         set({ isLoading: true, error: null });
         await deleteMedicineDelivery(id);
-
-        // Remove the deleted item from both lists in the store
-        set((state) => ({
-          medicineDeliveries: state.medicineDeliveries.filter(
-            (delivery) => delivery.id !== id
-          ),
-          medicineDeliveryByParentId: state.medicineDeliveryByParentId.filter(
-            (delivery) => delivery.id !== id
-          ),
-        }));
+        // Cập nhật lại danh sách đơn thuốc sau khi xoá
+        const updatedDeliveries = get().medicineDeliveryByParentId.filter(
+          (delivery) => delivery.id !== id
+        );
+        set({ medicineDeliveryByParentId: updatedDeliveries });
       } catch (err: any) {
-        const errorMessage = err.message || "Không thể xóa đơn thuốc";
-        set({ error: errorMessage });
-        console.error("Lỗi khi xóa đơn thuốc:", err);
+        set({ error: err.message || "Không thể xoá đơn thuốc" });
         throw err;
       } finally {
         set({ isLoading: false });
       }
     },
-
     updateMedicineDelivery: async (
       id: string,
       data: Partial<MedicineDelivery>

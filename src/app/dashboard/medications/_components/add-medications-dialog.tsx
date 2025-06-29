@@ -26,7 +26,7 @@ export default function AddMedicineDeliveryForm() {
   const { addMedicineDelivery } = useMedicineDeliveryStore();
   const { studentsData } = useParentStudentsStore(); // danh sách học sinh của tài khoản này
   const { medications, fetchMedications } = useMedicationStore(); // tất cả thuốc trong kho
-  const { staffs,fetchStaffs } = useStaffStore(); // danh sách staff// tài khoản đã đăng nhập (parent)
+  const { staffs, fetchStaffs } = useStaffStore(); // danh sách staff// tài khoản đã đăng nhập (parent)
   const [form, setForm] = useState<CreateMedicineDelivery>({
     name: "",
     date: getToday(),
@@ -75,8 +75,8 @@ export default function AddMedicineDeliveryForm() {
     if (form.end_at) {
       const start = new Date(form.date);
       const end = new Date(form.end_at);
-      if (end <= start) {
-        setError("Ngày kết thúc phải sau ngày bắt đầu!");
+      if (end < start) {
+        setError("Ngày kết thúc phải bằng hoặc sau ngày bắt đầu!");
         setLoading(false);
         return;
       }
@@ -140,6 +140,7 @@ export default function AddMedicineDeliveryForm() {
             type="date"
             name="date"
             value={form.date?.slice(0, 10) || ""}
+            onChange={handleChange}
             required
           />
         </div>

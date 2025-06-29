@@ -1,4 +1,3 @@
-
 import { fetchData } from "./api";
 import { Medication, MedicationFormValues } from "../type/medications";
 
@@ -85,9 +84,9 @@ export const updateMedicationForm = async (
 /**
  * Delete a medication by ID
  */
-export const deleteMedication = async (medicationId: string): Promise<void> => {
+export const deleteMedication = async (id: string): Promise<void> => {
   try {
-    await fetchData<null>(`/medicines/${medicationId}`, {
+    await fetchData(`/medicine-deliveries/${id}`, {
       method: "DELETE",
     });
     return;
