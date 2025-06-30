@@ -102,7 +102,7 @@ export function AdminLoginForm() {
           title: "Đăng nhập thành công",
           description: "Đang chuyển hướng...",
         });
-        router.push("/cms");
+        router.push("/cmscopy");
         setShowOTP(false);
       } else {
         throw new Error("Xác thực OTP thất bại");

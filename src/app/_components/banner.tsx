@@ -29,7 +29,10 @@ export default function Banner() {
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2  p-4 rounded-lg">
               <p className="text-3xl font-bold text-white tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                Hệ thống Quản lý Y tế Học đường
+                Hệ thống Quản lý Y tế 
+              </p>
+              <p className="text-3xl font-bold text-white tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+                Học đường
               </p>
               <p className="max-w-[600px] text-white md:text-xl drop-shadow-lg">
                 Giải pháp toàn diện để quản lý sức khỏe học sinh, theo dõi sự
