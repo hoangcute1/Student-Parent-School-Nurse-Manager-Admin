@@ -161,6 +161,18 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.findByUserId(userId);
   }
 
+   @Get('staff/:userId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get medicine deliveries by userId',
+    description: 'Get all medicine deliveries for a specific parent',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'Parent not found.' })
+  async findbyStaff(@Param('userId') userId: string) {
+    return this.medicineDeliveryService.findByUserStaff(userId);
+  }
+
   /**
    * Get deliveries for a student
    */
@@ -261,7 +273,11 @@ export class MedicineDeliveryController {
       const current = await this.medicineDeliveryService.findById(id);
 
       // Check if delivery can be updated based on status
-      if ([MedicineDeliveryStatus.COMPLETED, MedicineDeliveryStatus.CANCELLED].includes(current.delivery.status)) {
+      if (
+        [MedicineDeliveryStatus.COMPLETED, MedicineDeliveryStatus.CANCELLED].includes(
+          current.delivery.status,
+        )
+      ) {
         throw new ForbiddenException(`Cannot update delivery in ${current.delivery.status} status`);
       }
 
@@ -285,9 +301,11 @@ export class MedicineDeliveryController {
         updateMedicineDeliveryDto.end_at = endAt;
       }
 
-
       // Perform update
-      const updatedDelivery = await this.medicineDeliveryService.update(id, updateMedicineDeliveryDto);
+      const updatedDelivery = await this.medicineDeliveryService.update(
+        id,
+        updateMedicineDeliveryDto,
+      );
 
       // Return formatted response
       return this.formatDeliveryResponse(updatedDelivery);
@@ -339,4 +357,9 @@ export class MedicineDeliveryController {
       throw new BadRequestException(`Error deleting medicine delivery: ${error.message}`);
     }
   }
+
+  /**
+   * Get deliveries for a staff
+   */
+
 }

@@ -142,4 +142,12 @@ export class StaffService {
 
     return { id, deleted: true };
   }
+
+  async findByUserId(userId: string): Promise<StaffDocument> {
+      const staff = await this.staffModel.findOne({ user: userId }).populate('user').exec();
+      if (!staff) {
+        throw new NotFoundException(`Staff with user ID "${userId}" not found`);
+      }
+      return staff;
+    }
 }

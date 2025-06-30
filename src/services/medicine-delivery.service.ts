@@ -94,6 +94,9 @@ export class MedicineDeliveryService {
     };
   }
 
+
+
+
   async findByUserId(userId: string): Promise<{ data: any[]; total: number }> {
     const parentId = await this.parentService.findByUserId(userId);
     const medicineDeliveryList = await this.medicineDeliveryModel
@@ -121,6 +124,44 @@ export class MedicineDeliveryService {
           id: item._id,
           staffId: staff ? (item.staff as any)._id.toString() : '',
           staffName,
+          ...rest,
+        };
+      }),
+    );
+
+    return {
+      data,
+      total: data.length,
+    };
+  }
+
+  async findByUserStaff(userId: string): Promise<{ data: any[]; total: number }> {
+    const staffId = await this.staffService.findByUserId(userId);
+    const medicineDeliveryList = await this.medicineDeliveryModel
+      .find({ staff: staffId })
+      .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+      .populate('staff')
+      .populate('parent')
+      .populate('medicine')
+      .sort({ created_at: -1 })
+      .exec();
+
+    const data = await Promise.all(
+      medicineDeliveryList.map(async (item) => {
+        const { _id, parent, staff, ...rest } = item.toObject();
+
+        // Lấy tên staff
+        let parentName = '';
+        if (item.parent && (item.parent as any).user) {
+          const staffUserId = (item.parent as any).user.toString();
+          parentName =
+            ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
+        }
+
+        return {
+          id: item._id,
+          parentId: parent ? (item.parent as any)._id.toString() : '',
+          parentName,
           ...rest,
         };
       }),
@@ -208,20 +249,13 @@ export class MedicineDeliveryService {
       .exec();
   }
 
- 
-
-
   async update(
     id: string,
     updateDto: UpdateMedicineDeliveryDto,
   ): Promise<MedicineDeliveryDocument> {
     try {
       const delivery = await this.medicineDeliveryModel
-        .findByIdAndUpdate(
-          id,
-          { $set: updateDto },
-          { new: true, runValidators: true }
-        )
+        .findByIdAndUpdate(id, { $set: updateDto }, { new: true, runValidators: true })
         .populate('student', 'name studentId class')
         .populate('staff', 'name email role')
         .populate('medicine', 'name dosage unit type');
@@ -240,28 +274,26 @@ export class MedicineDeliveryService {
   }
 
   async findById(id: string): Promise<{ delivery: MedicineDeliveryDocument; staffName: string }> {
-  const delivery = await this.medicineDeliveryModel
-    .findById(id)
-    .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
-    .populate('staff')
-    .populate('parent')
-    .populate('medicine')
-    .exec();
+    const delivery = await this.medicineDeliveryModel
+      .findById(id)
+      .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
+      .populate('staff')
+      .populate('parent')
+      .populate('medicine')
+      .exec();
 
-  if (!delivery) {
-    throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+    if (!delivery) {
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+    }
+
+    let staffName = '';
+    if (delivery.staff && (delivery.staff as any).user) {
+      const staffUserId = (delivery.staff as any).user.toString();
+      staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
+    }
+
+    return { delivery, staffName };
   }
-
-  let staffName = '';
-  if (delivery.staff && (delivery.staff as any).user) {
-    const staffUserId = (delivery.staff as any).user.toString();
-    staffName =
-      ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
-  }
-
-  return { delivery, staffName };
-}
-
 
   async remove(id: string): Promise<void> {
     const delivery = await this.findById(id);
@@ -271,7 +303,9 @@ export class MedicineDeliveryService {
       delivery.delivery.status === MedicineDeliveryStatus.COMPLETED ||
       delivery.delivery.status === MedicineDeliveryStatus.CANCELLED
     ) {
-      throw new BadRequestException(`Cannot delete a delivery with status "${delivery.delivery.status}"`);
+      throw new BadRequestException(
+        `Cannot delete a delivery with status "${delivery.delivery.status}"`,
+      );
     }
 
     const result = await this.medicineDeliveryModel.deleteOne({ _id: id }).exec();
