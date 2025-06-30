@@ -94,9 +94,6 @@ export class MedicineDeliveryService {
     };
   }
 
-
-
-
   async findByUserId(userId: string): Promise<{ data: any[]; total: number }> {
     const parentId = await this.parentService.findByUserId(userId);
     const medicineDeliveryList = await this.medicineDeliveryModel
