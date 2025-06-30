@@ -5,6 +5,7 @@ import {
   getAllMedicineDeliveries,
   getMedicineDeliveriesById,
   getMedicineDeliveriesByParentId,
+  getMedicineDeliveriesByStaffId,
   updateMedicineDelivery,
 } from "@/lib/api/medicine-delivery";
 import {
@@ -23,6 +24,7 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
     error: null,
     students: [],
     medicineDeliveryByParentId: [],
+    medicineDeliveryByStaffId: [],
 
     fetchMedicineDeliveries: async () => {
       try {
@@ -78,6 +80,30 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         }
         const response = await getMedicineDeliveriesByParentId(userId);
         set({ medicineDeliveryByParentId: response || [] });
+      } catch (err: any) {
+        const errorMessage =
+          err.message || "Failed to fetch medicine delivery by parent ID";
+        set({ error: errorMessage });
+        throw err;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    fetchMedicineDeliveryByStaffId: async (): Promise<void> => {
+      try {
+        set({ isLoading: true, error: null });
+        const token = getAuthToken();
+        console.log(token);
+        if (!token) {
+          throw new Error("Không tìm thấy token xác thực");
+        }
+        const userId = parseJwt(token)?.sub;
+        if (!userId) {
+          throw new Error("Không tìm thấy ID người dùng trong token");
+        }
+        const response = await getMedicineDeliveriesByStaffId(userId);
+        set({ medicineDeliveryByStaffId: response || [] });
       } catch (err: any) {
         const errorMessage =
           err.message || "Failed to fetch medicine delivery by parent ID";

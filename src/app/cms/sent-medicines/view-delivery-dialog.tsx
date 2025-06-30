@@ -7,10 +7,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MedicineDelivery } from "@/lib/type/medicine-delivery";
+import {  MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
 
 interface ViewDeliveryDialogProps {
-  delivery: MedicineDelivery;
+  delivery: MedicineDeliveryByStaff;
   onClose: () => void;
 }
 
@@ -38,10 +38,6 @@ export function ViewDeliveryDialog({
             <div className="flex justify-between">
               <span className="font-medium">Người gửi:</span>
               <span>{delivery.parentName || "-"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Người nhận:</span>
-              <span>{delivery.staffName || "-"}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Thuốc:</span>

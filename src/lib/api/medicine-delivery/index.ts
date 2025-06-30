@@ -1,9 +1,12 @@
+import { getMedicationById } from './../medication';
 import {
   CreateMedicineDelivery,
   MedicineDelivery,
   MedicineDeliveryByParent,
+  MedicineDeliveryByStaff,
   MedicineDeliveryParentResponse,
   MedicineDeliveryResponse,
+  MedicineDeliveryStaffResponse,
 } from "@/lib/type/medicine-delivery";
 import { fetchData } from "../api";
 import { getAuthToken, parseJwt } from "../auth/token";
@@ -20,6 +23,28 @@ const getAllMedicineDeliveries =
       throw new Error(error.message || "Không thể lấy danh sách đơn thuốc");
     }
   };
+
+const getMedicineDeliveriesByStaffId = async (
+  userId: string
+): Promise<MedicineDeliveryByStaff[]> => {
+  try {
+    console.log("Fetching medicine deliveries for user ID:", userId);
+
+    console.log("Fetching medicine deliveries for user ID:", userId);
+    const response = await fetchData<MedicineDeliveryStaffResponse>(
+      `/medicine-deliveries/staff/${userId}`
+    );
+    return response.data || [];
+  } catch (error: any) {
+    console.error(
+      `Error fetching medicine deliveries for parent user Id`,
+      error
+    );
+    throw new Error(
+      error.message || "Không thể lấy đơn thuốc theo ID phụ huynh"
+    );
+  }
+};
 
 const getMedicineDeliveriesById = async (
   id: string
@@ -124,4 +149,5 @@ export {
   getMedicineDeliveriesById,
   updateMedicineDelivery,
   deleteMedicineDelivery,
+  getMedicineDeliveriesByStaffId,
 };

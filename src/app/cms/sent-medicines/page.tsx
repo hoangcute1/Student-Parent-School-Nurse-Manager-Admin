@@ -41,6 +41,7 @@ import {
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { request } from "http";
 import { ViewDeliveryDialog } from "./view-delivery-dialog";
+import { getMedicineDeliveriesByStaffId } from "@/lib/api/medicine-delivery";
 
 // Define types for our medicine data
 
@@ -50,8 +51,8 @@ export default function ParentMedicine() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState<string | null>(null);
   const {
-    medicineDeliveries,
-    fetchMedicineDeliveries,
+    medicineDeliveryByStaffId,
+    fetchMedicineDeliveryByStaffId,
     isLoading,
     setIsLoading,
     setError,
@@ -60,10 +61,10 @@ export default function ParentMedicine() {
   } = useMedicineDeliveryStore();
 
   useEffect(() => {
-    if (medicineDeliveries.length === 0) {
-      fetchMedicineDeliveries();
+    if (medicineDeliveryByStaffId.length === 0) {
+      fetchMedicineDeliveryByStaffId();
     }
-  }, [fetchMedicineDeliveries, medicineDeliveries.length]);
+  }, [fetchMedicineDeliveryByStaffId, medicineDeliveryByStaffId.length]);
 
   if (isLoading) {
     return (
@@ -83,7 +84,7 @@ export default function ParentMedicine() {
     try {
       setIsLoading(true);
       await updateMedicineDelivery(id, { status });
-      fetchMedicineDeliveries();
+      fetchMedicineDeliveryByStaffId();
     } catch (err) {
       setError("Không thể cập nhật trạng thái đơn thuốc");
     } finally {
@@ -146,7 +147,7 @@ export default function ParentMedicine() {
               </div>
 
               <div className="space-y-4">
-                {medicineDeliveries.map((request, index) => (
+                {medicineDeliveryByStaffId.map((request, index) => (
                   <div
                     key={index}
                     className="p-4 rounded-lg border border-teal-100 hover:bg-teal-50 transition-colors"
@@ -158,10 +159,10 @@ export default function ParentMedicine() {
                         </div>
                         <div>
                           <h4 className="font-medium text-teal-800">
-                            {request.student.name || "N/A"}
+                            {request.student?.name || "N/A"}
                           </h4>
                           <p className="text-sm text-teal-600">
-                            Lớp: {request.student.class?.name || "N/A"}
+                            Lớp: {request.student?.class?.name || "N/A"}
                           </p>
                         </div>
                       </div>
@@ -219,9 +220,6 @@ export default function ParentMedicine() {
                                 "vi-VN"
                               )
                             : "không"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Người nhận:</strong> {request.staffName}
                         </p>
                       </div>
                     </div>
@@ -312,7 +310,9 @@ export default function ParentMedicine() {
       </Tabs>{" "}
       {selectedMedicine && (
         <ViewDeliveryDialog
-          delivery={medicineDeliveries.find((d) => d.id === selectedMedicine)!}
+          delivery={
+            medicineDeliveryByStaffId.find((d) => d.id === selectedMedicine)!
+          }
           onClose={() => setSelectedMedicine(null)}
         />
       )}

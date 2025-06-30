@@ -48,7 +48,7 @@ interface MedicineDeliveryByParent {
   name: string;
   date: string;
   total: number;
-  status: "pending" | "completed" | "cancelled";
+  status: "pending" | "progress" | "completed" | "cancelled";
   per_dose: string;
   per_day: string;
   note?: string;
@@ -72,11 +72,44 @@ interface MedicineDeliveryParentResponse {
   data: MedicineDeliveryByParent[];
   total: number;
 }
+
+
+interface MedicineDeliveryByStaff {
+  id: string;
+  parentId: string;
+  parentName: string;
+  name: string;
+  date: string;
+  total: number;
+  status: "pending" | "progress" | "completed" | "cancelled";
+  per_dose: string;
+  per_day: string;
+  note?: string;
+  reason?: string;
+  sent_at: string;
+  end_at: string;
+  student: {
+    _id: string;
+    name: string;
+    studentId: string;
+    class: {
+      _id: string;
+      name: string;
+    };
+  };
+  medicine: Medication;
+  created_at: Date;
+  updated_at: Date;
+}
+interface MedicineDeliveryStaffResponse {
+  data: MedicineDeliveryByStaff[];
+  total: number;
+}
 interface CreateMedicineDelivery {
   name: string;
   date: string;
   total: number;
-  status?: "pending" | "completed" | "cancelled";
+  status: "pending" | "progress" | "completed" | "cancelled";
   per_dose: string;
   per_day: string;
   note?: string;
@@ -96,9 +129,11 @@ interface MedicineDeliveryResponse {
 interface MedicineDeliveryStore {
   medicineDeliveries: MedicineDelivery[];
   medicineDeliveryByParentId: MedicineDeliveryByParent[];
+  medicineDeliveryByStaffId: MedicineDeliveryByStaff[];
   isLoading: boolean;
   error: string | null;
   fetchMedicineDeliveries: () => Promise<void>;
+  fetchMedicineDeliveryByStaffId: () => Promise<void>;
   fetchMedicineDeliveryByParentId: () => Promise<void>;
   addMedicineDelivery: (data: CreateMedicineDelivery) => Promise<any>;
   updateMedicineDelivery: (
@@ -118,4 +153,6 @@ export type {
   CreateMedicineDelivery,
   MedicineDeliveryByParent,
   MedicineDeliveryParentResponse,
+  MedicineDeliveryByStaff,
+  MedicineDeliveryStaffResponse,
 };
