@@ -36,12 +36,13 @@ export default function BlogPage() {
           {blogPosts.map((post, index) => (
             <Link key={index} href={post.href} className="group">
               <Card className="h-full bg-white/80 backdrop-blur-sm hover:bg-white hover:shadow-2xl transition-all duration-500 transform group-hover:-translate-y-2 overflow-hidden border-0 shadow-xl">
-                <div className="aspect-video relative overflow-hidden">
+                <div className="relative overflow-hidden">
                   <Image
                     src={post.image}
                     alt={post.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    width={600}
+                    height={400}
+                    className="w-full h-auto group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 

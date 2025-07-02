@@ -670,4 +670,89 @@ export const blogContent = {
       <p>Kiến thức sơ cứu cơ bản là kỹ năng sống cần thiết giúp bảo vệ an toàn cho trẻ em. Việc trang bị đầy đủ kiến thức và thực hành thường xuyên sẽ giúp phụ huynh và giáo viên tự tin xử lý các tình huống khẩn cấp, từ đó bảo vệ tính mạng và sức khỏe của trẻ một cách hiệu quả nhất.</p>
     `,
   },
+  "puberty": {
+    title: "Phát triển tuổi dậy thì ở học sinh – Hiểu đúng và chăm sóc đúng cách",
+content: `
+  <h2>Tuổi dậy thì là gì?</h2>
+  <p>Tuổi dậy thì là giai đoạn chuyển tiếp từ trẻ em sang người lớn, thường xảy ra từ 8-13 tuổi ở bé gái và 9-14 tuổi ở bé trai. Đây là thời điểm cơ thể có những thay đổi rõ rệt về thể chất, tâm lý và hành vi do hormone sinh dục bắt đầu hoạt động mạnh.</p>
+
+  <h2>Biểu hiện tuổi dậy thì</h2>
+  <h3>1. Ở bé gái</h3>
+  <ul>
+    <li>Ngực bắt đầu phát triển</li>
+    <li>Xuất hiện lông nách và lông mu</li>
+    <li>Có kinh nguyệt lần đầu (thường từ 10–15 tuổi)</li>
+    <li>Cơ thể tăng chiều cao nhanh chóng</li>
+    <li>Thay đổi cảm xúc, dễ cáu gắt hoặc buồn bã</li>
+  </ul>
+
+  <h3>2. Ở bé trai</h3>
+  <ul>
+    <li>Giọng nói trầm hơn</li>
+    <li>Xuất hiện ria mép, lông nách, lông mu</li>
+    <li>Tăng chiều cao và khối lượng cơ bắp</li>
+    <li>Bắt đầu có hiện tượng mộng tinh</li>
+    <li>Cảm xúc thay đổi, thích thể hiện bản thân</li>
+  </ul>
+
+  <h2>Những thay đổi về tâm lý</h2>
+  <ul>
+    <li>Dễ cảm thấy tự ti về ngoại hình</li>
+    <li>Mong muốn được công nhận và thể hiện cá tính</li>
+    <li>Dễ bị ảnh hưởng bởi bạn bè và mạng xã hội</li>
+    <li>Xuất hiện tò mò về giới tính</li>
+  </ul>
+
+  <h2>Vai trò của phụ huynh và nhà trường</h2>
+  <h3>1. Phụ huynh</h3>
+  <ul>
+    <li>Quan tâm và trò chuyện cởi mở với con</li>
+    <li>Giải thích kịp thời và chính xác về những thay đổi sinh lý</li>
+    <li>Giúp con giữ vệ sinh cá nhân, đặc biệt trong kỳ kinh nguyệt hoặc mộng tinh</li>
+    <li>Hướng dẫn về giới tính và ranh giới cá nhân</li>
+  </ul>
+
+  <h3>2. Nhà trường</h3>
+  <ul>
+    <li>Giáo dục giới tính trong chương trình học</li>
+    <li>Tạo môi trường an toàn, không phân biệt hay trêu chọc</li>
+    <li>Hướng dẫn học sinh kỹ năng ứng xử trong mối quan hệ bạn bè</li>
+    <li>Hỗ trợ tư vấn tâm lý học đường khi học sinh gặp khó khăn</li>
+  </ul>
+
+  <h2>Chăm sóc sức khỏe tuổi dậy thì</h2>
+  <ul>
+    <li>Ăn uống đủ chất: canxi, sắt, vitamin D giúp phát triển chiều cao và thể lực</li>
+    <li>Ngủ đủ giấc (8–10 tiếng/ngày)</li>
+    <li>Vệ sinh cá nhân hàng ngày: tắm rửa, thay quần áo, vệ sinh vùng kín đúng cách</li>
+    <li>Tập thể dục đều đặn</li>
+    <li>Tránh sử dụng chất kích thích: thuốc lá, rượu bia</li>
+  </ul>
+
+  <h2>Giải đáp một số thắc mắc thường gặp</h2>
+  <ul>
+    <li><strong>Dậy thì sớm có nguy hiểm không?</strong> – Có thể ảnh hưởng tâm lý và sự phát triển chiều cao. Nên tham khảo bác sĩ chuyên khoa nếu dậy thì trước 8 tuổi (bé gái) hoặc 9 tuổi (bé trai).</li>
+    <li><strong>Kinh nguyệt không đều có đáng lo?</strong> – Những năm đầu mới có kinh, chu kỳ thường chưa ổn định. Nếu kéo dài quá lâu nên đi khám.</li>
+    <li><strong>Bé trai mộng tinh có bất thường?</strong> – Đây là hiện tượng sinh lý bình thường khi đến tuổi dậy thì.</li>
+  </ul>
+
+  <h2>Giáo dục giới tính và kỹ năng sống</h2>
+  <ul>
+    <li>Hướng dẫn học sinh hiểu về cơ thể mình</li>
+    <li>Biết nói “không” với hành vi quấy rối, xâm hại</li>
+    <li>Biết giữ ranh giới cá nhân trong các mối quan hệ</li>
+    <li>Thể hiện cảm xúc và xử lý áp lực tâm lý đúng cách</li>
+  </ul>
+
+  <h2>Vai trò của truyền thông và mạng xã hội</h2>
+  <ul>
+    <li>Trẻ dễ tiếp cận thông tin sai lệch nếu không được định hướng</li>
+    <li>Phụ huynh và giáo viên cần hướng dẫn con tiếp cận nội dung phù hợp độ tuổi</li>
+    <li>Khuyến khích đọc sách, tham gia hoạt động xã hội lành mạnh</li>
+  </ul>
+
+  <h2>Kết luận</h2>
+  <p>Tuổi dậy thì là giai đoạn quan trọng ảnh hưởng đến sức khỏe và nhân cách trẻ trong tương lai. Việc đồng hành, định hướng đúng và chăm sóc toàn diện từ gia đình và nhà trường sẽ giúp học sinh vượt qua tuổi dậy thì một cách khỏe mạnh, tự tin và tích cực.</p>
+`,
+  },
 };

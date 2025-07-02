@@ -23,12 +23,13 @@ export default function MyBlogsPage() {
         {/* Blog post card with management options */}
         <Card className="p-4">
           <div className="flex gap-4">
-            <div className="relative w-40 h-40">
+            <div className="relative w-40 h-40 bg-gray-50 rounded-lg overflow-hidden">
               <Image
                 src="/blog/example.jpg"
                 alt="Blog thumbnail"
-                fill
-                className="object-cover rounded-lg"
+                width={160}
+                height={160}
+                className="w-full h-full object-contain rounded-lg"
               />
             </div>
             <div className="flex-1">
