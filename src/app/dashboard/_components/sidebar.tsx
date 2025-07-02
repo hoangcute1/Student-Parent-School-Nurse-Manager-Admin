@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import { ParentStudents } from "@/lib/type/parent-students";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface SidebarProps {
 export default function Sidebar({ isOpen }: SidebarProps) {
   const { studentsData, fetchStudentsByParent, isLoading } =
     useParentStudentsStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   const [showStudentSection, setShowStudentSection] = useState(true);
   const [showStudentList, setShowStudentList] = useState(false);
@@ -27,8 +29,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    fetchStudentsByParent();
-  }, [fetchStudentsByParent]);
+    // Chỉ gọi fetchStudentsByParent khi user đã authenticated và có role parent
+    if (isAuthenticated && user && user.role === "parent") {
+      fetchStudentsByParent();
+    }
+  }, [fetchStudentsByParent, isAuthenticated, user]);
   useEffect(() => {
     if (studentsData.length > 0) {
       setSelectedStudent(studentsData[0]);
@@ -205,7 +210,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                           {studentsData.map(
                             (studentData) =>
                               selectedStudent &&
-                              studentData.student._id !== selectedStudent.student._id && (
+                              studentData.student._id !==
+                                selectedStudent.student._id && (
                                 <button
                                   key={studentData.student._id}
                                   onClick={() => {

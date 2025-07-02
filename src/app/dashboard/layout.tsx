@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Menu, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-
 import User from "@/components/layout/header/user";
 import Sidebar from "./_components/sidebar";
 
@@ -16,7 +15,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, profile } = useAuthStore();
+  const { user, profile, isAuthenticated } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Save sidebar state to localStorage when it changes
@@ -25,6 +24,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setIsSidebarOpen(newState);
     localStorage.setItem("sidebarOpen", JSON.stringify(newState));
   };
+
+  // Hiển thị loading hoặc gì đó khi chưa authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang kiểm tra xác thực...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">
