@@ -27,7 +27,7 @@ const features = [
     href: "/dashboard/resources",
   },
   {
-    title: "Sự kiện y tế",
+    title: "Sự cố y tế",
     href: "/dashboard/events",
   },
   {

@@ -37,7 +37,7 @@ function LoginGoogle() {
           router.push('/cms');
         } else if (data.user.role === 'admin') {
           handleTokenLoginSuccess(data.tokens.accessToken);
-          router.push('/cms');
+          router.push("/cmscopy");
         } else {
           throw new Error('Không hợp lệ');
         }

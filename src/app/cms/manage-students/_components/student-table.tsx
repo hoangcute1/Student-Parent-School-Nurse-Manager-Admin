@@ -161,7 +161,7 @@ export function StudentTable({
                         onClick={() => onAddHealthEvent?.(student)}
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Thêm sự kiện y tế
+                        Thêm sự cố y tế
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-700"

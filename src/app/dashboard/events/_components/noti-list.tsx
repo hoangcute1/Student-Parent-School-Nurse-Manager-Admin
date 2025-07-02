@@ -7,7 +7,7 @@ export default function NotiList() {
     <>
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-blue-800">
-          Sự kiện y tế sắp tới
+          Sự cố y tế sắp tới
         </h2>
       </div>
 

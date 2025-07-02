@@ -7,10 +7,10 @@ export default function EventsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Thông báo sự kiện y tế
+            Thông báo sự cố y tế
           </h1>
           <p className="text-blue-600">
-            Thông báo các sự kiện y tế trong trường học
+            Thông báo các sự cố y tế trong trường học
           </p>
         </div>
       </div>

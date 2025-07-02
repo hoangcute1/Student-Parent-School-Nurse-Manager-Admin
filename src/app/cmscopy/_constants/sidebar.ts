@@ -14,13 +14,13 @@ import {
 
 const adminNavLinks = [
   {
-    href: "/cms/manage-parents",
+    href: "/cmscopy/manage-parents",
     icon: Users,
     label: "Quản lý phụ huynh",
     description: "Quản lý phụ huynh",
   },
   {
-    href: "/cms/manage-staffs",
+    href: "/cmscopy/manage-staffs",
     icon: Users,
     label: "Quản lý nhân viên",
     description: "Quản lý nhân viên",
@@ -28,47 +28,46 @@ const adminNavLinks = [
 ];
 
 const navLinks = [
-  { href: "/cms", icon: Home, label: "Tổng quát", description: "Tổng quát" },
   {
-    href: "/cms/manage-students",
+    href: "/cmscopy/manage-students",
     icon: Users,
     label: "Quản lý học sinh",
     description: "Quản lý học sinh",
   },
   {
-    href: "/cms/medications",
+    href: "/cmscopy/medications",
     icon: Box,
     label: "Quản lý Kho Thuốc ",
     description: "Thông tin thuốc",
   },
   {
-    href: "/cms/sent-medicines",
+    href: "/cmscopy/sent-medicines",
     icon: Pill,
     label: "Phụ huynh gửi thuốc",
     description: "Sự kiện thuốc",
   },
   {
-    href: "/cms/health-result",
+    href: "/cmscopy/health-result",
     icon: Heart,
     label: "Quản lý Khám sức khỏe",
     description: "Theo dõi sức khỏe định kỳ",
   },
   
   {
-    href: "/cms/events",
+    href: "/cmscopy/events",
     icon: ClipboardCheck,
     label: "Sự cố y tế",
     description: "Xử lý y tế khẩn cấp",
   },
   {
-    href: "/cms/vaccinations",
+    href: "/cmscopy/vaccinations",
     icon: Syringe,
     label: "Quản lý tiêm chủng ",
     description: "Giám sát tiêm chủng",
   },
 
   {
-    href: "/cms/responses",
+    href: "/cmscopy/responses",
     icon: MessageCircleMore,
     label: "Quản lý phản hổi",
     description: "phản hồi từ phụ huynh",
