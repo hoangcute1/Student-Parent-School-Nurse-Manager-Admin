@@ -2,7 +2,32 @@
 
 import { blogPosts } from "@/app/_constants/blog";
 import Link from "next/link";
-import Image from "next/image";
+      {/* Call to action */}
+      <div className="container mx-auto px-4 mt-20">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 md:p-12 text-white text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <h3 className="text-3xl md:text-4xl font-bold mb-6">
+              Có thắc mắc về sức khỏe học sinh?
+            </h3>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              Liên hệ với đội ngũ chuyên gia của chúng tôi để được tư vấn và hỗ trợ tận tình
+            </p>
+            <Link 
+              href="/contact"
+              className="inline-flex items-center gap-3 bg-white text-blue-600 px-8 py-4 rounded-2xl hover:bg-blue-50 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              Liên hệ ngay
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
+          
+          {/* Decorative elements */}
+          <div className="absolute top-8 right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-8 left-8 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+        </div>
+      </div>
+    </div>m "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, User, ArrowRight, BookOpen } from "lucide-react";
 
@@ -19,12 +44,11 @@ export default function BlogPage() {
               <span className="font-medium">Kiến thức sức khỏe</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Blog Chia Sẻ
+              Blog Chia Sẻ 
               <span className="block text-blue-200">Kinh Nghiệm</span>
             </h1>
             <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
-              Khám phá các bài viết hữu ích về sức khỏe, dinh dưỡng và an toàn
-              cho học sinh từ đội ngũ chuyên gia hàng đầu
+              Khám phá các bài viết hữu ích về sức khỏe, dinh dưỡng và an toàn cho học sinh từ đội ngũ chuyên gia hàng đầu
             </p>
           </div>
         </div>
@@ -44,7 +68,7 @@ export default function BlogPage() {
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-
+                  
                   {/* Icon Badge */}
                   <div className="absolute top-6 left-6">
                     <div className="p-3 rounded-2xl bg-white/95 backdrop-blur-sm shadow-lg">
@@ -59,7 +83,7 @@ export default function BlogPage() {
                     </div>
                   </div>
                 </div>
-
+                
                 <CardContent className="p-8">
                   <h2 className="font-bold text-2xl mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
                     {post.title}
@@ -67,7 +91,7 @@ export default function BlogPage() {
                   <p className="text-gray-600 mb-6 line-clamp-3 leading-relaxed text-base">
                     {post.description}
                   </p>
-
+                  
                   {/* Meta Information */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -77,9 +101,7 @@ export default function BlogPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span>
-                          {new Date(post.date).toLocaleDateString("vi-VN")}
-                        </span>
+                        <span>{new Date(post.date).toLocaleDateString("vi-VN")}</span>
                       </div>
                     </div>
                   </div>
@@ -90,7 +112,9 @@ export default function BlogPage() {
                       <span>Đọc thêm</span>
                       <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <div className="text-sm text-gray-400">5 phút đọc</div>
+                    <div className="text-sm text-gray-400">
+                      5 phút đọc
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -100,30 +124,19 @@ export default function BlogPage() {
       </div>
 
       {/* Call to action */}
-      <div className="container mx-auto px-4 mt-20">
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 md:p-12 text-white text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative z-10">
-            <h3 className="text-3xl md:text-4xl font-bold mb-6">
-              Có thắc mắc về sức khỏe học sinh?
-            </h3>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Liên hệ với đội ngũ chuyên gia của chúng tôi để được tư vấn và hỗ
-              trợ tận tình
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-3 bg-white text-blue-600 px-8 py-4 rounded-2xl hover:bg-blue-50 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Liên hệ ngay
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </div>
-
-          {/* Decorative elements */}
-          <div className="absolute top-8 right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-8 left-8 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
-        </div>
+      <div className="mt-16 text-center bg-blue-50 rounded-lg p-8">
+        <h3 className="text-2xl font-bold mb-4">
+          Có thắc mắc về sức khỏe học sinh?
+        </h3>
+        <p className="text-gray-600 mb-6">
+          Liên hệ với đội ngũ chuyên gia của chúng tôi để được tư vấn và hỗ trợ
+        </p>
+        <Link
+          href="/contact"
+          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Liên hệ ngay
+        </Link>
       </div>
     </div>
   );
