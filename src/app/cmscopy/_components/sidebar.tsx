@@ -25,16 +25,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
         <Link
           href="/"
-          className="flex items-center gap-3 border-b border-blue-200 pb-4"
+          className="flex items-center gap-3 border-b border-blue-200 pb-4 group"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
-            <Heart className="h-7 w-7 text-white" />
+          <div className="relative p-2 rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+            <Heart className="h-7 w-7 text-white transition-all duration-300 group-hover:scale-110" />
           </div>
           <div>
-            <div className="font-bold text-blue-800 text-lg">
+            <div className="font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 bg-clip-text text-transparent text-lg">
               Y Tế Học Đường
             </div>
-            <div className="text-xs text-blue-600">Hệ thống quản lý y tế</div>
+            <div className="text-xs text-blue-500 font-medium opacity-80">
+              Hệ thống quản lý y tế
+            </div>
             <Badge
               variant="outline"
               className="bg-blue-100 text-blue-700 text-xs mt-1"
@@ -46,30 +48,29 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         </Link>
 
         <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
-              <div className="text-xs font-medium text-blue-500 uppercase tracking-wider mb-2 mt-2">
-                Quản lý hệ thống
-              </div>
-              {adminNavLinks.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
-                      isActive ? "bg-blue-100" : ""
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <div className="flex-1">
-                      <div className="font-medium">{item.label}</div>
-                      <div className="text-xs text-blue-600 mt-0.5">
-                        {item.description}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-
+          <div className="text-xs font-medium text-blue-500 uppercase tracking-wider mb-2 mt-2">
+            Quản lý hệ thống
+          </div>
+          {adminNavLinks.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
+                  isActive ? "bg-blue-100" : ""
+                }`}
+              >
+                <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                <div className="flex-1">
+                  <div className="font-medium">{item.label}</div>
+                  <div className="text-xs text-blue-600 mt-0.5">
+                    {item.description}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
 
           {/* Standard navigation links */}
           {navLinks.map((item) => {

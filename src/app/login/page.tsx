@@ -24,9 +24,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white flex flex-col items-center justify-center p-4">
-      <Link href="/" className="flex items-center gap-2 mb-8">
-        <Heart className="h-8 w-8 text-red-500" />
-        <span className="text-2xl font-bold text-blue-900">Y Tế Học Đường</span>
+      <Link href="/" className="flex items-center gap-3 mb-8 group">
+        <div className="relative p-2 rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+          <Heart className="h-7 w-7 text-white transition-all duration-300 group-hover:scale-110" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 bg-clip-text text-transparent">
+            Y Tế Học Đường
+          </span>
+          <span className="text-xs text-blue-500 font-medium opacity-80">
+            Chăm sóc sức khỏe học sinh
+          </span>
+        </div>
       </Link>
 
       <div className="w-full max-w-md">

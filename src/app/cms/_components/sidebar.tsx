@@ -25,16 +25,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
         <Link
           href="/"
-          className="flex items-center gap-3 border-b border-blue-200 pb-4"
+          className="flex items-center gap-3 border-b border-blue-200 pb-4 group"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
-            <Heart className="h-7 w-7 text-white" />
+          <div className="relative p-2 rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+            <Heart className="h-7 w-7 text-white transition-all duration-300 group-hover:scale-110" />
           </div>
           <div>
-            <div className="font-bold text-blue-800 text-lg">
+            <div className="font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 bg-clip-text text-transparent text-lg">
               Y Tế Học Đường
             </div>
-            <div className="text-xs text-blue-600">Hệ thống quản lý y tế</div>
+            <div className="text-xs text-blue-500 font-medium opacity-80">
+              Hệ thống quản lý y tế
+            </div>
             <Badge
               variant="outline"
               className="bg-blue-100 text-blue-700 text-xs mt-1"
