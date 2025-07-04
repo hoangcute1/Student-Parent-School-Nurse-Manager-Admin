@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './modules/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import configuration from './configuration';
 import { ProfileModule } from './modules/profile.module';
@@ -18,6 +19,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppThrottlerGuard } from './guards/throttler.guard';
 import { MedicineDeliveryModule } from './modules/medicine-delivery.module';
 import { FeedbackModule } from './modules/feedback.module';
+import { FeedbackEnhancedModule } from './modules/feedback-enhanced.module';
 import { SuggestionModule } from './modules/suggestion.module';
 import { CampaignClassModule } from './modules/campaign-class.module';
 import { CampaignStudentModule } from './modules/campaign-student.module';
@@ -38,6 +40,7 @@ import { TokenModule } from './modules/token.module';
     ConfigModule.forRoot({
       load: [configuration],
     }),
+    ScheduleModule.forRoot(),
     MongooseModule.forRoot(configuration().MONGODB_URI),
     AuthModule,
     ThrottlerModule,
@@ -52,6 +55,7 @@ import { TokenModule } from './modules/token.module';
     AdminModule,
     MedicineDeliveryModule,
     FeedbackModule,
+    FeedbackEnhancedModule,
     SuggestionModule,
     CampaignClassModule,
     CampaignStudentModule,

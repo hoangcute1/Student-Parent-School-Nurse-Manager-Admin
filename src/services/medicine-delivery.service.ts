@@ -148,7 +148,7 @@ export class MedicineDeliveryService {
         const { _id, parent, staff, ...rest } = item.toObject();
 
         // Lấy tên staff
-        let parentName = '';
+        let parentName = ''; 
         if (item.parent && (item.parent as any).user) {
           const staffUserId = (item.parent as any).user.toString();
           parentName =

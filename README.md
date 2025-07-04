@@ -1,98 +1,160 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Hệ Thống Feedback với Thông Báo Tự Động
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Tổng quan
+Hệ thống cho phép phụ huynh gửi feedback/thắc mắc và nhân viên y tế/quản lý có thể phản hồi. Hệ thống tự động tạo thông báo cho các bên liên quan.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tính năng chính
 
-## Description
+### 1. Phụ huynh gửi feedback
+- Phụ huynh có thể gửi feedback với tiêu đề và nội dung
+- Hệ thống tự động thông báo cho tất cả nhân viên y tế và quản lý
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 2. Nhân viên nhận thông báo và phản hồi
+- Nhân viên nhận thông báo realtime khi có feedback mới
+- Có thể xem chi tiết feedback và gửi phản hồi
+- Hệ thống tự động thông báo cho phụ huynh khi có phản hồi
 
-## Project setup
+### 3. Quản lý thông báo
+- Theo dõi trạng thái đã đọc/chưa đọc
+- Đếm số thông báo chưa đọc
+- Đánh dấu tất cả thông báo đã đọc
 
-```bash
-$ npm install
+## API Endpoints
+
+### Feedback APIs
+```
+POST   /api/feedbacks                    - Tạo feedback mới
+GET    /api/feedbacks                    - Lấy tất cả feedback  
+GET    /api/feedbacks/parent/:parentId   - Feedback của phụ huynh
+GET    /api/feedbacks/:id               - Chi tiết feedback
+POST   /api/feedbacks/:id/respond       - Nhân viên phản hồi
+PATCH  /api/feedbacks/:id               - Cập nhật feedback
+DELETE /api/feedbacks/:id               - Xóa feedback
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+### Notification APIs
+```
+GET    /api/feedback-notifications/recipient/:userId                    - Thông báo của user
+GET    /api/feedback-notifications/recipient/:userId/unread             - Thông báo chưa đọc
+GET    /api/feedback-notifications/recipient/:userId/unread-count       - Số thông báo chưa đọc
+GET    /api/feedback-notifications/role/:role                          - Thông báo theo role
+PATCH  /api/feedback-notifications/:id/mark-read                       - Đánh dấu đã đọc
+PATCH  /api/feedback-notifications/recipient/:userId/mark-all-read     - Đánh dấu tất cả đã đọc
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+### Response APIs
+```
+GET    /api/feedback-responses/feedback/:feedbackId   - Phản hồi của feedback
+GET    /api/feedback-responses/:id                   - Chi tiết phản hồi
+PATCH  /api/feedback-responses/:id/mark-read         - Đánh dấu phản hồi đã đọc
 ```
 
-## Deployment
+## Ví dụ sử dụng
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+### 1. Phụ huynh gửi feedback
+```javascript
+const feedback = await fetch('/api/feedbacks', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    parent: 'parentId',
+    title: 'Góp ý về dịch vụ y tế',
+    description: 'Tôi muốn góp ý về việc cấp phát thuốc...'
+  })
+});
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 2. Nhân viên lấy thông báo chưa đọc
+```javascript
+const unreadNotifications = await fetch('/api/feedback-notifications/recipient/staffId/unread');
+const unreadCount = await fetch('/api/feedback-notifications/recipient/staffId/unread-count');
+```
 
-## Resources
+### 3. Nhân viên phản hồi feedback
+```javascript
+const response = await fetch('/api/feedbacks/feedbackId/respond', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    responderId: 'staffId',
+    response: 'Cảm ơn phụ huynh đã góp ý. Chúng tôi sẽ cải thiện dịch vụ.'
+  })
+});
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 4. Đánh dấu thông báo đã đọc
+```javascript
+await fetch('/api/feedback-notifications/notificationId/mark-read', {
+  method: 'PATCH'
+});
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Database Schema
 
-## Support
+### Feedback
+```typescript
+{
+  parent: ObjectId,           // Phụ huynh gửi feedback
+  title: string,             // Tiêu đề
+  description: string,       // Nội dung feedback
+  response: string,          // Phản hồi từ nhân viên
+  status: string,            // pending/in_progress/resolved
+  respondedBy: ObjectId,     // Nhân viên phản hồi
+  respondedAt: Date,         // Thời gian phản hồi
+  created_at: Date,
+  updated_at: Date
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### FeedbackNotification
+```typescript
+{
+  feedback: ObjectId,        // Feedback liên quan
+  recipient: ObjectId,       // Người nhận thông báo
+  recipientRole: string,     // Role của người nhận (staff/admin/parent)
+  type: string,             // new_feedback/feedback_response
+  title: string,            // Tiêu đề thông báo
+  message: string,          // Nội dung thông báo
+  isRead: boolean,          // Đã đọc chưa
+  created_at: Date
+}
+```
 
-## Stay in touch
+### FeedbackResponse
+```typescript
+{
+  feedback: ObjectId,        // Feedback được phản hồi
+  responder: ObjectId,       // Nhân viên phản hồi
+  response: string,          // Nội dung phản hồi
+  isRead: boolean,          // Phụ huynh đã đọc chưa
+  created_at: Date
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Installation & Setup
 
-## License
+1. Import các module cần thiết vào app.module.ts:
+```typescript
+import { FeedbackModule } from './modules/feedback.module';
+import { FeedbackEnhancedModule } from './modules/feedback-enhanced.module';
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+@Module({
+  imports: [
+    // ...existing modules
+    FeedbackModule,
+    FeedbackEnhancedModule,
+  ],
+})
+export class AppModule {}
+```
+
+2. Các schema sẽ tự động được tạo khi chạy ứng dụng
+
+3. Test APIs bằng Swagger UI tại `/api/docs`
+
+## Luồng hoạt động
+
+1. **Phụ huynh gửi feedback** → Tự động tạo thông báo cho staff/admin
+2. **Staff/admin nhận thông báo** → Xem và phản hồi feedback  
+3. **Hệ thống tự động thông báo** → Phụ huynh nhận được thông báo phản hồi
+4. **Theo dõi trạng thái** → Các bên có thể theo dõi đã đọc/chưa đọc
