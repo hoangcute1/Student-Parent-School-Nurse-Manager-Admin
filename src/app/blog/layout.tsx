@@ -1,5 +1,6 @@
-import Header from "@/components/layout/header/header";
 import { Footer } from "@/components/layout/footer/footer";
+import Header from "@/components/layout/header/header";
+
 
 export default function BlogLayout({
   children,
@@ -12,7 +13,7 @@ export default function BlogLayout({
       <main className="flex-1 bg-gray-50">
         {children}
       </main>
-      <Footer />
+      <Footer/>
     </div>
   );
 }
