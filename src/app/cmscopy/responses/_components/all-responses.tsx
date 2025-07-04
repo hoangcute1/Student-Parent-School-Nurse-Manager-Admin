@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Filter, Search, Send, Star, User } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useFeedbackStore } from "@/stores/feedback-store";
 import { Badge } from "@/components/ui/badge";
 import { ResponseDialog } from "./response-dialog";
@@ -52,11 +52,30 @@ export function AllResponses({
   const { feedbacks, isLoading, error, fetchFeedbacks, updateFeedback } =
     useFeedbackStore();
 
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
-    if (feedbacks.length === 0) {
-      fetchFeedbacks();
+    console.log(
+      "AllResponses component mounted, feedbacks length:",
+      feedbacks.length
+    );
+    console.log("isLoading:", isLoading);
+    console.log("hasInitialized:", hasInitialized.current);
+
+    // Add check for client-side rendering and prevent double fetch
+    if (typeof window !== "undefined" && !hasInitialized.current) {
+      console.log("✅ Running in browser environment");
+      console.log("Fetching feedbacks with no-auth API...");
+      hasInitialized.current = true;
+      fetchFeedbacks(true); // Use no-auth API for responses page
     }
-  }, [fetchFeedbacks, feedbacks.length]);
+  }, []); // Empty dependency array to run only once
+
+  useEffect(() => {
+    console.log("Feedbacks updated:", feedbacks.length, "items");
+    console.log("Loading state:", isLoading);
+    console.log("Error state:", error);
+  }, [feedbacks, isLoading, error]);
 
   const handleRespondClick = async (id: string, response: string) => {
     try {
@@ -75,6 +94,27 @@ export function AllResponses({
     }
   };
 
+  const handleProcessClick = async (id: string) => {
+    try {
+      await updateFeedback(id, {
+        response: "Đã tiếp nhận và xử lý yêu cầu của bạn.",
+      });
+      toast({
+        title: "Xử lý thành công",
+        description: "Feedback đã được đánh dấu là đã xử lý",
+      });
+      // Refresh data
+      fetchFeedbacks(true);
+    } catch (error) {
+      console.error("Failed to process feedback:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể xử lý feedback. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -84,6 +124,31 @@ export function AllResponses({
             <CardDescription className="text-blue-600">
               Danh sách phản hồi từ phụ huynh và học sinh
             </CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                console.log("Manual fetch clicked");
+                fetchFeedbacks(true);
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Tải lại
+            </Button>
+            <Button
+              onClick={() => {
+                console.log("Current store state:", {
+                  feedbacks: feedbacks.length,
+                  isLoading,
+                  error,
+                });
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Debug
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -115,7 +180,36 @@ export function AllResponses({
             <Filter className="h-4 w-4" />
           </Button>
         </div>
-        {
+
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-blue-600">
+              Đang tải dữ liệu phản hồi...
+            </span>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-600">Lỗi: {error}</p>
+            <Button
+              onClick={() => fetchFeedbacks(true)}
+              className="mt-2"
+              variant="outline"
+            >
+              Thử lại
+            </Button>
+          </div>
+        )}
+
+        {!isLoading && !error && feedbacks.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-600">Chưa có phản hồi nào</p>
+          </div>
+        )}
+
+        {!isLoading && !error && feedbacks.length > 0 && (
           <div className="space-y-4">
             {feedbacks.map((feedback) => (
               <div
@@ -132,7 +226,12 @@ export function AllResponses({
                         {feedback.title}
                       </h4>
                       <p className="text-sm text-blue-600">
-                        {feedback.parent || "Anonymous"}
+                        {typeof feedback.parent === "object" &&
+                        feedback.parent?.email
+                          ? feedback.parent.email
+                          : typeof feedback.parent === "string"
+                          ? feedback.parent
+                          : "Anonymous"}
                       </p>
                     </div>
                   </div>
@@ -162,8 +261,22 @@ export function AllResponses({
                       <Button
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => {
+                          // Mark as processed without response
+                          handleProcessClick(feedback._id);
+                        }}
                       >
                         Xử lý
+                      </Button>
+                    )}
+                    {feedback.response && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50"
+                        disabled
+                      >
+                        ✓ Đã xử lý
                       </Button>
                     )}
                   </div>
@@ -171,7 +284,7 @@ export function AllResponses({
               </div>
             ))}
           </div>
-        }
+        )}
       </CardContent>
     </Card>
   );

@@ -8,7 +8,10 @@ import {
   createFeedback,
   deleteFeedback,
   getFeedbacks,
+  getFeedbacksNoAuth,
   updateFeedback,
+  updateFeedbackResponse,
+  processFeedback,
 } from "@/lib/api/feedbacks";
 
 export const useFeedbackStore = create<FeedbackStore>((set) => ({
@@ -17,13 +20,15 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
   error: null,
   total: 0,
 
-  fetchFeedbacks: async () => {
+  fetchFeedbacks: async (useNoAuth = false) => {
     try {
       set({ isLoading: true, error: null });
-      const response = await getFeedbacks();
+      const response = useNoAuth
+        ? await getFeedbacksNoAuth()
+        : await getFeedbacks();
       const feedbacksList = Array.isArray(response)
         ? response
-        : response.data || [];
+        : response.feedbacks || response.data || [];
       set({
         feedbacks: feedbacksList.map((feedback) => ({
           ...feedback,
@@ -36,6 +41,7 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
         error:
           error instanceof Error ? error.message : "Failed to fetch feedbacks",
         feedbacks: [],
+        isLoading: false,
       });
     } finally {
       set({ isLoading: false });
@@ -77,6 +83,53 @@ export const useFeedbackStore = create<FeedbackStore>((set) => ({
       set({
         error:
           error instanceof Error ? error.message : "Failed to update feedback",
+      });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateFeedbackResponse: async (
+    id: string,
+    data: { response: string; responderId: string }
+  ) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await updateFeedbackResponse(id, data);
+      if (response) {
+        set((state) => ({
+          feedbacks: state.feedbacks.map((feedback) =>
+            feedback._id === id
+              ? { ...feedback, response: data.response }
+              : feedback
+          ),
+        }));
+      }
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to update feedback response",
+      });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  processFeedback: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updatedFeedback = await processFeedback(id);
+      set((state) => ({
+        feedbacks: state.feedbacks.map((feedback) =>
+          feedback._id === id ? updatedFeedback : feedback
+        ),
+      }));
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error ? error.message : "Failed to process feedback",
       });
     } finally {
       set({ isLoading: false });

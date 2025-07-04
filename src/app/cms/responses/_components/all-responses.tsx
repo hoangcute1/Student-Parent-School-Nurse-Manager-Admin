@@ -49,14 +49,37 @@ export function AllResponses({
   selectedRating,
   setSelectedRating,
 }: AllResponsesProps) {
-  const { feedbacks, isLoading, error, fetchFeedbacks, updateFeedback } =
-    useFeedbackStore();
+  const {
+    feedbacks,
+    isLoading,
+    error,
+    fetchFeedbacks,
+    updateFeedback,
+    processFeedback,
+  } = useFeedbackStore();
 
   useEffect(() => {
     if (feedbacks.length === 0) {
       fetchFeedbacks();
     }
   }, [fetchFeedbacks, feedbacks.length]);
+
+  const handleProcessClick = async (id: string) => {
+    try {
+      await processFeedback(id);
+      toast({
+        title: "Xử lý thành công",
+        description: "Feedback đã được xử lý và phản hồi đã được gửi",
+      });
+    } catch (error) {
+      console.error("Failed to process feedback:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể xử lý feedback. Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleRespondClick = async (id: string, response: string) => {
     try {
@@ -132,7 +155,9 @@ export function AllResponses({
                         {feedback.title}
                       </h4>
                       <p className="text-sm text-blue-600">
-                        {feedback.parent || "Anonymous"}
+                        {typeof feedback.parent === "object"
+                          ? feedback.parent?.email
+                          : feedback.parent || "Anonymous"}
                       </p>
                     </div>
                   </div>
@@ -161,7 +186,8 @@ export function AllResponses({
                     {!feedback.response && (
                       <Button
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleProcessClick(feedback._id)}
                       >
                         Xử lý
                       </Button>

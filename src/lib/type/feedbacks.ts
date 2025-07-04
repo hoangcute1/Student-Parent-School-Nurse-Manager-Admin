@@ -1,15 +1,24 @@
 export interface Feedback {
   _id: string;
-  childId: string;
-  parent: string;
+  parent:
+    | string
+    | {
+        _id: string;
+        email: string;
+        [key: string]: any;
+      };
   title: string;
   description: string;
-  response: string;
+  response: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FeedbackResponse {
-  data: Feedback[];
-  total: number;
+  feedbacks: Feedback[];
+  data?: Feedback[];
+  total?: number;
 }
 
 export interface FeedbackStore {
@@ -17,19 +26,22 @@ export interface FeedbackStore {
   isLoading: boolean;
   error: string | null;
   total: number;
-  fetchFeedbacks: () => Promise<void>;
+  fetchFeedbacks: (useNoAuth?: boolean) => Promise<void>;
   createFeedback: (data: CreateFeedbackParams) => Promise<void>;
   updateFeedback: (id: string, data: UpdateFeedbackParams) => Promise<void>;
+  processFeedback: (id: string) => Promise<void>;
+  updateFeedbackResponse: (
+    id: string,
+    data: { response: string; responderId: string }
+  ) => Promise<void>;
   deleteFeedback: (id: string) => Promise<void>;
   resetError: () => void;
 }
 
 export interface CreateFeedbackParams {
-  childId: string;
   parent: string;
   title: string;
   description: string;
-  response?: string;
 }
 
 export interface UpdateFeedbackParams {
