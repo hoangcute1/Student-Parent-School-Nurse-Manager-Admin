@@ -55,16 +55,16 @@ function LoginGoogle() {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          marginTop: 50,
-        }}
-      >
-        {/* <h2>Đăng nhập phụ huynh bằng Google</h2> */}
-        <GoogleLogin onSuccess={handleSuccess} onError={handleFailure} />
+      <div className="w-full">
+        <GoogleLogin 
+          onSuccess={handleSuccess} 
+          onError={handleFailure}
+          theme="outline"
+          size="large"
+          width="100%"
+          text="signin_with"
+          locale="vi"
+        />
       </div>
     </GoogleOAuthProvider>
   );

@@ -60,12 +60,15 @@ export default function ResetPassword() {
       <h2 className="text-2xl font-bold mb-4">Đặt lại mật khẩu</h2>
       <form onSubmit={handleResetPassword}>
           <label className="block mb-2">Mật khẩu mới</label>
+          <p className="text-sm text-gray-600 mb-2">* Mật khẩu phải có ít nhất 6 ký tự</p>
           <input
             type="password"
             className="w-full p-2 border rounded mb-4"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
+            minLength={6}
+            placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
           />
           <label className="block mb-2">Xác nhận mật khẩu mới</label>
           <input
@@ -74,6 +77,8 @@ export default function ResetPassword() {
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
             required
+            minLength={6}
+            placeholder="Nhập lại mật khẩu mới"
           />
           <button
             type="submit"
