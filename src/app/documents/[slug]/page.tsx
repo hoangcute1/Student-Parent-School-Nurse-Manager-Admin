@@ -75,7 +75,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "Sức khỏe tâm thần và tâm lý xã hội học của học sinh hiện nay",
@@ -97,7 +97,7 @@ const documents = {
   "school-nutrition": {
     title: "Một số thực phẩm tốt cho hệ hô hấp",
     description: "Vitamin và Khoáng Chất Cho Sức Khỏe Học Đường",
-    image: "/resources/vitamin-tot-cho-ho-hap.jpg",
+    image: "/resources/TL1.jpg",
     author: "https://bvnguyentriphuong.com.vn/dinh-duong/mot-so-thuc-pham-tot-cho-he-ho-hap",
     content: `
       
@@ -366,7 +366,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "8 Nguyên tắc phòng tránh điện giật cho trẻ em khi vui chơi nghỉ hè",
@@ -434,7 +434,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "Sức khỏe tâm thần và tâm lý xã hội học của học sinh hiện nay",
@@ -536,7 +536,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "Sức khỏe tâm thần và tâm lý xã hội học của học sinh hiện nay",

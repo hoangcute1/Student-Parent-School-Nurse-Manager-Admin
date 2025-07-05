@@ -13,7 +13,7 @@ const resources = [
   {
     title: "Một số thực phẩm tốt cho hệ hô hấp",
     description: "Chế độ dinh dưỡng cân đối cho học sinh các cấp",
-    image: "/resources/vitamin-tot-cho-ho-hap.jpg",
+    image: "/resources/TL1.jpg",
     author: "https://bvnguyentriphuong.com.vn/dinh-duong/mot-so-thuc-pham-tot-cho-he-ho-hap",
     icon: Heart,
     iconColor: "text-blue-600",
