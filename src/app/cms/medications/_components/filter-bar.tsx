@@ -10,15 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AddMedicationDialog,
-  MedicationFormValues,
-} from "./add-medication-dialog";
+
+import React from "react";
+import { AddMedicationDialog } from "./add-medication-dialog";
+
 
 interface FilterBarProps {
   onSearchChange?: (value: string) => void;
   onTypeFilterChange?: (value: string) => void;
-  onAddMedication: (data: MedicationFormValues) => Promise<void>;
+  onAddMedication: (data: any) => Promise<void>;
 }
 
 export function FilterBar({
@@ -26,6 +26,7 @@ export function FilterBar({
   onTypeFilterChange,
   onAddMedication,
 }: FilterBarProps) {
+  const [open, setOpen] = React.useState(false);
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-6">
       <div className="flex-1 relative">
@@ -61,7 +62,18 @@ export function FilterBar({
       <Button className="bg-blue-600 hover:bg-blue-700">
         <Download className="h-4 w-4" />
       </Button>
-      <AddMedicationDialog onSubmit={onAddMedication} />
+      <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2" onClick={() => setOpen(true)}>
+        <Plus className="h-4 w-4" /> Thêm thuốc
+      </Button>
+      <AddMedicationDialog
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={async (data: any) => {
+          await onAddMedication(data);
+          setOpen(false);
+        }}
+        onCancel={() => setOpen(false)}
+      />
     </div>
   );
 }

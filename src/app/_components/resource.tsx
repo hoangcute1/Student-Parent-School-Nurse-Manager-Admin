@@ -8,58 +8,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { resources } from "../_constants/resource";
-import scrollContent from "./scrollContent";
-import { useRef, useEffect } from "react";
-import { ArrowRight, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Resource() {
-  const resourcesScrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const scrollContainer = resourcesScrollRef.current;
-    let scrollInterval: NodeJS.Timeout;
-
-    const startAutoScroll = () => {
-      scrollInterval = setInterval(() => {
-        if (scrollContainer) {
-          const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-          const newScrollPosition = scrollContainer.scrollLeft + 350;
-
-          if (scrollContainer.scrollLeft >= maxScroll) {
-            scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
-          } else {
-            scrollContainer.scrollTo({
-              left: newScrollPosition,
-              behavior: 'smooth'
-            });
-          }
-        }
-      }, 5000);
-    };
-
-    const stopAutoScroll = () => {
-      if (scrollInterval) {
-        clearInterval(scrollInterval);
-      }
-    };
-
-    startAutoScroll();
-
-    scrollContainer?.addEventListener('mouseenter', stopAutoScroll);
-    scrollContainer?.addEventListener('touchstart', stopAutoScroll);
-    scrollContainer?.addEventListener('mouseleave', startAutoScroll);
-    scrollContainer?.addEventListener('touchend', startAutoScroll);
-
-    return () => {
-      stopAutoScroll();
-      scrollContainer?.removeEventListener('mouseenter', stopAutoScroll);
-      scrollContainer?.removeEventListener('touchstart', stopAutoScroll);
-      scrollContainer?.removeEventListener('mouseleave', startAutoScroll);
-      scrollContainer?.removeEventListener('touchend', startAutoScroll);
-    };
-  }, []);
+  // Duplicate resources for infinite scroll effect
+  const duplicatedResources = [...resources, ...resources];
 
   return (
     <section
@@ -78,30 +33,19 @@ export default function Resource() {
           </div>
         </div>
 
-        <div className="relative mt-8">
-          <button
-            onClick={() => scrollContent("right", resourcesScrollRef)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6 text-gray-600" />
-          </button>
-
-          <div
-            ref={resourcesScrollRef}
-            className="flex overflow-x-auto gap-6 pb-4 scrollbar-hide snap-x snap-mandatory"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {resources.map((resource, index) => (
-              <div key={index} className="min-w-[350px] snap-center">
+        <div className="mt-8 resource-scroll-wrapper">
+          <div className="resource-infinite-scroll">
+            {duplicatedResources.map((resource, index) => (
+              <div key={`${resource.href}-${index}`} className="resource-card-slide">
                 <Link href={resource.href}>
-                  <Card className="h-full hover:shadow-lg transition-shadow border-blue-100 hover:border-blue-200 flex flex-col">
-                    <CardHeader className="flex flex-col space-y-4">
-                      <div className="aspect-video relative rounded-lg overflow-hidden">
+                  <Card className="h-full resource-card-hover border-blue-100 hover:border-blue-200 flex flex-col overflow-hidden">
+                    <CardHeader className="flex flex-col space-y-4 p-4">
+                      <div className="aspect-video relative rounded-lg overflow-hidden resource-image-hover">
                         <Image
                           src={resource.image}
                           alt={resource.title}
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-500"
                         />
                       </div>
                       <div className="space-y-2">
@@ -109,22 +53,22 @@ export default function Resource() {
                           <CalendarIcon className="h-4 w-4" />
                           <span>{resource.author.replace('https://', '').split('/')[0]}</span>
                         </div>
-                        <CardTitle className="text-xl font-bold">
+                        <CardTitle className="text-lg md:text-xl font-bold line-clamp-2 leading-tight">
                           {resource.title}
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="line-clamp-3 text-sm">
                           {resource.description}
                         </CardDescription>
                       </div>
                     </CardHeader>
                     <div className="flex-1"></div>
-                    <CardFooter className="mt-auto pt-6">
+                    <CardFooter className="mt-auto pt-4 p-4">
                       <Button
                         variant="ghost"
-                        className="w-full hover:bg-blue-50 hover:text-blue-600 border-blue-200"
+                        className="w-full hover:bg-blue-50 hover:text-blue-600 border-blue-200 transition-all duration-300 group text-sm"
                       >
                         Xem tài liệu
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -132,13 +76,6 @@ export default function Resource() {
               </div>
             ))}
           </div>
-
-          <button
-            onClick={() => scrollContent("left", resourcesScrollRef)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
-          >
-            <ChevronRight className="h-6 w-6 text-gray-600" />
-          </button>
         </div>
       </div>
     </section>
