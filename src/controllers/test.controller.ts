@@ -378,6 +378,7 @@ export class TestController {
       const feedbackData = {
         title: body.title || 'Test feedback từ parent',
         description: body.description || 'Nội dung feedback test',
+        category: body.category || null, // Thêm category
         parent: parentId,
       };
 

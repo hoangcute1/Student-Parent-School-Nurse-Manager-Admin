@@ -16,6 +16,9 @@ export class Feedback extends Document {
   description: string;
 
   @Prop({ trim: true, default: null })
+  category: string; // Loại thắc mắc: illness, nutrition, development, mental, prevention, other
+
+  @Prop({ trim: true, default: null })
   response: string;
 
   @Prop({ enum: FeedbackStatus, default: FeedbackStatus.PENDING })

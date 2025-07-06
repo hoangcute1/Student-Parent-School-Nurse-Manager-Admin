@@ -24,6 +24,15 @@ export class CreateFeedbackDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @ApiProperty({
+    example: 'illness',
+    description: 'Loại thắc mắc: illness, nutrition, development, mental, prevention, other',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  category?: string;
 }
 
 export class UpdateFeedbackDto {
