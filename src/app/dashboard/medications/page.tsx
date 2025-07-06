@@ -33,7 +33,7 @@ export default function MedicationsPage() {
     medicineDeliveryByParentId,
     isLoading,
     fetchMedicineDeliveryByParentId,
-      deleteMedicineDelivery,
+    deleteMedicineDelivery,
   } = useMedicineDeliveryStore();
   const { medications } = useMedicationStore();
 
@@ -68,121 +68,171 @@ export default function MedicationsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Gửi thuốc cho học sinh
-        </h1>
-        <p className="text-blue-600">Theo dõi thuốc của học sinh</p>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex justify-end mb-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="default"
-                className="bg-blue-700 text-white hover:bg-blue-800 font-semibold"
-              >
-                <Plus className="w-4 h-4 mr-2" /> Thêm đơn thuốc
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Thêm đơn thuốc mới</DialogTitle>
-                <DialogDescription>
-                  Nhập thông tin đơn thuốc cho học sinh
-                </DialogDescription>
-              </DialogHeader>
-              <AddMedicineDeliveryForm />
-            </DialogContent>
-          </Dialog>
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-sky-200 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <div className="space-y-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-sky-800">
+                💊 Quản lý thuốc học sinh
+              </h1>
+              <p className="text-sky-600 text-lg">
+                Theo dõi và quản lý việc gửi thuốc cho học sinh
+              </p>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Thêm đơn thuốc
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md rounded-2xl border-sky-200">
+                <DialogHeader>
+                  <DialogTitle className="text-sky-800">
+                    Thêm đơn thuốc mới
+                  </DialogTitle>
+                  <DialogDescription className="text-sky-600">
+                    Nhập thông tin đơn thuốc cho học sinh
+                  </DialogDescription>
+                </DialogHeader>
+                <AddMedicineDeliveryForm />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
-        <div className="rounded-md border border-blue-200">
-          <Table>
-            <TableHeader className="bg-blue-50">
-              <TableRow>
-                <TableHead className="text-blue-800">Tên học sinh</TableHead>
-                <TableHead className="text-blue-800">Tên thuốc</TableHead>
-                <TableHead>Liều lượng</TableHead>
-                <TableHead>Thời gian dùng</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    Đang tải dữ liệu...
-                  </TableCell>
+        {/* Table Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-sky-200 overflow-hidden">
+          <div className="p-6 border-b border-sky-100">
+            <h2 className="text-xl font-semibold text-sky-800">
+              Danh sách đơn thuốc
+            </h2>
+            <p className="text-sky-600 mt-1">Tổng quan các đơn thuốc đã gửi</p>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-sky-100 to-blue-100">
+                <TableRow className="border-sky-200">
+                  <TableHead className="text-sky-800 font-semibold">
+                    Tên học sinh
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Tên thuốc
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Liều lượng
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Thời gian dùng
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Trạng thái
+                  </TableHead>
+                  <TableHead className="text-right text-sky-800 font-semibold">
+                    Thao tác
+                  </TableHead>
                 </TableRow>
-              ) : medicineDeliveryByParentId.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    Không có đơn thuốc nào
-                  </TableCell>
-                </TableRow>
-              ) : (
-                medicineDeliveryByParentId.map((delivery, idx) => (
-                  <TableRow key={delivery.id || idx}>
-                    <TableCell className="font-medium">
-                      {delivery.student.name || "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      {typeof delivery.medicine === "object" &&
-                      delivery.medicine !== null &&
-                      "name" in delivery.medicine
-                        ? (delivery.medicine as any).name
-                        : medications.find(
-                            (m) => m._id === delivery.medicine._id
-                          )?.name ||
-                          delivery.medicine ||
-                          "N/A"}
-                    </TableCell>
-                    <TableCell>{delivery.per_dose}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Clock className="mr-2 h-4 w-4 text-orange-500" />
-                        {delivery.per_day} lần/ngày
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+                        <p className="text-sky-600">Đang tải dữ liệu...</p>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          delivery.status === "pending"
-                            ? "default"
-                            : "destructive"
-                        }
-                      >
-                        {delivery.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right flex gap-2 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleShowDetail(delivery)}
-                      >
-                        Chi tiết
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(delivery.id)}
-                        disabled={deletingId === delivery.id}
-                      >
-                        {deletingId === delivery.id ? "Đang xoá..." : "Xoá"}
-                      </Button>
+                  </TableRow>
+                ) : medicineDeliveryByParentId.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="text-4xl">📭</div>
+                        <p className="text-sky-600 text-lg">
+                          Không có đơn thuốc nào
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  medicineDeliveryByParentId.map((delivery, idx) => (
+                    <TableRow
+                      key={delivery.id || idx}
+                      className="hover:bg-sky-50 transition-colors border-sky-100"
+                    >
+                      <TableCell className="font-medium text-sky-900">
+                        {delivery.student.name || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-sky-800">
+                        {typeof delivery.medicine === "object" &&
+                        delivery.medicine !== null &&
+                        "name" in delivery.medicine
+                          ? (delivery.medicine as any).name
+                          : medications.find(
+                              (m) => m._id === delivery.medicine._id
+                            )?.name ||
+                            delivery.medicine ||
+                            "N/A"}
+                      </TableCell>
+                      <TableCell className="text-sky-700 font-medium">
+                        {delivery.per_dose}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-sky-700">
+                          <Clock className="mr-2 h-4 w-4 text-sky-500" />
+                          <span className="font-medium">
+                            {delivery.per_day} lần/ngày
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            delivery.status === "pending"
+                              ? "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
+                              : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+                          }
+                        >
+                          {delivery.status === "pending"
+                            ? "Đang chờ"
+                            : delivery.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShowDetail(delivery)}
+                            className="border-sky-300 text-sky-700 hover:bg-sky-50 hover:border-sky-400"
+                          >
+                            Chi tiết
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(delivery.id)}
+                            disabled={deletingId === delivery.id}
+                            className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                          >
+                            {deletingId === delivery.id ? "Đang xoá..." : "Xoá"}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
+
       {/* Modal chi tiết đơn thuốc */}
       {showDetail && selectedDelivery && (
         <ViewDeliveryDialog

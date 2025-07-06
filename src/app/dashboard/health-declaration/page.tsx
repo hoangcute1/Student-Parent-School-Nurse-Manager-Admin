@@ -106,354 +106,369 @@ export default function ParentHealthRecords() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Hồ sơ Sức khỏe
-        </h1>
-        <p className="text-blue-600">Quản lý thông tin sức khỏe của học sinh</p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-blue-800 text-2xl font-bold">
-            Danh sách hồ sơ sức khỏe
-          </CardTitle>
-          <CardDescription className="text-blue-600">
-            Tổng hợp thông tin sức khỏe của tất cả học sinh
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
-              <Input
-                placeholder="Tìm kiếm..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-blue-200 focus:border-blue-400 rounded-lg shadow-sm"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-sky-200 p-6 md:p-8">
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-sky-800">
+              🩺 Hồ sơ Sức khỏe
+            </h1>
+            <p className="text-sky-600 text-lg">
+              Quản lý và theo dõi thông tin sức khỏe của học sinh
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-sky-200 overflow-hidden">
+          <div className="p-6 border-b border-sky-100">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-sky-800">
+                Danh sách hồ sơ sức khỏe
+              </h2>
+              <p className="text-sky-600">
+                Tổng hợp thông tin sức khỏe của tất cả học sinh
+              </p>
             </div>
           </div>
 
-          <div className="rounded-xl border border-blue-100 shadow-sm overflow-x-auto bg-white">
-            <Table className="min-w-[900px]">
-              <TableHeader className="bg-blue-50">
-                <TableRow>
-                  <TableHead className="text-blue-700 font-semibold">
-                    Họ và tên
-                  </TableHead>
-                  <TableHead className="text-blue-700 font-semibold">
-                    Lớp
-                  </TableHead>
-                  <TableHead className="text-blue-700 font-semibold">
-                    Dị ứng
-                  </TableHead>
-                  <TableHead className="text-blue-700 font-semibold">
-                    Bệnh mãn tính
-                  </TableHead>
-                  <TableHead className="text-blue-700 font-semibold">
-                    Thị lực
-                  </TableHead>
-                  <TableHead className="text-blue-700 font-semibold">
-                    Cập nhật lần cuối
-                  </TableHead>
-                  <TableHead className="text-right text-blue-700 font-semibold">
-                    Chi tiết
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <div className="flex justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      </div>
-                      <p className="mt-2 text-base text-blue-500">
-                        Đang tải dữ liệu...
-                      </p>
-                    </TableCell>
+          <div className="p-6">
+            {/* Search Section */}
+            <div className="mb-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-sky-400" />
+                <Input
+                  placeholder="Tìm kiếm học sinh..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-xl shadow-sm h-12 text-base"
+                />
+              </div>
+            </div>
+
+            {/* Table Section */}
+            <div className="rounded-xl border border-sky-200 shadow-sm overflow-hidden bg-white">
+              <Table className="min-w-[900px]">
+                <TableHeader className="bg-gradient-to-r from-sky-100 to-blue-100">
+                  <TableRow className="border-sky-200">
+                    <TableHead className="text-sky-800 font-semibold text-base">
+                      Họ và tên
+                    </TableHead>
+                    <TableHead className="text-sky-800 font-semibold text-base">
+                      Lớp
+                    </TableHead>
+                    <TableHead className="text-sky-800 font-semibold text-base">
+                      Dị ứng
+                    </TableHead>
+                    <TableHead className="text-sky-800 font-semibold text-base">
+                      Bệnh mãn tính
+                    </TableHead>
+                    <TableHead className="text-sky-800 font-semibold text-base">
+                      Thị lực
+                    </TableHead>
+                    <TableHead className="text-sky-800 font-semibold text-base">
+                      Cập nhật lần cuối
+                    </TableHead>
+                    <TableHead className="text-right text-sky-800 font-semibold text-base">
+                      Thao tác
+                    </TableHead>
                   </TableRow>
-                ) : studentsData.length === 0 ? (
-                  <TableRow key="none">
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <p className="text-blue-400 text-lg">
-                        Không có dữ liệu hồ sơ sức khỏe
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  studentsData.map((eachStudent, idx) => (
-                    <TableRow
-                      key={eachStudent.student._id || idx}
-                      className="hover:bg-blue-50 transition"
-                    >
-                      <TableCell className="font-medium text-blue-900 text-sm md:text-base">
-                        {eachStudent.student.name}
-                      </TableCell>
-                      <TableCell className="text-blue-800 font-medium">
-                        {eachStudent.student.class.name}
-                      </TableCell>
-                      <TableCell>
-                        {eachStudent.healthRecord?.allergies ? (
-                          <Badge
-                            variant="destructive"
-                            className="bg-red-100 text-red-700 border border-red-200 px-2 py-1 rounded-full text-sm font-semibold shadow-sm transition-colors duration-150 hover:bg-red-200 hover:text-red-900"
-                          >
-                            {eachStudent.healthRecord.allergies}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-400 italic">Không</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {eachStudent.healthRecord?.chronic_conditions ? (
-                          <Badge
-                            variant="secondary"
-                            className="bg-orange-100 text-orange-700 border border-orange-200 px-2 py-1 rounded-full text-sm font-semibold shadow-sm transition-colors duration-150 hover:bg-orange-200 hover:text-orange-900"
-                          >
-                            {eachStudent.healthRecord.chronic_conditions}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-400 italic">Không</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            (eachStudent.healthRecord?.vision === "Bình thường"
-                              ? "bg-green-100 text-green-800 border border-green-200 hover:bg-green-200 hover:text-green-900"
-                              : "bg-yellow-100 text-yellow-800 border border-yellow-200 hover:bg-yellow-200 hover:text-yellow-900") +
-                            " px-2 py-1 rounded-full text-sm font-semibold shadow-sm transition-colors duration-150"
-                          }
-                        >
-                          {eachStudent.healthRecord?.vision || "Không rõ"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-blue-700 font-medium">
-                        {eachStudent.healthRecord?.updated_at ? (
-                          new Date(
-                            eachStudent.healthRecord.updated_at
-                          ).toLocaleDateString("vi-VN")
-                        ) : (
-                          <span className="text-gray-400">Chưa cập nhật</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-blue-700 hover:bg-blue-100 rounded-full p-2"
-                            >
-                              <MoreHorizontal className="h-5 w-5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="rounded-lg shadow-lg border border-blue-100 bg-white min-w-[160px] p-1"
-                          >
-                            <DropdownMenuItem
-                              className="flex items-center gap-2 px-3 py-2 rounded-md text-blue-700 hover:bg-blue-50 cursor-pointer transition"
-                              onClick={() => handleViewDetail(eachStudent)}
-                            >
-                              <Eye className="h-4 w-4" />
-                              <span>Xem hồ sơ</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="flex items-center gap-2 px-3 py-2 rounded-md text-blue-700 hover:bg-blue-50 cursor-pointer transition"
-                              onClick={() => handleEditRecord(eachStudent)}
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span>Khai báo</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-600"></div>
+                          <p className="text-sky-600 text-lg font-medium">
+                            Đang tải dữ liệu...
+                          </p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : studentsData.length === 0 ? (
+                    <TableRow key="none">
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="text-6xl">👥</div>
+                          <p className="text-sky-500 text-xl font-medium">
+                            Không có dữ liệu hồ sơ sức khỏe
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    studentsData.map((eachStudent, idx) => (
+                      <TableRow
+                        key={eachStudent.student._id || idx}
+                        className="hover:bg-sky-50 transition-colors border-sky-100"
+                      >
+                        <TableCell className="font-medium text-sky-900 text-base">
+                          {eachStudent.student.name}
+                        </TableCell>
+                        <TableCell className="text-sky-800 font-medium">
+                          {eachStudent.student.class.name}
+                        </TableCell>
+                        <TableCell>
+                          {eachStudent.healthRecord?.allergies ? (
+                            <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-200 px-3 py-1 rounded-full font-medium">
+                              {eachStudent.healthRecord.allergies}
+                            </Badge>
+                          ) : (
+                            <span className="text-sky-400 italic">
+                              Không có
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {eachStudent.healthRecord?.chronic_conditions ? (
+                            <Badge className="bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200 px-3 py-1 rounded-full font-medium">
+                              {eachStudent.healthRecord.chronic_conditions}
+                            </Badge>
+                          ) : (
+                            <span className="text-sky-400 italic">
+                              Không có
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              (eachStudent.healthRecord?.vision ===
+                              "Bình thường"
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200"
+                                : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200") +
+                              " px-3 py-1 rounded-full font-medium"
+                            }
+                          >
+                            {eachStudent.healthRecord?.vision || "Không rõ"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sky-700 font-medium">
+                          {eachStudent.healthRecord?.updated_at ? (
+                            new Date(
+                              eachStudent.healthRecord.updated_at
+                            ).toLocaleDateString("vi-VN")
+                          ) : (
+                            <span className="text-sky-400">Chưa cập nhật</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-sky-700 hover:bg-sky-100 rounded-full p-2 h-10 w-10"
+                              >
+                                <MoreHorizontal className="h-5 w-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="rounded-xl shadow-lg border border-sky-200 bg-white min-w-[160px] p-2"
+                            >
+                              <DropdownMenuItem
+                                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sky-700 hover:bg-sky-50 cursor-pointer transition-colors"
+                                onClick={() => handleViewDetail(eachStudent)}
+                              >
+                                <Eye className="h-4 w-4" />
+                                <span>Xem hồ sơ</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sky-700 hover:bg-sky-50 cursor-pointer transition-colors"
+                                onClick={() => handleEditRecord(eachStudent)}
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span>Cập nhật</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Dialog for viewing student details */}
       {selectedRecord && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-xl w-full px-1 py-2 md:max-w-2xl md:px-6 md:py-8 rounded-2xl shadow-2xl border border-blue-100 bg-white">
-            <DialogHeader>
+          <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-sky-200 bg-white">
+            <DialogHeader className="border-b border-sky-100 pb-4">
               <DialogTitle
-                className="text-2xl font-bold text-blue-700 mb-4 truncate"
+                className="text-2xl md:text-3xl font-bold text-sky-800 flex items-center gap-3"
                 title={selectedRecord.student.name}
               >
-                Thông tin học sinh: {selectedRecord.student.name}
+                <div className="h-8 w-8 bg-sky-100 rounded-lg flex items-center justify-center">
+                  🩺
+                </div>
+                Hồ sơ sức khỏe: {selectedRecord.student.name}
               </DialogTitle>
             </DialogHeader>
-            <div className="overflow-x-auto">
-              {/* Thông tin học sinh */}
-              <div className="bg-blue-50 rounded p-2 border border-blue-100 shadow-sm mb-4 mx-auto w-full max-w-2xl">
-                <div className="font-bold text-blue-600 mb-2 text-base md:text-lg text-center">
-                  Thông tin học sinh
+
+            <div className="space-y-6 p-2">
+              {/* Student Information */}
+              <div className="bg-gradient-to-r from-sky-50 to-blue-50 rounded-2xl p-6 border border-sky-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-6 w-6 bg-sky-500 rounded-lg flex items-center justify-center">
+                    👨‍🎓
+                  </div>
+                  <h3 className="text-xl font-bold text-sky-800">
+                    Thông tin học sinh
+                  </h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 w-full">
-                  <div className="flex gap-2 items-center py-1">
-                    <span className="font-semibold text-gray-600 min-w-[80px]">
-                      Mã HS:
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Mã học sinh
                     </span>
-                    <span
-                      className="text-gray-900 break-all truncate"
-                      title={selectedRecord.student.studentId}
-                    >
+                    <p className="text-sky-900 font-medium bg-white px-3 py-2 rounded-lg border border-sky-200">
                       {selectedRecord.student.studentId}
-                    </span>
+                    </p>
                   </div>
-                  <div className="flex gap-2 items-center py-1">
-                    <span className="font-semibold text-gray-600 min-w-[80px]">
-                      Lớp:
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Lớp
                     </span>
-                    <span
-                      className="text-gray-900 break-all truncate"
-                      title={selectedRecord.student.class?.name}
-                    >
+                    <p className="text-sky-900 font-medium bg-white px-3 py-2 rounded-lg border border-sky-200">
                       {selectedRecord.student.class?.name || "Chưa phân lớp"}
-                    </span>
+                    </p>
                   </div>
-                  <div className="flex gap-2 items-center py-1">
-                    <span className="font-semibold text-gray-600 min-w-[80px]">
-                      Ngày sinh:
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Ngày sinh
                     </span>
-                    <span className="text-gray-900">
+                    <p className="text-sky-900 font-medium bg-white px-3 py-2 rounded-lg border border-sky-200">
                       {selectedRecord.student.birth
                         ? new Date(
                             selectedRecord.student.birth
                           ).toLocaleDateString("vi-VN")
-                        : ""}
-                    </span>
+                        : "Chưa cập nhật"}
+                    </p>
                   </div>
-                  <div className="flex gap-2 items-center py-1">
-                    <span className="font-semibold text-gray-600 min-w-[80px]">
-                      Giới tính:
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Giới tính
                     </span>
-                    <span className="text-gray-900">
+                    <p className="text-sky-900 font-medium bg-white px-3 py-2 rounded-lg border border-sky-200">
                       {selectedRecord.student.gender === "male"
                         ? "Nam"
                         : selectedRecord.student.gender === "female"
                         ? "Nữ"
                         : "Không rõ"}
-                    </span>
+                    </p>
                   </div>
                 </div>
               </div>
-              {/* Thông tin sức khỏe */}
-              <div className="bg-white rounded p-4 border border-green-200 shadow-md mx-auto w-full max-w-2xl">
-                <div className="font-bold text-green-800 mb-3 text-xl text-center">
-                  Hồ sơ sức khỏe
+
+              {/* Health Information */}
+              <div className="bg-white rounded-2xl p-6 border border-sky-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-6 w-6 bg-emerald-500 rounded-lg flex items-center justify-center">
+                    ❤️
+                  </div>
+                  <h3 className="text-xl font-bold text-sky-800">
+                    Thông tin sức khỏe
+                  </h3>
                 </div>
-                <table className="w-full text-base md:text-lg">
-                  <tbody>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Dị ứng
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.allergies || "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Bệnh mãn tính
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.chronic_conditions ||
-                          "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Chiều cao
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.height || "N/A"} cm
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Cân nặng
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.weight || "N/A"} kg
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Thị lực
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.vision || "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Thính lực
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.hearing || "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Nhóm máu
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.blood_type || "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Ngày tạo
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord?.created_at
-                          ? new Date(
-                              selectedRecord.healthRecord.created_at
-                            ).toLocaleDateString("vi-VN")
-                          : "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Lịch sử bệnh án
-                      </td>
-                      <td className="text-gray-900 py-1 whitespace-pre-line">
-                        {selectedRecord.healthRecord?.treatment_history ||
-                          "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Ghi chú
-                      </td>
-                      <td className="text-gray-900 py-1 whitespace-pre-line">
-                        {selectedRecord.healthRecord?.notes || "N/A"}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="font-semibold text-gray-700 w-48 align-top py-1">
-                        Cập nhật lần cuối
-                      </td>
-                      <td className="text-gray-900 py-1">
-                        {selectedRecord.healthRecord.updated_at
-                          ? new Date(
-                              selectedRecord.healthRecord.updated_at
-                            ).toLocaleDateString("vi-VN")
-                          : "N/A"}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Dị ứng
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200 min-h-[3rem] flex items-center">
+                      {selectedRecord.healthRecord?.allergies || "Không có"}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Bệnh mãn tính
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200 min-h-[3rem] flex items-center">
+                      {selectedRecord.healthRecord?.chronic_conditions ||
+                        "Không có"}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Chiều cao
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200">
+                      {selectedRecord.healthRecord?.height || "N/A"} cm
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Cân nặng
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200">
+                      {selectedRecord.healthRecord?.weight || "N/A"} kg
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Thị lực
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200">
+                      {selectedRecord.healthRecord?.vision || "N/A"}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Thính lực
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200">
+                      {selectedRecord.healthRecord?.hearing || "N/A"}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Nhóm máu
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200">
+                      {selectedRecord.healthRecord?.blood_type || "N/A"}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Cập nhật lần cuối
+                    </span>
+                    <p className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200">
+                      {selectedRecord.healthRecord.updated_at
+                        ? new Date(
+                            selectedRecord.healthRecord.updated_at
+                          ).toLocaleDateString("vi-VN")
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Treatment History and Notes */}
+                <div className="mt-6 space-y-4">
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Lịch sử bệnh án
+                    </span>
+                    <div className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200 min-h-[4rem] whitespace-pre-line">
+                      {selectedRecord.healthRecord?.treatment_history ||
+                        "Không có"}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium text-sky-600">
+                      Ghi chú
+                    </span>
+                    <div className="text-sky-900 bg-sky-50 px-4 py-3 rounded-xl border border-sky-200 min-h-[4rem] whitespace-pre-line">
+                      {selectedRecord.healthRecord?.notes || "Không có"}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </DialogContent>

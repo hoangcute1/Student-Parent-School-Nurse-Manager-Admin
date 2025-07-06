@@ -22,7 +22,9 @@ const EditHealthRecordDialogSchema = z.object({
   notes: z.string().optional(),
 });
 
-export type EditHealthRecordFormValues = z.infer<typeof EditHealthRecordDialogSchema>;
+export type EditHealthRecordFormValues = z.infer<
+  typeof EditHealthRecordDialogSchema
+>;
 
 export const defaultEditHealthRecordDialog: EditHealthRecordFormValues = {
   allergies: "",
@@ -61,91 +63,144 @@ export function EditHealthRecordDialog(props: EditHealthRecordProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border border-blue-100 bg-white">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-blue-700 mb-2">
-            Khai báo hồ sơ sức khỏe{studentName ? `: ${studentName}` : ""}
-          </DialogTitle>
-        </DialogHeader>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-4"
-        >
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Dị ứng</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("allergies")}
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Bệnh mãn tính</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("chronic_conditions")}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block font-semibold text-gray-600 mb-1">Chiều cao</label>
+      <DialogContent className="max-w-2xl p-0 rounded-2xl shadow-2xl border border-sky-200 bg-white overflow-hidden">
+        <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-6 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+              <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center">
+                📝
+              </div>
+              Cập nhật hồ sơ sức khỏe
+              {studentName && (
+                <span className="text-sky-100 text-lg">- {studentName}</span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+
+        <div className="p-6 bg-gradient-to-br from-sky-50 to-blue-50">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block font-semibold text-sky-800 text-sm">
+                  Dị ứng
+                </label>
+                <input
+                  className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                  placeholder="Ví dụ: Hải sản, phấn hoa..."
+                  {...form.register("allergies")}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block font-semibold text-sky-800 text-sm">
+                  Bệnh mãn tính
+                </label>
+                <input
+                  className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                  placeholder="Ví dụ: Hen suyễn, tiểu đường..."
+                  {...form.register("chronic_conditions")}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block font-semibold text-sky-800 text-sm">
+                  Chiều cao (cm)
+                </label>
+                <input
+                  className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                  placeholder="120"
+                  {...form.register("height")}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block font-semibold text-sky-800 text-sm">
+                  Cân nặng (kg)
+                </label>
+                <input
+                  className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                  placeholder="25"
+                  {...form.register("weight")}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block font-semibold text-sky-800 text-sm">
+                  Thị lực
+                </label>
+                <input
+                  className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                  placeholder="Bình thường / Cận thị..."
+                  {...form.register("vision")}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block font-semibold text-sky-800 text-sm">
+                  Thính lực
+                </label>
+                <input
+                  className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                  placeholder="Bình thường / Kém..."
+                  {...form.register("hearing")}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block font-semibold text-sky-800 text-sm">
+                Nhóm máu
+              </label>
               <input
-                className="w-full border rounded px-3 py-2"
-                {...form.register("height")}
+                className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors"
+                placeholder="A, B, AB, O..."
+                {...form.register("blood_type")}
               />
             </div>
-            <div>
-              <label className="block font-semibold text-gray-600 mb-1">Cân nặng</label>
-              <input
-                className="w-full border rounded px-3 py-2"
-                {...form.register("weight")}
+
+            <div className="space-y-2">
+              <label className="block font-semibold text-sky-800 text-sm">
+                Lịch sử bệnh án
+              </label>
+              <textarea
+                className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors min-h-[80px] resize-vertical"
+                placeholder="Mô tả chi tiết lịch sử bệnh án..."
+                {...form.register("treatment_history")}
               />
             </div>
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Thị lực</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("vision")}
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Thính lực</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("hearing")}
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Nhóm máu</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("blood_type")}
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Lịch sử bệnh án</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("treatment_history")}
-            />
-          </div>
-          <div>
-            <label className="block font-semibold text-gray-600 mb-1">Ghi chú</label>
-            <input
-              className="w-full border rounded px-3 py-2"
-              {...form.register("notes")}
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Hủy
-            </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-              Lưu
-            </Button>
-          </div>
-        </form>
+
+            <div className="space-y-2">
+              <label className="block font-semibold text-sky-800 text-sm">
+                Ghi chú
+              </label>
+              <textarea
+                className="w-full border border-sky-200 rounded-lg px-4 py-3 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 focus:outline-none transition-colors min-h-[80px] resize-vertical"
+                placeholder="Ghi chú thêm về tình trạng sức khỏe..."
+                {...form.register("notes")}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-sky-200">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="border-sky-300 text-sky-700 hover:bg-sky-50 hover:border-sky-400 px-6 py-2 rounded-xl font-medium"
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white px-6 py-2 rounded-xl font-medium shadow-lg transition-all duration-200 hover:shadow-xl"
+              >
+                💾 Lưu thông tin
+              </Button>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
-    );
+  );
 }

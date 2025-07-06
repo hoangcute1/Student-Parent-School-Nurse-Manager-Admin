@@ -128,163 +128,210 @@ export default function AddMedicineDeliveryForm() {
   }, [staffs, fetchStaffs]);
 
   return (
-    <form className="space-y-3" onSubmit={handleSubmit}>
-      <div>
-        <label className="block font-medium mb-1">Tên đơn thuốc</label>
-        <Input name="name" value={form.name} onChange={handleChange} required />
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium mb-1">Ngày bắt đầu</label>
+    <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl">
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <label className="block text-sky-800 font-semibold text-sm">
+            Tên đơn thuốc
+          </label>
           <Input
-            type="date"
-            name="date"
-            value={form.date?.slice(0, 10) || ""}
+            name="name"
+            value={form.name}
             onChange={handleChange}
             required
+            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
           />
         </div>
-        <div>
-          <label className="block font-medium mb-1">Ngày kết thúc</label>
-          <Input
-            type="date"
-            name="end_at"
-            value={form.end_at?.slice(0, 10) || ""}
-            onChange={handleChange}
-          />
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <label className="block text-sky-800 font-semibold text-sm">
+              Ngày bắt đầu
+            </label>
+            <Input
+              type="date"
+              name="date"
+              value={form.date?.slice(0, 10) || ""}
+              onChange={handleChange}
+              required
+              className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sky-800 font-semibold text-sm">
+              Ngày kết thúc
+            </label>
+            <Input
+              type="date"
+              name="end_at"
+              value={form.end_at?.slice(0, 10) || ""}
+              onChange={handleChange}
+              className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+            />
+          </div>
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium mb-1">Tổng số liều</label>
-          <Input
-            type="number"
-            name="total"
-            value={form.total}
-            min={1}
-            onChange={handleChange}
-            required
-          />
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <label className="block text-sky-800 font-semibold text-sm">
+              Tổng số liều
+            </label>
+            <Input
+              type="number"
+              name="total"
+              value={form.total}
+              min={1}
+              onChange={handleChange}
+              required
+              className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sky-800 font-semibold text-sm">
+              Liều/lần
+            </label>
+            <Input
+              name="per_dose"
+              value={form.per_dose}
+              onChange={handleChange}
+              required
+              className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+            />
+          </div>
         </div>
-        {/* Ẩn trường chọn trạng thái, luôn là chờ duyệt */}
-        {/*
-        <div>
-          <label className="block font-medium mb-1">Trạng thái</label>
-          <Select
-            value={form.status}
-            onValueChange={(v) => handleSelect("status", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Chọn trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Chờ duyệt</SelectItem>
-              <SelectItem value="completed">Hoàn thành</SelectItem>
-              <SelectItem value="cancelled">Đã hủy</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        */}
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium mb-1">Liều/lần</label>
-          <Input
-            name="per_dose"
-            value={form.per_dose}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Số lần/ngày</label>
+
+        <div className="space-y-2">
+          <label className="block text-sky-800 font-semibold text-sm">
+            Số lần/ngày
+          </label>
           <Input
             name="per_day"
             value={form.per_day}
             onChange={handleChange}
             required
+            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
           />
         </div>
-      </div>
-      <div>
-        <label className="block font-medium mb-1">Lý do</label>
-        <Input name="reason" value={form.reason} onChange={handleChange} />
-      </div>
-      <div>
-        <label className="block font-medium mb-1">Ghi chú</label>
-        <Textarea name="note" value={form.note} onChange={handleChange} />
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium mb-1">Học sinh</label>
-          <Select
-            value={form.student}
-            onValueChange={(v) => handleSelect("student", v)}
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Chọn học sinh" />
-            </SelectTrigger>
-            <SelectContent>
-              {studentsData.map((s) => (
-                <SelectItem key={s.student._id} value={s.student._id}>
-                  {s.student.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+        <div className="space-y-2">
+          <label className="block text-sky-800 font-semibold text-sm">
+            Lý do
+          </label>
+          <Input
+            name="reason"
+            value={form.reason}
+            onChange={handleChange}
+            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+          />
         </div>
-        <div>
-          <label className="block font-medium mb-1">Thuốc</label>
-          <Select
-            value={form.medicine}
-            onValueChange={(v) => handleSelect("medicine", v)}
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Chọn thuốc" />
-            </SelectTrigger>
-            <SelectContent>
-              {medications.map((m) => (
-                <SelectItem key={m._id} value={m._id}>
-                  {m.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+        <div className="space-y-2">
+          <label className="block text-sky-800 font-semibold text-sm">
+            Ghi chú
+          </label>
+          <Textarea
+            name="note"
+            value={form.note}
+            onChange={handleChange}
+            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
+          />
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium mb-1">Nhân viên</label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <label className="block text-sky-800 font-semibold text-sm">
+              Học sinh
+            </label>
+            <Select
+              value={form.student}
+              onValueChange={(v) => handleSelect("student", v)}
+              required
+            >
+              <SelectTrigger className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg">
+                <SelectValue placeholder="Chọn học sinh" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-sky-200">
+                {studentsData.map((s) => (
+                  <SelectItem
+                    key={s.student._id}
+                    value={s.student._id}
+                    className="hover:bg-sky-50"
+                  >
+                    {s.student.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sky-800 font-semibold text-sm">
+              Thuốc
+            </label>
+            <Select
+              value={form.medicine}
+              onValueChange={(v) => handleSelect("medicine", v)}
+              required
+            >
+              <SelectTrigger className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg">
+                <SelectValue placeholder="Chọn thuốc" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-sky-200">
+                {medications.map((m) => (
+                  <SelectItem
+                    key={m._id}
+                    value={m._id}
+                    className="hover:bg-sky-50"
+                  >
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sky-800 font-semibold text-sm">
+            Nhân viên
+          </label>
           <Select
             value={form.staff}
             onValueChange={(v) => handleSelect("staff", v)}
             required
           >
-            <SelectTrigger>
+            <SelectTrigger className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg">
               <SelectValue placeholder="Chọn nhân viên" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-lg border-sky-200">
               {staffs.map((s) => (
-                <SelectItem key={s._id} value={s._id}>
+                <SelectItem
+                  key={s._id}
+                  value={s._id}
+                  className="hover:bg-sky-50"
+                >
                   {s.profile?.name || "Không rõ"}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-      </div>
-      <div className="pt-2 flex justify-end">
-        <Button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-700 text-white hover:bg-blue-800 font-semibold"
-        >
-          {loading ? "Đang lưu..." : "Lưu đơn thuốc"}
-        </Button>
-      </div>
-      {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
-    </form>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="pt-4 flex justify-end">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
+          >
+            {loading ? "Đang lưu..." : "💾 Lưu đơn thuốc"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
