@@ -1,6 +1,11 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { MedicationFormDialog } from "./medication-form-dialog";
 
 interface AddMedicationDialogProps {
@@ -18,14 +23,13 @@ export function AddMedicationDialog({
 }: AddMedicationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Thêm thuốc mới</DialogTitle>
+      <DialogContent className="max-w-md border-sky-200 bg-white/95 backdrop-blur-sm">
+        <DialogHeader className="border-b border-sky-100 pb-4">
+          <DialogTitle className="text-sky-800 text-lg font-semibold">
+            Thêm thuốc mới
+          </DialogTitle>
         </DialogHeader>
-        <MedicationFormDialog
-          onSubmit={onSubmit}
-          onCancel={onCancel}
-        />
+        <MedicationFormDialog onSubmit={onSubmit} onCancel={onCancel} />
       </DialogContent>
     </Dialog>
   );

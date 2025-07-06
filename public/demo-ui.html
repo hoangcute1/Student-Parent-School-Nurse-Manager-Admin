@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giao diện quản lý đã cải thiện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .gradient-bg {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+    </style>
+  </head>
+  <body class="gradient-bg min-h-screen">
+    <div class="container mx-auto p-8">
+      <h1
+        class="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+      >
+        Giao diện quản lý đã được cải thiện
+      </h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Manage Parents Preview -->
+        <div
+          class="bg-white/80 backdrop-blur-sm rounded-xl p-6 border-0 shadow-lg card-hover"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">
+              Quản lý phụ huynh
+            </h3>
+            <div class="p-3 bg-blue-100 rounded-xl">
+              <svg
+                class="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-4">
+            Giao diện mới với gradient background, stats cards và filter bar
+            hiện đại
+          </p>
+          <div class="flex gap-2">
+            <span
+              class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
+              >Gradient Design</span
+            >
+            <span
+              class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
+              >Stats Cards</span
+            >
+          </div>
+        </div>
+
+        <!-- Manage Staffs Preview -->
+        <div
+          class="bg-white/80 backdrop-blur-sm rounded-xl p-6 border-0 shadow-lg card-hover"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">
+              Quản lý nhân viên
+            </h3>
+            <div class="p-3 bg-emerald-100 rounded-xl">
+              <svg
+                class="w-6 h-6 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-4">
+            Color scheme emerald-teal, thống kê nhân viên hoạt động và quản trị
+            viên
+          </p>
+          <div class="flex gap-2">
+            <span
+              class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full"
+              >Emerald Theme</span
+            >
+            <span
+              class="px-2 py-1 bg-teal-100 text-teal-700 text-xs rounded-full"
+              >Role Stats</span
+            >
+          </div>
+        </div>
+
+        <!-- Manage Students Preview -->
+        <div
+          class="bg-white/80 backdrop-blur-sm rounded-xl p-6 border-0 shadow-lg card-hover"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">
+              Quản lý học sinh
+            </h3>
+            <div class="p-3 bg-indigo-100 rounded-xl">
+              <svg
+                class="w-6 h-6 text-indigo-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 14l9-5-9-5-9 5 9 5z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-4">
+            Indigo-purple gradient, thống kê theo giới tính và filter theo sức
+            khỏe
+          </p>
+          <div class="flex gap-2">
+            <span
+              class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full"
+              >Indigo Theme</span
+            >
+            <span
+              class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
+              >Gender Stats</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div
+        class="bg-white/80 backdrop-blur-sm rounded-xl p-8 border-0 shadow-lg"
+      >
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          Tính năng đã cải thiện:
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-700">🎨 Giao diện</h3>
+            <ul class="space-y-2 text-gray-600">
+              <li>• Gradient background hiện đại</li>
+              <li>• Backdrop blur effect</li>
+              <li>• Color scheme nhất quán cho từng trang</li>
+              <li>• Shadow và hover effects</li>
+              <li>• Icon design cải thiện</li>
+            </ul>
+          </div>
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-700">⚡ Tính năng</h3>
+            <ul class="space-y-2 text-gray-600">
+              <li>• Stats cards với thống kê realtime</li>
+              <li>• Filter bar với design mới</li>
+              <li>• Responsive design tối ưu</li>
+              <li>• Transition animations mượt mà</li>
+              <li>• Button với gradient và hover effects</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="mt-8 text-center">
+        <div class="inline-flex gap-4">
+          <a
+            href="/cmscopy/manage-parents"
+            class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Xem Quản lý phụ huynh
+          </a>
+          <a
+            href="/cmscopy/manage-staffs"
+            class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Xem Quản lý nhân viên
+          </a>
+          <a
+            href="/cmscopy/manage-students"
+            class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Xem Quản lý học sinh
+          </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -24,6 +24,7 @@ import type { UpdateStudentFormValues } from "./_components/update-student-dialo
 import { Student, ViewStudent } from "@/lib/type/students";
 import { AddStudentDialog } from "./_components/add-student-dialog";
 import { UpdateStudentDialog } from "./_components/update-student-dialog";
+import { Users } from "lucide-react";
 
 const mapStudentForDisplay = (students: Student): Student => {
   return {
@@ -176,166 +177,244 @@ export default function StudentsPage() {
     }
   };
 
+  // Calculate stats
+  const totalStudents = displayStudents.length;
+  const maleStudents = displayStudents.filter(
+    (s) => s.student.gender === "male"
+  ).length;
+  const femaleStudents = displayStudents.filter(
+    (s) => s.student.gender === "female"
+  ).length;
+
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Quản lý học sinh
-        </h1>
-        <p className="text-blue-600">Danh sách học sinh và thông tin cá nhân</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-sky-500 to-sky-600 rounded-2xl shadow-lg mb-4">
+            <Users className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
+            Quản lý học sinh
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Quản lý thông tin học sinh, theo dõi học tập và hỗ trợ phát triển
+          </p>
+        </div>
 
-      <Card className="border-blue-100">
-        <CardHeader>
-          <CardTitle className="text-blue-800">Danh sách học sinh</CardTitle>
-          <CardDescription className="text-blue-600">
-            Quản lý thông tin và hồ sơ học sinh trong trường
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FilterBar
-            onSearchChange={setSearchQuery}
-            onClassFilterChange={setClassFilter}
-            onHealthStatusChange={setHealthFilter}
-          />
-          <StudentTable
-            students={displayStudents}
-            isLoading={isLoading}
-            error={error}
-            onView={handleViewStudent}
-            onEdit={handleEditStudent}
-            onDelete={handleDeleteStudent}
-            onAddStudent={() => setIsAddDialogOpen(true)}
-          />
-        </CardContent>
-      </Card>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Tổng học sinh
+                  </p>
+                  <p className="text-3xl font-bold text-sky-700">
+                    {totalStudents}
+                  </p>
+                </div>
+                <div className="p-3 bg-sky-100 rounded-xl">
+                  <Users className="w-6 h-6 text-sky-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Dialog for viewing student details */}
-      {selectedStudentId && (
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border border-blue-100 bg-white">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-blue-700 mb-2">
-                Thông tin học sinh: {selectedStudentId.student.name}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-1 gap-3">
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Mã học sinh:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.student.studentId}
-                </span>
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Nam</p>
+                  <p className="text-3xl font-bold text-sky-700">
+                    {maleStudents}
+                  </p>
+                </div>
+                <div className="p-3 bg-sky-100 rounded-xl">
+                  <Users className="w-6 h-6 text-sky-600" />
+                </div>
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Lớp:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.class?.name || "Chưa phân lớp"}
-                </span>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Nữ</p>
+                  <p className="text-3xl font-bold text-sky-700">
+                    {femaleStudents}
+                  </p>
+                </div>
+                <div className="p-3 bg-sky-100 rounded-xl">
+                  <Users className="w-6 h-6 text-sky-600" />
+                </div>
               </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Khối:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.class?.grade || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Ngày sinh:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.student.birth
-                    ? new Date(selectedStudentId.student.birth)
-                        .toISOString()
-                        .split("T")[0]
-                    : ""}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Giới tính:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.student.gender === "male"
-                    ? "Nam"
-                    : selectedStudentId.student.gender === "female"
-                    ? "Nữ"
-                    : "Không rõ"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  ID phụ huynh:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.parent?._id || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Dị ứng:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.healthRecord.allergies || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Bệnh mãn tính:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.healthRecord.chronic_conditions || "N/A"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="font-semibold text-gray-600 min-w-[120px]">
-                  Lịch sử bệnh án:
-                </span>
-                <span className="text-gray-900">
-                  {selectedStudentId.healthRecord.treatment_history || "N/A"}
-                </span>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <CardTitle className="text-2xl font-bold text-gray-800">
+                  Danh sách học sinh
+                </CardTitle>
+                <CardDescription className="text-gray-600 mt-1">
+                  Quản lý thông tin và hồ sơ học sinh trong trường
+                </CardDescription>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </CardHeader>
 
-      {/* Dialog for adding student */}
-      <AddStudentDialog
-        onSubmit={handleAddStudent}
-        open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
-      />
+          <CardContent className="space-y-6">
+            <FilterBar
+              onSearchChange={setSearchQuery}
+              onClassFilterChange={setClassFilter}
+              onHealthStatusChange={setHealthFilter}
+            />
+            <StudentTable
+              students={displayStudents}
+              isLoading={isLoading}
+              error={error}
+              onView={handleViewStudent}
+              onEdit={handleEditStudent}
+              onDelete={handleDeleteStudent}
+              onAddStudent={() => setIsAddDialogOpen(true)}
+            />
+          </CardContent>
+        </Card>
 
-      {/* Dialog for editing student details */}
-      {selectedStudent && (
-        <UpdateStudentDialog
-          onSubmit={handleUpdateStudent}
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          defaultValues={{
-            name: selectedStudent.student.name,
-            studentId: selectedStudent.student.studentId,
-            birth: selectedStudent.student.birth
-              ? new Date(selectedStudent.student.birth)
-                  .toISOString()
-                  .split("T")[0]
-              : "",
-            gender:
-              selectedStudent.student.gender === "male" ||
-              selectedStudent.student.gender === "female"
-                ? selectedStudent.student.gender
-                : "male",
-            classId: selectedStudent.class?._id || "",
-            parentId: selectedStudent.parent?._id || "",
-          }}
+        {/* Dialog for viewing student details */}
+        {selectedStudentId && (
+          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-indigo-700 mb-2">
+                  Thông tin học sinh: {selectedStudentId.student.name}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Mã học sinh:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.student.studentId}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Lớp:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.class?.name || "Chưa phân lớp"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Khối:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.class?.grade || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Ngày sinh:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.student.birth
+                      ? new Date(selectedStudentId.student.birth)
+                          .toISOString()
+                          .split("T")[0]
+                      : ""}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Giới tính:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.student.gender === "male"
+                      ? "Nam"
+                      : selectedStudentId.student.gender === "female"
+                      ? "Nữ"
+                      : "Không rõ"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    ID phụ huynh:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.parent?._id || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Dị ứng:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.healthRecord.allergies || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Bệnh mãn tính:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.healthRecord.chronic_conditions || "N/A"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-semibold text-gray-600 min-w-[120px]">
+                    Lịch sử bệnh án:
+                  </span>
+                  <span className="text-gray-900">
+                    {selectedStudentId.healthRecord.treatment_history || "N/A"}
+                  </span>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Dialog for adding student */}
+        <AddStudentDialog
+          onSubmit={handleAddStudent}
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
         />
-      )}
+
+        {/* Dialog for editing student details */}
+        {selectedStudent && (
+          <UpdateStudentDialog
+            onSubmit={handleUpdateStudent}
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            defaultValues={{
+              name: selectedStudent.student.name,
+              studentId: selectedStudent.student.studentId,
+              birth: selectedStudent.student.birth
+                ? new Date(selectedStudent.student.birth)
+                    .toISOString()
+                    .split("T")[0]
+                : "",
+              gender:
+                selectedStudent.student.gender === "male" ||
+                selectedStudent.student.gender === "female"
+                  ? selectedStudent.student.gender
+                  : "male",
+              classId: selectedStudent.class?._id || "",
+              parentId: selectedStudent.parent?._id || "",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

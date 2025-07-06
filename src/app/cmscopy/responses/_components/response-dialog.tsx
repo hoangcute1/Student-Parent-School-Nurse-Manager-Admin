@@ -44,14 +44,19 @@ export function ResponseDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          Trả lời
+        <Button
+          size="sm"
+          className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-lg transition-all duration-300"
+        >
+          Phản hồi
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-blue-800 ">{title}</DialogTitle>
-          <DialogDescription className="text-blue-600">
+      <DialogContent className="border-sky-200 bg-white/95 backdrop-blur-sm">
+        <DialogHeader className="border-b border-sky-100 pb-4">
+          <DialogTitle className="text-sky-800 text-lg font-semibold">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-sky-600">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -60,20 +65,21 @@ export function ResponseDialog({
             placeholder="Nhập nội dung phản hồi..."
             value={response}
             onChange={(e) => setResponse(e.target.value)}
-            className="min-h-[120px] border-blue-200 focus:border-blue-500"
+            className="min-h-[120px] border-sky-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 rounded-lg transition-all duration-200"
           />
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
             disabled={isLoading}
+            className="border-sky-200 hover:bg-sky-50 transition-all duration-200"
           >
             Hủy
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-lg transition-all duration-300"
             disabled={isLoading || !response.trim()}
           >
             {isLoading ? "Đang gửi..." : "Gửi phản hồi"}

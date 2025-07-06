@@ -25,25 +25,25 @@ export function FilterBar({
   onHealthStatusChange,
 }: FilterBarProps) {
   return (
-    <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-sky-100 space-y-4">
+    <div className="bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-gray-100 space-y-4">
       <div className="flex flex-col lg:flex-row gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sky-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             type="search"
             placeholder="Tìm kiếm theo tên, email, chức vụ..."
-            className="pl-10 h-11 border-sky-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 rounded-lg transition-all duration-200"
+            className="pl-10 h-11 border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-lg transition-all duration-200"
             onChange={(e) => onSearchChange?.(e.target.value)}
           />
         </div>
 
         <div className="flex gap-3">
           <Select onValueChange={onClassFilterChange}>
-            <SelectTrigger className="w-[180px] h-11 border-sky-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 rounded-lg">
-              <Filter className="w-4 h-4 mr-2 text-sky-400" />
+            <SelectTrigger className="w-[180px] h-11 border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-lg">
+              <Filter className="w-4 h-4 mr-2 text-gray-400" />
               <SelectValue placeholder="Phòng ban" />
             </SelectTrigger>
-            <SelectContent className="border-sky-200 shadow-lg">
+            <SelectContent className="border-gray-200 shadow-lg">
               <SelectItem value="all">Tất cả phòng ban</SelectItem>
               <SelectItem value="admin">Hành chính</SelectItem>
               <SelectItem value="teacher">Giáo viên</SelectItem>
@@ -53,11 +53,11 @@ export function FilterBar({
           </Select>
 
           <Select onValueChange={onHealthStatusChange}>
-            <SelectTrigger className="w-[200px] h-11 border-sky-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 rounded-lg">
-              <Filter className="w-4 h-4 mr-2 text-sky-400" />
+            <SelectTrigger className="w-[200px] h-11 border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-lg">
+              <Filter className="w-4 h-4 mr-2 text-gray-400" />
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
-            <SelectContent className="border-sky-200 shadow-lg">
+            <SelectContent className="border-gray-200 shadow-lg">
               <SelectItem value="all">Tất cả</SelectItem>
               <SelectItem value="active">Đang hoạt động</SelectItem>
               <SelectItem value="inactive">Tạm nghỉ</SelectItem>
@@ -67,7 +67,7 @@ export function FilterBar({
 
           <Button
             variant="outline"
-            className="h-11 px-4 border-sky-200 hover:bg-sky-50 transition-all duration-200 rounded-lg"
+            className="h-11 px-4 border-gray-200 hover:bg-gray-50 transition-all duration-200 rounded-lg"
           >
             <Download className="w-4 h-4 mr-2" />
             Xuất Excel

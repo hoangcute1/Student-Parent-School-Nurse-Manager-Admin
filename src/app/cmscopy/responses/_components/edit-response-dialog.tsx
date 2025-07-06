@@ -75,7 +75,7 @@ export function EditResponseDialog({
         <Button
           size="sm"
           variant="outline"
-          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+          className="text-sky-600 border-sky-600 hover:bg-sky-50"
         >
           <Edit className="h-4 w-4 mr-1" />
           Chỉnh sửa
@@ -83,7 +83,7 @@ export function EditResponseDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-blue-800">
+          <DialogTitle className="text-sky-800">
             Chỉnh sửa phản hồi
           </DialogTitle>
           <DialogDescription>
@@ -115,7 +115,7 @@ export function EditResponseDialog({
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !response.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-sky-600 hover:bg-sky-700"
           >
             {isSubmitting ? "Đang cập nhật..." : "Cập nhật"}
           </Button>
