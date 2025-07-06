@@ -91,18 +91,24 @@ const ViewDeliveryDialog: React.FC<ViewDeliveryDialogProps> = ({
                   <div className="flex">
                     <span
                       className={`px-3 py-2 rounded-lg text-sm font-semibold ${
-                        delivery.status === "pending"
-                          ? "bg-amber-100 text-amber-800 border border-amber-200"
-                          : delivery.status === "completed"
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                          : "bg-red-100 text-red-800 border border-red-200"
+                        delivery.status === "completed"
+                          ? "bg-green-100 text-green-800 border border-green-200"
+                          : delivery.status === "cancelled"
+                          ? "bg-red-100 text-red-800 border border-red-200"
+                          : delivery.status === "progress"
+                          ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                          : "bg-white text-gray-800 border border-gray-200"
                       }`}
                     >
                       {delivery.status === "pending"
-                        ? "🕐 Đang chờ"
+                        ? "🕐 Chờ xử lý"
+                        : delivery.status === "progress"
+                        ? "⚡ Đang làm"
                         : delivery.status === "completed"
-                        ? "✅ Hoàn thành"
-                        : "❌ Đã hủy"}
+                        ? "✅ Đã hoàn thành"
+                        : delivery.status === "cancelled"
+                        ? "❌ Đã huỷ"
+                        : delivery.status}
                     </span>
                   </div>
                 </div>

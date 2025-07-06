@@ -91,7 +91,7 @@ export default function MedicationsPage() {
                   Thêm đơn thuốc
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md rounded-2xl border-sky-200">
+              <DialogContent className="max-w-2xl rounded-2xl border-sky-200 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-sky-800">
                     Thêm đơn thuốc mới
@@ -193,13 +193,23 @@ export default function MedicationsPage() {
                       <TableCell>
                         <Badge
                           className={
-                            delivery.status === "pending"
-                              ? "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"
-                              : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+                            delivery.status === "completed"
+                              ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+                              : delivery.status === "cancelled"
+                              ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+                              : delivery.status === "progress"
+                              ? "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
+                              : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
                           }
                         >
                           {delivery.status === "pending"
-                            ? "Đang chờ"
+                            ? "Chờ xử lý"
+                            : delivery.status === "progress"
+                            ? "Đang làm"
+                            : delivery.status === "completed"
+                            ? "Đã hoàn thành"
+                            : delivery.status === "cancelled"
+                            ? "Đã huỷ"
                             : delivery.status}
                         </Badge>
                       </TableCell>
