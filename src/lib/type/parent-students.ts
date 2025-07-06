@@ -2,27 +2,23 @@ import { Parent } from "@/lib/type/parents";
 import { Student } from "./students";
 import { EditHealthRecord, HealthRecord } from "./health-record";
 
-
-
 interface ParentStudents {
   student: {
     _id: string;
     studentId: string;
     name: string;
-    birth: Date
+    birth: Date;
     gender: string;
     class: {
       _id: string;
       name: string;
     };
-
-    
-  }
+  };
   parent: {
     _id: string;
     user: string;
-  }
-  healthRecord: HealthRecord
+  };
+  healthRecord: HealthRecord;
 }
 interface ParentData extends Parent {}
 interface StudentData extends Student {}
@@ -40,8 +36,12 @@ interface ParentStudentsStore {
   isLoading: boolean;
   error: string | null;
   selectedStudent: ParentStudents | null;
+  setSelectedStudent: (student: ParentStudents | null) => void;
   fetchStudentsByParent: () => Promise<void>;
-  updateStudent: (studentId: string, studentData: Partial<EditHealthRecord>) => Promise<void>;
+  updateStudent: (
+    studentId: string,
+    studentData: Partial<EditHealthRecord>
+  ) => Promise<void>;
 }
 
 interface GetAllParentsResponse {

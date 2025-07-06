@@ -4,7 +4,10 @@ import {
   updateStudentByStudentId,
 } from "@/lib/api/parent-students/parent-students";
 import { EditHealthRecord } from "@/lib/type/health-record";
-import { ParentStudentsStore } from "@/lib/type/parent-students";
+import {
+  ParentStudents,
+  ParentStudentsStore,
+} from "@/lib/type/parent-students";
 import { create } from "zustand";
 
 export const useParentStudentsStore = create<ParentStudentsStore>(
@@ -13,6 +16,10 @@ export const useParentStudentsStore = create<ParentStudentsStore>(
     isLoading: false,
     error: null,
     selectedStudent: null,
+
+    setSelectedStudent: (student) => {
+      set({ selectedStudent: student });
+    },
 
     fetchStudentsByParent: async () => {
       try {
@@ -50,6 +57,9 @@ export const useParentStudentsStore = create<ParentStudentsStore>(
         set({
           studentsData: studentParentList,
           error: null,
+          // Tự động chọn học sinh đầu tiên nếu chưa có học sinh nào được chọn
+          selectedStudent:
+            get().selectedStudent || studentParentList[0] || null,
         });
       } catch (err: any) {
         const errorMessage = err.message || "Failed to fetch students";

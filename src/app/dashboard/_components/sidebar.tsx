@@ -16,16 +16,18 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen }: SidebarProps) {
-  const { studentsData, fetchStudentsByParent, isLoading } =
-    useParentStudentsStore();
+  const {
+    studentsData,
+    fetchStudentsByParent,
+    isLoading,
+    selectedStudent,
+    setSelectedStudent,
+  } = useParentStudentsStore();
   const { isAuthenticated, user } = useAuthStore();
 
   const [showStudentSection, setShowStudentSection] = useState(true);
   const [showStudentList, setShowStudentList] = useState(false);
   const [showParentSection, setShowParentSection] = useState(true);
-  const [selectedStudent, setSelectedStudent] = useState<ParentStudents | null>(
-    studentsData[0] || null
-  );
   const pathname = usePathname();
 
   useEffect(() => {
@@ -34,13 +36,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       fetchStudentsByParent();
     }
   }, [fetchStudentsByParent, isAuthenticated, user]);
-  useEffect(() => {
-    if (studentsData.length > 0) {
-      setSelectedStudent(studentsData[0]);
-    } else {
-      setSelectedStudent(null);
-    }
-  }, [studentsData]);
 
   return (
     <aside
