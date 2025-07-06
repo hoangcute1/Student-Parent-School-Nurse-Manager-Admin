@@ -31,6 +31,10 @@ import {
   getDefaultParentFeedbacks,
 } from "@/lib/api/feedbacks";
 import { Feedback } from "@/lib/type/feedbacks";
+import {
+  getCategoryInfo,
+  getCategoryLabel,
+} from "@/lib/utils/feedback-category";
 
 export default function FeedbackPage() {
   const { toast } = useToast();
@@ -92,6 +96,7 @@ export default function FeedbackPage() {
       const newFeedback = await createFeedback({
         title: formData.title,
         description: formData.description,
+        category: formData.category,
         parent: "684d1c638921098b6c7311ad", // Default parent ID for testing
       });
 
@@ -240,31 +245,61 @@ export default function FeedbackPage() {
                               value="illness"
                               className="rounded-lg py-3"
                             >
-                              🏥 Bệnh lý thường gặp
+                              🩺 Bệnh tật
                             </SelectItem>
                             <SelectItem
-                              value="nutrition" 
+                              value="nutrition"
                               className="rounded-lg py-3"
                             >
-                              🥗 Dinh dưỡng
+                              🍎 Dinh dưỡng
                             </SelectItem>
                             <SelectItem
-                              value="development"
+                              value="medicine"
                               className="rounded-lg py-3"
                             >
-                              📈 Phát triển thể chất
+                              💊 Thuốc
+                            </SelectItem>
+                            <SelectItem
+                              value="environment"
+                              className="rounded-lg py-3"
+                            >
+                              🌍 Môi trường
+                            </SelectItem>
+                            <SelectItem
+                              value="vaccine"
+                              className="rounded-lg py-3"
+                            >
+                              💉 Vaccine
                             </SelectItem>
                             <SelectItem
                               value="mental"
                               className="rounded-lg py-3"
                             >
-                              🧠 Sức khỏe tinh thần
+                              🧠 Tâm lý
+                            </SelectItem>
+                            <SelectItem
+                              value="development"
+                              className="rounded-lg py-3"
+                            >
+                              📈 Phát triển
                             </SelectItem>
                             <SelectItem
                               value="prevention"
                               className="rounded-lg py-3"
                             >
-                              🛡️ Phòng ngừa bệnh tật
+                              🛡️ Phòng chống
+                            </SelectItem>
+                            <SelectItem
+                              value="general"
+                              className="rounded-lg py-3"
+                            >
+                              💬 Chung
+                            </SelectItem>
+                            <SelectItem
+                              value="emergency"
+                              className="rounded-lg py-3"
+                            >
+                              🚨 Khẩn cấp
                             </SelectItem>
                             <SelectItem
                               value="other"
@@ -425,6 +460,13 @@ export default function FeedbackPage() {
                                         hour: "2-digit",
                                         minute: "2-digit",
                                       })}
+                                    </span>
+                                    <span
+                                      className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                                        getCategoryInfo(feedback.category).color
+                                      }`}
+                                    >
+                                      {getCategoryLabel(feedback.category)}
                                     </span>
                                   </div>
                                 </div>

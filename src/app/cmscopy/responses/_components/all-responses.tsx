@@ -22,6 +22,10 @@ import { useFeedbackStore } from "@/stores/feedback-store";
 import { Badge } from "@/components/ui/badge";
 import { ResponseDialog } from "./response-dialog";
 import { toast } from "@/components/ui/use-toast";
+import {
+  getCategoryInfo,
+  getCategoryLabel,
+} from "@/lib/utils/feedback-category";
 
 interface AllResponsesProps {
   searchTerm: string;
@@ -268,6 +272,13 @@ export function AllResponses({
                           ? feedback.parent
                           : "Anonymous"}
                       </p>
+                      <span
+                        className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium border ${
+                          getCategoryInfo(feedback.category).color
+                        }`}
+                      >
+                        {getCategoryLabel(feedback.category)}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

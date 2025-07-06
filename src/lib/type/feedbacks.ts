@@ -9,6 +9,7 @@ export interface Feedback {
       };
   title: string;
   description: string;
+  category?: string; // Loại thắc mắc
   response: string | null;
   status: string;
   createdAt: string;
@@ -42,6 +43,7 @@ export interface CreateFeedbackParams {
   parent: string;
   title: string;
   description: string;
+  category?: string;
 }
 
 export interface UpdateFeedbackParams {
