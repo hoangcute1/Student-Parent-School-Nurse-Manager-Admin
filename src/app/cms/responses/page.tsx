@@ -12,7 +12,6 @@ import {
 import {
   ThumbsUp,
   ThumbsDown,
-  Star,
   MessageSquare,
   Download,
   RefreshCw,
@@ -40,10 +39,6 @@ export default function ResponsesPage() {
   const unprocessedFeedbacks = feedbacks.filter(
     (f) => f.response === null || f.response === ""
   ).length;
-  const averageRating =
-    totalFeedbacks > 0
-      ? ((processedFeedbacks / totalFeedbacks) * 5).toFixed(1)
-      : "0.0";
 
   // Mock function for export - can be implemented later
   const handleExportToExcel = () => {
@@ -72,7 +67,7 @@ export default function ResponsesPage() {
         </div>
 
         {/* Dashboard Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -98,109 +93,6 @@ export default function ResponsesPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Đánh giá tích cực
-                  </p>
-                  <p className="text-3xl font-bold text-emerald-700">142</p>
-                  <p className="text-xs text-emerald-600 mt-1">Tỷ lệ: 91%</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl">
-                  <ThumbsUp className="h-6 w-6 text-emerald-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Phản hồi tiêu cực
-                  </p>
-                  <p className="text-3xl font-bold text-red-700">14</p>
-                  <p className="text-xs text-red-600 mt-1">Cần xem lại</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-red-100 to-red-200 rounded-xl">
-                  <ThumbsDown className="h-6 w-6 text-red-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Điểm trung bình
-                  </p>
-                  <p className="text-3xl font-bold text-amber-700">4.2</p>
-                  <p className="text-xs text-amber-600 mt-1">Trên 5 sao</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl">
-                  <Star className="h-6 w-6 text-amber-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-sky-600" />
-                Thao tác nhanh
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                onClick={handleExportToExcel}
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
-              >
-                <Download className="h-4 w-4" />
-                <span>Xuất báo cáo Excel</span>
-              </Button>
-              <Button
-                onClick={handleRefresh}
-                variant="outline"
-                className="w-full border-sky-200 text-sky-700 py-3 px-4 rounded-lg hover:bg-sky-50 transition-all duration-300 flex items-center justify-center space-x-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                <span>Làm mới dữ liệu</span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-            onClick={() => setSelectedRating("all")}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Tổng phản hồi
-                  </p>
-                  <p className="text-3xl font-bold text-sky-700">156</p>
-                  <p className="text-xs text-sky-600 mt-1">Tất cả đánh giá</p>
-                </div>
-                <div className="p-3 bg-gradient-to-br from-sky-100 to-sky-200 rounded-xl">
-                  <MessageSquare className="h-6 w-6 text-sky-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-            onClick={() => setSelectedRating("positive")}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
                   <p className="text-sm font-medium text-gray-600">Đã xử lý</p>
                   <p className="text-3xl font-bold text-emerald-700">
                     {processedFeedbacks}
@@ -216,10 +108,7 @@ export default function ResponsesPage() {
             </CardContent>
           </Card>
 
-          <Card
-            className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-            onClick={() => setSelectedRating("negative")}
-          >
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -229,7 +118,7 @@ export default function ResponsesPage() {
                   <p className="text-3xl font-bold text-red-700">
                     {unprocessedFeedbacks}
                   </p>
-                  <p className="text-xs text-red-600 mt-1">Phản hồi tiêu cực</p>
+                  <p className="text-xs text-red-600 mt-1">Cần xem lại</p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-red-100 to-red-200 rounded-xl">
                   <ThumbsDown className="h-6 w-6 text-red-600" />
@@ -239,30 +128,62 @@ export default function ResponsesPage() {
           </Card>
         </div>
 
-        {/* Main Data Table */}
-        <div className="lg:col-span-1">
-          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <CardTitle className="text-2xl font-bold text-gray-800">
-                    Danh sách phản hồi
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 mt-1">
-                    Quản lý và theo dõi phản hồi từ phụ huynh và học sinh
-                  </CardDescription>
+        {/* Dashboard Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar with Quick Actions */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-sky-600" />
+                  Thao tác nhanh
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  onClick={handleExportToExcel}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Xuất báo cáo Excel</span>
+                </Button>
+                <Button
+                  onClick={handleRefresh}
+                  variant="outline"
+                  className="w-full border-sky-200 text-sky-700 py-3 px-4 rounded-lg hover:bg-sky-50 transition-all duration-300 flex items-center justify-center space-x-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Làm mới dữ liệu</span>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Data Table */}
+          <div className="lg:col-span-3">
+            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader className="pb-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-800">
+                      Danh sách phản hồi
+                    </CardTitle>
+                    <CardDescription className="text-gray-600 mt-1">
+                      Quản lý và theo dõi phản hồi từ phụ huynh và học sinh
+                    </CardDescription>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <AllResponses
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                selectedRating={selectedRating}
-                setSelectedRating={setSelectedRating}
-              />
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <AllResponses
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  selectedRating={selectedRating}
+                  setSelectedRating={setSelectedRating}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
