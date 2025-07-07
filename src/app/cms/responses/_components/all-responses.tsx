@@ -41,7 +41,7 @@ interface AllResponsesProps {
 //     case "negative":
 //       return <Badge className="bg-red-100 text-red-800">Tiêu cực</Badge>;
 //     case "suggestion":
-//       return <Badge className="bg-blue-100 text-blue-800">Góp ý</Badge>;
+//       return <Badge className="bg-sky-100 text-sky-800">Góp ý</Badge>;
 //     default:
 //       return null;
 //   }
@@ -107,8 +107,8 @@ export function AllResponses({
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <CardTitle className="text-blue-800">Tất cả phản hồi</CardTitle>
-            <CardDescription className="text-blue-600">
+            <CardTitle className="text-sky-800">Tất cả phản hồi</CardTitle>
+            <CardDescription className="text-sky-600">
               Danh sách phản hồi từ phụ huynh và học sinh
             </CardDescription>
           </div>
@@ -147,18 +147,18 @@ export function AllResponses({
             {feedbacks.map((feedback) => (
               <div
                 key={feedback._id}
-                className="p-4 rounded-lg border border-blue-100 hover:bg-blue-50 transition-colors"
+                className="p-4 rounded-lg border border-sky-100 hover:bg-sky-50 transition-colors"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User className="h-5 w-5 text-blue-600" />
+                    <div className="h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center">
+                      <User className="h-5 w-5 text-sky-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-800">
+                      <h4 className="font-semibold text-sky-800">
                         {feedback.title}
                       </h4>
-                      <p className="text-sm text-blue-600">
+                      <p className="text-sm text-sky-600">
                         {typeof feedback.parent === "object"
                           ? feedback.parent?.email
                           : feedback.parent || "Anonymous"}
@@ -177,11 +177,11 @@ export function AllResponses({
                 <p className="text-gray-700 mb-3">{feedback.description}</p>
 
                 {feedback.response && (
-                  <div className="bg-blue-50 rounded-lg p-3 mb-3 border-l-4 border-blue-500">
-                    <h4 className="font-medium text-blue-800 mb-1">
+                  <div className="bg-sky-50 rounded-lg p-3 mb-3 border-l-4 border-sky-500">
+                    <h4 className="font-medium text-sky-800 mb-1">
                       Phản hồi:
                     </h4>
-                    <p className="text-sm text-blue-700">{feedback.response}</p>
+                    <p className="text-sm text-sky-700">{feedback.response}</p>
                   </div>
                 )}
 

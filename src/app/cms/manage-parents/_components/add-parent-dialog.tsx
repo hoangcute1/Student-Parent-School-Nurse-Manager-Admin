@@ -95,7 +95,7 @@ export function AddParentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-blue-700">Thêm phụ huynh mới</DialogTitle>
+          <DialogTitle className="text-sky-700">Thêm phụ huynh mới</DialogTitle>
         </DialogHeader>
         <form
           id="add-parent-form"
@@ -158,7 +158,7 @@ export function AddParentDialog({
           >
             Huỷ
           </Button>
-          <Button type="submit" form="add-parent-form" disabled={loading} className="bg-blue-700 text-white hover:bg-blue-600 ">
+          <Button type="submit" form="add-parent-form" disabled={loading} className="bg-sky-700 text-white hover:bg-sky-600 ">
             {loading ? "Đang thêm..." : "Thêm"}
           </Button>
         </DialogFooter>

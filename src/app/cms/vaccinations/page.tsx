@@ -260,25 +260,25 @@ export default function Vaccination() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+        <h1 className="text-3xl font-bold tracking-tight text-sky-800">
           Quản lý Tiêm chủng
         </h1>
-        <p className="text-blue-600">
+        <p className="text-sky-600">
           Theo dõi lịch tiêm chủng và tỷ lệ hoàn thành
         </p>
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-blue-100">
+        <Card className="border-sky-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">
+            <CardTitle className="text-sm font-medium text-sky-700">
               Tỷ lệ tiêm chủng
             </CardTitle>
-            <Shield className="h-4 w-4 text-blue-600" />
+            <Shield className="h-4 w-4 text-sky-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">85%</div>
-            <p className="text-xs text-blue-600">
+            <div className="text-2xl font-bold text-sky-800">85%</div>
+            <p className="text-xs text-sky-600">
               Hoàn thành đợt tiêm hiện tại
             </p>
           </CardContent>
@@ -327,14 +327,14 @@ export default function Vaccination() {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <CardTitle className="text-blue-800">Lịch tiêm chủng</CardTitle>
-              <CardDescription className="text-blue-600">
+              <CardTitle className="text-sky-800">Lịch tiêm chủng</CardTitle>
+              <CardDescription className="text-sky-600">
                 Kế hoạch tiêm chủng cho học sinh
               </CardDescription>
             </div>{" "}
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-sky-600 hover:bg-sky-700"
               onClick={() => setIsCreateScheduleOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -392,7 +392,7 @@ export default function Vaccination() {
                     </div>
                     <div className="space-y-2">
                       <Label>Thông tin vắc-xin</Label>
-                      <div className="p-3 bg-blue-50 rounded-md text-sm">
+                      <div className="p-3 bg-sky-50 rounded-md text-sm">
                         {selectedVaccineInfo ? (
                           <div>
                             <p>
@@ -529,7 +529,7 @@ export default function Vaccination() {
                       Hủy
                     </Button>
                     <Button
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-sky-600 hover:bg-sky-700"
                       onClick={() => {
                         if (selectedTargets.length === 0) {
                           alert("Vui lòng chọn ít nhất một đối tượng tiêm!");
@@ -552,18 +552,18 @@ export default function Vaccination() {
             {vaccinationSchedule.map((schedule, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-4 rounded-lg border border-blue-100 hover:bg-blue-50 cursor-pointer"
+                className="flex items-center justify-between p-4 rounded-lg border border-sky-100 hover:bg-sky-50 cursor-pointer"
                 onClick={() => handleScheduleClick(schedule)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                    <Shield className="h-6 w-6 text-blue-600" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-100">
+                    <Shield className="h-6 w-6 text-sky-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-blue-800">
+                    <h4 className="font-medium text-sky-800">
                       {schedule.vaccine}
                     </h4>
-                    <p className="text-sm text-blue-600">
+                    <p className="text-sm text-sky-600">
                       {schedule.targetGroup}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -589,7 +589,7 @@ export default function Vaccination() {
                       schedule.status === "Hoàn thành"
                         ? "bg-green-100 text-green-800"
                         : schedule.status === "Đang tiến hành"
-                        ? "bg-blue-100 text-blue-800"
+                        ? "bg-sky-100 text-sky-800"
                         : "bg-gray-100 text-gray-800"
                     }
                   >
@@ -617,7 +617,7 @@ export default function Vaccination() {
             {classVaccinationProgress.map((classInfo) => (
               <Card
                 key={classInfo.class}
-                className="cursor-pointer hover:border-blue-500 transition-colors"
+                className="cursor-pointer hover:border-sky-500 transition-colors"
                 onClick={() => handleClassClick(classInfo)}
               >
                 <CardHeader className="pb-2">
@@ -641,7 +641,7 @@ export default function Vaccination() {
                         classInfo.completed === classInfo.total
                           ? "bg-green-100 text-green-800"
                           : classInfo.completed > 0
-                          ? "bg-blue-100 text-blue-800"
+                          ? "bg-sky-100 text-sky-800"
                           : "bg-gray-100 text-gray-800"
                       }
                     >

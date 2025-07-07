@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,23 +24,25 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
-import {
-  createFeedback,
-  getFeedbacks,
-  getDefaultParentFeedbacks,
-} from "@/lib/api/feedbacks";
+import { createFeedback, getDefaultParentFeedbacks } from "@/lib/api/feedbacks";
 import { Feedback } from "@/lib/type/feedbacks";
 import {
   getCategoryInfo,
   getCategoryLabel,
 } from "@/lib/utils/feedback-category";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 export default function FeedbackPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { fetchStudentsByParent } =
+    useParentStudentsStore();
 
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
   // Form state
   const [formData, setFormData] = useState({
     title: "",

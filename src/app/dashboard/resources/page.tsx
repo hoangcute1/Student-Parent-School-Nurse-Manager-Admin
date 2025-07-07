@@ -1,3 +1,4 @@
+"use client";
 import {
   Calendar,
   Download,
@@ -18,8 +19,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
+import { useEffect } from "react";
 
 export default function MedicalHistoryPage() {
+  const { fetchStudentsByParent } = useParentStudentsStore();
+
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">

@@ -47,17 +47,18 @@ const ViewDeliveryDialog: React.FC<ViewDeliveryDialogProps> = ({
                 </div>
                 <div className="space-y-2">
                   <span className="text-sm font-medium text-sky-600">
-                    Thuốc
+                    Tên đơn thuốc
                   </span>
                   <p className="text-sky-900 font-semibold bg-sky-50 px-3 py-2 rounded-lg">
-                    {typeof delivery.medicine === "object" &&
-                    delivery.medicine !== null &&
-                    "name" in delivery.medicine
-                      ? delivery.medicine.name
-                      : medications.find((m) => m._id === delivery.medicine._id)
-                          ?.name ||
-                        delivery.medicine ||
-                        "N/A"}
+                    {delivery.name || "N/A"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <span className="text-sm font-medium text-sky-600">
+                    Thành phần thuốc
+                  </span>
+                  <p className="text-sky-900 bg-sky-50 px-3 py-2 rounded-lg">
+                    {delivery.note || "Không có thông tin thành phần"}
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -114,19 +115,21 @@ const ViewDeliveryDialog: React.FC<ViewDeliveryDialogProps> = ({
                 </div>
                 <div className="space-y-2">
                   <span className="text-sm font-medium text-sky-600">
-                    Cập nhật lần cuối
+                    Thời gian tạo đơn
                   </span>
                   <p className="text-sky-900 font-semibold bg-sky-50 px-3 py-2 rounded-lg">
-                    {delivery.updated_at
-                      ? new Date(delivery.updated_at).toLocaleDateString(
+                    {delivery.created_at
+                      ? new Date(delivery.created_at).toLocaleDateString(
                           "vi-VN",
                           {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
                           }
                         )
-                      : "Chưa cập nhật"}
+                      : "Chưa có thông tin"}
                   </p>
                 </div>
               </div>
@@ -147,7 +150,7 @@ const ViewDeliveryDialog: React.FC<ViewDeliveryDialogProps> = ({
                 {delivery.note && (
                   <div className="space-y-2">
                     <span className="text-sm font-medium text-sky-600">
-                      Ghi chú
+                      Ghi chú thêm từ phụ huynh
                     </span>
                     <p className="text-sky-900 bg-sky-50 px-3 py-2 rounded-lg">
                       {delivery.note}

@@ -65,14 +65,13 @@ interface MedicineDeliveryByParent {
     };
   };
   medicine: Medication;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }
 interface MedicineDeliveryParentResponse {
   data: MedicineDeliveryByParent[];
   total: number;
 }
-
 
 interface MedicineDeliveryByStaff {
   id: string;
@@ -98,8 +97,8 @@ interface MedicineDeliveryByStaff {
     };
   };
   medicine: Medication;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }
 interface MedicineDeliveryStaffResponse {
   data: MedicineDeliveryByStaff[];
@@ -107,18 +106,15 @@ interface MedicineDeliveryStaffResponse {
 }
 interface CreateMedicineDelivery {
   name: string;
-  date: string;
   total: number;
   status: "pending" | "progress" | "completed" | "cancelled";
   per_dose: string;
   per_day: string;
-  note?: string;
-  reason?: string;
-  end_at?: string;
+  note?: string; // Thành phần thuốc
+  reason: string;
   student: string;
   parent: string;
-  medicine: string;
-  staff: string;
+  staff?: string;
 }
 
 interface MedicineDeliveryResponse {
@@ -141,6 +137,7 @@ interface MedicineDeliveryStore {
     data: Partial<MedicineDelivery>
   ) => Promise<any>;
   deleteMedicineDelivery: (id: string) => Promise<any>;
+  softDeleteMedicineDelivery: (id: string) => Promise<any>;
   viewMedicineDeliveries: (id: string) => Promise<any>;
   setIsLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;

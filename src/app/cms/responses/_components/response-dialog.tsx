@@ -50,8 +50,8 @@ export function ResponseDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-blue-800 ">{title}</DialogTitle>
-          <DialogDescription className="text-blue-600">
+          <DialogTitle className="text-sky-800 ">{title}</DialogTitle>
+          <DialogDescription className="text-sky-600">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -60,7 +60,7 @@ export function ResponseDialog({
             placeholder="Nhập nội dung phản hồi..."
             value={response}
             onChange={(e) => setResponse(e.target.value)}
-            className="min-h-[120px] border-blue-200 focus:border-blue-500"
+            className="min-h-[120px] border-sky-200 focus:border-sky-500"
           />
         </div>
         <DialogFooter>
@@ -73,7 +73,7 @@ export function ResponseDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-sky-600 hover:bg-sky-700"
             disabled={isLoading || !response.trim()}
           >
             {isLoading ? "Đang gửi..." : "Gửi phản hồi"}

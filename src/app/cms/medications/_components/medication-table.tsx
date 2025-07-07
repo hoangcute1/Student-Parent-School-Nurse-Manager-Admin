@@ -36,17 +36,17 @@ export function MedicationTable({
   onDeleteMedication,
 }: MedicationTableProps) {
   return (
-    <div className="rounded-md border border-blue-200">
+    <div className="rounded-md border border-sky-200">
       <Table>
-        <TableHeader className="bg-blue-50">
+        <TableHeader className="bg-sky-50">
           <TableRow>
-            <TableHead className="text-blue-700">Tên thuốc</TableHead>
-            <TableHead className="text-blue-700">Loại</TableHead>
-            <TableHead className="text-blue-700">Liều lượng</TableHead>
-            <TableHead className="text-blue-700">Số lượng</TableHead>
-            <TableHead className="text-blue-700">Hướng dẫn sử dụng</TableHead>
-            <TableHead className="text-blue-700">Ngày cập nhật</TableHead>
-            <TableHead className="text-right text-blue-700">
+            <TableHead className="text-sky-700">Tên thuốc</TableHead>
+            <TableHead className="text-sky-700">Loại</TableHead>
+            <TableHead className="text-sky-700">Liều lượng</TableHead>
+            <TableHead className="text-sky-700">Số lượng</TableHead>
+            <TableHead className="text-sky-700">Hướng dẫn sử dụng</TableHead>
+            <TableHead className="text-sky-700">Ngày cập nhật</TableHead>
+            <TableHead className="text-right text-sky-700">
               Hành động
             </TableHead>
           </TableRow>
@@ -56,7 +56,7 @@ export function MedicationTable({
             <TableRow>
               <TableCell
                 colSpan={6}
-                className="text-center py-10 text-blue-600"
+                className="text-center py-10 text-sky-600"
               >
                 Đang tải dữ liệu...
               </TableCell>
@@ -71,7 +71,7 @@ export function MedicationTable({
             <TableRow>
               <TableCell
                 colSpan={6}
-                className="text-center py-10 text-blue-600"
+                className="text-center py-10 text-sky-600"
               >
                 Không có dữ liệu thuốc
               </TableCell>
@@ -80,40 +80,40 @@ export function MedicationTable({
             medications.map((medication, index) => (
               <TableRow
                 key={medication._id || `${medication.name || "med"}-${index}`}
-                className="hover:bg-blue-50 cursor-pointer"
+                className="hover:bg-sky-50 cursor-pointer"
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-blue-200">
+                    <Avatar className="h-8 w-8 border border-sky-200">
                       <AvatarImage
                         src={`/placeholder.svg?height=32&width=32&text=${
                           medication.name?.charAt(0) || "M"
                         }`}
                       />
-                      <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
+                      <AvatarFallback className="bg-sky-100 text-sky-700 text-xs">
                         {medication.name?.charAt(0) || "M"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium text-blue-800">
+                      <div className="font-medium text-sky-800">
                         {medication.name || "Chưa có tên"}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-blue-700">
+                <TableCell className="text-sky-700">
                   {medication.type || "Chưa phân loại"}
                 </TableCell>
-                <TableCell className="text-blue-700">
+                <TableCell className="text-sky-700">
                   {medication.dosage} {medication.unit}
                 </TableCell>
-                <TableCell className="text-blue-700">
+                <TableCell className="text-sky-700">
                   {medication.quantity !== undefined ? medication.quantity : 0}
                 </TableCell>
-                <TableCell className="text-blue-700">
+                <TableCell className="text-sky-700">
                   {medication.usage_instructions || "Không có hướng dẫn"}
                 </TableCell>
-                <TableCell className="text-blue-700">
+                <TableCell className="text-sky-700">
                   {medication.updatedAt
                     ? new Date(medication.updatedAt).toLocaleDateString("vi-VN")
                     : "Không rõ"}
@@ -124,21 +124,21 @@ export function MedicationTable({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-blue-700 hover:bg-blue-100"
+                        className="text-sky-700 hover:bg-sky-100"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        className="text-blue-700"
+                        className="text-sky-700"
                         onClick={() => onViewMedication?.(medication)}
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         Xem chi tiết
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        className="text-blue-700"
+                        className="text-sky-700"
                         onClick={() => onEditMedication?.(medication)}
                       >
                         <Edit className="mr-2 h-4 w-4" />

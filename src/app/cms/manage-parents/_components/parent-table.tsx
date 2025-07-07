@@ -40,16 +40,16 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
   const { fetchParents } = useParentStore();
 
   return (
-    <div className="rounded-md border border-blue-200">
+    <div className="rounded-md border border-sky-200">
       <Table>
-        <TableHeader className="bg-blue-50">
+        <TableHeader className="bg-sky-50">
           <TableRow>
-            <TableHead className="text-blue-700">Họ và tên</TableHead>
-            <TableHead className="text-blue-700">Số điện thoại</TableHead>
-            <TableHead className="text-blue-700">Địa chỉ</TableHead>
-            <TableHead className="text-blue-700">Email</TableHead>
-            <TableHead className="text-blue-700">Ngày tạo</TableHead>
-            <TableHead className="text-right text-blue-700">
+            <TableHead className="text-sky-700">Họ và tên</TableHead>
+            <TableHead className="text-sky-700">Số điện thoại</TableHead>
+            <TableHead className="text-sky-700">Địa chỉ</TableHead>
+            <TableHead className="text-sky-700">Email</TableHead>
+            <TableHead className="text-sky-700">Ngày tạo</TableHead>
+            <TableHead className="text-right text-sky-700">
               Hành động
             </TableHead>
           </TableRow>
@@ -59,7 +59,7 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
             <TableRow>
               <TableCell
                 colSpan={8}
-                className="text-center py-10 text-blue-600"
+                className="text-center py-10 text-sky-600"
               >
                 Đang tải dữ liệu...
               </TableCell>
@@ -74,7 +74,7 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
             <TableRow>
               <TableCell
                 colSpan={8}
-                className="text-center py-10 text-blue-600"
+                className="text-center py-10 text-sky-600"
               >
                 Không có dữ liệu học sinh
               </TableCell>
@@ -86,27 +86,27 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
               return (
                 <TableRow
                   key={`parent-${parent._id || index}`}
-                  className="hover:bg-blue-50 cursor-pointer"
+                  className="hover:bg-sky-50 cursor-pointer"
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div>
-                        <div className="font-medium text-blue-800">
+                        <div className="font-medium text-sky-800">
                           {profile.name || "Chưa có tên"}
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-blue-700">
+                  <TableCell className="text-sky-700">
                     {profile.phone || "-"}
                   </TableCell>
-                  <TableCell className="text-blue-700">
+                  <TableCell className="text-sky-700">
                     {profile.address || "-"}
                   </TableCell>
-                  <TableCell className="text-blue-700">
+                  <TableCell className="text-sky-700">
                     {user.email || "-"}
                   </TableCell>
-                  <TableCell className="text-blue-700">
+                  <TableCell className="text-sky-700">
                     {user.created_at
                       ? new Date(user.created_at).toLocaleDateString("vi-VN")
                       : "-"}
@@ -117,21 +117,21 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-blue-700 hover:bg-blue-100"
+                          className="text-sky-700 hover:bg-sky-100"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          className="text-blue-700"
+                          className="text-sky-700"
                           onClick={() => setSelectedParent(parent)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           Xem hồ sơ
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="text-blue-700"
+                          className="text-sky-700"
                           onClick={() => setEditParent(parent)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
@@ -189,7 +189,7 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
               <h2 className="text-2xl font-bold mb-2 text-red-700 text-center">
                 Xác nhận xoá tài khoản
               </h2>
-              <div className="mb-4 text-center text-blue-900 text-base">
+              <div className="mb-4 text-center text-sky-900 text-base">
                 Bạn có chắc chắn muốn xoá phụ huynh{" "}
                 <b className="text-red-700">
                   {deleteParentState.profile?.name || ""}
@@ -201,7 +201,7 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                   variant="outline"
                   onClick={() => setDeleteParent(null)}
                   disabled={deleting}
-                  className="min-w-[90px] border-blue-300 hover:border-blue-500"
+                  className="min-w-[90px] border-sky-300 hover:border-sky-500"
                 >
                   Huỷ
                 </Button>

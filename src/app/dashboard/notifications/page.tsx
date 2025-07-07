@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/stores/auth-store";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 interface Notification {
   _id: string;
@@ -49,13 +50,16 @@ interface Notification {
 
 export default function NotificationsPage() {
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuthStore();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
   const [responseText, setResponseText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { fetchStudentsByParent } = useParentStudentsStore();
 
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
   // Fetch notifications
   useEffect(() => {
     const fetchNotifications = async () => {

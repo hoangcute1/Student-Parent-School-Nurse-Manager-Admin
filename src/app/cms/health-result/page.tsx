@@ -203,24 +203,24 @@ export default function HealthResults() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+        <h1 className="text-3xl font-bold tracking-tight text-sky-800">
           Quản lý Khám Sức Khỏe
         </h1>
-        <p className="text-blue-600">Theo dõi lịch khám và kết quả sức khỏe</p>
+        <p className="text-sky-600">Theo dõi lịch khám và kết quả sức khỏe</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-blue-100">
+        <Card className="border-sky-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">
+            <CardTitle className="text-sm font-medium text-sky-700">
               Tỷ lệ khám sức khỏe
             </CardTitle>
-            <Shield className="h-4 w-4 text-blue-600" />
+            <Shield className="h-4 w-4 text-sky-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">85%</div>
-            <p className="text-xs text-blue-600">
+            <div className="text-2xl font-bold text-sky-800">85%</div>
+            <p className="text-xs text-sky-600">
               Hoàn thành đợt khám hiện tại
             </p>
           </CardContent>
@@ -270,16 +270,16 @@ export default function HealthResults() {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <CardTitle className="text-blue-800">
+              <CardTitle className="text-sky-800">
                 Lịch khám sức khỏe
               </CardTitle>
-              <CardDescription className="text-blue-600">
+              <CardDescription className="text-sky-600">
                 Kế hoạch khám sức khỏe cho học sinh
               </CardDescription>
             </div>
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-sky-600 hover:bg-sky-700"
               onClick={() => setIsCreateScheduleOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -292,18 +292,18 @@ export default function HealthResults() {
             {examSchedule.map((schedule, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-4 rounded-lg border border-blue-100 hover:bg-blue-50 cursor-pointer"
+                className="flex items-center justify-between p-4 rounded-lg border border-sky-100 hover:bg-sky-50 cursor-pointer"
                 onClick={() => handleScheduleClick(schedule)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                    <Shield className="h-6 w-6 text-blue-600" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-100">
+                    <Shield className="h-6 w-6 text-sky-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-blue-800">
+                    <h4 className="font-medium text-sky-800">
                       {schedule.examType}
                     </h4>
-                    <p className="text-sm text-blue-600">
+                    <p className="text-sm text-sky-600">
                       {schedule.targetGroup}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -329,7 +329,7 @@ export default function HealthResults() {
                       schedule.status === "Hoàn thành"
                         ? "bg-green-100 text-green-800"
                         : schedule.status === "Đang tiến hành"
-                        ? "bg-blue-100 text-blue-800"
+                        ? "bg-sky-100 text-sky-800"
                         : "bg-gray-100 text-gray-800"
                     }
                   >
@@ -482,7 +482,7 @@ export default function HealthResults() {
                 Hủy
               </Button>
               <Button
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-sky-600 hover:bg-sky-700"
                 onClick={() => {
                   if (selectedTargets.length === 0) {
                     alert("Vui lòng chọn ít nhất một đối tượng khám!");
@@ -517,7 +517,7 @@ export default function HealthResults() {
             {classExamProgress.map((classInfo) => (
               <Card
                 key={classInfo.class}
-                className="cursor-pointer hover:border-blue-500 transition-colors"
+                className="cursor-pointer hover:border-sky-500 transition-colors"
                 onClick={() => handleClassClick(classInfo)}
               >
                 <CardHeader className="pb-2">
@@ -543,7 +543,7 @@ export default function HealthResults() {
                         classInfo.completed === classInfo.total
                           ? "bg-green-100 text-green-800"
                           : classInfo.completed > 0
-                          ? "bg-blue-100 text-blue-800"
+                          ? "bg-sky-100 text-sky-800"
                           : "bg-gray-100 text-gray-800"
                       }
                     >

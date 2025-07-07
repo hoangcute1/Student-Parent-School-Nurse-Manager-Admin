@@ -1,17 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Pill,
-  Plus,
   Search,
-  User,
+  Filter,
+  Calendar,
+  Users,
+  Package,
   CheckCircle,
   Clock,
-  AlertTriangle,
+  AlertCircle,
+  X,
+  Eye,
+  Edit,
+  Trash2,
+  Plus,
+  Download,
+  RefreshCw,
+  ChevronDown,
+  Activity,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -19,17 +29,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -37,285 +37,453 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
-import { request } from "http";
 import { ViewDeliveryDialog } from "./view-delivery-dialog";
-import { getMedicineDeliveriesByStaffId } from "@/lib/api/medicine-delivery";
+import { MedicineDeliveryTable } from "./components/medicine-delivery-table";
+import { MedicineDeliveryStats } from "./components/stats-cards";
+import type { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
 
-// Define types for our medicine data
-
-export default function ParentMedicine() {
+function SentMedicinesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [selectedMedicine, setSelectedMedicine] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState("all");
+  const [selectedDelivery, setSelectedDelivery] =
+    useState<MedicineDeliveryByStaff | null>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
   const {
     medicineDeliveryByStaffId,
     fetchMedicineDeliveryByStaffId,
-    isLoading,
-    setIsLoading,
-    setError,
     updateMedicineDelivery,
-    viewMedicineDeliveries,
+    softDeleteMedicineDelivery,
+    isLoading,
+    error,
+    setError,
+    setIsLoading,
   } = useMedicineDeliveryStore();
 
   useEffect(() => {
-    if (medicineDeliveryByStaffId.length === 0) {
-      fetchMedicineDeliveryByStaffId();
+    fetchMedicineDeliveryByStaffId();
+  }, [fetchMedicineDeliveryByStaffId]);
+
+  // Filter data based on search and status
+  const filteredData = medicineDeliveryByStaffId.filter((delivery) => {
+    const matchesSearch =
+      delivery.student?.name
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      delivery.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      delivery.parentName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      selectedStatus === "all" || delivery.status === selectedStatus;
+
+    // Date filtering logic
+    let matchesDate = true;
+    if (selectedDate !== "all" && delivery.created_at) {
+      const deliveryDate = new Date(delivery.created_at);
+      const now = new Date();
+
+      switch (selectedDate) {
+        case "today":
+          matchesDate = deliveryDate.toDateString() === now.toDateString();
+          break;
+        case "week":
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          matchesDate = deliveryDate >= weekAgo;
+          break;
+        case "month":
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          matchesDate = deliveryDate >= monthAgo;
+          break;
+      }
     }
-  }, [fetchMedicineDeliveryByStaffId, medicineDeliveryByStaffId.length]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <span className="text-teal-600 text-lg font-semibold">
-          Đang tải dữ liệu...
-        </span>
-      </div>
-    );
-  }
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
-  // Handler cập nhật trạng thái
+  // Pagination
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // Stats calculation
+  const stats = {
+    total: medicineDeliveryByStaffId.length,
+    pending: medicineDeliveryByStaffId.filter((d) => d.status === "pending")
+      .length,
+    progress: medicineDeliveryByStaffId.filter((d) => d.status === "progress")
+      .length,
+    completed: medicineDeliveryByStaffId.filter((d) => d.status === "completed")
+      .length,
+    cancelled: medicineDeliveryByStaffId.filter((d) => d.status === "cancelled")
+      .length,
+  };
+
+  // Handle status update
   const handleUpdateStatus = async (
     id: string,
-    status: "progress" | "completed" | "cancelled"
+    newStatus: "pending" | "progress" | "completed" | "cancelled"
   ) => {
     try {
       setIsLoading(true);
-      await updateMedicineDelivery(id, { status });
-      fetchMedicineDeliveryByStaffId();
+      await updateMedicineDelivery(id, { status: newStatus });
+      await fetchMedicineDeliveryByStaffId();
     } catch (err) {
-      setError("Không thể cập nhật trạng thái đơn thuốc");
+      setError("Không thể cập nhật trạng thái");
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-teal-800">
-          Thuốc gửi từ Phụ huynh
-        </h1>
-        <p className="text-teal-600">
-          Quản lý thuốc cá nhân học sinh do phụ huynh gửi
-        </p>
+  // Handle delete delivery (soft delete - chỉ ẩn khỏi view admin/staff)
+  const handleDeleteDelivery = async (delivery: MedicineDeliveryByStaff) => {
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn ẩn đơn thuốc "${delivery.name}" cho học sinh "${delivery.student?.name}"?\n\nĐơn thuốc sẽ bị ẩn khỏi view quản trị nhưng phụ huynh vẫn có thể thấy được.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsLoading(true);
+      if (softDeleteMedicineDelivery) {
+        await softDeleteMedicineDelivery(delivery.id);
+        await fetchMedicineDeliveryByStaffId();
+      } else {
+        setError("Chức năng ẩn đơn thuốc không khả dụng");
+      }
+    } catch (err) {
+      setError("Không thể ẩn đơn thuốc");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle view delivery
+  const handleViewDelivery = (delivery: MedicineDeliveryByStaff) => {
+    setSelectedDelivery(delivery);
+    setShowViewDialog(true);
+  };
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    try {
+      await fetchMedicineDeliveryByStaffId();
+    } catch (err) {
+      setError("Không thể làm mới dữ liệu");
+    }
+  };
+
+  // Handle export to Excel
+  const handleExportExcel = () => {
+    try {
+      // Create CSV content
+      const headers = [
+        "Học sinh",
+        "Lớp",
+        "Thuốc",
+        "Số liều",
+        "Mỗi lần",
+        "Phụ huynh",
+        "Trạng thái",
+        "Ngày tạo",
+      ];
+      const csvContent = [
+        headers.join(","),
+        ...filteredData.map((delivery) =>
+          [
+            `"${delivery.student?.name || "N/A"}"`,
+            `"${delivery.student?.class?.name || "N/A"}"`,
+            `"${delivery.name || "N/A"}"`,
+            `"${delivery.total || "N/A"}"`,
+            `"${delivery.per_dose || "N/A"}"`,
+            `"${delivery.parentName || "N/A"}"`,
+            `"${getStatusText(delivery.status)}"`,
+            `"${
+              delivery.created_at
+                ? new Date(delivery.created_at).toLocaleDateString("vi-VN")
+                : "N/A"
+            }"`,
+          ].join(",")
+        ),
+      ].join("\n");
+
+      // Create and download file
+      const blob = new Blob(["\ufeff" + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `danh-sach-don-thuoc-${new Date().toISOString().split("T")[0]}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      setError("Không thể xuất báo cáo");
+    }
+  };
+
+  // Get status text helper function
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Chờ xử lý";
+      case "progress":
+        return "Đang thực hiện";
+      case "completed":
+        return "Đã hoàn thành";
+      case "cancelled":
+        return "Đã hủy";
+      default:
+        return status;
+    }
+  };
+
+  if (isLoading && medicineDeliveryByStaffId.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center space-y-4">
+              <RefreshCw className="w-12 h-12 text-sky-500 animate-spin mx-auto" />
+              <p className="text-sky-600 text-lg font-medium">
+                Đang tải dữ liệu...
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      {/* Stats Cards */}
-      <Tabs defaultValue="requests" className="w-full">
-        <TabsContent value="requests" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <CardTitle className="text-teal-800">
-                    Yêu cầu thuốc từ phụ huynh
-                  </CardTitle>
-                  <CardDescription className="text-teal-600">
-                    Danh sách yêu cầu gửi thuốc cần được xử lý
-                  </CardDescription>
-                </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold text-gray-900">
+                Quản lý Thuốc gửi
+              </h1>
+              <p className="text-gray-600">
+                Theo dõi và quản lý các đơn thuốc từ phụ huynh
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="border-sky-200 text-sky-700 hover:bg-sky-50"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Làm mới
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportExcel}
+                className="border-sky-200 text-sky-700 hover:bg-sky-50"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Xuất báo cáo
+              </Button>
+            </div>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <div className="flex-1">
+                <p className="text-red-800 font-medium">Có lỗi xảy ra</p>
+                <p className="text-red-600 text-sm">{error}</p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Button variant="ghost" size="sm" onClick={() => setError(null)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Stats */}
+        <MedicineDeliveryStats stats={stats} />
+
+        {/* Filters */}
+        <Card className="border-sky-200 bg-white/70 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Filter className="w-5 h-5 text-sky-600" />
+              Bộ lọc & Tìm kiếm
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Tìm kiếm
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    placeholder="Tìm kiếm theo tên học sinh hoặc thuốc..."
+                    placeholder="Tìm theo tên học sinh, thuốc, phụ huynh..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-sky-200 focus:border-sky-500 focus:ring-sky-200"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Trạng thái
+                </label>
                 <Select
                   value={selectedStatus}
                   onValueChange={setSelectedStatus}
                 >
-                  <SelectTrigger className="w-full md:w-48">
-                    <SelectValue placeholder="Trạng thái" />
+                  <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-200">
+                    <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
                     <SelectItem value="pending">Chờ xử lý</SelectItem>
-                    <SelectItem value="progress">Đang làm</SelectItem>
+                    <SelectItem value="progress">Đang thực hiện</SelectItem>
                     <SelectItem value="completed">Đã hoàn thành</SelectItem>
-                    <SelectItem value="cancelled">Đã huỷ</SelectItem>
+                    <SelectItem value="cancelled">Đã hủy</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-4">
-                {medicineDeliveryByStaffId.map((request, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-lg border border-teal-100 hover:bg-teal-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center">
-                          <User className="h-5 w-5 text-teal-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-teal-800">
-                            {request.student?.name || "N/A"}
-                          </h4>
-                          <p className="text-sm text-teal-600">
-                            Lớp: {request.student?.class?.name || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant={
-                          request.status === "pending" ? "secondary" : "default"
-                        }
-                        className={
-                          request.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : request.status === "completed"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }
-                      >
-                        {request.status === "pending"
-                          ? "Chờ xử lí"
-                          : request.status === "progress"
-                          ? "Đang làm"
-                          : request.status === "completed"
-                          ? "Đã hoàn thành"
-                          : request.status === "cancelled"
-                          ? "Đã huỷ"
-                          : request.status}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <p className="text-sm">
-                          <strong>Thuốc:</strong> {request.name}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Số lượng:</strong> {request.total}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Người gửi: </strong>{" "}
-                          {request.parentName || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm">
-                          <strong>Số lần uống: </strong> {request.per_day}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Thời gian uống:</strong>{" "}
-                          {request.created_at
-                            ? new Date(request.created_at).toLocaleDateString(
-                                "vi-VN"
-                              )
-                            : "không"}
-                          {" - "}
-                          {request.end_at
-                            ? new Date(request.end_at).toLocaleDateString(
-                                "vi-VN"
-                              )
-                            : "không"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {request.note && (
-                      <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-200">
-                        <p className="text-sm text-blue-800">
-                          <strong>Hướng dẫn:</strong> {request.note}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>
-                        Gửi lúc:{" "}
-                        {request.created_at
-                          ? new Date(request.created_at).toLocaleString("vi-VN")
-                          : "không xác định"}
-                      </span>
-                      <div className="flex gap-2">
-                        {/* Nếu trạng thái là pending: chỉ hiện Duyệt và Huỷ */}
-                        {request.status === "pending" && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-red-200 text-red-700"
-                              onClick={() =>
-                                handleUpdateStatus(request.id, "cancelled")
-                              }
-                            >
-                              Huỷ
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                              onClick={() =>
-                                handleUpdateStatus(request.id, "progress")
-                              }
-                            >
-                              Duyệt
-                            </Button>
-                          </>
-                        )}
-                        {/* Nếu trạng thái là progress: chỉ hiện Hoàn thành và Huỷ */}
-                        {request.status === "progress" && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-red-200 text-red-700"
-                              onClick={() =>
-                                handleUpdateStatus(request.id, "cancelled")
-                              }
-                            >
-                              Huỷ
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-teal-600 hover:bg-teal-700"
-                              onClick={() =>
-                                handleUpdateStatus(request.id, "completed")
-                              }
-                            >
-                              Hoàn thành
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            viewMedicineDeliveries(request.id);
-                            setSelectedMedicine(request.id);
-                            setIsDetailDialogOpen(true);
-                          }}
-                        >
-                          Chi tiết
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Thời gian
+                </label>
+                <Select value={selectedDate} onValueChange={setSelectedDate}>
+                  <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-200">
+                    <SelectValue placeholder="Chọn thời gian" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả thời gian</SelectItem>
+                    <SelectItem value="today">Hôm nay</SelectItem>
+                    <SelectItem value="week">Tuần này</SelectItem>
+                    <SelectItem value="month">Tháng này</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>{" "}
-      {selectedMedicine && (
-        <ViewDeliveryDialog
-          delivery={
-            medicineDeliveryByStaffId.find((d) => d.id === selectedMedicine)!
-          }
-          onClose={() => setSelectedMedicine(null)}
-        />
-      )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Main Content */}
+        <Card className="border-sky-200 bg-white/70 backdrop-blur-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-semibold text-gray-900">
+                  Danh sách đơn thuốc
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  Hiển thị {filteredData.length} trong tổng số{" "}
+                  {medicineDeliveryByStaffId.length} đơn thuốc
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">
+                  Trang {currentPage} / {totalPages || 1}
+                </span>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <MedicineDeliveryTable
+              deliveries={paginatedData}
+              onViewDelivery={handleViewDelivery}
+              onUpdateStatus={handleUpdateStatus}
+              onDeleteDelivery={handleDeleteDelivery}
+              isLoading={isLoading}
+            />
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="border-sky-200 text-sky-700 hover:bg-sky-50"
+                >
+                  Trước
+                </Button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = currentPage <= 3 ? i + 1 : currentPage - 2 + i;
+                  if (page > totalPages) return null;
+
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className={
+                        currentPage === page
+                          ? "bg-sky-500 text-white hover:bg-sky-600"
+                          : "border-sky-200 text-sky-700 hover:bg-sky-50"
+                      }
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="border-sky-200 text-sky-700 hover:bg-sky-50"
+                >
+                  Sau
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* View Dialog */}
+        {showViewDialog && selectedDelivery && (
+          <ViewDeliveryDialog
+            delivery={selectedDelivery}
+            onClose={() => {
+              setShowViewDialog(false);
+              setSelectedDelivery(null);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
+
+export default SentMedicinesPage;

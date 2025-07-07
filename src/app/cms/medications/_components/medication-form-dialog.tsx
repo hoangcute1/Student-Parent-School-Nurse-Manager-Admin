@@ -120,7 +120,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
   return (
     <DialogContent className="max-w-2xl bg-white rounded-2xl shadow-xl p-0">
       <DialogHeader className="px-6 pt-6">
-        <DialogTitle className="text-2xl font-bold text-blue-800">
+        <DialogTitle className="text-2xl font-bold text-sky-800">
           {isEdit ? "Chỉnh sửa thông tin thuốc" : "Thêm thuốc mới"}
         </DialogTitle>
         <DialogDescription className="text-gray-500">
@@ -134,7 +134,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           <div>
             <label
               htmlFor="name"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Tên thuốc *
             </label>
@@ -144,7 +144,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Tên thuốc"
               value={form.name}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm transition-all outline-none"
               required
               list="medication-name-list"
             />
@@ -162,7 +162,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           <div>
             <label
               htmlFor="type"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Loại thuốc *
             </label>
@@ -171,7 +171,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               name="type"
               value={form.type}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 bg-white focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm transition-all outline-none"
               required
             >
               <option value="">-- Chọn loại thuốc --</option>
@@ -191,7 +191,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           <div>
             <label
               htmlFor="dosage"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Liều lượng
             </label>
@@ -201,13 +201,13 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Liều lượng"
               value={form.dosage}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm transition-all outline-none"
             />
           </div>
           <div>
             <label
               htmlFor="unit"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Đơn vị
             </label>
@@ -216,7 +216,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               name="unit"
               value={form.unit}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 bg-white focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm transition-all outline-none"
               required
             >
               <option value="">-- Chọn đơn vị --</option>
@@ -233,7 +233,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           <div>
             <label
               htmlFor="quantity"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Số lượng
             </label>
@@ -245,13 +245,13 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Số lượng"
               value={form.quantity}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm transition-all outline-none"
             />
           </div>
           <div>
             <label
               htmlFor="image"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Ảnh thuốc (URL)
             </label>
@@ -261,7 +261,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="https://..."
               value={form.image}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm transition-all outline-none"
             />
             {form.image && (
               <div className="mt-2 flex items-center gap-2">
@@ -280,7 +280,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           <div>
             <label
               htmlFor="usage_instructions"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Hướng dẫn sử dụng
             </label>
@@ -290,13 +290,13 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Hướng dẫn sử dụng"
               value={form.usage_instructions}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm min-h-[60px] transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm min-h-[60px] transition-all outline-none"
             />
           </div>
           <div>
             <label
               htmlFor="side_effects"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Tác dụng phụ
             </label>
@@ -306,7 +306,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Tác dụng phụ"
               value={form.side_effects}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm min-h-[60px] transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm min-h-[60px] transition-all outline-none"
             />
           </div>
         </div>
@@ -314,7 +314,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           <div>
             <label
               htmlFor="contraindications"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Chống chỉ định
             </label>
@@ -324,13 +324,13 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Chống chỉ định"
               value={form.contraindications}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm min-h-[60px] transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm min-h-[60px] transition-all outline-none"
             />
           </div>
           <div>
             <label
               htmlFor="description"
-              className="block font-semibold text-blue-700 mb-1"
+              className="block font-semibold text-sky-700 mb-1"
             >
               Mô tả
             </label>
@@ -340,7 +340,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               placeholder="Mô tả"
               value={form.description}
               onChange={handleChange}
-              className="w-full border border-blue-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 shadow-sm min-h-[60px] transition-all outline-none"
+              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:border-sky-500 shadow-sm min-h-[60px] transition-all outline-none"
             />
           </div>
         </div>
@@ -351,11 +351,11 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
             type="checkbox"
             checked={!!form.is_prescription_required}
             onChange={handleChange}
-            className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-400"
+            className="h-5 w-5 text-sky-600 border-gray-300 rounded focus:ring-blue-400"
           />
           <label
             htmlFor="is_prescription_required"
-            className="font-semibold text-blue-700 select-none cursor-pointer"
+            className="font-semibold text-sky-700 select-none cursor-pointer"
           >
             Thuốc kê đơn (yêu cầu đơn thuốc)
           </label>
@@ -363,7 +363,7 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
         <DialogFooter className="flex flex-row gap-3 pt-4">
           <Button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-2 rounded-lg shadow font-semibold disabled:opacity-60"
+            className="bg-sky-600 hover:bg-sky-700 text-lg px-8 py-2 rounded-lg shadow font-semibold disabled:opacity-60"
             disabled={loading}
           >
             {loading ? (

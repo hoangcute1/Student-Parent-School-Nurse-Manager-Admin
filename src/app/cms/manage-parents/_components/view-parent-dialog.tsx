@@ -19,17 +19,17 @@ export function ViewParentDialog({ parent, onClose }: ViewParentDialogProps) {
   const user = parent.user || {};
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-xl border border-blue-200">
+      <DialogContent className="max-w-md bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-xl border border-sky-200">
         <DialogHeader>
-          <DialogTitle className="text-blue-800 text-2xl font-bold mb-4 text-left">
+          <DialogTitle className="text-sky-800 text-2xl font-bold mb-4 text-left">
             Thông tin phụ huynh:
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4 items-start">
-          <div className="text-2xl font-semibold text-blue-900 mb-2">
+          <div className="text-2xl font-semibold text-sky-900 mb-2">
             {profile.name || "Chưa có tên"}
           </div>
-          <div className="w-full flex flex-col gap-3 text-blue-800 text-lg">
+          <div className="w-full flex flex-col gap-3 text-sky-800 text-lg">
             <div className="flex justify-between">
               <span className="font-medium">Giới tính:</span>
               <span>
@@ -63,7 +63,7 @@ export function ViewParentDialog({ parent, onClose }: ViewParentDialogProps) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} className="w-full mt-4 border-blue-300 text-blue-800 font-semibold text-lg hover:bg-blue-50">
+          <Button variant="outline" onClick={onClose} className="w-full mt-4 border-sky-300 text-sky-800 font-semibold text-lg hover:bg-sky-50">
             Đóng
           </Button>
         </DialogFooter>

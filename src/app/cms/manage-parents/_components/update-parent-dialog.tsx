@@ -163,7 +163,7 @@ export function UpdateParentDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-sky-600 hover:bg-sky-700 text-white"
               disabled={loading}
             >
               {loading ? "Đang lưu..." : "Lưu thay đổi"}

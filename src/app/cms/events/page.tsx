@@ -262,16 +262,16 @@ export default function MedicalEvents() {
           </CardContent>
         </Card>
 
-        <Card className="border-blue-100">
+        <Card className="border-sky-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">
+            <CardTitle className="text-sm font-medium text-sky-700">
               Tổng sự kiện
             </CardTitle>
-            <FileText className="h-4 w-4 text-blue-600" />
+            <FileText className="h-4 w-4 text-sky-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">156</div>
-            <p className="text-xs text-blue-600">Tháng này</p>
+            <div className="text-2xl font-bold text-sky-800">156</div>
+            <p className="text-xs text-sky-600">Tháng này</p>
           </CardContent>
         </Card>
       </div>
@@ -362,7 +362,7 @@ export default function MedicalEvents() {
                         ? "border-l-red-500 bg-red-50"
                         : event.priority === "Trung bình"
                         ? "border-l-yellow-500 bg-yellow-50"
-                        : "border-l-blue-500 bg-blue-50"
+                        : "border-l-blue-500 bg-sky-50"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-3">
@@ -394,7 +394,7 @@ export default function MedicalEvents() {
                             ? "bg-red-100 text-red-800"
                             : event.priority === "Trung bình"
                             ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
+                            : "bg-sky-100 text-sky-800"
                         }
                       >
                         {event.priority}
@@ -1194,7 +1194,7 @@ export default function MedicalEvents() {
                           ? "bg-red-100 text-red-800"
                           : selectedEvent.priority === "Trung bình"
                           ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
+                          : "bg-sky-100 text-sky-800"
                       }
                     >
                       {selectedEvent.priority || "Đã xử lý"}
@@ -1545,7 +1545,7 @@ const eventTypeStats = [
     description: "Các trường hợp khác",
     count: 23,
     percentage: 15,
-    color: "bg-blue-500",
+    color: "bg-sky-500",
   },
 ];
 
@@ -1569,7 +1569,7 @@ const responseTimeStats = [
     avgTime: "18 phút",
     target: "< 20 phút",
     performance: 92,
-    color: "bg-blue-500",
+    color: "bg-sky-500",
   },
   {
     priority: "Thấp",

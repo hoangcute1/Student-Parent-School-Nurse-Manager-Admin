@@ -1,4 +1,4 @@
-import { getMedicationById } from './../medication';
+import { getMedicationById } from "./../medication";
 import {
   CreateMedicineDelivery,
   MedicineDelivery,
@@ -114,13 +114,10 @@ const updateMedicineDelivery = async (
   data: Partial<MedicineDeliveryResponse>
 ) => {
   try {
-    const response = await fetchData(
-      `/medicine-deliveries/${id}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await fetchData(`/medicine-deliveries/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
     return response;
   } catch (error: any) {
     console.error("Error updating medicine delivery:", error);
@@ -128,17 +125,32 @@ const updateMedicineDelivery = async (
   }
 };
 
-const deleteMedicineDelivery = async (
-  id: string
-) => {
+const deleteMedicineDelivery = async (id: string) => {
   try {
+    console.log("Deleting medicine delivery with ID:", id);
     const response = await fetchData(`/medicine-deliveries/${id}`, {
       method: "DELETE",
     });
+    console.log("Delete API response:", response);
     return response;
   } catch (error: any) {
     console.error("Error deleting medicine delivery:", error);
     throw new Error(error.message || "Không thể xóa đơn thuốc");
+  }
+};
+
+// Soft delete cho admin/staff - chỉ ẩn khỏi view của họ
+const softDeleteMedicineDelivery = async (id: string) => {
+  try {
+    console.log("Soft deleting medicine delivery with ID:", id);
+    const response = await fetchData(`/medicine-deliveries/${id}/soft-delete`, {
+      method: "PATCH",
+    });
+    console.log("Soft delete API response:", response);
+    return response;
+  } catch (error: any) {
+    console.error("Error soft deleting medicine delivery:", error);
+    throw new Error(error.message || "Không thể ẩn đơn thuốc");
   }
 };
 
@@ -149,5 +161,6 @@ export {
   getMedicineDeliveriesById,
   updateMedicineDelivery,
   deleteMedicineDelivery,
+  softDeleteMedicineDelivery,
   getMedicineDeliveriesByStaffId,
 };

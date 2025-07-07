@@ -839,21 +839,53 @@ body {
   }
 }
 
-/* Utility classes */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Custom Sky Theme Utilities for CMS */
+@layer utilities {
+  .sky-gradient-bg {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #e0f2fe 100%);
+  }
+
+  .sky-card {
+    @apply bg-white/80 backdrop-blur-sm border-sky-200 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .sky-header {
+    @apply bg-gradient-to-r from-sky-500 to-sky-600 text-white;
+  }
+
+  .sky-text-primary {
+    @apply text-sky-800;
+  }
+
+  .sky-text-secondary {
+    @apply text-sky-600;
+  }
+
+  .sky-button {
+    @apply bg-sky-500 hover:bg-sky-600 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .sky-input {
+    @apply border-sky-200 focus:border-sky-400 focus:ring-sky-400/20;
+  }
 }
 
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Custom scrollbar for sky theme */
+.scrollbar-sky::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-sky::-webkit-scrollbar-track {
+  background: #f0f9ff;
+}
+
+.scrollbar-sky::-webkit-scrollbar-thumb {
+  background: #0ea5e9;
+  border-radius: 3px;
+}
+
+.scrollbar-sky::-webkit-scrollbar-thumb:hover {
+  background: #0284c7;
 }
 
 @layer base {

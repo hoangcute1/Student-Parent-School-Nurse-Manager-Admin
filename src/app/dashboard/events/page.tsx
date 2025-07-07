@@ -1,7 +1,16 @@
+'use client'
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 import ImportantNoti from "./_components/important-noti";
 import NotiList from "./_components/noti-list";
+import { useEffect } from "react";
 
 export default function EventsPage() {
+  const { studentsData, isLoading, fetchStudentsByParent, updateStudent } =
+    useParentStudentsStore();
+
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">

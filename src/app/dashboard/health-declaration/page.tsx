@@ -2,19 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search, Eye, Edit, MoreHorizontal } from "lucide-react";
-interface Vaccine {
-  name: string;
-  completed: boolean;
-}
-
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -48,7 +36,6 @@ export default function ParentHealthRecords() {
   const {
     studentsData,
     isLoading,
-    error,
     fetchStudentsByParent,
     updateStudent,
   } = useParentStudentsStore();

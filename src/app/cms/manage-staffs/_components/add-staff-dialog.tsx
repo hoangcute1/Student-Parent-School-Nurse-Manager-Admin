@@ -95,7 +95,7 @@ export function AddStaffDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-blue-700">
+          <DialogTitle className="text-sky-700">
             Thêm nhân viên mới
           </DialogTitle>
         </DialogHeader>
@@ -164,7 +164,7 @@ export function AddStaffDialog({
             type="submit"
             form="add-staff-form"
             disabled={loading}
-            className="text-white bg-blue-600 hover:bg-blue-600"
+            className="text-white bg-sky-600 hover:bg-sky-600"
           >
             {loading ? "Đang thêm..." : "Thêm"}
           </Button>

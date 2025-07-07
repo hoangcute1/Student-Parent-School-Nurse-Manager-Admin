@@ -14,32 +14,25 @@ import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { CreateMedicineDelivery } from "@/lib/type/medicine-delivery";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import { useStaffStore } from "@/stores/staff-store";
-
-// TODO: Replace with real data from API/store
-
-const getToday = () => {
-  const d = new Date();
-  return d.toISOString().slice(0, 10); // yyyy-MM-dd
-};
+import { useMedicationStore } from "@/stores/medication-store";
 
 export default function AddMedicineDeliveryForm() {
   const { addMedicineDelivery } = useMedicineDeliveryStore();
   const { studentsData } = useParentStudentsStore(); // danh sách học sinh của tài khoản này
-  const { staffs, fetchStaffs } = useStaffStore(); // danh sách staff// tài khoản đã đăng nhập (parent)
+  const { staffs, fetchStaffs } = useStaffStore(); // danh sách staff
+  const { medications, fetchMedications } = useMedicationStore(); // để lấy medicine ID
+  const { fetchMedicineDeliveryByParentId } = useMedicineDeliveryStore();
 
   const [form, setForm] = useState<CreateMedicineDelivery>({
     name: "",
-    date: getToday(),
     total: 1,
     status: "pending",
     per_dose: "",
     per_day: "",
-    note: "",
+    note: "", // Thành phần thuốc
     reason: "",
-    end_at: "",
     student: "",
     parent: "",
-    medicine: "", // Keeping for API compatibility but won't be used in UI
     staff: "",
   });
 
@@ -59,7 +52,8 @@ export default function AddMedicineDeliveryForm() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleTimeChange = (time: string, checked: boolean) => {
@@ -118,32 +112,60 @@ export default function AddMedicineDeliveryForm() {
     }
 
     try {
+      // Validate required fields before submission
+      if (!form.reason || form.reason.trim() === "") {
+        alert("Vui lòng nhập lý do sử dụng thuốc");
+        return;
+      }
+
+      // Đảm bảo medications đã được load
+      if (!medications || medications.length === 0) {
+        console.log("Đang load danh sách thuốc...");
+        await fetchMedications();
+      }
+
       // Chuyển date sang ISO string
       const combinedNote =
         form.note + (nurseNote ? `\n\n[Lưu ý cho y tá]:\n${nurseNote}` : "");
+
+      // Tạo dates mặc định
+      const currentDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(currentDate.getDate() + 7); // 7 ngày sau
+
+      // Lấy medicine ID đầu tiên trong danh sách, hoặc tạo ObjectId mặc định
+      let defaultMedicineId = "675d8a1b123456789abcdef0"; // ObjectId mặc định có format đúng
+
+      if (medications && medications.length > 0) {
+        defaultMedicineId = medications[0]._id;
+      } else {
+        // Nếu không có medicine nào, log warning
+        console.warn(
+          "Không có medicine nào trong hệ thống, sử dụng ID mặc định"
+        );
+      }
+
       const payload = {
         ...form,
         note: combinedNote,
-        medicine: form.medicine || "default", // Set default medicine if empty
-        status: "pending" as const, // luôn là chờ duyệt, đúng type
-        date: form.date
-          ? new Date(form.date).toISOString()
-          : new Date().toISOString(),
+        status: "pending" as const,
+        // Thêm các trường bắt buộc cho backend với giá trị mặc định
+        date: currentDate.toISOString(),
+        end_at: endDate.toISOString(),
+        medicine: defaultMedicineId,
       };
+      console.log("Payload being sent:", payload);
       await addMedicineDelivery(payload);
       setForm({
         name: "",
-        date: getToday(),
         total: 1,
         status: "pending",
         per_dose: "",
         per_day: "",
         note: "",
         reason: "",
-        end_at: "",
         student: "",
         parent: "",
-        medicine: "",
         staff: "",
       });
       setMedicineTimes({
@@ -154,6 +176,7 @@ export default function AddMedicineDeliveryForm() {
       });
       setNurseNote("");
       alert("Thêm đơn thuốc thành công!");
+      await fetchMedicineDeliveryByParentId();
     } catch (err: any) {
       setError(err.message || "Có lỗi xảy ra");
     } finally {
@@ -166,7 +189,10 @@ export default function AddMedicineDeliveryForm() {
     if (!staffs || staffs.length === 0) {
       fetchStaffs();
     }
-  }, [staffs, fetchStaffs]);
+    if (!medications || medications.length === 0) {
+      fetchMedications();
+    }
+  }, [staffs, fetchStaffs, medications, fetchMedications]);
 
   return (
     <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl">
@@ -270,13 +296,14 @@ export default function AddMedicineDeliveryForm() {
 
         <div className="space-y-2">
           <label className="block text-sky-800 font-semibold text-sm">
-            Lý do sử dụng
+            Lý do sử dụng <span className="text-red-500">*</span>
           </label>
           <Input
             name="reason"
             value={form.reason}
             onChange={handleChange}
             placeholder="Điều trị cảm lạnh, giảm đau..."
+            required
             className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
           />
         </div>

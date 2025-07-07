@@ -22,13 +22,16 @@ import {
 } from "@/components/ui/table";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { useMedicationStore } from "@/stores/medication-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 import React, { useState } from "react";
 import ViewDeliveryDialog from "./_components/view-delivery-dialog";
 import type { MedicineDeliveryByParent } from "@/lib/type/medicine-delivery";
 import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 export default function MedicationsPage() {
+  const { isAuthenticated, user } = useAuthStore();
   const {
     medicineDeliveryByParentId,
     isLoading,
@@ -36,33 +39,55 @@ export default function MedicationsPage() {
     deleteMedicineDelivery,
   } = useMedicineDeliveryStore();
   const { medications } = useMedicationStore();
+  const {
+    fetchStudentsByParent,
+  } = useParentStudentsStore();
 
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
   const [selectedDelivery, setSelectedDelivery] =
     useState<MedicineDeliveryByParent | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchMedicineDeliveryByParentId();
-  }, [fetchMedicineDeliveryByParentId]);
+    if (isAuthenticated && user) {
+      fetchMedicineDeliveryByParentId();
+    }
+  }, [isAuthenticated, user, fetchMedicineDeliveryByParentId]);
 
   const handleShowDetail = (delivery: any) => {
     setSelectedDelivery(delivery);
     setShowDetail(true);
   };
 
-  const handleDelete = async (id: string | undefined) => {
+  const handleDelete = async (id: string) => {
     if (!id) {
       alert("Không tìm thấy ID đơn thuốc để xoá!");
       return;
     }
-    if (!window.confirm("Bạn có chắc muốn xoá đơn thuốc này?")) return;
+    console.log("Attempting to delete medicine delivery with ID:", id);
+    if (
+      !window.confirm(
+        "⚠️ LƯU Ý: Bạn có chắc muốn xoá hoàn toàn đơn thuốc này?\n\n" +
+          "Khi xóa, đơn thuốc sẽ bị XÓA HOÀN TOÀN khỏi hệ thống, " +
+          "bao gồm cả view của quản trị viên và nhân viên y tế.\n\n" +
+          "Hành động này KHÔNG THỂ HOÀN TÁC!"
+      )
+    )
+      return;
     setDeletingId(id);
     try {
+      console.log("Calling deleteMedicineDelivery...");
       await deleteMedicineDelivery(id);
+      console.log("Delete successful, refreshing data...");
       await fetchMedicineDeliveryByParentId();
+      console.log("Data refreshed successfully");
+      alert("✅ Đã xóa đơn thuốc thành công!");
     } catch (error) {
-      alert("Xoá thất bại!");
+      console.error("Delete failed:", error);
+      alert("❌ Xoá thất bại! Vui lòng thử lại.");
     }
     setDeletingId(null);
   };
@@ -229,6 +254,7 @@ export default function MedicationsPage() {
                             onClick={() => handleDelete(delivery.id)}
                             disabled={deletingId === delivery.id}
                             className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                            title="Xóa hoàn toàn đơn thuốc khỏi hệ thống. Quản trị viên và nhân viên y tế cũng sẽ không thể thấy đơn này."
                           >
                             {deletingId === delivery.id ? "Đang xoá..." : "Xoá"}
                           </Button>

@@ -1,7 +1,8 @@
 import { getAuthToken, parseJwt } from "@/lib/api/auth/token";
 import {
   createMedicineDeliveries,
-  deleteMedicineDelivery,
+  deleteMedicineDelivery as deleteMedicineDeliveryAPI,
+  softDeleteMedicineDelivery as softDeleteMedicineDeliveryAPI,
   getAllMedicineDeliveries,
   getMedicineDeliveriesById,
   getMedicineDeliveriesByParentId,
@@ -12,7 +13,6 @@ import {
   CreateMedicineDelivery,
   MedicineDeliveryStore,
   MedicineDeliveryByParent,
-  MedicineDeliveryParentResponse,
 } from "@/lib/type/medicine-delivery";
 import type { MedicineDelivery } from "@/lib/type/medicine-delivery";
 import { create } from "zustand";
@@ -70,13 +70,17 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       try {
         set({ isLoading: true, error: null });
         const token = getAuthToken();
-        console.log(token);
+        console.log("Token in fetchMedicineDeliveryByParentId:", token);
         if (!token) {
-          throw new Error("Không tìm thấy token xác thực");
+          console.log("No auth token found, skipping fetch");
+          set({ isLoading: false });
+          return;
         }
         const userId = parseJwt(token)?.sub;
         if (!userId) {
-          throw new Error("Không tìm thấy ID người dùng trong token");
+          console.log("No user ID found in token, skipping fetch");
+          set({ isLoading: false });
+          return;
         }
         const response = await getMedicineDeliveriesByParentId(userId);
         set({ medicineDeliveryByParentId: response || [] });
@@ -94,19 +98,23 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       try {
         set({ isLoading: true, error: null });
         const token = getAuthToken();
-        console.log(token);
+        console.log("Token in fetchMedicineDeliveryByStaffId:", token);
         if (!token) {
-          throw new Error("Không tìm thấy token xác thực");
+          console.log("No auth token found, skipping fetch");
+          set({ isLoading: false });
+          return;
         }
         const userId = parseJwt(token)?.sub;
         if (!userId) {
-          throw new Error("Không tìm thấy ID người dùng trong token");
+          console.log("No user ID found in token, skipping fetch");
+          set({ isLoading: false });
+          return;
         }
         const response = await getMedicineDeliveriesByStaffId(userId);
         set({ medicineDeliveryByStaffId: response || [] });
       } catch (err: any) {
         const errorMessage =
-          err.message || "Failed to fetch medicine delivery by parent ID";
+          err.message || "Failed to fetch medicine delivery by staff ID";
         set({ error: errorMessage });
         throw err;
       } finally {
@@ -139,22 +147,100 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       }
     },
 
+    // Xóa hoàn toàn đơn thuốc (cho phụ huynh)
     deleteMedicineDelivery: async (id: string) => {
       try {
+        console.log("Starting delete medicine delivery with ID:", id);
         set({ isLoading: true, error: null });
-        await deleteMedicineDelivery(id);
-        // Cập nhật lại danh sách đơn thuốc sau khi xoá
-        const updatedDeliveries = get().medicineDeliveryByParentId.filter(
+
+        await deleteMedicineDeliveryAPI(id);
+        console.log("Successfully deleted medicine delivery from API");
+
+        // Cập nhật lại tất cả danh sách đơn thuốc sau khi xoá
+        const currentState = get();
+        console.log("Current state before update:", {
+          parentCount: currentState.medicineDeliveryByParentId.length,
+          staffCount: currentState.medicineDeliveryByStaffId.length,
+          allCount: currentState.medicineDeliveries.length,
+        });
+
+        // Cập nhật danh sách cho phụ huynh
+        const updatedParentDeliveries =
+          currentState.medicineDeliveryByParentId.filter(
+            (delivery) => delivery.id !== id
+          );
+
+        // Cập nhật danh sách cho nhân viên
+        const updatedStaffDeliveries =
+          currentState.medicineDeliveryByStaffId.filter(
+            (delivery) => delivery.id !== id
+          );
+
+        // Cập nhật danh sách chung cho quản lý
+        const updatedAllDeliveries = currentState.medicineDeliveries.filter(
           (delivery) => delivery.id !== id
         );
-        set({ medicineDeliveryByParentId: updatedDeliveries });
+
+        console.log("Updated counts after filter:", {
+          parentCount: updatedParentDeliveries.length,
+          staffCount: updatedStaffDeliveries.length,
+          allCount: updatedAllDeliveries.length,
+        });
+
+        set({
+          medicineDeliveryByParentId: updatedParentDeliveries,
+          medicineDeliveryByStaffId: updatedStaffDeliveries,
+          medicineDeliveries: updatedAllDeliveries,
+        });
+
+        console.log("Successfully updated store state after deletion");
       } catch (err: any) {
+        console.error("Error in deleteMedicineDelivery:", err);
         set({ error: err.message || "Không thể xoá đơn thuốc" });
         throw err;
       } finally {
         set({ isLoading: false });
       }
     },
+
+    // Soft delete cho admin/staff - chỉ ẩn khỏi view của họ
+    softDeleteMedicineDelivery: async (id: string) => {
+      try {
+        console.log("Starting soft delete medicine delivery with ID:", id);
+        set({ isLoading: true, error: null });
+
+        await softDeleteMedicineDeliveryAPI(id);
+        console.log("Successfully soft deleted medicine delivery from API");
+
+        // Chỉ cập nhật danh sách cho nhân viên/admin, không ảnh hưởng đến phụ huynh
+        const currentState = get();
+
+        // Chỉ xóa khỏi view staff và admin
+        const updatedStaffDeliveries =
+          currentState.medicineDeliveryByStaffId.filter(
+            (delivery) => delivery.id !== id
+          );
+
+        const updatedAllDeliveries = currentState.medicineDeliveries.filter(
+          (delivery) => delivery.id !== id
+        );
+
+        set({
+          medicineDeliveryByStaffId: updatedStaffDeliveries,
+          medicineDeliveries: updatedAllDeliveries,
+          // Không cập nhật medicineDeliveryByParentId để phụ huynh vẫn thấy được
+        });
+
+        console.log("Successfully updated store state after soft deletion");
+      } catch (err: any) {
+        console.error("Error in softDeleteMedicineDelivery:", err);
+        set({ error: err.message || "Không thể ẩn đơn thuốc" });
+        throw err;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
     updateMedicineDelivery: async (
       id: string,
       data: Partial<MedicineDelivery>

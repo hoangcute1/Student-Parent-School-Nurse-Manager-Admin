@@ -175,10 +175,10 @@ export default function ClassHealthList({
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle className="text-blue-800">
+            <CardTitle className="text-sky-800">
               Danh sách học sinh - {className}
             </CardTitle>
-            <CardDescription className="text-blue-600">
+            <CardDescription className="text-sky-600">
               Ghi nhận và theo dõi kết quả khám sức khỏe
             </CardDescription>
           </div>
@@ -335,7 +335,7 @@ export default function ClassHealthList({
                   </TableCell>
                   <TableCell>
                     {student.followUp ? (
-                      <Badge className="bg-blue-100 text-blue-800">
+                      <Badge className="bg-sky-100 text-sky-800">
                         {student.followUp}
                       </Badge>
                     ) : (

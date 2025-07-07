@@ -24,8 +24,8 @@ export function SuggestionsResponses() {
     <div className="w-full gap-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-blue-800">Góp ý cải thiện</CardTitle>
-          <CardDescription className="text-blue-600">
+          <CardTitle className="text-sky-800">Góp ý cải thiện</CardTitle>
+          <CardDescription className="text-sky-600">
             Những đề xuất từ phụ huynh để cải thiện dịch vụ
           </CardDescription>
         </CardHeader>
@@ -34,18 +34,18 @@ export function SuggestionsResponses() {
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
-                className="p-3 rounded-lg border border-blue-100 bg-blue-50"
+                className="p-3 rounded-lg border border-sky-100 bg-sky-50"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <MessageSquare className="h-4 w-4 text-blue-600" />
-                  <h4 className="font-medium text-blue-800">
+                  <MessageSquare className="h-4 w-4 text-sky-600" />
+                  <h4 className="font-medium text-sky-800">
                     {suggestion.title}
                   </h4>
                 </div>
-                <p className="text-blue-700 text-sm mb-2">
+                <p className="text-sky-700 text-sm mb-2">
                   {suggestion.content}
                 </p>
-                <div className="flex justify-between items-center text-xs text-blue-600">
+                <div className="flex justify-between items-center text-xs text-sky-600">
                   <span>{suggestion.author}</span>
                   <span>{suggestion.date}</span>
                 </div>

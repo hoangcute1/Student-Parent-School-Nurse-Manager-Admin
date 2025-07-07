@@ -33,18 +33,18 @@ export default function StaffsPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+        <h1 className="text-3xl font-bold tracking-tight text-sky-800">
           Quản lý nhân viên
         </h1>
-        <p className="text-blue-600">
+        <p className="text-sky-600">
           Danh sách nhân viên và thông tin liên hệ
         </p>
       </div>
 
-      <Card className="border-blue-100">
+      <Card className="border-sky-100">
         <CardHeader>
-          <CardTitle className="text-blue-800">Danh sách nhân viên</CardTitle>
-          <CardDescription className="text-blue-600">
+          <CardTitle className="text-sky-800">Danh sách nhân viên</CardTitle>
+          <CardDescription className="text-sky-600">
             Quản lý thông tin và liên lạc với nhân viên trong trường
           </CardDescription>
         </CardHeader>
@@ -53,7 +53,7 @@ export default function StaffsPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div>
               <Button
-                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 shadow transition-all duration-150 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-300 font-normal"
+                className="bg-sky-600 hover:bg-sky-700 text-white py-2 px-4 rounded-lg flex items-center gap-2 shadow transition-all duration-150 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-300 font-normal"
                 onClick={() => setOpenAddStaff(true)}
               >
                 <Plus className="mr-2 h-4 w-4" /> Thêm nhân viên

@@ -29,15 +29,15 @@ export function StatsCards({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="border-blue-100">
+      <Card className="border-sky-100">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <Users className="h-8 w-8 text-blue-600" />
+            <Users className="h-8 w-8 text-sky-600" />
             <div>
-              <div className="text-2xl font-bold text-blue-800">
+              <div className="text-2xl font-bold text-sky-800">
                 {totalStudents}
               </div>
-              <div className="text-sm text-blue-600">Total Students</div>
+              <div className="text-sm text-sky-600">Total Students</div>
             </div>
           </div>
         </CardContent>
