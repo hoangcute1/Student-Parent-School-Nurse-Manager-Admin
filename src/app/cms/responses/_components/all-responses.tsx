@@ -68,6 +68,32 @@ export function AllResponses({
     }
   }, [fetchFeedbacks, feedbacks.length]);
 
+  // Filter feedbacks based on search and status
+  const filteredFeedbacks = feedbacks.filter((feedback) => {
+    // Search filter
+    const matchesSearch =
+      searchTerm === "" ||
+      feedback.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      feedback.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (typeof feedback.parent === "object" &&
+        feedback.parent?.email
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()));
+
+    // Status filter - using response field to determine if processed
+    let matchesStatus = true;
+    if (selectedRating === "positive") {
+      // "Đã xử lý" - has response
+      matchesStatus = feedback.response !== null && feedback.response !== "";
+    } else if (selectedRating === "negative") {
+      // "Chưa xử lý" - no response
+      matchesStatus = feedback.response === null || feedback.response === "";
+    }
+    // "all" shows everything
+
+    return matchesSearch && matchesStatus;
+  });
+
   const handleProcessClick = async (id: string) => {
     try {
       await processFeedback(id);
@@ -127,15 +153,12 @@ export function AllResponses({
           </div>
           <Select value={selectedRating} onValueChange={setSelectedRating}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Lọc theo đánh giá" />
+              <SelectValue placeholder="Lọc theo trạng thái" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="5">5 sao</SelectItem>
-              <SelectItem value="4">4 sao</SelectItem>
-              <SelectItem value="3">3 sao</SelectItem>
-              <SelectItem value="2">2 sao</SelectItem>
-              <SelectItem value="1">1 sao</SelectItem>
+              <SelectItem value="positive">Đã xử lý</SelectItem>
+              <SelectItem value="negative">Chưa xử lý</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon">
@@ -144,7 +167,7 @@ export function AllResponses({
         </div>
         {
           <div className="space-y-4">
-            {feedbacks.map((feedback) => (
+            {filteredFeedbacks.map((feedback) => (
               <div
                 key={feedback._id}
                 className="p-4 rounded-lg border border-sky-100 hover:bg-sky-50 transition-colors"
@@ -178,9 +201,7 @@ export function AllResponses({
 
                 {feedback.response && (
                   <div className="bg-sky-50 rounded-lg p-3 mb-3 border-l-4 border-sky-500">
-                    <h4 className="font-medium text-sky-800 mb-1">
-                      Phản hồi:
-                    </h4>
+                    <h4 className="font-medium text-sky-800 mb-1">Phản hồi:</h4>
                     <p className="text-sm text-sky-700">{feedback.response}</p>
                   </div>
                 )}

@@ -19,6 +19,7 @@ import {
   RefreshCw,
   ChevronDown,
   Activity,
+  Pill,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,11 +38,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { ViewDeliveryDialog } from "./view-delivery-dialog";
 import { MedicineDeliveryTable } from "./components/medicine-delivery-table";
-import { MedicineDeliveryStats } from "./components/stats-cards";
+import { FilterBar } from "./_components/filter-bar";
 import type { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
 
 function SentMedicinesPage() {
@@ -51,8 +51,6 @@ function SentMedicinesPage() {
   const [selectedDelivery, setSelectedDelivery] =
     useState<MedicineDeliveryByStaff | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
 
   const {
     medicineDeliveryByStaffId,
@@ -105,14 +103,6 @@ function SentMedicinesPage() {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
   // Stats calculation
   const stats = {
     total: medicineDeliveryByStaffId.length,
@@ -122,62 +112,6 @@ function SentMedicinesPage() {
       .length,
     completed: medicineDeliveryByStaffId.filter((d) => d.status === "completed")
       .length,
-    cancelled: medicineDeliveryByStaffId.filter((d) => d.status === "cancelled")
-      .length,
-  };
-
-  // Handle status update
-  const handleUpdateStatus = async (
-    id: string,
-    newStatus: "pending" | "progress" | "completed" | "cancelled"
-  ) => {
-    try {
-      setIsLoading(true);
-      await updateMedicineDelivery(id, { status: newStatus });
-      await fetchMedicineDeliveryByStaffId();
-    } catch (err) {
-      setError("Không thể cập nhật trạng thái");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle delete delivery (soft delete - chỉ ẩn khỏi view admin/staff)
-  const handleDeleteDelivery = async (delivery: MedicineDeliveryByStaff) => {
-    const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn ẩn đơn thuốc "${delivery.name}" cho học sinh "${delivery.student?.name}"?\n\nĐơn thuốc sẽ bị ẩn khỏi view quản trị nhưng phụ huynh vẫn có thể thấy được.`
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setIsLoading(true);
-      if (softDeleteMedicineDelivery) {
-        await softDeleteMedicineDelivery(delivery.id);
-        await fetchMedicineDeliveryByStaffId();
-      } else {
-        setError("Chức năng ẩn đơn thuốc không khả dụng");
-      }
-    } catch (err) {
-      setError("Không thể ẩn đơn thuốc");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle view delivery
-  const handleViewDelivery = (delivery: MedicineDeliveryByStaff) => {
-    setSelectedDelivery(delivery);
-    setShowViewDialog(true);
-  };
-
-  // Handle refresh
-  const handleRefresh = async () => {
-    try {
-      await fetchMedicineDeliveryByStaffId();
-    } catch (err) {
-      setError("Không thể làm mới dữ liệu");
-    }
   };
 
   // Handle export to Excel
@@ -250,6 +184,57 @@ function SentMedicinesPage() {
     }
   };
 
+  // Action handlers for deliveries
+  const handleViewDelivery = (delivery: MedicineDeliveryByStaff) => {
+    setSelectedDelivery(delivery);
+    setShowViewDialog(true);
+  };
+
+  const handleUpdateStatus = async (
+    id: string,
+    newStatus: "pending" | "progress" | "completed" | "cancelled"
+  ) => {
+    try {
+      setIsLoading(true);
+      await updateMedicineDelivery(id, { status: newStatus });
+      await fetchMedicineDeliveryByStaffId();
+    } catch (err) {
+      setError("Không thể cập nhật trạng thái");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteDelivery = async (delivery: MedicineDeliveryByStaff) => {
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn ẩn đơn thuốc "${delivery.name}" cho học sinh "${delivery.student?.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsLoading(true);
+      if (softDeleteMedicineDelivery) {
+        await softDeleteMedicineDelivery(delivery.id);
+        await fetchMedicineDeliveryByStaffId();
+      } else {
+        setError("Chức năng ẩn đơn thuốc không khả dụng");
+      }
+    } catch (err) {
+      setError("Không thể ẩn đơn thuốc");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      await fetchMedicineDeliveryByStaffId();
+    } catch (err) {
+      setError("Không thể làm mới dữ liệu");
+    }
+  };
+
   if (isLoading && medicineDeliveryByStaffId.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
@@ -270,206 +255,229 @@ function SentMedicinesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-4xl font-bold text-gray-900">
-                Quản lý Thuốc gửi
-              </h1>
-              <p className="text-gray-600">
-                Theo dõi và quản lý các đơn thuốc từ phụ huynh
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoading}
-                className="border-sky-200 text-sky-700 hover:bg-sky-50"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-                />
-                Làm mới
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportExcel}
-                className="border-sky-200 text-sky-700 hover:bg-sky-50"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Xuất báo cáo
-              </Button>
-            </div>
+        {/* Header Section */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-sky-500 to-sky-600 rounded-2xl shadow-lg mb-4">
+            <svg
+              className="w-8 h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+              />
+            </svg>
           </div>
-
-          {/* Error Alert */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-500" />
-              <div className="flex-1">
-                <p className="text-red-800 font-medium">Có lỗi xảy ra</p>
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setError(null)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
+            Dashboard - Đơn thuốc từ phụ huynh
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Theo dõi và quản lý các đơn thuốc được gửi từ phụ huynh
+          </p>
         </div>
 
-        {/* Stats */}
-        <MedicineDeliveryStats stats={stats} />
+        {/* Error Alert */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <div className="flex-1">
+              <p className="text-red-800 font-medium">Có lỗi xảy ra</p>
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setError(null)}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
 
-        {/* Filters */}
-        <Card className="border-sky-200 bg-white/70 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Filter className="w-5 h-5 text-sky-600" />
-              Bộ lọc & Tìm kiếm
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Tìm kiếm
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    placeholder="Tìm theo tên học sinh, thuốc, phụ huynh..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 border-sky-200 focus:border-sky-500 focus:ring-sky-200"
-                  />
+        {/* Dashboard Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Tổng đơn thuốc
+                  </p>
+                  <p className="text-3xl font-bold text-sky-700">
+                    {stats.total}
+                  </p>
+                  <p className="text-xs text-emerald-600 mt-1">
+                    ↗ +{stats.pending} mới
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-sky-100 to-sky-200 rounded-xl">
+                  <svg
+                    className="w-6 h-6 text-sky-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                    />
+                  </svg>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Trạng thái
-                </label>
-                <Select
-                  value={selectedStatus}
-                  onValueChange={setSelectedStatus}
-                >
-                  <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-200">
-                    <SelectValue placeholder="Chọn trạng thái" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                    <SelectItem value="pending">Chờ xử lý</SelectItem>
-                    <SelectItem value="progress">Đang thực hiện</SelectItem>
-                    <SelectItem value="completed">Đã hoàn thành</SelectItem>
-                    <SelectItem value="cancelled">Đã hủy</SelectItem>
-                  </SelectContent>
-                </Select>
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
+                  <p className="text-3xl font-bold text-amber-700">
+                    {stats.pending}
+                  </p>
+                  <p className="text-xs text-amber-600 mt-1">Cần xử lý</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl">
+                  <svg
+                    className="w-6 h-6 text-amber-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Thời gian
-                </label>
-                <Select value={selectedDate} onValueChange={setSelectedDate}>
-                  <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-200">
-                    <SelectValue placeholder="Chọn thời gian" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả thời gian</SelectItem>
-                    <SelectItem value="today">Hôm nay</SelectItem>
-                    <SelectItem value="week">Tuần này</SelectItem>
-                    <SelectItem value="month">Tháng này</SelectItem>
-                  </SelectContent>
-                </Select>
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Hoàn thành
+                  </p>
+                  <p className="text-3xl font-bold text-emerald-700">
+                    {stats.completed}
+                  </p>
+                  <p className="text-xs text-emerald-600 mt-1">Thành công</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl">
+                  <svg
+                    className="w-6 h-6 text-emerald-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Main Content */}
-        <Card className="border-sky-200 bg-white/70 backdrop-blur-sm">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  Danh sách đơn thuốc
+        {/* Dashboard Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar with Quick Actions */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-lg font-bold text-gray-800">
+                  Thao tác nhanh
                 </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Hiển thị {filteredData.length} trong tổng số{" "}
-                  {medicineDeliveryByStaffId.length} đơn thuốc
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">
-                  Trang {currentPage} / {totalPages || 1}
-                </span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <MedicineDeliveryTable
-              deliveries={paginatedData}
-              onViewDelivery={handleViewDelivery}
-              onUpdateStatus={handleUpdateStatus}
-              onDeleteDelivery={handleDeleteDelivery}
-              isLoading={isLoading}
-            />
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(1, prev - 1))
-                  }
-                  disabled={currentPage === 1}
-                  className="border-sky-200 text-sky-700 hover:bg-sky-50"
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <button
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-white py-3 px-4 rounded-lg hover:from-sky-600 hover:to-sky-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
                 >
-                  Trước
-                </Button>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const page = currentPage <= 3 ? i + 1 : currentPage - 2 + i;
-                  if (page > totalPages) return null;
-
-                  return (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className={
-                        currentPage === page
-                          ? "bg-sky-500 text-white hover:bg-sky-600"
-                          : "border-sky-200 text-sky-700 hover:bg-sky-50"
-                      }
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  disabled={currentPage === totalPages}
-                  className="border-sky-200 text-sky-700 hover:bg-sky-50"
+                  <svg
+                    className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  <span>Làm mới dữ liệu</span>
+                </button>
+                <button
+                  onClick={handleExportExcel}
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
                 >
-                  Sau
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span>Xuất báo cáo</span>
+                </button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Data Table */}
+          <div className="lg:col-span-3">
+            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader className="pb-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-800">
+                      Danh sách đơn thuốc
+                    </CardTitle>
+                    <CardDescription className="text-gray-600 mt-1">
+                      Quản lý các đơn thuốc được gửi từ phụ huynh
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FilterBar
+                  onSearchChange={setSearchTerm}
+                  onStatusFilterChange={setSelectedStatus}
+                  onDateFilterChange={setSelectedDate}
+                />
+                <div className="mt-6">
+                  <MedicineDeliveryTable
+                    deliveries={filteredData}
+                    isLoading={isLoading}
+                    onViewDelivery={handleViewDelivery}
+                    onUpdateStatus={handleUpdateStatus}
+                    onDeleteDelivery={handleDeleteDelivery}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* View Dialog */}
         {showViewDialog && selectedDelivery && (
