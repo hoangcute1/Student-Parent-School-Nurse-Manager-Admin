@@ -65,6 +65,10 @@ export class MedicineDelivery extends Document {
 
   @Prop({ default: Date.now })
   updated_at: Date;
+
+  // Array of staff IDs who have hidden this delivery from their view
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Staff', default: [] })
+  hiddenFromStaff: MongooseSchema.Types.ObjectId[];
 }
 
 export const MedicineDeliverySchema = SchemaFactory.createForClass(MedicineDelivery);

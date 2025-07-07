@@ -161,7 +161,7 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.findByUserId(userId);
   }
 
-   @Get('staff/:userId')
+  @Get('staff/:userId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get medicine deliveries by userId',
@@ -362,4 +362,40 @@ export class MedicineDeliveryController {
    * Get deliveries for a staff
    */
 
+  @Patch(':id/soft-delete')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Soft delete a medicine delivery (hide from admin/staff view)',
+    description:
+      'Hide a medicine delivery from admin/staff view while keeping it visible to parents',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Medicine delivery ID',
+    type: String,
+    required: true,
+  })
+  @ApiNoContentResponse({
+    description: 'The medicine delivery has been successfully hidden from admin/staff view.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'Medicine delivery not found.' })
+  async softDelete(@Param('id') id: string, @GetUser() user: any) {
+    try {
+      // Check if delivery exists
+      const delivery = await this.medicineDeliveryService.findById(id);
+
+      // Add the current user (admin/staff) to a hidden list or mark as hidden for staff
+      await this.medicineDeliveryService.softDelete(id, user.id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Error hiding medicine delivery: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get deliveries for a staff
+   */
 }

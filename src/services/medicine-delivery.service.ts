@@ -2,7 +2,7 @@ import { UserService } from './user.service';
 import { StaffService } from './staff.service';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   MedicineDelivery,
   MedicineDeliveryDocument,
@@ -135,7 +135,10 @@ export class MedicineDeliveryService {
   async findByUserStaff(userId: string): Promise<{ data: any[]; total: number }> {
     const staffId = await this.staffService.findByUserId(userId);
     const medicineDeliveryList = await this.medicineDeliveryModel
-      .find({ staff: staffId })
+      .find({
+        staff: staffId,
+        hiddenFromStaff: { $ne: staffId }, // Exclude deliveries hidden from this staff member
+      })
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
       .populate('staff')
       .populate('parent')
@@ -148,7 +151,7 @@ export class MedicineDeliveryService {
         const { _id, parent, staff, ...rest } = item.toObject();
 
         // Lấy tên staff
-        let parentName = ''; 
+        let parentName = '';
         if (item.parent && (item.parent as any).user) {
           const staffUserId = (item.parent as any).user.toString();
           parentName =
@@ -309,6 +312,22 @@ export class MedicineDeliveryService {
 
     if (result.deletedCount === 0) {
       throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+    }
+  }
+
+  async softDelete(id: string, staffId: string): Promise<void> {
+    const delivery = await this.medicineDeliveryModel.findById(id).exec();
+
+    if (!delivery) {
+      throw new NotFoundException(`Medicine delivery with ID "${id}" not found`);
+    }
+
+    // Add staff ID to hiddenFromStaff array if not already present
+    const staffObjectId = new Types.ObjectId(staffId);
+    if (!delivery.hiddenFromStaff.some((hiddenId) => hiddenId.toString() === staffId)) {
+      await this.medicineDeliveryModel
+        .updateOne({ _id: id }, { $addToSet: { hiddenFromStaff: staffObjectId } })
+        .exec();
     }
   }
 }
