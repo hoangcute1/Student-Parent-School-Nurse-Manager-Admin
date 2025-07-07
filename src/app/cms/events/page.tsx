@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Plus,
@@ -55,6 +55,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getAllStudents } from "@/lib/api/student";
+import { getAllStaffs } from "@/lib/api/staff";
+import { createTreatmentHistory } from "@/lib/api/treatment-history";
 
 export default function MedicalEvents() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,6 +72,12 @@ export default function MedicalEvents() {
 
   // State for selected event
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+  // State for initial loading and data
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [students, setStudents] = useState<any[]>([]);
+  const [studentsError, setStudentsError] = useState<string | null>(null);
+  const [staffs, setStaffs] = useState<any[]>([]);
 
   // Form schema for adding/updating event
   const eventFormSchema = z.object({
@@ -96,6 +105,21 @@ export default function MedicalEvents() {
       reporter: "",
     },
   });
+
+  useEffect(() => {
+      setIsInitialLoading(true);
+      Promise.all([
+        getAllStudents()
+          .then((data) => {
+            console.log("Fetched students:", data);
+            setStudents(data)})
+          .catch(() => setStudentsError("Không thể tải danh sách học sinh")),
+        getAllStaffs()
+          .then((data) => setStaffs(data))
+          .catch(() => setStaffs([])),
+        // Thêm các API khác nếu cần
+      ]).finally(() => setIsInitialLoading(false));
+    }, []);
 
   // Form for updating event
   const updateEventForm = useForm<z.infer<typeof eventFormSchema>>({
@@ -151,12 +175,26 @@ export default function MedicalEvents() {
   });
 
   // Handle form submissions
-  const onAddEvent = (data: z.infer<typeof eventFormSchema>) => {
-    console.log("Add event data:", data);
-    // Add logic to save new event
-    // For now, just close the modal
-    setAddEventOpen(false);
-    addEventForm.reset();
+  const onAddEvent = async (data: z.infer<typeof eventFormSchema>) => {
+    try {
+      // Gửi dữ liệu tới API treatment-history
+      await createTreatmentHistory({
+        title: data.title,
+        student: data.student,
+        class: data.class,
+        location: data.location,
+        priority: data.priority,
+        description: data.description,
+        contactStatus: data.contactStatus,
+        reporter: data.reporter,
+        // Thêm các trường khác nếu cần
+      });
+      setAddEventOpen(false);
+      addEventForm.reset();
+    } catch (error) {
+      alert("Không thể thêm sự kiện mới!");
+      console.error(error);
+    }
   };
 
   const onUpdateEvent = (data: z.infer<typeof eventFormSchema>) => {
