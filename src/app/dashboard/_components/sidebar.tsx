@@ -29,7 +29,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 
   useEffect(() => {
     fetchStudentsByParent();
-  }, [fetchStudentsByParent]);
+  }, []); // Chỉ chạy một lần khi component mount
   useEffect(() => {
     if (studentsData.length > 0) {
       setSelectedStudent(studentsData[0]);

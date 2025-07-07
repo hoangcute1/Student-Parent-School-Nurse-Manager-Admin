@@ -22,60 +22,91 @@ export function useAuthInit() {
   // Sử dụng useCallback để tránh tạo hàm mới mỗi khi render
   const initializeAuth = useCallback(async () => {
     try {
+      console.log("Starting auth initialization...");
       setIsLoading(true);
       setStoreLoading(true);
-      const token = getAuthToken();
 
-      // Nếu đã có user trong store thì không cần fetch lại
-      if (user) {
-        console.log("User already in store, skipping fetch");
+      const token = getAuthToken();
+      console.log("Token found:", !!token);
+
+      if (!token) {
+        console.log("No token found, user not authenticated");
+        clearAuth();
         setIsInitialized(true);
         setIsLoading(false);
         setStoreLoading(false);
         return;
       }
 
-      if (token) {
-        console.log("Found auth token, checking validity...");
-
-        try {
-          const response = await fetchData<GetMeResponse>(`/auth/me`, {
-            headers: {
-              method: "GET",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          const role = parseJwt(token).role;
-          updateUserRole(role);
-          updateUserInfo(response.user, response.profile);
-          console.log("User data loaded successfully");
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Token không hợp lệ, xóa token và thông tin xác thực
-          clearAuthToken();
-          clearAuth();
+      // Parse token để lấy thông tin cơ bản trước
+      let tokenData;
+      try {
+        tokenData = parseJwt(token);
+        if (tokenData && tokenData.role) {
+          updateUserRole(tokenData.role);
+          console.log("Token parsed successfully, role:", tokenData.role);
+        } else {
+          throw new Error("Invalid token data");
         }
-      } else {
-        // Không có token, xóa thông tin xác thực
+      } catch (parseError) {
+        console.error("Failed to parse token:", parseError);
+        clearAuthToken();
         clearAuth();
-        console.log("No token found, cleared auth data");
+        setIsInitialized(true);
+        setIsLoading(false);
+        setStoreLoading(false);
+        return;
+      }
+
+      // Thử gọi API để lấy thông tin chi tiết (không bắt buộc)
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+        const response = await fetchData<GetMeResponse>(`/auth/me`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        updateUserInfo(response.user, response.profile);
+        console.log("User data loaded from API successfully");
+      } catch (error) {
+        console.warn("Failed to fetch user data from API, using token data only:", error);
+        // Không xóa auth ở đây vì chúng ta đã có thông tin cơ bản từ token
+        // Tạo user object từ token data
+        if (tokenData) {
+          const basicUser = {
+            id: tokenData.sub || tokenData.id || '',
+            email: tokenData.email || '',
+            role: tokenData.role,
+            name: tokenData.name || tokenData.email || 'User'
+          };
+          updateUserInfo(basicUser, null);
+          console.log("Using basic user data from token");
+        }
       }
     } catch (error) {
       console.error("Error initializing auth:", error);
       clearAuth();
     } finally {
+      console.log("Auth initialization completed");
       setIsLoading(false);
       setStoreLoading(false);
       setIsInitialized(true);
     }
-  }, [updateUserInfo, clearAuth, updateUserRole, user, setStoreLoading]);
+  }, [updateUserInfo, clearAuth, updateUserRole, setStoreLoading]);
 
   // Chỉ chạy một lần khi component được mount
   useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
+    if (!isInitialized) {
+      initializeAuth();
+    }
+  }, []); // Empty dependency array to run only once
 
   return { isInitialized, isLoading };
 }

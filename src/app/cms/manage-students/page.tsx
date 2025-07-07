@@ -90,7 +90,7 @@ export default function StudentsPage() {
     if (classes.length === 0) {
       fetchClasses();
     }
-  }, [fetchStudents, fetchClasses, students.length, classes.length]);
+  }, []); // Chỉ chạy một lần khi component mount
 
   const handleAddStudent = async (data: AddStudentFormValues) => {
     if (!user || user.role !== "admin") {

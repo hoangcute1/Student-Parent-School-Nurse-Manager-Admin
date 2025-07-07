@@ -8,6 +8,7 @@ import {
 } from "@/lib/type/students";
 import { fetchData } from "../api";
 import { Update } from 'next/dist/build/swc/types';
+import { getAuthToken } from '../auth/token';
 
 
 /**
@@ -26,13 +27,14 @@ export const getStudentById = async (id: string): Promise<Student> => {
  * Get all students
  */
 export const getAllStudents = async (): Promise<Student[]> => {
-  try {
-    const response = await fetchData<StudentResponse>(`/students`);
-    return response.data || [];
-  } catch (error) {
-    console.error("Error fetching all students:", error);
-    throw error;
-  }
+  const token = getAuthToken();
+   console.log("Token:", token);
+  const res = await fetch("http://localhost:3001/students", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const json = await res.json();
+  return json.data; // ✅ trả về mảng
 };
 
 /**

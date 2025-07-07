@@ -13,6 +13,10 @@ export interface TreatmentHistory {
   description: string;
   contactStatus: string;
   reporter?: string;
+  status?: "processing" | "resolved" | "pending";
+  notes?: string;
+  contactParent?: boolean;
+  actionTaken?: string;
   createdAt?: string;
   updatedAt?: string;
   // Thêm các trường khác nếu backend trả về

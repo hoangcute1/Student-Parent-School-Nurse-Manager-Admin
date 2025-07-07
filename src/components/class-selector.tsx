@@ -26,7 +26,7 @@ export function ClassSelector({ onClassChange }: ClassSelectorProps) {
 
   useEffect(() => {
     fetchClasses();
-  }, [fetchClasses]);
+  }, []); // Chỉ chạy một lần khi component mount
 
   const handleClassChange = (value: string) => {
     if (value === "all") {

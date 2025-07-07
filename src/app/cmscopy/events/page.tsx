@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAllStudents} from "@/lib/api/student";
+import { getAllStaffs } from "@/lib/api/staff";
 import {
   AlertTriangle,
   Plus,
@@ -11,7 +13,7 @@ import {
   Phone,
   FileText,
   CheckCircle,
-  X,
+
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -50,13 +52,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Student } from "@/lib/type/students";
+import { fetchData } from "@/lib/api/api";
 
 export default function MedicalEvents() {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
+  const [studentsError, setStudentsError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
 
@@ -69,6 +75,12 @@ export default function MedicalEvents() {
 
   // State for selected event
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+
+  const [treatmentHistories, setTreatmentHistories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [staffs, setStaffs] = useState<any[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Form schema for adding/updating event
   const eventFormSchema = z.object({
@@ -150,6 +162,31 @@ export default function MedicalEvents() {
     },
   });
 
+  
+  // Fetch students from API
+  const fetchStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      setStudentsError(null);
+      const data = await getAllStudents();
+      setStudents(data);
+      console.log("Students loaded:", data);
+    } catch (error: any) {
+      const errorMessage = error?.message || "Không thể tải danh sách sinh viên";
+      setStudentsError(errorMessage);
+      setStudents([]);
+      console.error("Error fetching students:", error);
+    } finally {
+      setStudentsLoading(false);
+      setIsInitialLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+
   // Handle form submissions
   const onAddEvent = (data: z.infer<typeof eventFormSchema>) => {
     console.log("Add event data:", data);
@@ -209,6 +246,28 @@ export default function MedicalEvents() {
     emergencyProcessForm.reset();
     setEmergencyProcessOpen(true);
   };
+
+  // Show loading state for initial data load
+  if (isInitialLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-teal-800">
+            Sự cố Y tế
+          </h1>
+          <p className="text-teal-600">
+            Quản lý và xử lý các sự cố y tế đột xuất
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-4"></div>
+            <p className="text-teal-600">Đang tải dữ liệu...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -357,13 +416,12 @@ export default function MedicalEvents() {
                 {activeEvents.map((event, index) => (
                   <div
                     key={index}
-                    className={`p-4 rounded-lg border-l-4 ${
-                      event.priority === "Cao"
+                    className={`p-4 rounded-lg border-l-4 ${event.priority === "Cao"
                         ? "border-l-red-500 bg-red-50"
                         : event.priority === "Trung bình"
-                        ? "border-l-yellow-500 bg-yellow-50"
-                        : "border-l-blue-500 bg-blue-50"
-                    }`}
+                          ? "border-l-yellow-500 bg-yellow-50"
+                          : "border-l-blue-500 bg-blue-50"
+                      }`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -393,8 +451,8 @@ export default function MedicalEvents() {
                           event.priority === "Cao"
                             ? "bg-red-100 text-red-800"
                             : event.priority === "Trung bình"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-blue-100 text-blue-800"
                         }
                       >
                         {event.priority}
@@ -679,9 +737,39 @@ export default function MedicalEvents() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Học sinh</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Tên học sinh" {...field} />
-                      </FormControl>
+                      <Select onValueChange={(val) => {
+                        field.onChange(val);
+                        setSelectedStudentId(val);
+                      }} disabled={studentsLoading}>
+                        <SelectTrigger className="w-full">
+                          {studentsLoading ? "Đang tải..." : "Chọn học sinh"}
+                        </SelectTrigger>
+                        <SelectContent>
+                          {studentsError ? (
+                            <div className="p-2 text-red-600 text-sm">
+                              {studentsError}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={fetchStudents}
+                                className="ml-2"
+                              >
+                                Thử lại
+                              </Button>
+                            </div>
+                          ) : students.length === 0 && !studentsLoading ? (
+                            <div className="p-2 text-gray-500 text-sm">
+                              Không có sinh viên nào
+                            </div>
+                          ) : (
+                            students.map(student => (
+                              <SelectItem key={student._id} value={student._id}>
+                                {student.name} ({student.studentId})
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -730,7 +818,7 @@ export default function MedicalEvents() {
                   )}
                 />
 
-                {/* <FormField
+                <FormField
                   control={addEventForm.control}
                   name="reporter"
                   render={({ field }) => (
@@ -742,7 +830,7 @@ export default function MedicalEvents() {
                       <FormMessage />
                     </FormItem>
                   )}
-                /> */}
+                />
 
                 <FormField
                   control={addEventForm.control}
@@ -875,9 +963,42 @@ export default function MedicalEvents() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Học sinh</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Tên học sinh" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn học sinh" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {studentsError ? (
+                            <div className="p-2 text-red-600 text-sm">
+                              {studentsError}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={fetchStudents}
+                                className="ml-2"
+                              >
+                                Thử lại
+                              </Button>
+                            </div>
+                          ) : students.length === 0 && !studentsLoading ? (
+                            <div className="p-2 text-gray-500 text-sm">
+                              Không có sinh viên nào
+                            </div>
+                          ) : studentsLoading ? (
+                            <div className="p-2 text-gray-500 text-sm">
+                              Đang tải danh sách sinh viên...
+                            </div>
+                          ) : (
+                            students.map((student) => (
+                              <SelectItem key={student._id} value={student._id}>
+                                {student.name} ({student.studentId})
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -1193,8 +1314,8 @@ export default function MedicalEvents() {
                         selectedEvent.priority === "Cao"
                           ? "bg-red-100 text-red-800"
                           : selectedEvent.priority === "Trung bình"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
                       }
                     >
                       {selectedEvent.priority || "Đã xử lý"}
@@ -1479,9 +1600,6 @@ const activeEvents = [
 const completedEvents = [
   {
     title: "Sốt cao",
-    student: "Phạm Thị Dung",
-    class: "Lớp 2A",
-    date: "15/12/2024",
   },
   {
     title: "Chảy máu cam",
@@ -1579,3 +1697,5 @@ const responseTimeStats = [
     color: "bg-gray-500",
   },
 ];
+
+

@@ -131,7 +131,7 @@ export default function ParentHealthRecords() {
       fetchStudents();
       fetchRecords();
     }
-  }, [isAuthenticated, role, fetchRecords, fetchStudents]);
+  }, [isAuthenticated, role]); // Chỉ phụ thuộc vào auth state
 
   // Map student data to UI health records
   const healthRecords: HealthRecord[] = students.map((student) => {
