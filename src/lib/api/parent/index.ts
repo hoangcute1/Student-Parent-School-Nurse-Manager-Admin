@@ -1,7 +1,16 @@
 import { API_URL } from "@/lib/env";
 import { Parent } from "@/lib/type/parents";
-import { ParentFormValues } from "@/app/cms/manage-parents/_components/add-parent-dialog";
 import { fetchData } from "../api";
+
+// Định nghĩa lại type cho form tạo phụ huynh, các trường phẳng
+export interface ParentFormValues {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+  address: string;
+  gender: string;
+}
 
 // Get all parents
 export const getAllParents = async (): Promise<Parent[]> => {
@@ -18,19 +27,10 @@ export const createParent = async (
   formData: ParentFormValues
 ): Promise<Parent> => {
   try {
-    // Convert ParentFormValues to the format expected by the API
-    const parentData = {
-      ...formData,
-      user: {
-        username: formData.email,
-        password: "defaultPassword123", // This might need to be generated or prompted
-        role: "parent",
-      },
-    };
-
-    return await fetchData<Parent>("/parents", {
+    // Gửi trực tiếp các trường phẳng, không thêm user lồng bên trong
+    return await fetchData<Parent>("/parents/create-parent-with-user-profile", {
       method: "POST",
-      body: JSON.stringify(parentData),
+      body: JSON.stringify(formData),
     });
   } catch (error) {
     console.error("Error creating parent:", error);

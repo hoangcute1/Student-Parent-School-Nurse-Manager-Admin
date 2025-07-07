@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Clock, Plus, Search, Filter } from "lucide-react";
-import Link from "next/link";
-
+import { useEffect } from "react";
+import { Clock, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,17 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -32,410 +20,263 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
+import { useMedicationStore } from "@/stores/medication-store";
+import { useAuthStore } from "@/stores/auth-store";
 
-// Định nghĩa kiểu dữ liệu cho medication
-interface Medication {
-  studentName: string;
-  medicationName: string;
-  dosage: string;
-  schedule: string;
-  status: string;
-  frequency?: string;
-  startDate?: string;
-  endDate?: string;
-  reason?: string;
-  instructions?: string;
-  parentContact?: string;
-}
+import React, { useState } from "react";
+import ViewDeliveryDialog from "./_components/view-delivery-dialog";
+import type { MedicineDeliveryByParent } from "@/lib/type/medicine-delivery";
+import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 export default function MedicationsPage() {
-  const [isAddMedicineOpen, setIsAddMedicineOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedMedication, setSelectedMedication] =
-    useState<Medication | null>(null);
+  const { isAuthenticated, user } = useAuthStore();
+  const {
+    medicineDeliveryByParentId,
+    isLoading,
+    fetchMedicineDeliveryByParentId,
+    deleteMedicineDelivery,
+  } = useMedicineDeliveryStore();
+  const { medications } = useMedicationStore();
+  const {
+    fetchStudentsByParent,
+  } = useParentStudentsStore();
 
-  const handleSubmitMedicine = () => {
-    // TODO: Implement medicine submission logic
-    setIsAddMedicineOpen(false);
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
+  const [selectedDelivery, setSelectedDelivery] =
+    useState<MedicineDeliveryByParent | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchMedicineDeliveryByParentId();
+    }
+  }, [isAuthenticated, user, fetchMedicineDeliveryByParentId]);
+
+  const handleShowDetail = (delivery: any) => {
+    setSelectedDelivery(delivery);
+    setShowDetail(true);
   };
 
-  const handleViewDetail = (medication: Medication) => {
-    setSelectedMedication(medication);
-    setIsDetailOpen(true);
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      alert("Không tìm thấy ID đơn thuốc để xoá!");
+      return;
+    }
+    console.log("Attempting to delete medicine delivery with ID:", id);
+    if (
+      !window.confirm(
+        "⚠️ LƯU Ý: Bạn có chắc muốn xoá hoàn toàn đơn thuốc này?\n\n" +
+          "Khi xóa, đơn thuốc sẽ bị XÓA HOÀN TOÀN khỏi hệ thống, " +
+          "bao gồm cả view của quản trị viên và nhân viên y tế.\n\n" +
+          "Hành động này KHÔNG THỂ HOÀN TÁC!"
+      )
+    )
+      return;
+    setDeletingId(id);
+    try {
+      console.log("Calling deleteMedicineDelivery...");
+      await deleteMedicineDelivery(id);
+      console.log("Delete successful, refreshing data...");
+      await fetchMedicineDeliveryByParentId();
+      console.log("Data refreshed successfully");
+      alert("✅ Đã xóa đơn thuốc thành công!");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("❌ Xoá thất bại! Vui lòng thử lại.");
+    }
+    setDeletingId(null);
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Gửi thuốc cho học sinh
-        </h1>
-        <p className="text-blue-600">Theo dõi thuốc của học sinh</p>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
-              <Input
-                type="search"
-                placeholder="Tìm kiếm thuốc..."
-                className="w-[300px] pl-8 border-blue-200 focus:border-blue-500"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-sky-200 p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <div className="space-y-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-sky-800">
+                💊 Quản lý thuốc học sinh
+              </h1>
+              <p className="text-sky-600 text-lg">
+                Theo dõi và quản lý việc gửi thuốc cho học sinh
+              </p>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="border-blue-200 text-blue-700 hover:bg-blue-50"
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
-          </div>
-          <Dialog open={isAddMedicineOpen} onOpenChange={setIsAddMedicineOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="mr-2 h-4 w-4" /> Gửi thuốc mới
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <div className="flex justify-between items-start">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Thêm đơn thuốc
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl rounded-2xl border-sky-200 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-xl">
-                    Yêu cầu gửi thuốc cho học sinh
+                  <DialogTitle className="text-sky-800">
+                    Thêm đơn thuốc mới
                   </DialogTitle>
-                  <DialogDescription className="text-gray-600">
-                    Điền thông tin chi tiết về thuốc cần gửi cho con em
+                  <DialogDescription className="text-sky-600">
+                    Nhập thông tin đơn thuốc cho học sinh
                   </DialogDescription>
                 </DialogHeader>
-              </div>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="student">Học sinh</Label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Chọn học sinh" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="student1">
-                        Nguyễn Văn An - Lớp 1A
-                      </SelectItem>
-                      <SelectItem value="student2">
-                        Trần Thị Bình - Lớp 2B
-                      </SelectItem>
-                      <SelectItem value="student3">
-                        Lê Hoàng Cường - Lớp 3A
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="medicineName">Tên thuốc</Label>
-                    <Input
-                      id="medicineName"
-                      placeholder="VD: Paracetamol 500mg"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">Số lượng</Label>
-                    <Input id="quantity" type="number" placeholder="VD: 10" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="dosage">Liều dùng</Label>
-                    <Input id="dosage" placeholder="VD: 1 viên/lần" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="frequency">Tần suất</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn tần suất" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="once">1 lần/ngày</SelectItem>
-                        <SelectItem value="twice">2 lần/ngày</SelectItem>
-                        <SelectItem value="three">3 lần/ngày</SelectItem>
-                        <SelectItem value="asneeded">Khi cần thiết</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="startDate">Ngày bắt đầu</Label>
-                    <Input id="startDate" type="date" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endDate">Ngày kết thúc</Label>
-                    <Input id="endDate" type="date" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reason">Lý do sử dụng</Label>
-                  <Textarea
-                    id="reason"
-                    placeholder="VD: Điều trị cảm lạnh, sốt..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="instructions">Hướng dẫn đặc biệt</Label>
-                  <Textarea
-                    id="instructions"
-                    placeholder="VD: Uống sau ăn, không uống khi đói..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="parentContact">Số điện thoại liên hệ</Label>
-                  <Input
-                    id="parentContact"
-                    placeholder="Số điện thoại phụ huynh"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsAddMedicineOpen(false)}
-                >
-                  Hủy
-                </Button>
-                <Button
-                  className="bg-teal-600 hover:bg-teal-700"
-                  onClick={handleSubmitMedicine}
-                >
-                  Gửi yêu cầu
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+                <AddMedicineDeliveryForm />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
-        <div className="rounded-md border border-blue-200">
-          <Table>
-            <TableHeader className="bg-blue-50">
-              <TableRow>
-                <TableHead className="text-blue-800">Tên học sinh</TableHead>
-                <TableHead className="text-blue-800">Tên thuốc</TableHead>
-                <TableHead>Liều lượng</TableHead>
-                <TableHead>Thời gian dùng</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {studentMedications.map((med, index) => (
-                <TableRow
-                  key={index}
-                  className="cursor-pointer hover:bg-muted/50"
-                >
-                  <TableCell className="font-medium">
-                    {med.studentName}
-                  </TableCell>
-                  <TableCell>{med.medicationName}</TableCell>
-                  <TableCell>{med.dosage}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <Clock className="mr-2 h-4 w-4 text-orange-500" />
-                      {med.schedule}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        med.status === "Đang dùng" ? "default" : "outline"
-                      }
-                    >
-                      {med.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewDetail(med)}
-                    >
-                      Chi tiết
-                    </Button>
-                  </TableCell>
+        {/* Table Section */}
+        <div className="bg-white rounded-2xl shadow-lg border border-sky-200 overflow-hidden">
+          <div className="p-6 border-b border-sky-100">
+            <h2 className="text-xl font-semibold text-sky-800">
+              Danh sách đơn thuốc
+            </h2>
+            <p className="text-sky-600 mt-1">Tổng quan các đơn thuốc đã gửi</p>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-sky-100 to-blue-100">
+                <TableRow className="border-sky-200">
+                  <TableHead className="text-sky-800 font-semibold">
+                    Tên học sinh
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Tên thuốc
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Liều lượng
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Thời gian dùng
+                  </TableHead>
+                  <TableHead className="text-sky-800 font-semibold">
+                    Trạng thái
+                  </TableHead>
+                  <TableHead className="text-right text-sky-800 font-semibold">
+                    Thao tác
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+                        <p className="text-sky-600">Đang tải dữ liệu...</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : medicineDeliveryByParentId.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="text-4xl">📭</div>
+                        <p className="text-sky-600 text-lg">
+                          Không có đơn thuốc nào
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  medicineDeliveryByParentId.map((delivery, idx) => (
+                    <TableRow
+                      key={delivery.id || idx}
+                      className="hover:bg-sky-50 transition-colors border-sky-100"
+                    >
+                      <TableCell className="font-medium text-sky-900">
+                        {delivery.student.name || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-sky-800">
+                        {typeof delivery.medicine === "object" &&
+                        delivery.medicine !== null &&
+                        "name" in delivery.medicine
+                          ? (delivery.medicine as any).name
+                          : medications.find(
+                              (m) => m._id === delivery.medicine._id
+                            )?.name ||
+                            delivery.medicine ||
+                            "N/A"}
+                      </TableCell>
+                      <TableCell className="text-sky-700 font-medium">
+                        {delivery.per_dose}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-sky-700">
+                          <Clock className="mr-2 h-4 w-4 text-sky-500" />
+                          <span className="font-medium">
+                            {delivery.per_day} lần/ngày
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            delivery.status === "completed"
+                              ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+                              : delivery.status === "cancelled"
+                              ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+                              : delivery.status === "progress"
+                              ? "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
+                              : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
+                          }
+                        >
+                          {delivery.status === "pending"
+                            ? "Chờ xử lý"
+                            : delivery.status === "progress"
+                            ? "Đang làm"
+                            : delivery.status === "completed"
+                            ? "Đã hoàn thành"
+                            : delivery.status === "cancelled"
+                            ? "Đã huỷ"
+                            : delivery.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShowDetail(delivery)}
+                            className="border-sky-300 text-sky-700 hover:bg-sky-50 hover:border-sky-400"
+                          >
+                            Chi tiết
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(delivery.id)}
+                            disabled={deletingId === delivery.id}
+                            className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                            title="Xóa hoàn toàn đơn thuốc khỏi hệ thống. Quản trị viên và nhân viên y tế cũng sẽ không thể thấy đơn này."
+                          >
+                            {deletingId === delivery.id ? "Đang xoá..." : "Xoá"}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
 
-      {/* Dialog xem chi tiết thuốc */}
-      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Chi tiết thuốc</DialogTitle>
-            <DialogDescription className="text-gray-600">
-              Thông tin về thuốc và lịch uống của học sinh
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedMedication && (
-            <div className="space-y-6 py-4">
-              <div className="border-b pb-4">
-                <h3 className="font-medium text-blue-800 mb-2">
-                  Thông tin học sinh
-                </h3>
-                <p className="text-gray-800">
-                  {selectedMedication.studentName}
-                </p>
-              </div>
-
-              <div className="border-b pb-4">
-                <h3 className="font-medium text-blue-800 mb-2">
-                  Thông tin thuốc
-                </h3>
-                <p className="text-gray-800">
-                  {selectedMedication.medicationName}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 border-b pb-4">
-                <div>
-                  <h3 className="font-medium text-blue-800 mb-2">Liều dùng</h3>
-                  <p className="text-gray-800">{selectedMedication.dosage}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-blue-800 mb-2">Tần suất</h3>
-                  <p className="text-gray-800">
-                    {selectedMedication.schedule || "Chưa cập nhật"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 border-b pb-4">
-                <div>
-                  <h3 className="font-medium text-blue-800 mb-2">
-                    Ngày bắt đầu
-                  </h3>
-                  <p className="text-gray-800">
-                    {selectedMedication.startDate || "Chưa cập nhật"}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-blue-800 mb-2">
-                    Ngày kết thúc
-                  </h3>
-                  <p className="text-gray-800">
-                    {selectedMedication.endDate || "Chưa cập nhật"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="border-b pb-4">
-                <h3 className="font-medium text-blue-800 mb-2">
-                  Lý do sử dụng
-                </h3>
-                <p className="text-gray-800">
-                  {selectedMedication.reason || "Chưa cập nhật"}
-                </p>
-              </div>
-
-              <div className="border-b pb-4">
-                <h3 className="font-medium text-blue-800 mb-2">
-                  Hướng dẫn đặc biệt
-                </h3>
-                <p className="text-gray-800">
-                  {selectedMedication.instructions || "Không có"}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-blue-800 mb-2">
-                  Liên hệ phụ huynh
-                </h3>
-                <p className="text-gray-800">
-                  {selectedMedication.parentContact || "Chưa cập nhật"}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2">
-            <Button onClick={() => setIsDetailOpen(false)}>Đóng</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Modal chi tiết đơn thuốc */}
+      {showDetail && selectedDelivery && (
+        <ViewDeliveryDialog
+          delivery={selectedDelivery as MedicineDeliveryByParent}
+          medications={medications}
+          onClose={() => setShowDetail(false)}
+        />
+      )}
     </div>
   );
 }
-
-const studentMedications: Medication[] = [
-  {
-    studentName: "Nguyễn Văn An",
-    medicationName: "Paracetamol",
-    dosage: "500mg, 1 viên",
-    schedule: "Sau bữa trưa",
-    status: "Đang dùng",
-    frequency: "3 lần/ngày",
-    startDate: "15/06/2025",
-    endDate: "22/06/2025",
-    reason: "Điều trị sốt nhẹ, đau đầu",
-    instructions: "Uống sau bữa ăn, không uống khi đói",
-    parentContact: "0912345678",
-  },
-  {
-    studentName: "Trần Thị Bình",
-    medicationName: "Cetirizine",
-    dosage: "10mg, 1 viên",
-    schedule: "Sáng và tối",
-    status: "Đang dùng",
-    frequency: "2 lần/ngày",
-    startDate: "10/06/2025",
-    endDate: "25/06/2025",
-    reason: "Điều trị dị ứng theo mùa",
-    instructions: "Có thể gây buồn ngủ, uống vào buổi tối",
-    parentContact: "0923456789",
-  },
-  {
-    studentName: "Lê Hoàng Cường",
-    medicationName: "Salbutamol",
-    dosage: "2 nhát xịt",
-    schedule: "Khi có triệu chứng",
-    status: "Khi cần",
-    frequency: "Khi cần thiết",
-    startDate: "01/06/2025",
-    endDate: "30/06/2025",
-    reason: "Điều trị hen suyễn",
-    instructions: "Xịt khi có triệu chứng khó thở, không quá 4 lần/ngày",
-    parentContact: "0934567890",
-  },
-  {
-    studentName: "Phạm Minh Đức",
-    medicationName: "Vitamin D",
-    dosage: "400 IU, 1 viên",
-    schedule: "Sau bữa sáng",
-    status: "Đang dùng",
-    frequency: "1 lần/ngày",
-    startDate: "01/05/2025",
-    endDate: "31/07/2025",
-    reason: "Bổ sung vitamin D",
-    instructions: "Uống hàng ngày sau bữa sáng",
-    parentContact: "0945678901",
-  },
-  {
-    studentName: "Hoàng Thị Lan",
-    medicationName: "Ibuprofen",
-    dosage: "200mg, 1 viên",
-    schedule: "Khi đau đầu",
-    status: "Khi cần",
-    frequency: "Khi cần thiết",
-    startDate: "10/06/2025",
-    endDate: "10/07/2025",
-    reason: "Giảm đau nhẹ, đau đầu",
-    instructions: "Không dùng khi dị ứng, có thể gây kích ứng dạ dày",
-    parentContact: "0956789012",
-  },
-];

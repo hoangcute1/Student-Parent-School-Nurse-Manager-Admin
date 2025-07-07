@@ -18,26 +18,28 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out bg-blue-50 overflow-y-auto scrollbar-none",
+        "fixed left-0 top-0 z-40 h-screen w-64 transform border-r bg-background transition-all duration-200 ease-in-out bg-sky-50 overflow-y-auto scrollbar-none",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
         <Link
           href="/"
-          className="flex items-center gap-3 border-b border-blue-200 pb-4"
+          className="flex items-center gap-3 border-b border-sky-200 pb-4 group"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
-            <Heart className="h-7 w-7 text-white" />
+          <div className="relative p-2 rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+            <Heart className="h-7 w-7 text-white transition-all duration-300 group-hover:scale-110" />
           </div>
           <div>
-            <div className="font-bold text-blue-800 text-lg">
+            <div className="font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 bg-clip-text text-transparent text-lg">
               Y Tế Học Đường
             </div>
-            <div className="text-xs text-blue-600">Hệ thống quản lý y tế</div>
+            <div className="text-xs text-sky-500 font-medium opacity-80">
+              Hệ thống quản lý y tế
+            </div>
             <Badge
               variant="outline"
-              className="bg-blue-100 text-blue-700 text-xs mt-1"
+              className="bg-sky-100 text-sky-700 text-xs mt-1"
             >
               <Shield className="mr-1 h-3 w-3" />
               {role === "admin" ? "Quản trị viên" : "Nhân viên y tế"}
@@ -45,22 +47,22 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           </div>
         </Link>
         {/* Thống kê nhanh */}
-        <div className="bg-white rounded-lg border border-blue-200 p-3 mb-4">
+        <div className="bg-white rounded-lg border border-sky-200 p-3 mb-4">
           <div className="grid grid-cols-2 gap-2 text-center">
             <div>
-              <div className="text-lg font-bold text-blue-800">248</div>
-              <div className="text-xs text-blue-600">Học sinh</div>
+              <div className="text-lg font-bold text-sky-800">248</div>
+              <div className="text-xs text-sky-600">Học sinh</div>
             </div>
             <div>
               <div className="text-lg font-bold text-orange-600">12</div>
-              <div className="text-xs text-blue-600">Cần theo dõi</div>
+              <div className="text-xs text-sky-600">Cần theo dõi</div>
             </div>
           </div>
         </div>{" "}
         <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
           {role === "admin" && (
             <>
-              <div className="text-xs font-medium text-blue-500 uppercase tracking-wider mb-2 mt-2">
+              <div className="text-xs font-medium text-sky-500 uppercase tracking-wider mb-2 mt-2">
                 Quản lý hệ thống
               </div>
               {adminNavLinks.map((item) => {
@@ -69,21 +71,21 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
-                      isActive ? "bg-blue-100" : ""
+                    className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${
+                      isActive ? "bg-sky-100" : ""
                     }`}
                   >
                     <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                     <div className="flex-1">
                       <div className="font-medium">{item.label}</div>
-                      <div className="text-xs text-blue-600 mt-0.5">
+                      <div className="text-xs text-sky-600 mt-0.5">
                         {item.description}
                       </div>
                     </div>
                   </Link>
                 );
               })}
-              <div className="border-t border-blue-200 my-2" />
+              <div className="border-t border-sky-200 my-2" />
             </>
           )}
 
@@ -94,14 +96,14 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-blue-700 transition-all hover:text-blue-900 hover:bg-blue-100 group border border-transparent hover:border-blue-200 ${
-                  isActive ? "bg-blue-100" : ""
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${
+                  isActive ? "bg-sky-100" : ""
                 }`}
               >
                 <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 <div className="flex-1">
                   <div className="font-medium">{item.label}</div>
-                  <div className="text-xs text-blue-600 mt-0.5">
+                  <div className="text-xs text-sky-600 mt-0.5">
                     {item.description}
                   </div>
                 </div>

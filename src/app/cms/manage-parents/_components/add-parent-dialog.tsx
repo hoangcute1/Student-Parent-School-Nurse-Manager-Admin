@@ -1,191 +1,168 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogFooter, 
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import type { User as AppUser } from "@/lib/type/users";
 
-const parentFormSchema = z.object({
-  name: z.string().min(1, { message: "Họ và tên không được để trống" }),
-  phone: z.string().min(1, { message: "Số điện thoại không được để trống" }),
-  address: z.string().min(1, { message: "Địa chỉ không được để trống" }),
-  email: z.string().email({ message: "Email không hợp lệ" }),
-});
-
-export type ParentFormValues = z.infer<typeof parentFormSchema>;
-
-interface AuthUser {
+export interface ParentFormValues {
   email: string;
-  role: string;
+  password: string;
+  name: string;
+  phone: string;
+  address: string;
+  gender?: string;
 }
 
 interface AddParentDialogProps {
-  onSubmit: (data: ParentFormValues) => Promise<void>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: ParentFormValues) => void;
+  onCancel: () => void;
 }
 
-export function AddParentDialog({ onSubmit }: AddParentDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<AuthUser | null>(null);
+export function AddParentDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  onCancel,
+}: AddParentDialogProps) {
+  const [form, setForm] = useState<ParentFormValues>({
+    email: "",
+    password: "password123",
+    name: "",
+    phone: "",
+    address: "",
+    gender: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Get user data from localStorage
-    const authData = localStorage.getItem("authData");
-    if (!authData) return;
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    // Không cho phép thay đổi password
+    if (e.target.name === "password") return;
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    try {
-      const data = JSON.parse(authData);
-      if (data.user) {
-        setUser(data.user);
-      }
-    } catch (error) {
-      console.error("Error parsing auth data:", error);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!form.email.trim() || !form.password.trim() || !form.name.trim()) {
+      setError("Vui lòng nhập đầy đủ thông tin bắt buộc.");
+      return;
     }
-  }, []);
-  const form = useForm<ParentFormValues>({
-    resolver: zodResolver(parentFormSchema),
-    defaultValues: {
-      name: "",
-      phone: "",
-      address: "",
-      email: "",
-    },
-  });
-
-  const handleSubmit = async (data: ParentFormValues) => {
+    setLoading(true);
     try {
-      await onSubmit(data);
-      setOpen(false);
-      form.reset();
+      await onSubmit({
+        email: form.email,
+        password: form.password,
+        name: form.name,
+        phone: form.phone,
+        address: form.address,
+        gender: form.gender,
+      });
       toast({
         title: "Thành công",
         description: "Đã thêm phụ huynh mới vào hệ thống",
         variant: "default",
       });
+      onOpenChange(false);
     } catch (err: any) {
       console.error("Failed to submit form:", err);
-      // Set form error
-      form.setError("root", {
-        type: "serverError",
-        message: err.message || "Không thể thêm phụ huynh, vui lòng thử lại",
-      });
+      setError(err.message || "Không thể thêm phụ huynh, vui lòng thử lại");
       toast({
         title: "Lỗi",
         description:
           err.message || "Không thể thêm phụ huynh, vui lòng thử lại",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
-    user?.role === "admin" && (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm phụ huynh
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-sky-700">Thêm phụ huynh mới</DialogTitle>
+        </DialogHeader>
+        <form
+          id="add-parent-form"
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-3 py-2"
+        >
+          <Input
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email"
+            type="email"
+            required
+          />
+          <Input
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Mật khẩu"
+            required
+            readOnly
+          />
+          <Input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Họ và tên"
+            required
+          />
+          <Input
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="Số điện thoại"
+          />
+          <Input
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+            placeholder="Địa chỉ"
+          />
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+          >
+            <option value="">Chọn giới tính</option>
+            <option value="male">Nam</option>
+            <option value="female">Nữ</option>
+          </select>
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+        </form>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            type="button"
+            disabled={loading}
+          >
+            Huỷ
           </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-[500px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Thêm phụ huynh mới</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
-            >
-              {form.formState.errors.root && (
-                <div className="bg-red-50 p-3 rounded-md text-red-600 text-sm">
-                  {form.formState.errors.root.message}
-                </div>
-              )}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Họ và tên</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nguyễn Văn A" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Số điện thoại</FormLabel>
-                    <FormControl>
-                      <Input placeholder="0123456789" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Địa chỉ</FormLabel>
-                    <FormControl>
-                      <Input placeholder="123 Đường ABC, Quận 1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="example@gmail.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={form.formState.isSubmitting}
-                >
-                  {form.formState.isSubmitting ? "Đang lưu..." : "Lưu"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    )
+          <Button type="submit" form="add-parent-form" disabled={loading} className="bg-sky-700 text-white hover:bg-sky-600 ">
+            {loading ? "Đang thêm..." : "Thêm"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

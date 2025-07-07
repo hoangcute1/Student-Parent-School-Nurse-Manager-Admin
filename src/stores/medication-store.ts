@@ -5,6 +5,9 @@ import {
   createMedication as apiAddMedication,
   updateMedicationForm as apiUpdateMedication,
   deleteMedication as apiDeleteMedication,
+  createMedication,
+  updateMedicationForm,
+  deleteMedication,
 } from "@/lib/api/medication";
 import { Medication } from "@/lib/type/medications";
 
@@ -28,10 +31,10 @@ export const useMedicationStore = create<MedicationStore>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // Call the API
-      const data = (await getAllMedications()).data || [];
+      const data = (await getAllMedications()) || [];
 
       set({
-        medications: data,
+        medications: Array.isArray(data) ? data : [data],
         error: null,
       });
     } catch (err: any) {
@@ -48,7 +51,7 @@ export const useMedicationStore = create<MedicationStore>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // Call the API
-      const newMedication = await apiAddMedication(medicationData);
+      const newMedication = await createMedication(medicationData);
 
       set((state) => ({
         medications: [...state.medications, newMedication],
@@ -71,7 +74,7 @@ export const useMedicationStore = create<MedicationStore>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // Call the API
-      const updatedMedication = await apiUpdateMedication(id, medicationData);
+      const updatedMedication = await updateMedicationForm(id, medicationData);
 
       set((state) => {
         const updatedMedications = state.medications.map((med) =>
@@ -100,7 +103,7 @@ export const useMedicationStore = create<MedicationStore>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // Call the API
-      await apiDeleteMedication(id);
+      await deleteMedication(id);
 
       set((state) => ({
         medications: state.medications.filter((med) => med._id !== id),

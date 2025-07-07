@@ -30,6 +30,8 @@ interface GetAllStaffsResponse {
   limit: number;
 }
 
+
+
 interface UpdateStaffForm
   extends Partial<
     Omit<StaffAccount & StaffProfile, "_id" | "created_at" | "updated_at">

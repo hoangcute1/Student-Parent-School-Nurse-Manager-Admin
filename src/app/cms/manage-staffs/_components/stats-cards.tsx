@@ -24,16 +24,16 @@ export function StatsCards({
 }: StatsCardsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card className="border-blue-100">
+      <Card className="border-sky-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-blue-600">
+          <CardTitle className="text-sm font-medium text-sky-600">
             Tổng số nhân viên
           </CardTitle>
-          <UserRound className="h-4 w-4 text-blue-500" />
+          <UserRound className="h-4 w-4 text-sky-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-blue-900">{totalStaffs}</div>
-          <p className="text-xs text-blue-500">Nhân viên trong hệ thống</p>
+          <div className="text-2xl font-bold text-sky-900">{totalStaffs}</div>
+          <p className="text-xs text-sky-500">Nhân viên trong hệ thống</p>
         </CardContent>
       </Card>
       <Card className="border-green-100">

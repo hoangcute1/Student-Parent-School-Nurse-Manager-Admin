@@ -3,28 +3,31 @@ import { cn } from "@/lib/utils";
 import { Heart, MessageSquare, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { parentNav, studentNav } from "../_constants/sidebar";
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useStudentStore } from "@/stores/student-store";
-import { useStudentParentStore } from "@/stores/student-parent-store";
-import { Student, StudentParentResponse } from "@/lib/type/students";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
+import { ParentStudents } from "@/lib/type/parent-students";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
 export default function Sidebar({ isOpen }: SidebarProps) {
-  const { studentsData, fetchStudentsByParent, isLoading } =
-    useStudentParentStore();
+  const {
+    studentsData,
+    fetchStudentsByParent,
+    isLoading,
+    selectedStudent,
+    setSelectedStudent,
+  } = useParentStudentsStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   const [showStudentSection, setShowStudentSection] = useState(true);
   const [showStudentList, setShowStudentList] = useState(false);
   const [showParentSection, setShowParentSection] = useState(true);
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentParentResponse | null>(studentsData[0] || null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -37,6 +40,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       setSelectedStudent(null);
     }
   }, [studentsData]);
+    // Chỉ gọi fetchStudentsByParent khi user đã authenticated và có role parent
+    if (isAuthenticated && user && user.role === "parent") {
+      fetchStudentsByParent();
+    }
+  }, [fetchStudentsByParent, isAuthenticated, user]);
 
   return (
     <aside
@@ -48,15 +56,17 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     >
       {/* Header section */}
       <div className="p-4 border-b border-blue-200">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
-            <Heart className="h-7 w-7 text-white" />
+        <div className="flex items-center gap-3 group">
+          <div className="relative p-2 rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+            <Heart className="h-7 w-7 text-white transition-all duration-300 group-hover:scale-110" />
           </div>
           <Link href="/" className="flex-1">
-            <div className="font-bold text-blue-800 text-lg">
+            <div className="font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 bg-clip-text text-transparent text-lg">
               Y Tế Học Đường{" "}
             </div>
-            <div className="text-xs text-blue-600">Dành cho phụ huynh</div>
+            <div className="text-xs text-blue-500 font-medium opacity-80">
+              Dành cho phụ huynh
+            </div>
             <Badge
               variant="outline"
               className="bg-blue-100 text-blue-700 text-xs mt-1"
@@ -182,7 +192,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                             </div>
                             <div className="text-xs text-blue-600">
                               Lớp{" "}
-                              {(selectedStudent?.student.class.name as any) ||
+                              {(selectedStudent?.student.class?.name as any) ||
                                 "N/A"}{" "}
                             </div>
                           </div>
@@ -206,9 +216,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                           {studentsData.map(
                             (studentData) =>
                               selectedStudent &&
-                              studentData._id !== selectedStudent._id && (
+                              studentData.student._id !==
+                                selectedStudent.student._id && (
                                 <button
-                                  key={studentData._id}
+                                  key={studentData.student._id}
                                   onClick={() => {
                                     setSelectedStudent(studentData);
                                     setShowStudentList(false);
@@ -221,8 +232,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                                     </span>
                                     <span className="text-xs text-blue-600">
                                       Lớp{" "}
-                                      {studentData.student.class.name || "N/A"}{" "}
-                                      •{" "}
+                                      {studentData.student.class?.name || "N/A"}{" "}
                                     </span>
                                   </div>
                                 </button>

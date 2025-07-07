@@ -1,15 +1,12 @@
-import { MedicationFormValues } from "@/app/cms/medications/_components/add-medication-dialog";
 import { fetchData } from "./api";
-import { MedicationListResponse } from "../type/medications";
-
-import { Medication } from "../type/medications";
+import { Medication, MedicationFormValues } from "../type/medications";
 
 /**
  * Get all medications from the system
  */
-export const getAllMedications = async (): Promise<MedicationListResponse> => {
+export const getAllMedications = async (): Promise<Medication[]> => {
   try {
-    return await fetchData<MedicationListResponse>("/medicines");
+    return await fetchData<Medication[]>("/medicines");
   } catch (error) {
     console.error("Error fetching medications:", error);
     throw error;
@@ -20,19 +17,42 @@ export const createMedication = async (
   formData: MedicationFormValues
 ): Promise<Medication> => {
   try {
-    // Create new medication object matching the Medication interface
-    const newMedication = {
-      name: formData.name,
-      dosage: formData.dosage || "",
-      unit: Number(formData.unit),
-      type: formData.type || "",
-      usage_instructions: formData.usage_instructions || "",
-      side_effects: formData.side_effects || "",
-      contraindications: formData.contraindications || "",
-      description: formData.description || "",
+    // Tạo object mới đúng chuẩn interface Medication
+    const newMedication: Partial<Medication> = {
+      name: formData.name ?? "",
+      dosage: formData.dosage ?? "",
+      quantity:
+        formData.quantity !== undefined && formData.quantity !== null
+          ? Number(formData.quantity)
+          : 0,
+      unit:
+        formData.unit !== undefined && formData.unit !== null
+          ? String(formData.unit)
+          : "",
+      type: formData.type ?? "",
+      usage_instructions: formData.usage_instructions ?? "",
+      side_effects: formData.side_effects ?? "",
+      contraindications: formData.contraindications ?? "",
+      description: formData.description ?? "",
+      manufacturer: (formData as any).manufacturer || undefined,
+      image: (formData as any).image
+        ? String((formData as any).image)
+        : undefined,
+      is_prescription_required:
+        typeof (formData as any).is_prescription_required === "string"
+          ? (formData as any).is_prescription_required === "true"
+          : Boolean((formData as any).is_prescription_required),
     };
 
-    // Send API request
+    // Xóa các trường undefined/null/rỗng để API không nhận giá trị rỗng
+    Object.keys(newMedication).forEach((key) => {
+      const v = (newMedication as any)[key];
+      if (v === undefined || v === null || v === "") {
+        delete (newMedication as any)[key];
+      }
+    });
+
+    // Gửi request
     return await fetchData<Medication>("/medicines", {
       method: "POST",
       body: JSON.stringify(newMedication),
@@ -64,11 +84,12 @@ export const updateMedicationForm = async (
 /**
  * Delete a medication by ID
  */
-export const deleteMedication = async (medicationId: string): Promise<void> => {
+export const deleteMedication = async (id: string): Promise<void> => {
   try {
-    await fetchData<void>(`/medicines/${medicationId}`, {
+    await fetchData(`/medicine-deliveries/${id}`, {
       method: "DELETE",
     });
+    return;
   } catch (error) {
     console.error("Error deleting medication:", error);
     throw error;

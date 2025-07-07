@@ -58,7 +58,17 @@ export const useParentStore = create<ParentStore>((set) => ({
   addParent: async (data: ParentFormValues) => {
     try {
       set({ isLoading: true, error: null });
-      const newParent = await createParent(data);
+      // Transform data to match the API's ParentFormValues shape
+      const { name, phone, address, gender, email, password } = data as any;
+      const apiParentFormValues = {
+        email,
+        password,
+        name,
+        phone,
+        address,
+        gender,
+      };
+      const newParent = await createParent(apiParentFormValues);
 
       // Update the store with the new parent
       set((state) => ({

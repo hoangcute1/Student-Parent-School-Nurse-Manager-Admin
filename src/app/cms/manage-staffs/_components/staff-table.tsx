@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Edit, Plus, MoreHorizontal } from "lucide-react";
+import { Eye, Edit, Plus, MoreHorizontal, DeleteIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,14 +17,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Staff {
-  name: string;
-  phone: string;
-  address: string;
-  email: string;
-  createdAt: string;
-}
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Staff } from "@/lib/type/staff";
+import { useStaffStore } from "@/stores/staff-store";
+import { ViewStaffDialog } from "./view-staff-dialog";
+import { UpdateStaffDialog } from "./update-staff-dialog";
+import { deleteStaff } from "@/lib/api/staff";
 
 interface StaffTableProps {
   staffs: Staff[];
@@ -33,17 +32,24 @@ interface StaffTableProps {
 }
 
 export function StaffTable({ staffs, isLoading, error }: StaffTableProps) {
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [editStaff, setEditStaff] = useState<Staff | null>(null);
+  const [deleteStaffState, setDeleteStaff] = useState<Staff | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
+  const { fetchStaffs } = useStaffStore();
+
   return (
-    <div className="rounded-md border border-blue-200">
+    <div className="rounded-md border border-sky-200">
       <Table>
-        <TableHeader className="bg-blue-50">
+        <TableHeader className="bg-sky-50">
           <TableRow>
-            <TableHead className="text-blue-700">Họ và tên</TableHead>
-            <TableHead className="text-blue-700">Số điện thoại</TableHead>
-            <TableHead className="text-blue-700">Địa chỉ</TableHead>
-            <TableHead className="text-blue-700">Email</TableHead>
-            <TableHead className="text-blue-700">Ngày tạo</TableHead>
-            <TableHead className="text-right text-blue-700">
+            <TableHead className="text-sky-700">Họ và tên</TableHead>
+            <TableHead className="text-sky-700">Số điện thoại</TableHead>
+            <TableHead className="text-sky-700">Địa chỉ</TableHead>
+            <TableHead className="text-sky-700">Email</TableHead>
+            <TableHead className="text-sky-700">Ngày tạo</TableHead>
+            <TableHead className="text-right text-sky-700">
               Hành động
             </TableHead>
           </TableRow>
@@ -53,7 +59,7 @@ export function StaffTable({ staffs, isLoading, error }: StaffTableProps) {
             <TableRow>
               <TableCell
                 colSpan={8}
-                className="text-center py-10 text-blue-600"
+                className="text-center py-10 text-sky-600"
               >
                 Đang tải dữ liệu...
               </TableCell>
@@ -68,70 +74,171 @@ export function StaffTable({ staffs, isLoading, error }: StaffTableProps) {
             <TableRow>
               <TableCell
                 colSpan={8}
-                className="text-center py-10 text-blue-600"
+                className="text-center py-10 text-sky-600"
               >
                 Không có dữ liệu học sinh
               </TableCell>
             </TableRow>
           ) : (
-            staffs.map((staff, index) => (
-              <TableRow
-                key={`staff-${staff.phone}-${index}`}
-                className="hover:bg-blue-50 cursor-pointer"
-              >
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-blue-200">
-                      <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32&text=${
-                          staff.name?.charAt(0) || "P"
-                        }`}
-                      />
-                      <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
-                        {staff.name?.charAt(0) || "P"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium text-blue-800">
-                        {staff.name || "Chưa có tên"}
+            staffs.map((staff, index) => {
+              const profile = staff.profile || {};
+              const user = staff.user || {};
+              return (
+                <TableRow
+                  key={`staff-${staff._id || index}`}
+                  className="hover:bg-sky-50 cursor-pointer"
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <div className="font-medium text-sky-800">
+                          {profile.name || "Chưa có tên"}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-blue-700">{staff.phone}</TableCell>
-                <TableCell className="text-blue-700">{staff.address}</TableCell>
-                <TableCell className="text-blue-700">{staff.email}</TableCell>
-                <TableCell className="text-blue-700">
-                  {staff.createdAt}
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-700 hover:bg-blue-100"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="text-blue-700">
-                        <Eye className="mr-2 h-4 w-4" />
-                        Xem hồ sơ
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-blue-700">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))
+                  </TableCell>
+                  <TableCell className="text-sky-700">
+                    {profile.phone || "-"}
+                  </TableCell>
+                  <TableCell className="text-sky-700">
+                    {profile.address || "-"}
+                  </TableCell>
+                  <TableCell className="text-sky-700">
+                    {user.email || "-"}
+                  </TableCell>
+                  <TableCell className="text-sky-700">
+                    {user.created_at
+                      ? new Date(user.created_at).toLocaleDateString("vi-VN")
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-sky-700 hover:bg-sky-100"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="text-sky-700"
+                          onClick={() => setSelectedStaff(staff)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Xem hồ sơ
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-sky-700"
+                          onClick={() => setEditStaff(staff)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-700"
+                          onClick={() => setDeleteStaff(staff)}
+                        >
+                          <DeleteIcon className="mr-2 h-4 w-4" />
+                          Xoá tài khoản
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })
           )}
         </TableBody>
       </Table>
+      {/* Dialog xem hồ sơ */}
+      {selectedStaff && (
+        <ViewStaffDialog
+          staff={selectedStaff}
+          onClose={() => setSelectedStaff(null)}
+        />
+      )}
+      {/* Dialog chỉnh sửa */}
+      {editStaff && (
+        <UpdateStaffDialog
+          staff={editStaff}
+          onClose={() => setEditStaff(null)}
+          onSubmit={async () => {
+            await fetchStaffs();
+            setEditStaff(null);
+          }}
+        />
+      )}
+      {/* Dialog xác nhận xoá */}
+      {deleteStaffState && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative animate-fade-in">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-2xl font-bold focus:outline-none"
+              onClick={() => setDeleteStaff(null)}
+              aria-label="Đóng"
+            >
+              ×
+            </button>
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mb-2">
+                <DeleteIcon className="text-red-600 w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-red-700 text-center">
+                Xác nhận xoá tài khoản
+              </h2>
+              <div className="mb-4 text-center text-sky-900 text-base">
+                Bạn có chắc chắn muốn xoá nhân viên{" "}
+                <b className="text-red-700">
+                  {deleteStaffState.profile?.name || ""}
+                </b>{" "}
+                không?
+              </div>
+              <div className="flex gap-3 justify-center w-full mt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteStaff(null)}
+                  disabled={deleting}
+                  className="min-w-[90px] border-sky-300 hover:border-sky-500"
+                >
+                  Huỷ
+                </Button>
+                <Button
+                  className="bg-red-600 hover:bg-red-700 text-white min-w-[90px] shadow"
+                  disabled={deleting}
+                  onClick={async () => {
+                    if (!deleteStaffState?._id) return;
+                    setDeleting(true);
+                    try {
+                      await deleteStaff(deleteStaffState._id);
+                      toast({
+                        title: "Đã xoá nhân viên",
+                        description:
+                          "Tài khoản nhân viên đã được xoá thành công.",
+                        variant: "default",
+                      });
+                      setDeleteStaff(null);
+                       await fetchStaffs();
+                    } catch (err: any) {
+                      toast({
+                        title: "Lỗi khi xoá",
+                        description: err.message || "Không thể xoá nhân viên.",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setDeleting(false);
+                    }
+                  }}
+                >
+                  {deleting ? "Đang xoá..." : "Xoá"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -39,6 +39,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Progress } from "@/components/layout/sidebar/progress";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
+import { HealthRecordDialog } from "./health-record-dialog";
 
 // Component hiển thị thông tin chi tiết của lần khám
 interface ExaminationDetailsProps {
@@ -176,6 +178,7 @@ function ExaminationDetailsDialog({
 }
 
 export default function RegularResultsPage() {
+  const { selectedStudent } = useParentStudentsStore();
   const [selectedExam, setSelectedExam] = useState<
     (typeof examinationHistory)[0] | null
   >(null);
@@ -190,16 +193,54 @@ export default function RegularResultsPage() {
     setIsDetailsOpen(false);
   };
 
+  // Hiển thị thông báo nếu không có học sinh nào được chọn
+  if (!selectedStudent) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Kết quả khám
+          </h1>
+          <p className="text-blue-600">
+            Xem kết quả kiểm tra sức khỏe định kỳ và theo dõi sự phát triển của
+            học sinh.
+          </p>
+        </div>
+        <Card className="border-blue-100 bg-blue-50/30">
+          <CardContent className="p-6">
+            <div className="text-center text-blue-600">
+              Chưa có học sinh nào được chọn. Vui lòng chọn học sinh từ sidebar.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Kết quả khám
-        </h1>
-        <p className="text-blue-600">
-          Xem kết quả kiểm tra sức khỏe định kỳ và theo dõi sự phát triển của
-          học sinh.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Kết quả khám - {selectedStudent.student.name}
+          </h1>
+          <p className="text-blue-600">
+            Xem kết quả kiểm tra sức khỏe định kỳ và theo dõi sự phát triển của
+            học sinh.
+          </p>
+        </div>
+        <HealthRecordDialog
+          student={selectedStudent}
+          trigger={
+            <Button
+              variant="outline"
+              className="border-blue-200 text-blue-700 hover:bg-blue-100"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Xem hồ sơ sức khỏe đầy đủ
+            </Button>
+          }
+        />
       </div>
 
       <Tabs defaultValue="recent" className="w-full">

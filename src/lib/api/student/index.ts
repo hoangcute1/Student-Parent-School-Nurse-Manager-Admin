@@ -2,21 +2,21 @@ import { create } from 'zustand';
 import {
   CreateStudentData,
   Student,
-  StudentParentResponse,
   StudentResponse,
   UpdateStudentData,
+  ViewStudent,
 } from "@/lib/type/students";
 import { fetchData } from "../api";
 import { Update } from 'next/dist/build/swc/types';
 import { getAuthToken } from '../auth/token';
 
 
-/**
+/** 
  * Get a student by ID
  */
-export const getStudentById = async (id: string): Promise<Student> => {
+export const getStudentById = async (id: string): Promise<ViewStudent> => {
   try {
-    return await fetchData<Student>(`/students/${id}`);
+    return await fetchData<ViewStudent>(`/students/${id}`);
   } catch (error) {
     console.error(`Error fetching student with ID ${id}:`, error);
     throw error;
@@ -53,10 +53,6 @@ export const getStudentsByClass = async (
     throw error;
   }
 };
-
-
-
-
 
 
 export const deleteStudent = async (id: string): Promise<void> => {

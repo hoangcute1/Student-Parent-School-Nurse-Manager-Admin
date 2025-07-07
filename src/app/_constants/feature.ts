@@ -17,6 +17,7 @@ const features = [
     href: "/dashboard/health-declaration",
     textColor: "text-blue-500",
     borderColor: "border-blue-500",
+    bgGradient: "from-blue-500 to-blue-600",
   },
   {
     title: "Gửi thuốc",
@@ -27,6 +28,7 @@ const features = [
     href: "/dashboard/medications",
     textColor: "text-red-500",
     borderColor: "border-red-500",
+    bgGradient: "from-red-500 to-red-600",
   },
   {
     title: "Nhận kết quả",
@@ -37,6 +39,7 @@ const features = [
     href: "/dashboard/profile",
     textColor: "text-green-500",
     borderColor: "border-green-500",
+    bgGradient: "from-green-500 to-green-600",
   },
   {
     title: "Lịch sử bệnh án",
@@ -47,6 +50,7 @@ const features = [
     href: "/dashboard/resources",
     textColor: "text-purple-500",
     borderColor: "border-purple-500",
+    bgGradient: "from-purple-500 to-purple-600",
   },
   {
     title: "Thông báo & Sự kiện",
@@ -57,6 +61,7 @@ const features = [
     href: "/dashboard/events",
     textColor: "text-yellow-500",
     borderColor: "border-yellow-500",
+    bgGradient: "from-yellow-500 to-yellow-600",
   },
   {
     title: "Xem phản hồi",
@@ -67,6 +72,7 @@ const features = [
     href: "/dashboard/feedback",
     textColor: "text-orange-500",
     borderColor: "border-orange-500",
+    bgGradient: "from-orange-500 to-orange-600",
   },
 ];
 

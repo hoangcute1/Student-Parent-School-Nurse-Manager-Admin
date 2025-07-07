@@ -58,26 +58,26 @@ export default function CMSPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+        <h1 className="text-3xl font-bold tracking-tight text-sky-800">
           Tổng quan hệ thống 
         </h1>
-        <p className="text-blue-600">
+        <p className="text-sky-600">
           Tổng quan hệ thống quản lý sức khỏe học đường
         </p>
       </div>
 
       {/* Thống kê tổng quan */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-blue-100 hover:border-blue-300 transition-all duration-300">
+        <Card className="border-sky-100 hover:border-sky-300 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">
+            <CardTitle className="text-sm font-medium text-sky-700">
               Tổng học sinh
             </CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <Users className="h-4 w-4 text-sky-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">248</div>
-            <p className="text-xs text-blue-600">+12 so với tháng trước</p>
+            <div className="text-2xl font-bold text-sky-800">248</div>
+            <p className="text-xs text-sky-600">+12 so với tháng trước</p>
           </CardContent>
         </Card>
 
@@ -109,43 +109,43 @@ export default function CMSPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-blue-100 hover:border-blue-300 transition-all duration-300">
+        <Card className="border-sky-100 hover:border-sky-300 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">
+            <CardTitle className="text-sm font-medium text-sky-700">
               Tiêm chủng
             </CardTitle>
-            <Calendar className="h-4 w-4 text-blue-600" />
+            <Calendar className="h-4 w-4 text-sky-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-800">85%</div>
-            <p className="text-xs text-blue-600">Tỷ lệ hoàn thành đợt tiêm</p>
+            <div className="text-2xl font-bold text-sky-800">85%</div>
+            <p className="text-xs text-sky-600">Tỷ lệ hoàn thành đợt tiêm</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-blue-50">
+        <TabsList className="grid w-full grid-cols-4 bg-sky-50">
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-sky-600 data-[state=active]:text-white"
           >
             Tổng quan
           </TabsTrigger>
           <TabsTrigger
             value="alerts"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-sky-600 data-[state=active]:text-white"
           >
             Cảnh báo
           </TabsTrigger>
           <TabsTrigger
             value="recent"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-sky-600 data-[state=active]:text-white"
           >
             Hoạt động gần đây
           </TabsTrigger>
           <TabsTrigger
             value="reports"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-sky-600 data-[state=active]:text-white"
           >
             Báo cáo
           </TabsTrigger>
@@ -153,12 +153,12 @@ export default function CMSPage() {
 
         <TabsContent value="overview" className="mt-6 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-blue-100">
+            <Card className="border-sky-100">
               <CardHeader>
-                <CardTitle className="text-blue-800">
+                <CardTitle className="text-sky-800">
                   Thống kê sức khỏe theo lớp
                 </CardTitle>
-                <CardDescription className="text-blue-600">
+                <CardDescription className="text-sky-600">
                   Tỷ lệ học sinh có vấn đề sức khỏe theo từng lớp
                 </CardDescription>
               </CardHeader>
@@ -166,16 +166,16 @@ export default function CMSPage() {
                 {classHealthStats.map((stat, index) => (
                   <div key={index} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-blue-700 font-medium">
+                      <span className="text-sky-700 font-medium">
                         {stat.class}
                       </span>
-                      <span className="text-blue-800">
+                      <span className="text-sky-800">
                         {stat.issues}/{stat.total} học sinh
                       </span>
                     </div>
                     <Progress
                       value={(stat.issues / stat.total) * 100}
-                      className="h-2 bg-blue-100"
+                      className="h-2 bg-sky-100"
                       indicatorClassName={
                         stat.issues > 2 ? "bg-red-500" : "bg-green-500"
                       }
@@ -185,10 +185,10 @@ export default function CMSPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-blue-100">
+            <Card className="border-sky-100">
               <CardHeader>
-                <CardTitle className="text-blue-800">Kho thuốc</CardTitle>
-                <CardDescription className="text-blue-600">
+                <CardTitle className="text-sky-800">Kho thuốc</CardTitle>
+                <CardDescription className="text-sky-600">
                   Tình trạng thuốc trong kho
                 </CardDescription>
               </CardHeader>
@@ -196,15 +196,15 @@ export default function CMSPage() {
                 {medicineInventory.map((medicine, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 rounded-lg border border-blue-100"
+                    className="flex items-center justify-between p-3 rounded-lg border border-sky-100"
                   >
                     <div className="flex items-center gap-3">
-                      <Pill className="h-5 w-5 text-blue-600" />
+                      <Pill className="h-5 w-5 text-sky-600" />
                       <div>
-                        <div className="font-medium text-blue-800">
+                        <div className="font-medium text-sky-800">
                           {medicine.name}
                         </div>
-                        <div className="text-sm text-blue-600">
+                        <div className="text-sm text-sky-600">
                           {medicine.quantity} còn lại
                         </div>
                       </div>
@@ -238,7 +238,7 @@ export default function CMSPage() {
                     ? "border-l-red-500 bg-red-50"
                     : alert.priority === "Trung bình"
                     ? "border-l-yellow-500 bg-yellow-50"
-                    : "border-l-blue-500 bg-blue-50"
+                    : "border-l-blue-500 bg-sky-50"
                 }`}
               >
                 <CardHeader className="pb-2">
@@ -253,7 +253,7 @@ export default function CMSPage() {
                           ? "bg-red-100 text-red-800"
                           : alert.priority === "Trung bình"
                           ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
+                          : "bg-sky-100 text-sky-800"
                       }
                     >
                       {alert.priority}
@@ -268,7 +268,7 @@ export default function CMSPage() {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-sky-600 hover:bg-sky-700"
                       onClick={() => handleProcessAlert(alert.id)}
                       disabled={processingAlert === alert.id}
                     >
@@ -279,7 +279,7 @@ export default function CMSPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-200 text-blue-700"
+                      className="border-sky-200 text-sky-700"
                       onClick={() => handleViewDetails(alert.id)}
                     >
                       Xem chi tiết
@@ -296,22 +296,22 @@ export default function CMSPage() {
             {recentActivities.map((activity, index) => (
               <div
                 key={index}
-                className="flex items-start gap-4 p-4 rounded-lg border border-blue-100 hover:bg-blue-50 transition-all duration-200"
+                className="flex items-start gap-4 p-4 rounded-lg border border-sky-100 hover:bg-sky-50 transition-all duration-200"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                  <activity.icon className="h-5 w-5 text-blue-600" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100">
+                  <activity.icon className="h-5 w-5 text-sky-600" />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-medium text-blue-800">
+                      <h4 className="font-medium text-sky-800">
                         {activity.title}
                       </h4>
-                      <p className="text-sm text-blue-600 mt-1">
+                      <p className="text-sm text-sky-600 mt-1">
                         {activity.description}
                       </p>
                     </div>
-                    <span className="text-xs text-blue-500">
+                    <span className="text-xs text-sky-500">
                       {activity.time}
                     </span>
                   </div>
@@ -326,19 +326,19 @@ export default function CMSPage() {
             {reports.map((report, index) => (
               <Card
                 key={index}
-                className="border-blue-100 hover:border-blue-300 transition-all duration-300 cursor-pointer"
+                className="border-sky-100 hover:border-sky-300 transition-all duration-300 cursor-pointer"
               >
                 <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-blue-800">
-                    <report.icon className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="flex items-center gap-2 text-sky-800">
+                    <report.icon className="h-5 w-5 text-sky-600" />
                     {report.title}
                   </CardTitle>
-                  <CardDescription className="text-blue-600">
+                  <CardDescription className="text-sky-600">
                     {report.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-800 mb-2">
+                  <div className="text-2xl font-bold text-sky-800 mb-2">
                     {report.value}
                   </div>
                   <div className="flex items-center gap-2">

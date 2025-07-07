@@ -2,12 +2,21 @@
 
 import * as React from "react";
 import { notFound } from "next/navigation";
-
-import { Facebook, Twitter, Share2, Clock, User, ChevronRight } from "lucide-react";
+import { resources } from "@/app/_constants/resource";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ChevronRight,
+  User,
+  Share2,
+  Facebook,
+  Twitter,
+  MessageCircle,
+  ArrowLeft,
+  Calendar,
+  Eye,
+  ExternalLink,
+} from "lucide-react";
 
 const documents = {
   "prevention-guide": {
@@ -75,7 +84,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "Sức khỏe tâm thần và tâm lý xã hội học của học sinh hiện nay",
@@ -97,7 +106,7 @@ const documents = {
   "school-nutrition": {
     title: "Một số thực phẩm tốt cho hệ hô hấp",
     description: "Vitamin và Khoáng Chất Cho Sức Khỏe Học Đường",
-    image: "/resources/vitamin-tot-cho-ho-hap.jpg",
+    image: "/resources/TL1.jpg",
     author: "https://bvnguyentriphuong.com.vn/dinh-duong/mot-so-thuc-pham-tot-cho-he-ho-hap",
     content: `
       
@@ -366,7 +375,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "8 Nguyên tắc phòng tránh điện giật cho trẻ em khi vui chơi nghỉ hè",
@@ -434,7 +443,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "Sức khỏe tâm thần và tâm lý xã hội học của học sinh hiện nay",
@@ -536,7 +545,7 @@ const documents = {
       {
         title: "Một số thực phẩm tốt cho hệ hô hấp",
         href: "/documents/school-nutrition",
-        image: "/resources/vitamin-tot-cho-ho-hap.jpg"
+        image: "/resources/TL1.jpg"
       },
       {
         title: "Sức khỏe tâm thần và tâm lý xã hội học của học sinh hiện nay",
@@ -584,11 +593,34 @@ export default function DocumentPage({ params }: Params) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Main content */}
             <div className="lg:col-span-8">
-              <article className="bg-white rounded-lg shadow-sm p-6">
-                <h1 className="text-3xl font-bold mb-6">{document.title}</h1>
+              <article 
+                className="bg-white rounded-xl shadow-lg p-8" 
+                style={{ 
+                  animation: 'fadeInUp 0.8s ease-out forwards',
+                  animationDelay: '0.2s',
+                  opacity: 0
+                }}
+              >
+                <h1 
+                  className="text-3xl lg:text-4xl font-bold mb-6 text-gray-900" 
+                  style={{ 
+                    animation: 'slideInLeft 0.8s ease-out forwards',
+                    animationDelay: '0.4s',
+                    opacity: 0
+                  }}
+                >
+                  {document.title}
+                </h1>
                 
                 {/* Meta information */}
-                <div className="flex items-center gap-6 text-sm text-gray-500 mb-6">
+                <div 
+                  className="flex items-center gap-6 text-sm text-gray-500 mb-6" 
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards',
+                    animationDelay: '0.6s',
+                    opacity: 0
+                  }}
+                >
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
                     <Link 
@@ -603,39 +635,119 @@ export default function DocumentPage({ params }: Params) {
                 </div>
 
                 {/* Featured image */}
-                <div className="aspect-video relative rounded-lg overflow-hidden mb-6">
+                <div 
+                  className="aspect-video relative rounded-xl overflow-hidden mb-6" 
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards',
+                    animationDelay: '0.8s',
+                    opacity: 0
+                  }}
+                >
                   <Image
                     src={document.image}
                     alt={document.title}
                     fill
-                    className="object-cover"
+                    className="object-cover hover:scale-105 transition-transform duration-700"
                   />
                 </div>
 
                 {/* Description */}
-                <p className="text-lg text-gray-600 mb-6">
+                <p 
+                  className="text-lg text-gray-600 mb-6 leading-relaxed" 
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards',
+                    animationDelay: '1s',
+                    opacity: 0
+                  }}
+                >
                   {document.description}
                 </p>
 
-                {/* Social sharing */}
-                <div className="flex items-center gap-4 mb-8">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Facebook className="h-4 w-4" />
-                    Chia sẻ
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Twitter className="h-4 w-4" />
-                    Tweet
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Share2 className="h-4 w-4" />
-                    Chia sẻ
-                  </Button>
+                {/* Share Section */}
+                <div 
+                  className="mt-8 pt-6 border-t border-gray-200" 
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards',
+                    animationDelay: '1.2s',
+                    opacity: 0
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 
+                      className="text-lg font-semibold text-gray-900" 
+                      style={{ 
+                        animation: 'slideInLeft 0.8s ease-out forwards',
+                        animationDelay: '1.4s',
+                        opacity: 0
+                      }}
+                    >
+                      Chia sẻ tài liệu
+                    </h3>
+                    <div 
+                      className="flex gap-3" 
+                      style={{ 
+                        animation: 'bounceIn 0.8s ease-out forwards',
+                        animationDelay: '1.6s',
+                        opacity: 0
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          const url = encodeURIComponent(window.location.href);
+                          const text = encodeURIComponent(document.title);
+                          window.open(
+                            `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`,
+                            "_blank",
+                            "width=600,height=400"
+                          );
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 hover:scale-105 hover:shadow-lg transform"
+                      >
+                        <Facebook className="h-4 w-4" />
+                        Facebook
+                      </button>
+                      <button
+                        onClick={() => {
+                          const url = encodeURIComponent(window.location.href);
+                          const text = encodeURIComponent(
+                            `${document.title} - ${document.description}`
+                          );
+                          window.open(
+                            `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+                            "_blank",
+                            "width=600,height=400"
+                          );
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-all duration-300 hover:scale-105 hover:shadow-lg transform"
+                      >
+                        <Twitter className="h-4 w-4" />
+                        Twitter
+                      </button>
+                      <button
+                        onClick={() => {
+                          const url = encodeURIComponent(window.location.href);
+                          const text = encodeURIComponent(
+                            `${document.title}\n\n${document.description}\n\nXem thêm tại: ${window.location.href}`
+                          );
+                          window.open(`https://wa.me/?text=${text}`, "_blank");
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 hover:scale-105 hover:shadow-lg transform"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        WhatsApp
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Main content */}
                 <div
-                  className="prose max-w-none"
+                  className="prose prose-lg max-w-none"
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards',
+                    animationDelay: '1.8s',
+                    opacity: 0
+                  }}
                   dangerouslySetInnerHTML={{ __html: document.content }}
                 />
               </article>
@@ -644,32 +756,61 @@ export default function DocumentPage({ params }: Params) {
             {/* Sidebar */}
             <aside className="lg:col-span-4">
               <div className="sticky top-24">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Bài viết liên quan</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {document.relatedDocs?.map((doc: { title: string; href: string; image: string }, index: number) => (
-                      <Link href={doc.href} key={index} className="block group">
-                        <div className="flex gap-4">
-                          <div className="relative w-20 h-20 rounded-lg overflow-hidden">
-                            <Image
-                              src={doc.image}
-                              alt={doc.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform"
-                            />
+                <div 
+                  className="bg-white rounded-xl shadow-lg p-6" 
+                  style={{ 
+                    animation: 'fadeInUp 0.8s ease-out forwards',
+                    animationDelay: '1s',
+                    opacity: 0
+                  }}
+                >
+                  <h3 
+                    className="text-xl font-bold text-gray-900 mb-6" 
+                    style={{ 
+                      animation: 'slideInLeft 0.8s ease-out forwards',
+                      animationDelay: '1.2s',
+                      opacity: 0
+                    }}
+                  >
+                    Tài liệu liên quan
+                  </h3>
+                  <div className="space-y-4">
+                    {resources
+                      .filter((resource) => resource.title !== document.title)
+                      .slice(0, 4)
+                      .map((resource, index) => (
+                        <Link
+                          href={resource.href}
+                          key={index}
+                          className="block group"
+                          style={{ 
+                            animation: 'slideInRight 0.8s ease-out forwards',
+                            animationDelay: `${1.4 + index * 0.2}s`,
+                            opacity: 0
+                          }}
+                        >
+                          <div className="flex gap-4 p-4 rounded-lg hover:bg-gray-50 transition-all duration-300 hover:shadow-md border border-transparent hover:border-blue-100">
+                            <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                              <Image
+                                src={resource.image}
+                                alt={resource.title}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-300"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
+                                {resource.title}
+                              </h4>
+                              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                                {resource.description}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium group-hover:text-blue-600 transition-colors">
-                              {doc.title}
-                            </h3>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </CardContent>
-                </Card>
+                        </Link>
+                      ))}
+                  </div>
+                </div>
               </div>
             </aside>
           </div>
