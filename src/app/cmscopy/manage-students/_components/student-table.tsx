@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Edit, Plus, MoreHorizontal, Delete } from "lucide-react";
+import { Eye, Plus, Delete } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,12 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Student, ViewStudent } from "@/lib/type/students";
 
 interface StudentTableProps {
@@ -62,7 +56,9 @@ export function StudentTable({
             <TableHead className="text-blue-700">Lớp</TableHead>
             <TableHead className="text-blue-700">Ngày sinh</TableHead>
             <TableHead className="text-blue-700">Giới tính</TableHead>
-            <TableHead className="text-right text-blue-700">Thao tác</TableHead>
+            <TableHead className="text-right text-blue-700 w-48">
+              Thao tác
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -136,40 +132,29 @@ export function StudentTable({
                     : "Không rõ"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-700 hover:bg-blue-100"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="text-blue-700"
-                        onClick={() => onView?.(eachStudent)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Xem hồ sơ
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-blue-700"
-                        onClick={() => onEdit?.(eachStudent)}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-700"
-                        onClick={() => onDelete?.(eachStudent)}
-                      >
-                        <Delete className="mr-2 h-4 w-4" />
-                        Xoá
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center justify-end gap-2">
+                    {/* View Profile Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onView?.(eachStudent)}
+                      className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="font-medium">Xem</span>
+                    </Button>
+
+                    {/* Delete Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete?.(eachStudent)}
+                      className="flex items-center gap-2 bg-gradient-to-r from-red-50 to-pink-50 border-red-200 text-red-700 hover:from-red-100 hover:to-pink-100 hover:border-red-300 hover:text-red-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      <Delete className="h-4 w-4" />
+                      <span className="font-medium">Xóa</span>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))

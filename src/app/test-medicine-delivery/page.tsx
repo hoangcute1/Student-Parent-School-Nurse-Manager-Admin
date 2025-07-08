@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ViewDeliveryDialog as CmsViewDialog } from "@/app/cms/sent-medicines/view-delivery-dialog";

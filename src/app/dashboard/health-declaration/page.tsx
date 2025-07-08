@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Eye, Edit, MoreHorizontal } from "lucide-react";
+import { Search, Eye, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +16,6 @@ import {
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import { ParentStudents } from "@/lib/type/parent-students";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import {
   EditHealthRecordDialog,
   EditHealthRecordFormValues,
 } from "./_components/edit-health-record-dialog";
@@ -33,12 +27,8 @@ export default function ParentHealthRecords() {
   const [selectedEditRecord, setSelectedEditRecord] =
     useState<ParentStudents | null>(null);
 
-  const {
-    studentsData,
-    isLoading,
-    fetchStudentsByParent,
-    updateStudent,
-  } = useParentStudentsStore();
+  const { studentsData, isLoading, fetchStudentsByParent, updateStudent } =
+    useParentStudentsStore();
 
   useEffect(() => {
     fetchStudentsByParent();
@@ -127,7 +117,7 @@ export default function ParentHealthRecords() {
 
             {/* Table Section */}
             <div className="rounded-xl border border-sky-200 shadow-sm overflow-hidden bg-white">
-              <Table className="min-w-[900px]">
+              <Table className="min-w-[1000px]">
                 <TableHeader className="bg-gradient-to-r from-sky-100 to-blue-100">
                   <TableRow className="border-sky-200">
                     <TableHead className="text-sky-800 font-semibold text-base">
@@ -148,7 +138,7 @@ export default function ParentHealthRecords() {
                     <TableHead className="text-sky-800 font-semibold text-base">
                       Cập nhật lần cuối
                     </TableHead>
-                    <TableHead className="text-right text-sky-800 font-semibold text-base">
+                    <TableHead className="text-right text-sky-800 font-semibold text-base w-48">
                       Thao tác
                     </TableHead>
                   </TableRow>
@@ -233,38 +223,33 @@ export default function ParentHealthRecords() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-sky-700 hover:bg-sky-100 rounded-full p-2 h-10 w-10"
-                              >
-                                <MoreHorizontal className="h-5 w-5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="rounded-xl shadow-lg border border-sky-200 bg-white min-w-[160px] p-2"
+                          <div className="flex items-center justify-end gap-2">
+                            {/* View Profile Button */}
+                            <HealthRecordDialog
+                              student={eachStudent}
+                              trigger={
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  <span className="font-medium">Xem</span>
+                                </Button>
+                              }
+                            />
+
+                            {/* Update Profile Button */}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditRecord(eachStudent)}
+                              className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
                             >
-                              <HealthRecordDialog
-                                student={eachStudent}
-                                trigger={
-                                  <DropdownMenuItem className="flex items-center gap-3 px-3 py-2 rounded-lg text-sky-700 hover:bg-sky-50 cursor-pointer transition-colors">
-                                    <Eye className="h-4 w-4" />
-                                    <span>Xem hồ sơ</span>
-                                  </DropdownMenuItem>
-                                }
-                              />
-                              <DropdownMenuItem
-                                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sky-700 hover:bg-sky-50 cursor-pointer transition-colors"
-                                onClick={() => handleEditRecord(eachStudent)}
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span>Cập nhật</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                              <Edit className="h-4 w-4" />
+                              <span className="font-medium">Cập nhật</span>
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))

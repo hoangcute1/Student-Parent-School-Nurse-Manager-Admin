@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Edit, MoreHorizontal, Delete, Plus } from "lucide-react";
+import { Eye, Plus, Delete, Bell } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,12 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Student, ViewStudent } from "@/lib/type/students";
 
 interface StudentTableProps {
@@ -49,7 +43,9 @@ export function StudentTable({
             <TableHead className="text-sky-700">Lớp</TableHead>
             <TableHead className="text-sky-700">Ngày sinh</TableHead>
             <TableHead className="text-sky-700">Giới tính</TableHead>
-            <TableHead className="text-right text-sky-700">Thao tác</TableHead>
+            <TableHead className="text-right text-sky-700 w-32">
+              Thao tác
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -117,47 +113,40 @@ export function StudentTable({
                     : "Không rõ"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-sky-700 hover:bg-sky-100"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="text-sky-700"
-                        onClick={() => onView?.(eachStudent)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Xem hồ sơ
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-sky-700"
-                        onClick={() => onEdit?.(eachStudent)}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-sky-700"
-                        onClick={() => onAddHealthEvent?.(eachStudent)}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Thêm sự kiện y tế
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-700"
-                        onClick={() => onDelete?.(eachStudent)}
-                      >
-                        <Delete className="mr-2 h-4 w-4" />
-                        Xoá
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center justify-end gap-1">
+                    {/* View Profile Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onView?.(eachStudent)}
+                      className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 rounded-lg px-2 py-1 h-8 w-8 transition-all duration-200 shadow-sm hover:shadow-md"
+                      title="Xem hồ sơ"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+
+                    {/* Add Health Event Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onAddHealthEvent?.(eachStudent)}
+                      className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 rounded-lg px-2 py-1 h-8 w-8 transition-all duration-200 shadow-sm hover:shadow-md"
+                      title="Tạo lịch tư vấn"
+                    >
+                      <Bell className="h-4 w-4" />
+                    </Button>
+
+                    {/* Delete Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete?.(eachStudent)}
+                      className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 text-red-700 hover:from-red-100 hover:to-pink-100 hover:border-red-300 hover:text-red-800 rounded-lg px-2 py-1 h-8 w-8 transition-all duration-200 shadow-sm hover:shadow-md"
+                      title="Xóa học sinh"
+                    >
+                      <Delete className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))
