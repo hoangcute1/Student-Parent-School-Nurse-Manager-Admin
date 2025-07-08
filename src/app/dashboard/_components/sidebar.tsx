@@ -31,12 +31,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Chỉ gọi fetchStudentsByParent khi user đã authenticated và có role parent
-    if (isAuthenticated && user && user.role === "parent") {
-      fetchStudentsByParent();
-    }
-  }, [fetchStudentsByParent, isAuthenticated, user]);
+    fetchStudentsByParent();
+  }, []); // Chỉ chạy một lần khi component mount
 
+  
+  useEffect(() => {
+    if (studentsData.length > 0) {
+      setSelectedStudent(studentsData[0]);
+    } else {
+      setSelectedStudent(null);
+    }
+  }, [studentsData]);
+    
   return (
     <aside
       className={cn(

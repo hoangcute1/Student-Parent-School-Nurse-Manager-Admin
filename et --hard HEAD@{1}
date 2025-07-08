@@ -1,0 +1,12 @@
+[33m5d7e049[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull: Fast-forward
+[33mf549549[m HEAD@{1}: checkout: moving from Login-google to main
+[33mbd6e6a7[m[33m ([m[1;32mLogin-google[m[33m)[m HEAD@{2}: commit: WIP: update student table and login components
+[33m85e5110[m[33m ([m[1;31morigin/Login-google[m[33m)[m HEAD@{3}: checkout: moving from main to Login-google
+[33mf549549[m HEAD@{4}: pull: Fast-forward
+[33mf7cd03f[m HEAD@{5}: checkout: moving from Login-google to main
+[33m85e5110[m[33m ([m[1;31morigin/Login-google[m[33m)[m HEAD@{6}: checkout: moving from main to Login-google
+[33mf7cd03f[m HEAD@{7}: checkout: moving from Login-google to main
+[33m85e5110[m[33m ([m[1;31morigin/Login-google[m[33m)[m HEAD@{8}: commit: Login with google
+[33mf7cd03f[m HEAD@{9}: checkout: moving from main to Login-google
+[33mf7cd03f[m HEAD@{10}: pull: Fast-forward
+[33mdea4ec2[m HEAD@{11}: clone: from https://github.com/hoang-0512/SWP391-FE.git

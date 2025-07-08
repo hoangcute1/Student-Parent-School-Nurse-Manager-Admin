@@ -20,14 +20,92 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getParentId } from "@/lib/utils/parent-utils";
+import { getTreatmentHistoryByParentId } from "@/lib/api/treatment-history";
+import { TreatmentHistory } from "@/lib/type/treatment-history";
 
 export default function MedicalHistoryPage() {
   const { fetchStudentsByParent } = useParentStudentsStore();
 
+  // State để lưu treatment history
+  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchStudentsByParent();
+    const fetchTreatmentHistoryByParent = () => {
+      getParentId().then((parentId) => {
+        console.log("Fetched parent ID:", parentId);
+        if (parentId) {
+          // Gọi API để lấy treatment history theo parentId
+          setLoading(true);
+          setError(null);
+
+          getTreatmentHistoryByParentId(parentId)
+            .then((data) => {
+              console.log("Treatment history data received:", data);
+              setTreatmentHistory(data);
+              setLoading(false);
+            })
+            .catch((error) => {
+              console.error("Error fetching treatment history:", error);
+              setError("Không thể tải lịch sử bệnh án. Vui lòng thử lại sau.");
+              setLoading(false);
+            });
+        } else {
+          console.warn("No parent ID found");
+          setError("Không tìm thấy thông tin phụ huynh.");
+          setLoading(false);
+        }
+      });
+    };
+
+    fetchTreatmentHistoryByParent();
   }, [fetchStudentsByParent]);
+
+  // Hiển thị loading
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Lịch sử bệnh án
+          </h1>
+          <p className="text-blue-600">
+            Theo dõi toàn bộ lịch sử bệnh án, điều trị và chăm sóc sức khỏe của
+            học sinh.
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-blue-600">Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Hiển thị error
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Lịch sử bệnh án
+          </h1>
+          <p className="text-blue-600">
+            Theo dõi toàn bộ lịch sử bệnh án, điều trị và chăm sóc sức khỏe của
+            học sinh.
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-red-600">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
@@ -66,7 +144,7 @@ export default function MedicalHistoryPage() {
         </div>
 
         <div className="space-y-6">
-          {medicalTimeline.map((entry, index) => (
+          {treatmentHistory.map((entry, index) => (
             <div key={index} className="relative">
               {index !== medicalTimeline.length - 1 && (
                 <div className="absolute left-6 top-12 h-full w-0.5 bg-blue-200"></div>
@@ -84,34 +162,28 @@ export default function MedicalHistoryPage() {
                         </CardTitle>
                         <CardDescription className="flex items-center gap-2 text-blue-600">
                           <Calendar className="h-4 w-4" />
-                          {entry.date}
+                          {entry.createdAt}
                           <span>•</span>
                           <User className="h-4 w-4" />
-                          {entry.doctor}
                         </CardDescription>
                       </div>
-                      <Badge
-                        variant={getSeverityVariant(entry.severity)}
-                        className="ml-2"
-                      >
-                        {entry.severity}
-                      </Badge>
+                      <Badge className="ml-2">{entry.status}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
                       <p className="text-blue-700">{entry.description}</p>
-                      {entry.treatment && (
-                        <div className="bg-blue-50 rounded-lg p-3">
-                          <h4 className="font-medium text-blue-800 mb-1">
-                            Điều trị:
-                          </h4>
-                          <p className="text-sm text-blue-700">
-                            {entry.treatment}
-                          </p>
-                        </div>
-                      )}
-                      {entry.medications && entry.medications.length > 0 && (
+
+                      <div className="bg-blue-50 rounded-lg p-3">
+                        <h4 className="font-medium text-blue-800 mb-1">
+                          Điều trị:
+                        </h4>
+                        <p className="text-sm text-blue-700">
+                          {entry.description}
+                        </p>
+                      </div>
+
+                      {/* {entry. && entry.medications.length > 0 && (
                         <div>
                           <h4 className="font-medium text-blue-800 mb-2">
                             Thuốc đã sử dụng:
@@ -128,13 +200,7 @@ export default function MedicalHistoryPage() {
                             ))}
                           </div>
                         </div>
-                      )}
-                      {entry.followUp && (
-                        <div className="flex items-center gap-2 text-sm text-blue-600">
-                          <Clock className="h-4 w-4" />
-                          <span>Tái khám: {entry.followUp}</span>
-                        </div>
-                      )}
+                      )} */}
                     </div>
                   </CardContent>
                 </Card>

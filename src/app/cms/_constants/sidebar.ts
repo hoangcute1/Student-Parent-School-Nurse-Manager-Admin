@@ -57,7 +57,7 @@ const navLinks = [
   {
     href: "/cms/events",
     icon: ClipboardCheck,
-    label: "Sự kiện y tế",
+    label: "Sự cố y tế",
     description: "Xử lý y tế khẩn cấp",
   },
   {

@@ -105,7 +105,7 @@ export default function CMSPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-800">5</div>
-            <p className="text-xs text-green-600">Sự kiện y tế đã xử lý</p>
+            <p className="text-xs text-green-600">Sự cố y tế đã xử lý</p>
           </CardContent>
         </Card>
 
@@ -410,7 +410,7 @@ const recentActivities = [
     icon: FileText,
   },
   {
-    title: "Xử lý sự kiện y tế",
+    title: "Xử lý sự cố y tế",
     description:
       "Trần Thị Bình - Lớp 2B bị té ngã, đã sơ cứu và thông báo phụ huynh",
     time: "15 phút trước",
@@ -439,8 +439,8 @@ const reports = [
     icon: Shield,
   },
   {
-    title: "Sự kiện y tế",
-    description: "Tổng số sự kiện y tế đã xử lý",
+    title: "Sự cố y tế",
+    description: "Tổng số sự cố y tế đã xử lý",
     value: "42",
     trend: "-8% so với tháng trước",
     icon: Activity,
