@@ -12,10 +12,14 @@ import {
 import { MedicineService } from '../services/medicine.service';
 import { Medicine } from '../schemas/medicine.schema';
 import { CreateMedicineDto } from '../decorations/dto/create-medicine.dto';
+import { ExportHistoryService } from '../services/export-history.service';
 
 @Controller('medicines')
 export class MedicineController {
-  constructor(private readonly medicineService: MedicineService) {}
+  constructor(
+    private readonly medicineService: MedicineService,
+    private readonly exportHistoryService: ExportHistoryService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -47,5 +51,68 @@ export class MedicineController {
   async remove(@Param('id') id: string) {
     await this.medicineService.remove(id);
     return;
+  }
+
+  @Post(':id/export')
+  @HttpCode(HttpStatus.OK)
+  async exportMedicine(
+    @Param('id') id: string,
+    @Body()
+    exportData: {
+      quantity: number;
+      reason: string;
+      medicalStaffName: string;
+      exportDate: string;
+    },
+  ) {
+    try {
+      // Get current medicine
+      const medicine = await this.medicineService.findOne(id);
+      if (!medicine) {
+        return {
+          success: false,
+          message: 'Medicine not found',
+        };
+      }
+
+      // Check if there's enough quantity
+      if (medicine.quantity < exportData.quantity) {
+        return {
+          success: false,
+          message: `Insufficient quantity. Available: ${medicine.quantity}, Requested: ${exportData.quantity}`,
+        };
+      }
+
+      // Update medicine quantity
+      const newQuantity = medicine.quantity - exportData.quantity;
+      await this.medicineService.update(id, { quantity: newQuantity });
+
+      // Create export history
+      await this.exportHistoryService.create({
+        medicineId: id,
+        quantity: exportData.quantity,
+        reason: exportData.reason,
+        medicalStaffName: exportData.medicalStaffName,
+        exportDate: exportData.exportDate,
+      });
+
+      return {
+        success: true,
+        message: `Successfully exported ${exportData.quantity} units. New quantity: ${newQuantity}`,
+        data: {
+          medicationId: id,
+          exportedQuantity: exportData.quantity,
+          newQuantity: newQuantity,
+          exportDate: exportData.exportDate,
+          reason: exportData.reason,
+          medicalStaffName: exportData.medicalStaffName,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Error exporting medicine: ${error.message}`,
+      };
+    }
   }
 }

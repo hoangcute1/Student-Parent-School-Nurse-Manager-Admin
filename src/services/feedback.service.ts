@@ -396,4 +396,48 @@ export class FeedbackService {
       feedbacks,
     };
   }
+
+  /**
+   * Update feedback with old date for testing
+   */
+  async updateFeedbackWithOldDate(feedbackId: string, oldDate: Date): Promise<Feedback> {
+    const feedback = await this.feedbackModel
+      .findByIdAndUpdate(feedbackId, { createdAt: oldDate }, { new: true })
+      .populate('parent')
+      .exec();
+
+    if (!feedback) {
+      throw new NotFoundException(`Feedback with ID "${feedbackId}" not found`);
+    }
+    return feedback;
+  }
+
+  /**
+   * Update feedback responded date for testing
+   */
+  async updateFeedbackRespondedDate(feedbackId: string, respondedDate: Date): Promise<Feedback> {
+    const feedback = await this.feedbackModel
+      .findByIdAndUpdate(feedbackId, { respondedAt: respondedDate }, { new: true })
+      .populate('parent')
+      .exec();
+
+    if (!feedback) {
+      throw new NotFoundException(`Feedback with ID "${feedbackId}" not found`);
+    }
+    return feedback;
+  }
+
+  /**
+   * Find processed feedbacks older than specified date
+   */
+  async findProcessedFeedbacksOlderThan(date: Date): Promise<Feedback[]> {
+    return this.feedbackModel
+      .find({
+        status: 'resolved',
+        response: { $ne: null },
+        respondedAt: { $lt: date },
+      })
+      .populate('parent')
+      .exec();
+  }
 }

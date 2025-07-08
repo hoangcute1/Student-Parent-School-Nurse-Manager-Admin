@@ -1,7 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FeedbackController } from '@/controllers/feedback.controller';
-import { TestController } from '@/controllers/test.controller';
 import { FeedbackService } from '@/services/feedback.service';
 import { Feedback, FeedbackSchema } from '@/schemas/feedback.schema';
 import { User, UserSchema } from '@/schemas/user.schema';
@@ -15,7 +14,7 @@ import { FeedbackEnhancedModule } from './feedback-enhanced.module';
     ]),
     forwardRef(() => FeedbackEnhancedModule),
   ],
-  controllers: [FeedbackController, TestController],
+  controllers: [FeedbackController],
   providers: [FeedbackService],
   exports: [FeedbackService],
 })

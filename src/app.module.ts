@@ -34,6 +34,8 @@ import { VaccineModule } from './modules/vaccine.module';
 import { VaccineCampaignModule } from './modules/vaccine-campaign.module';
 import { ClassModule } from './modules/class.module';
 import { TokenModule } from './modules/token.module';
+import { TestModule } from './modules/test.module';
+import { ExportHistoryModule } from './modules/export-history.module';
 
 @Module({
   imports: [
@@ -68,6 +70,8 @@ import { TokenModule } from './modules/token.module';
     TreatmentHistoryModule,
     VaccineModule,
     VaccineCampaignModule,
+    TestModule,
+    ExportHistoryModule,
   ],
   controllers: [AppController],
   providers: [
