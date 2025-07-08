@@ -24,7 +24,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     >
       <div className="flex h-full max-h-screen flex-col gap-2 p-4">
         <Link
-          href="/"
+          href="/cms"
           className="flex items-center gap-3 border-b border-sky-200 pb-4 group"
         >
           <div className="relative p-2 rounded-xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg group-hover:shadow-xl transition-all duration-300">

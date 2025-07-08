@@ -77,8 +77,8 @@ export default function User() {
                 {profile?.name
                   ? profile.name.charAt(0).toUpperCase()
                   : user?.email
-                  ? user.email.charAt(0).toUpperCase()
-                  : "U"}
+                    ? user.email.charAt(0).toUpperCase()
+                    : "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start">
@@ -89,10 +89,10 @@ export default function User() {
                 {role === "admin"
                   ? "Quản trị viên"
                   : role === "staff"
-                  ? "Nhân viên y tế"
-                  : role === "parent"
-                  ? "Phụ huynh"
-                  : null}
+                    ? "Nhân viên y tế"
+                    : role === "parent"
+                      ? "Phụ huynh"
+                      : null}
               </span>
             </div>
           </Button>
@@ -101,7 +101,18 @@ export default function User() {
           <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href="/" className="flex w-full items-center">
+            <Link
+              href={
+                role === "parent"
+                  ? "/"
+                  : role === "staff"
+                    ? "/cms"
+                    : role === "admin"
+                      ? "/admin"
+                      : "/"
+              }
+              className="flex w-full items-center"
+            >
               <UserCircle className="mr-2 h-4 w-4" />
               <span>Trang chủ</span>
             </Link>

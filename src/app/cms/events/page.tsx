@@ -50,9 +50,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -466,13 +463,12 @@ export default function MedicalEvents() {
                   {eventList.map((event) => (
                     <div
                       key={event._id}
-                      className={`p-4 rounded-lg border-l-4 ${
-                        event.priority === "Cao"
+                      className={`p-4 rounded-lg border-l-4 ${event.priority === "Cao"
                           ? "border-l-red-500 bg-red-50"
                           : event.priority === "Trung bình"
-                          ? "border-l-yellow-500 bg-yellow-50"
-                          : "border-l-blue-500 bg-blue-50"
-                      }`}
+                            ? "border-l-yellow-500 bg-yellow-50"
+                            : "border-l-blue-500 bg-blue-50"
+                        }`}
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -484,7 +480,7 @@ export default function MedicalEvents() {
                               <User className="h-3 w-3" />
                               {/* Hiển thị tên học sinh nếu có */}
                               {event.student &&
-                              typeof event.student === "object"
+                                typeof event.student === "object"
                                 ? `${event.student.name} (${event.student.studentId})`
                                 : event.student || "Không rõ"}{" "}
                               - {event.class}
@@ -512,8 +508,8 @@ export default function MedicalEvents() {
                             event.priority === "Cao"
                               ? "bg-red-100 text-red-800"
                               : event.priority === "Trung bình"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-blue-100 text-blue-800"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800"
                           }
                         >
                           {event.priority}
@@ -609,75 +605,7 @@ export default function MedicalEvents() {
                 Các trường hợp cần xử lý ngay lập tức
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {emergencyEvents.map((event, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-lg border-2 border-red-200 bg-red-50"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
-                        <h4 className="font-semibold text-red-900">
-                          {event.title}
-                        </h4>
-                      </div>
-                      <Badge className="bg-red-100 text-red-800">
-                        KHẨN CẤP
-                      </Badge>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <p className="text-sm text-red-800">
-                          <strong>Học sinh:</strong> {event.student}
-                        </p>
-                        <p className="text-sm text-red-800">
-                          <strong>Lớp:</strong> {event.class}
-                        </p>
-                        <p className="text-sm text-red-800">
-                          <strong>Thời gian:</strong> {event.time}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-red-800">
-                          <strong>Địa điểm:</strong> {event.location}
-                        </p>
-                        <p className="text-sm text-red-800">
-                          <strong>Người báo:</strong> {event.reporter}
-                        </p>
-                        <p className="text-sm text-red-800">
-                          <strong>Liên hệ PH:</strong> {event.parentContact}
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-red-700 mb-3">
-                      {event.description}
-                    </p>
-
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-red-600 hover:bg-red-700"
-                        onClick={() => handleEmergencyProcess(event)}
-                      >
-                        Xử lý ngay
-                      </Button>{" "}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-red-200 text-red-700"
-                        onClick={() => handleViewDetails(event)}
-                      >
-                        Chi tiết
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
           </Card>
         </TabsContent>
 
@@ -692,38 +620,7 @@ export default function MedicalEvents() {
                   Phân loại sự cố y tế trong tháng
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {eventTypeStats.map((stat, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border border-teal-100"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`h-3 w-3 rounded-full ${stat.color}`}
-                        ></div>
-                        <div>
-                          <div className="font-medium text-teal-800">
-                            {stat.type}
-                          </div>
-                          <div className="text-sm text-teal-600">
-                            {stat.description}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-teal-800">
-                          {stat.count}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {stat.percentage}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
+
             </Card>
 
             <Card>
@@ -735,29 +632,7 @@ export default function MedicalEvents() {
                   Hiệu quả xử lý sự cố y tế
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {responseTimeStats.map((stat, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-teal-700 font-medium">
-                          {stat.priority}
-                        </span>
-                        <span className="text-teal-800">{stat.avgTime}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${stat.color}`}
-                          style={{ width: `${stat.performance}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Mục tiêu: {stat.target} | Hiệu suất: {stat.performance}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
+
             </Card>
           </div>
         </TabsContent>
@@ -1054,10 +929,10 @@ export default function MedicalEvents() {
                             ) : (
                               students.map((student: any) => (
                                 <SelectItem
-                                  key={student._id}
-                                  value={student._id}
+                                  key={student.student?._id || student._id}
+                                  value={student.student?._id || student._id}
                                 >
-                                  {student.name} ({student.studentId})
+                                  {student.student?.name || student.name} ({student.student?._id || student._id})
                                 </SelectItem>
                               ))
                             )}
@@ -1238,7 +1113,12 @@ export default function MedicalEvents() {
               </h4>
               <div className="text-sm text-gray-600 mt-1">
                 <div>
-                  {selectedEvent.student.name} - {selectedEvent.student.class}
+                  {/* Safely access student name and class */}
+                  {typeof selectedEvent.student === "object" &&
+                    selectedEvent.student !== null
+                    ? `${selectedEvent.student.name || "Không rõ"} - ${selectedEvent.student.class || "Không rõ"
+                    }`
+                    : selectedEvent.student || "Không rõ"}
                 </div>
                 <div>
                   {selectedEvent.location} - {selectedEvent.time}
@@ -1392,8 +1272,8 @@ export default function MedicalEvents() {
                         selectedEvent.priority === "Cao"
                           ? "bg-red-100 text-red-800"
                           : selectedEvent.priority === "Trung bình"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
                       }
                     >
                       {selectedEvent.priority || "Đã xử lý"}
@@ -1639,85 +1519,7 @@ export default function MedicalEvents() {
   );
 }
 
-const emergencyEvents = [
-  {
-    title: "Ngạt thở do dị ứng nghiêm trọng",
-    student: "Trần Văn Hùng",
-    class: "Lớp 2A",
-    time: "13:45 - 16/12/2024",
-    location: "Phòng ăn",
-    reporter: "Cô Lan - Giáo viên",
-    parentContact: "Đã gọi - Đang đến",
-    description:
-      "Học sinh có phản ứng dị ứng nghiêm trọng với tôm, khó thở, sưng mặt. Đã tiêm thuốc khẩn cấp và chuẩn bị chuyển viện.",
-  },
-];
 
-const eventTypeStats = [
-  {
-    type: "Té ngã, chấn thương",
-    description: "Tai nạn trong hoạt động",
-    count: 45,
-    percentage: 29,
-    color: "bg-red-500",
-  },
-  {
-    type: "Dị ứng thức ăn",
-    description: "Phản ứng dị ứng",
-    count: 28,
-    percentage: 18,
-    color: "bg-orange-500",
-  },
-  {
-    type: "Sốt, cảm lạnh",
-    description: "Bệnh thông thường",
-    count: 35,
-    percentage: 22,
-    color: "bg-yellow-500",
-  },
-  {
-    type: "Đau bụng",
-    description: "Vấn đề tiêu hóa",
-    count: 25,
-    percentage: 16,
-    color: "bg-green-500",
-  },
-  {
-    type: "Khác",
-    description: "Các trường hợp khác",
-    count: 23,
-    percentage: 15,
-    color: "bg-sky-500",
-  },
-];
 
-const responseTimeStats = [
-  {
-    priority: "Khẩn cấp",
-    avgTime: "2 phút",
-    target: "< 3 phút",
-    performance: 95,
-    color: "bg-green-500",
-  },
-  {
-    priority: "Cao",
-    avgTime: "8 phút",
-    target: "< 10 phút",
-    performance: 88,
-    color: "bg-yellow-500",
-  },
-  {
-    priority: "Trung bình",
-    avgTime: "18 phút",
-    target: "< 20 phút",
-    performance: 92,
-    color: "bg-sky-500",
-  },
-  {
-    priority: "Thấp",
-    avgTime: "35 phút",
-    target: "< 45 phút",
-    performance: 85,
-    color: "bg-gray-500",
-  },
-];
+
+
