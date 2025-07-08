@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
 import { setAuthToken } from "@/lib/api/auth/token";
@@ -20,7 +26,7 @@ function createFakeToken(userData: any) {
     role: userData.role,
     name: userData.name,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
   };
 
   // Simple base64 encoding (not secure, just for testing)
@@ -32,7 +38,14 @@ function createFakeToken(userData: any) {
 }
 
 export default function LoginTestPage() {
-  const { user, isAuthenticated, clearAuth, updateUserInfo, updateUserRole } = useAuthStore();
+  const {
+    user,
+    profile,
+    isAuthenticated,
+    clearAuth,
+    updateUserInfo,
+    updateUserRole,
+  } = useAuthStore();
   const [email, setEmail] = useState("admin@example.com");
   const [name, setName] = useState("Test Admin");
   const [role, setRole] = useState<"admin" | "staff" | "parent">("admin");
@@ -42,25 +55,25 @@ export default function LoginTestPage() {
       id: "test-user-id",
       email,
       name,
-      role
+      role,
     };
 
     // Create fake token
     const fakeToken = createFakeToken(userData);
-    
+
     // Save token to localStorage
     setAuthToken(fakeToken);
-    
+
     // Update auth store
     updateUserRole(role);
     updateUserInfo(userData, null);
-    
+
     toast.success("Đăng nhập thành công!");
   };
 
   const handleLogout = () => {
     clearAuth();
-    localStorage.removeItem('authToken');
+    localStorage.removeItem("authToken");
     toast.success("Đã đăng xuất!");
   };
 
@@ -69,7 +82,9 @@ export default function LoginTestPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Login Test Page</h1>
-          <p className="text-gray-600 mt-2">Tạo token giả để test auth system</p>
+          <p className="text-gray-600 mt-2">
+            Tạo token giả để test auth system
+          </p>
         </div>
       </div>
 
@@ -93,7 +108,7 @@ export default function LoginTestPage() {
                 placeholder="admin@example.com"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="name">Tên</Label>
               <Input
@@ -103,10 +118,15 @@ export default function LoginTestPage() {
                 placeholder="Test Admin"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={(value: "admin" | "staff" | "parent") => setRole(value)}>
+              <Select
+                value={role}
+                onValueChange={(value: "admin" | "staff" | "parent") =>
+                  setRole(value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -117,7 +137,7 @@ export default function LoginTestPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <Button onClick={handleLogin} className="w-full">
               <LogIn className="h-4 w-4 mr-2" />
               Đăng nhập
@@ -140,7 +160,7 @@ export default function LoginTestPage() {
                   <Shield className="h-4 w-4" />
                   <span className="font-medium">Đã đăng nhập</span>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm text-gray-600">Email</p>
@@ -148,15 +168,19 @@ export default function LoginTestPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Tên</p>
-                    <p className="font-medium">{user.name}</p>
+                    <p className="font-medium">{profile?.name}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Role</p>
                     <p className="font-medium">{user.role}</p>
                   </div>
                 </div>
-                
-                <Button onClick={handleLogout} variant="destructive" className="w-full">
+
+                <Button
+                  onClick={handleLogout}
+                  variant="destructive"
+                  className="w-full"
+                >
                   <LogOut className="h-4 w-4 mr-2" />
                   Đăng xuất
                 </Button>
@@ -185,7 +209,7 @@ export default function LoginTestPage() {
               <a href="/cms/events">CMS Events</a>
             </Button>
             <Button asChild variant="outline">
-              <a href="/cmscopy/events">CMS Copy Events</a>
+              <a href="/admin/events">CMS Copy Events</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/events-noauth">Events (No Auth)</a>
@@ -202,16 +226,22 @@ export default function LoginTestPage() {
         <CardContent>
           <div className="space-y-2 text-sm font-mono">
             <div>
-              <span className="text-gray-600">Token exists:</span> {typeof window !== 'undefined' ? (localStorage.getItem('authToken') ? 'Yes' : 'No') : 'N/A'}
+              <span className="text-gray-600">Token exists:</span>{" "}
+              {typeof window !== "undefined"
+                ? localStorage.getItem("authToken")
+                  ? "Yes"
+                  : "No"
+                : "N/A"}
             </div>
-            {typeof window !== 'undefined' && localStorage.getItem('authToken') && (
-              <div>
-                <span className="text-gray-600">Token preview:</span>
-                <div className="mt-1 p-2 bg-gray-100 rounded text-xs break-all">
-                  {localStorage.getItem('authToken')?.substring(0, 100)}...
+            {typeof window !== "undefined" &&
+              localStorage.getItem("authToken") && (
+                <div>
+                  <span className="text-gray-600">Token preview:</span>
+                  <div className="mt-1 p-2 bg-gray-100 rounded text-xs break-all">
+                    {localStorage.getItem("authToken")?.substring(0, 100)}...
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </CardContent>
       </Card>

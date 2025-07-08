@@ -38,7 +38,7 @@ function LoginGoogle() {
           router.push("/cms");
         } else if (data.user.role === "admin") {
           handleTokenLoginSuccess(data.tokens.accessToken);
-          router.push("/cmscopy");
+          router.push("/admin");
         } else {
           throw new Error("Không hợp lệ");
         }
@@ -56,8 +56,8 @@ function LoginGoogle() {
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div className="w-full">
-        <GoogleLogin 
-          onSuccess={handleSuccess} 
+        <GoogleLogin
+          onSuccess={handleSuccess}
           onError={handleFailure}
           theme="outline"
           size="large"

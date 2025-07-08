@@ -232,10 +232,10 @@ export default function DemoThemePage() {
                   Các trang đã cập nhật:
                 </h3>
                 <ul className="space-y-2 text-sky-700">
-                  <li>• /cmscopy/manage-parents</li>
-                  <li>• /cmscopy/manage-staffs</li>
-                  <li>• /cmscopy/manage-students</li>
-                  <li>• /cmscopy/medications</li>
+                  <li>• /admin/manage-parents</li>
+                  <li>• /admin/manage-staffs</li>
+                  <li>• /admin/manage-students</li>
+                  <li>• /admin/medications</li>
                 </ul>
               </div>
               <div>

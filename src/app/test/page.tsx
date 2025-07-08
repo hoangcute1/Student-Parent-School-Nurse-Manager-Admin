@@ -26,17 +26,23 @@ export default function TestPage() {
             <Button onClick={() => setShowEventsPage(true)}>
               Show Events Page (No Auth)
             </Button>
-            <Button onClick={() => window.location.href = '/cms/events'}>
+            <Button onClick={() => (window.location.href = "/cms/events")}>
               Go to /cms/events
             </Button>
-            <Button onClick={() => window.location.href = '/cmscopy/events'}>
-              Go to /cmscopy/events
+            <Button onClick={() => (window.location.href = "/admin/events")}>
+              Go to /admin/events
             </Button>
           </div>
 
           <div className="text-sm text-gray-600">
-            <p>This page bypasses authentication to test the events page directly.</p>
-            <p>Current URL: {typeof window !== 'undefined' ? window.location.href : 'N/A'}</p>
+            <p>
+              This page bypasses authentication to test the events page
+              directly.
+            </p>
+            <p>
+              Current URL:{" "}
+              {typeof window !== "undefined" ? window.location.href : "N/A"}
+            </p>
           </div>
         </CardContent>
       </Card>

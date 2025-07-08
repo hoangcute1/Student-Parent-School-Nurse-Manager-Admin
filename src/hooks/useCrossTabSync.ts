@@ -7,7 +7,6 @@ import { useExportHistoryStore } from "@/stores/export-history-store";
  */
 export const useCrossTabSync = () => {
   const { fetchMedications } = useMedicationStore();
-  const { forceRefresh } = useExportHistoryStore();
 
   useEffect(() => {
     // Lắng nghe sự kiện medication export từ các tab khác
@@ -27,7 +26,7 @@ export const useCrossTabSync = () => {
         event.detail
       );
       // Force refresh export history để trigger re-render
-      forceRefresh();
+      useForceRefresh();
     };
 
     // Lắng nghe storage events (khi localStorage thay đổi từ tab khác)
@@ -69,7 +68,7 @@ export const useCrossTabSync = () => {
         window.removeEventListener("storage", handleStorageChange);
       }
     };
-  }, [fetchMedications, forceRefresh]);
+  }, [fetchMedications, useForceRefresh]);
 };
 
 /**

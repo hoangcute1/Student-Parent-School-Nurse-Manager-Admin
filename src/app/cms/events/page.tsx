@@ -58,7 +58,11 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAllStudents } from "@/lib/api/student";
 import { getAllStaffs } from "@/lib/api/staff";
-import { createTreatmentHistory, getAllTreatmentHistories, updateTreatmentHistory } from "@/lib/api/treatment-history";
+import {
+  createTreatmentHistory,
+  getAllTreatmentHistories,
+  updateTreatmentHistory,
+} from "@/lib/api/treatment-history";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
 
@@ -87,13 +91,11 @@ export default function MedicalEvents() {
 
   // Form schema for adding/updating event
 
-
-
   const eventFormSchema = z.object({
     title: z.string().min(3, "Tiêu đề phải có ít nhất 3 ký tự"),
-    student: z.string().min(2, "Vui lòng chọn học sinh"),      // ObjectId
-    class: z.string().min(1, "Vui lòng chọn lớp"),             // ObjectId
-    reporter: z.string().min(1, "Vui lòng chọn người báo cáo"),// ObjectId
+    student: z.string().min(2, "Vui lòng chọn học sinh"), // ObjectId
+    class: z.string().min(1, "Vui lòng chọn lớp"), // ObjectId
+    reporter: z.string().min(1, "Vui lòng chọn người báo cáo"), // ObjectId
     description: z.string().min(10, "Mô tả phải có ít nhất 10 ký tự"),
     location: z.string().min(1, "Vui lòng nhập địa điểm"),
     priority: z.enum(["Cao", "Trung bình", "Thấp"]),
@@ -207,7 +209,7 @@ export default function MedicalEvents() {
         priority: data.priority,
         description: data.description,
         contactStatus: data.contactStatus,
-        reporter: data.reporter,// <-- phải là string // boolean
+        reporter: data.reporter, // <-- phải là string // boolean
       });
 
       // Refresh danh sách events ngay sau khi tạo thành công
@@ -306,7 +308,7 @@ export default function MedicalEvents() {
     getAllTreatmentHistories()
       .then((data) => {
         console.log("Fetched treatment histories:", data);
-        setEventList(data)
+        setEventList(data);
       })
       .catch(() => setEventError("Không thể tải danh sách sự kiện"))
       .finally(() => setEventLoading(false));
@@ -464,21 +466,25 @@ export default function MedicalEvents() {
                   {eventList.map((event) => (
                     <div
                       key={event._id}
-                      className={`p-4 rounded-lg border-l-4 ${event.priority === "Cao"
-                        ? "border-l-red-500 bg-red-50"
-                        : event.priority === "Trung bình"
+                      className={`p-4 rounded-lg border-l-4 ${
+                        event.priority === "Cao"
+                          ? "border-l-red-500 bg-red-50"
+                          : event.priority === "Trung bình"
                           ? "border-l-yellow-500 bg-yellow-50"
                           : "border-l-blue-500 bg-blue-50"
-                        }`}
+                      }`}
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h4 className="font-bold text-gray-900">{event.title}</h4>
+                          <h4 className="font-bold text-gray-900">
+                            {event.title}
+                          </h4>
                           <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                               <User className="h-3 w-3" />
                               {/* Hiển thị tên học sinh nếu có */}
-                              {event.student && typeof event.student === "object"
+                              {event.student &&
+                              typeof event.student === "object"
                                 ? `${event.student.name} (${event.student.studentId})`
                                 : event.student || "Không rõ"}{" "}
                               - {event.class}
@@ -497,19 +503,25 @@ export default function MedicalEvents() {
                           </div>
                         </div>
                         <Badge
-                          variant={event.priority === "Cao" ? "destructive" : "secondary"}
+                          variant={
+                            event.priority === "Cao"
+                              ? "destructive"
+                              : "secondary"
+                          }
                           className={
                             event.priority === "Cao"
                               ? "bg-red-100 text-red-800"
                               : event.priority === "Trung bình"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-blue-100 text-blue-800"
                           }
                         >
                           {event.priority}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-700 mb-3">{event.description}</p>
+                      <p className="text-sm text-gray-700 mb-3">
+                        {event.description}
+                      </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Phone className="h-3 w-3" />
@@ -552,36 +564,38 @@ export default function MedicalEvents() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {eventList.filter(event => event.status === 'resolved').map((event, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {event.title}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {event.student} - {event.class} | {event.date}
+                {eventList
+                  .filter((event) => event.status === "resolved")
+                  .map((event, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {event.title}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {event.student} - {event.class} | {event.date}
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-800">
+                          Đã xử lý
+                        </Badge>{" "}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(event)}
+                        >
+                          Chi tiết
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-green-100 text-green-800">
-                        Đã xử lý
-                      </Badge>{" "}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewDetails(event)}
-                      >
-                        Chi tiết
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </CardContent>
           </Card>
@@ -753,9 +767,7 @@ export default function MedicalEvents() {
       <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-teal-800">
-              Thêm sự cố y tế
-            </DialogTitle>
+            <DialogTitle className="text-teal-800">Thêm sự cố y tế</DialogTitle>
             <DialogDescription className="text-teal-600">
               Nhập thông tin về sự cố y tế mới
             </DialogDescription>
@@ -788,17 +800,25 @@ export default function MedicalEvents() {
                     <FormItem>
                       <FormLabel>Học sinh</FormLabel>
                       <FormControl>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn học sinh" />
                           </SelectTrigger>
                           <SelectContent>
                             {students.length === 0 ? (
-                              <div className="p-2 text-gray-500 text-sm">Không có học sinh</div>
+                              <div className="p-2 text-gray-500 text-sm">
+                                Không có học sinh
+                              </div>
                             ) : (
                               students.map((student) => (
-                                <SelectItem key={student.student._id} value={student.student._id}>
-                                  {student.student.name} ({student.studentId})
+                                <SelectItem
+                                  key={student.student._id}
+                                  value={student.student._id}
+                                >
+                                  {student.student.name} ({student.student._id})
                                 </SelectItem>
                               ))
                             )}
@@ -860,13 +880,18 @@ export default function MedicalEvents() {
                     <FormItem>
                       <FormLabel>Người báo cáo</FormLabel>
                       <FormControl>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn người báo cáo" />
                           </SelectTrigger>
                           <SelectContent>
                             {staffs.length === 0 ? (
-                              <div className="p-2 text-gray-500 text-sm">Không có nhân viên</div>
+                              <div className="p-2 text-gray-500 text-sm">
+                                Không có nhân viên
+                              </div>
                             ) : (
                               staffs.map((staff) => (
                                 <SelectItem key={staff._id} value={staff._id}>
@@ -881,8 +906,6 @@ export default function MedicalEvents() {
                     </FormItem>
                   )}
                 />
-
-
 
                 <FormField
                   control={addEventForm.control}
@@ -1016,16 +1039,24 @@ export default function MedicalEvents() {
                     <FormItem>
                       <FormLabel>Học sinh</FormLabel>
                       <FormControl>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Chọn học sinh" />
                           </SelectTrigger>
                           <SelectContent>
                             {students.length === 0 ? (
-                              <div className="p-2 text-gray-500 text-sm">Không có học sinh</div>
+                              <div className="p-2 text-gray-500 text-sm">
+                                Không có học sinh
+                              </div>
                             ) : (
                               students.map((student: any) => (
-                                <SelectItem key={student._id} value={student._id}>
+                                <SelectItem
+                                  key={student._id}
+                                  value={student._id}
+                                >
                                   {student.name} ({student.studentId})
                                 </SelectItem>
                               ))
@@ -1361,8 +1392,8 @@ export default function MedicalEvents() {
                         selectedEvent.priority === "Cao"
                           ? "bg-red-100 text-red-800"
                           : selectedEvent.priority === "Trung bình"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-blue-100 text-blue-800"
                       }
                     >
                       {selectedEvent.priority || "Đã xử lý"}
@@ -1607,9 +1638,6 @@ export default function MedicalEvents() {
     </div>
   );
 }
-
-
-
 
 const emergencyEvents = [
   {

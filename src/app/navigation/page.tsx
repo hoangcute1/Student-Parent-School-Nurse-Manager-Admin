@@ -68,9 +68,9 @@ export default function NavigationPage() {
       bgColor: "from-blue-50 to-blue-100",
     },
     {
-      title: "📋 CMSCopy Medications",
+      title: "📋 admin Medications",
       description: "Quản lý thuốc phiên bản copy với xuất thuốc",
-      url: "/cmscopy/medications",
+      url: "/admin/medications",
       icon: Package,
       color: "from-sky-500 to-sky-600",
       bgColor: "from-sky-50 to-sky-100",
@@ -78,7 +78,7 @@ export default function NavigationPage() {
     {
       title: "📊 Export History",
       description: "Lịch sử xuất thuốc với filter nâng cao",
-      url: "/cmscopy/medications/export-history",
+      url: "/admin/medications/export-history",
       icon: History,
       color: "from-orange-500 to-orange-600",
       bgColor: "from-orange-50 to-orange-100",
@@ -224,9 +224,7 @@ export default function NavigationPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() =>
-                  router.push("/cmscopy/medications/export-history")
-                }
+                onClick={() => router.push("/admin/medications/export-history")}
                 className="border-orange-300 hover:bg-orange-50 text-orange-700"
               >
                 📊 View History

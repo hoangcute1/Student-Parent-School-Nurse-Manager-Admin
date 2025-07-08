@@ -1,4 +1,3 @@
-
 import { UserLoginResponse, UserProfile, UserRoleType } from "./users";
 
 interface LoginRequestCredentials {
@@ -38,13 +37,18 @@ interface AuthStore {
   setIsLoading: (isLoading: boolean) => void;
   clearAuth: () => void;
   updateUserRole: (role: UserRoleType | null) => void;
-  updateUserInfo: (user: UserLoginResponse, profile?: UserProfile) => void;
+  updateUserInfo: (
+    user: UserLoginResponse,
+    profile: UserProfile | null
+  ) => void;
   // Forgot password actions
   forgotPassword: (email: string) => Promise<void>;
   verifyResetOTP: (email: string, otp: string) => Promise<any>;
-  resetPasswordWithToken: (resetToken: string, newPassword: string) => Promise<any>;
+  resetPasswordWithToken: (
+    resetToken: string,
+    newPassword: string
+  ) => Promise<any>;
 }
-
 
 export type {
   AuthResponse,
@@ -53,5 +57,5 @@ export type {
   AuthStore,
   LoginRequestCredentials,
   LoginVerifyCredentials,
-  ForgotPasswordRequest
+  ForgotPasswordRequest,
 };

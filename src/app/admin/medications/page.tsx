@@ -249,7 +249,7 @@ export default function MedicationsPage() {
                 <Button
                   variant="outline"
                   onClick={() =>
-                    router.push("/cmscopy/medications/export-history")
+                    router.push("/admin/medications/export-history")
                   }
                   className="bg-white/70 hover:bg-sky-50 text-sky-700 border-sky-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg"
                 >

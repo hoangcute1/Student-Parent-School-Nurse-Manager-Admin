@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
  * Lấy parent ID từ auth store
  * @returns string | null - Parent ID hoặc null nếu không tìm thấy
  */
-export const getParentId = async (): Promise<string | null> => {
+export const getParentId = async (): Promise<string> => {
   const { user, profile } = useAuthStore.getState();
   console.log("user", user);
   console.log("profile", profile);
@@ -25,11 +25,11 @@ export const getParentId = async (): Promise<string | null> => {
       return foundParent._id;
     }
 
-    console.warn('No parent ID found in parents list');
-    return null;
+    console.warn("No parent ID found in parents list");
+    return "";
   } catch (error) {
-    console.error('Error fetching parents:', error);
-    return null;
+    console.error("Error fetching parents:", error);
+    return "";
   }
 };
 
@@ -43,7 +43,7 @@ export const useParentId = () => {
   const { user } = useAuthStore();
 
   useEffect(() => {
-    if (user?.role === 'parent') {
+    if (user?.role === "parent") {
       setLoading(true);
       getParentId()
         .then((id) => {
@@ -51,7 +51,7 @@ export const useParentId = () => {
           setLoading(false);
         })
         .catch((error) => {
-          console.error('Error fetching parent ID:', error);
+          console.error("Error fetching parent ID:", error);
           setParentId(null);
           setLoading(false);
         });
@@ -71,7 +71,7 @@ export const useParentId = () => {
 export const getParentIdSync = (): string | null => {
   const { user } = useAuthStore.getState();
 
-  if (user?.role !== 'parent') {
+  if (user?.role !== "parent") {
     return null;
   }
 
@@ -91,7 +91,7 @@ export const getParentIdSync = (): string | null => {
  */
 export const isParentUser = (): boolean => {
   const { user } = useAuthStore.getState();
-  return user?.role === 'parent';
+  return user?.role === "parent";
 };
 
 /**
@@ -100,5 +100,5 @@ export const isParentUser = (): boolean => {
  */
 export const useIsParent = (): boolean => {
   const { user } = useAuthStore();
-  return user?.role === 'parent';
+  return user?.role === "parent";
 };

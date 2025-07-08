@@ -6,11 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
-import { User, Shield, Clock, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import {
+  User,
+  Shield,
+  Clock,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+} from "lucide-react";
 
 export default function AuthTestPage() {
-  const { user, isLoading, isAuthenticated, clearAuth } = useAuthStore();
-  const [authStatus, setAuthStatus] = useState<'loading' | 'success' | 'error' | 'timeout'>('loading');
+  const { user, profile, isLoading, isAuthenticated, clearAuth } =
+    useAuthStore();
+  const [authStatus, setAuthStatus] = useState<
+    "loading" | "success" | "error" | "timeout"
+  >("loading");
   const [timeoutReached, setTimeoutReached] = useState(false);
 
   useEffect(() => {
@@ -18,7 +28,7 @@ export default function AuthTestPage() {
     const timer = setTimeout(() => {
       setTimeoutReached(true);
       if (isLoading) {
-        setAuthStatus('timeout');
+        setAuthStatus("timeout");
       }
     }, 10000); // 10 seconds
 
@@ -28,9 +38,9 @@ export default function AuthTestPage() {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated && user) {
-        setAuthStatus('success');
+        setAuthStatus("success");
       } else {
-        setAuthStatus('error');
+        setAuthStatus("error");
       }
     }
   }, [isLoading, isAuthenticated, user]);
@@ -46,13 +56,13 @@ export default function AuthTestPage() {
 
   const getStatusIcon = () => {
     switch (authStatus) {
-      case 'loading':
+      case "loading":
         return <RefreshCw className="h-6 w-6 animate-spin text-blue-500" />;
-      case 'success':
+      case "success":
         return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'error':
+      case "error":
         return <XCircle className="h-6 w-6 text-red-500" />;
-      case 'timeout':
+      case "timeout":
         return <Clock className="h-6 w-6 text-orange-500" />;
       default:
         return <RefreshCw className="h-6 w-6 animate-spin text-blue-500" />;
@@ -61,31 +71,31 @@ export default function AuthTestPage() {
 
   const getStatusText = () => {
     switch (authStatus) {
-      case 'loading':
-        return 'Đang tải thông tin xác thực...';
-      case 'success':
-        return 'Xác thực thành công';
-      case 'error':
-        return 'Lỗi xác thực';
-      case 'timeout':
-        return 'Timeout - Quá thời gian chờ';
+      case "loading":
+        return "Đang tải thông tin xác thực...";
+      case "success":
+        return "Xác thực thành công";
+      case "error":
+        return "Lỗi xác thực";
+      case "timeout":
+        return "Timeout - Quá thời gian chờ";
       default:
-        return 'Đang kiểm tra...';
+        return "Đang kiểm tra...";
     }
   };
 
   const getStatusColor = () => {
     switch (authStatus) {
-      case 'loading':
-        return 'bg-blue-100 text-blue-800';
-      case 'success':
-        return 'bg-green-100 text-green-800';
-      case 'error':
-        return 'bg-red-100 text-red-800';
-      case 'timeout':
-        return 'bg-orange-100 text-orange-800';
+      case "loading":
+        return "bg-blue-100 text-blue-800";
+      case "success":
+        return "bg-green-100 text-green-800";
+      case "error":
+        return "bg-red-100 text-red-800";
+      case "timeout":
+        return "bg-orange-100 text-orange-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -96,7 +106,7 @@ export default function AuthTestPage() {
           <h1 className="text-3xl font-bold">Auth Test Page</h1>
           <p className="text-gray-600 mt-2">Kiểm tra trạng thái xác thực</p>
         </div>
-        
+
         <div className="flex gap-2">
           <Button onClick={handleRefresh} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -128,24 +138,32 @@ export default function AuthTestPage() {
                 </Badge>
               </div>
             </div>
-            
+
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Loading:</span>
-                <span className={isLoading ? 'text-blue-600' : 'text-gray-600'}>
-                  {isLoading ? 'True' : 'False'}
+                <span className={isLoading ? "text-blue-600" : "text-gray-600"}>
+                  {isLoading ? "True" : "False"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Authenticated:</span>
-                <span className={isAuthenticated ? 'text-green-600' : 'text-red-600'}>
-                  {isAuthenticated ? 'True' : 'False'}
+                <span
+                  className={
+                    isAuthenticated ? "text-green-600" : "text-red-600"
+                  }
+                >
+                  {isAuthenticated ? "True" : "False"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Timeout Reached:</span>
-                <span className={timeoutReached ? 'text-orange-600' : 'text-gray-600'}>
-                  {timeoutReached ? 'True' : 'False'}
+                <span
+                  className={
+                    timeoutReached ? "text-orange-600" : "text-gray-600"
+                  }
+                >
+                  {timeoutReached ? "True" : "False"}
                 </span>
               </div>
             </div>
@@ -164,20 +182,16 @@ export default function AuthTestPage() {
             {user ? (
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">ID</p>
-                  <p className="font-medium">{user.id || 'N/A'}</p>
-                </div>
-                <div>
                   <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-medium">{user.email || 'N/A'}</p>
+                  <p className="font-medium">{user.email || "N/A"}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Role</p>
-                  <Badge variant="outline">{user.role || 'N/A'}</Badge>
+                  <Badge variant="outline">{user.role || "N/A"}</Badge>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Name</p>
-                  <p className="font-medium">{user.name || 'N/A'}</p>
+                  <p className="font-medium">{profile?.name || "N/A"}</p>
                 </div>
               </div>
             ) : (
@@ -198,19 +212,28 @@ export default function AuthTestPage() {
         <CardContent>
           <div className="space-y-2 text-sm font-mono">
             <div>
-              <span className="text-gray-600">Environment:</span> {process.env.NODE_ENV}
+              <span className="text-gray-600">Environment:</span>{" "}
+              {process.env.NODE_ENV}
             </div>
             <div>
-              <span className="text-gray-600">API URL:</span> {process.env.NEXT_PUBLIC_API_URL}
+              <span className="text-gray-600">API URL:</span>{" "}
+              {process.env.NEXT_PUBLIC_API_URL}
             </div>
             <div>
-              <span className="text-gray-600">Skip Auth:</span> {process.env.NEXT_PUBLIC_SKIP_AUTH}
+              <span className="text-gray-600">Skip Auth:</span>{" "}
+              {process.env.NEXT_PUBLIC_SKIP_AUTH}
             </div>
             <div>
-              <span className="text-gray-600">Current URL:</span> {typeof window !== 'undefined' ? window.location.href : 'N/A'}
+              <span className="text-gray-600">Current URL:</span>{" "}
+              {typeof window !== "undefined" ? window.location.href : "N/A"}
             </div>
             <div>
-              <span className="text-gray-600">Local Storage Token:</span> {typeof window !== 'undefined' ? (localStorage.getItem('authToken') ? 'Present' : 'Not found') : 'N/A'}
+              <span className="text-gray-600">Local Storage Token:</span>{" "}
+              {typeof window !== "undefined"
+                ? localStorage.getItem("authToken")
+                  ? "Present"
+                  : "Not found"
+                : "N/A"}
             </div>
           </div>
         </CardContent>
@@ -230,10 +253,12 @@ export default function AuthTestPage() {
               <a href="/cms/events">CMS Events</a>
             </Button>
             <Button asChild variant="outline">
-              <a href="/cmscopy/events">CMS Copy Events</a>
+              <a href="/admin/events">CMS Copy Events</a>
             </Button>
             <Button asChild variant="outline">
-              <a href="/cmscopy/events?skipauth=true">CMS Copy Events (Skip Auth)</a>
+              <a href="/admin/events?skipauth=true">
+                CMS Copy Events (Skip Auth)
+              </a>
             </Button>
           </div>
         </CardContent>
