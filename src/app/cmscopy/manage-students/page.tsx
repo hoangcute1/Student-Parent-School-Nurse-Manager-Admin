@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import {
   Card,
   CardContent,
@@ -141,6 +142,91 @@ export default function StudentsPage() {
     }
   };
 
+  const handleExportToExcel = () => {
+    try {
+      // Chuẩn bị dữ liệu để xuất
+      const exportData = displayStudents.map(
+        (studentData: any, index: number) => ({
+          STT: index + 1,
+          "Mã học sinh": studentData.student?.studentId || "",
+          "Họ và tên": studentData.student?.name || "",
+          "Giới tính":
+            studentData.student?.gender === "male"
+              ? "Nam"
+              : studentData.student?.gender === "female"
+              ? "Nữ"
+              : "",
+          "Ngày sinh": studentData.student?.birth
+            ? new Date(studentData.student.birth).toLocaleDateString("vi-VN")
+            : "",
+          Lớp: studentData.class?.name || "",
+          Khối: studentData.class?.grade || "",
+          "Chiều cao": studentData.healthRecord?.height
+            ? `${studentData.healthRecord.height} cm`
+            : "Chưa cập nhật",
+          "Cân nặng": studentData.healthRecord?.weight
+            ? `${studentData.healthRecord.weight} kg`
+            : "Chưa cập nhật",
+          "Nhóm máu": studentData.healthRecord?.blood_type || "Chưa xác định",
+          "Thị lực": studentData.healthRecord?.vision || "Chưa kiểm tra",
+          "Thính lực": studentData.healthRecord?.hearing || "Chưa kiểm tra",
+          "Dị ứng": studentData.healthRecord?.allergies || "Không có",
+          "Bệnh mãn tính":
+            studentData.healthRecord?.chronic_conditions || "Không có",
+          "Lịch sử bệnh án":
+            studentData.healthRecord?.treatment_history || "Không có",
+          "Ghi chú": studentData.healthRecord?.notes || "Không có",
+          "Ngày tạo": studentData.student?.created_at
+            ? new Date(studentData.student.created_at).toLocaleDateString(
+                "vi-VN"
+              )
+            : "",
+        })
+      );
+
+      // Tạo workbook và worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+
+      // Thiết lập độ rộng cột
+      const colWidths = [
+        { wch: 5 }, // STT
+        { wch: 15 }, // Mã học sinh
+        { wch: 25 }, // Họ và tên
+        { wch: 10 }, // Giới tính
+        { wch: 12 }, // Ngày sinh
+        { wch: 10 }, // Lớp
+        { wch: 8 }, // Khối
+        { wch: 12 }, // Chiều cao
+        { wch: 12 }, // Cân nặng
+        { wch: 12 }, // Nhóm máu
+        { wch: 15 }, // Thị lực
+        { wch: 15 }, // Thính lực
+        { wch: 20 }, // Dị ứng
+        { wch: 20 }, // Bệnh mãn tính
+        { wch: 30 }, // Lịch sử bệnh án
+        { wch: 20 }, // Ghi chú
+        { wch: 12 }, // Ngày tạo
+      ];
+      ws["!cols"] = colWidths;
+
+      // Thêm worksheet vào workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Danh sách học sinh");
+
+      // Xuất file với tên có ngày tháng
+      const fileName = `Danh_sach_hoc_sinh_${new Date()
+        .toLocaleDateString("vi-VN")
+        .replace(/\//g, "_")}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      // Hiển thị thông báo thành công
+      alert("Xuất báo cáo Excel thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error);
+      alert("Có lỗi xảy ra khi xuất báo cáo!");
+    }
+  };
+
   // Calculate stats
   const totalStudents = displayStudents.length;
   const maleStudents = displayStudents.filter(
@@ -239,6 +325,7 @@ export default function StudentsPage() {
               onSearchChange={setSearchQuery}
               onClassFilterChange={setClassFilter}
               onHealthStatusChange={setHealthFilter}
+              onExportExcel={handleExportToExcel}
             />
             <StudentTable
               students={displayStudents}

@@ -107,3 +107,82 @@ export const getMedicationById = async (id: string): Promise<Medication> => {
     throw error;
   }
 };
+
+/**
+ * Export medication from inventory (reduces quantity)
+ */
+export const exportMedication = async (exportData: {
+  medicationId: string;
+  quantity: number;
+  reason: string;
+  medicalStaffName: string;
+}): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Gọi API để cập nhật số lượng thuốc sau khi xuất
+    const response = await fetchData<{ success: boolean; message: string }>(
+      `/medicines/${exportData.medicationId}/export`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          quantity: exportData.quantity,
+          reason: exportData.reason,
+          medicalStaffName: exportData.medicalStaffName,
+          exportDate: new Date().toISOString(),
+        }),
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error exporting medication:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get medication export history
+ */
+export const getMedicationExportHistory = async (
+  medicationId?: string
+): Promise<any[]> => {
+  try {
+    const url = medicationId
+      ? `/medicines/${medicationId}/exports`
+      : `/medicine-exports`;
+    return await fetchData<any[]>(url);
+  } catch (error) {
+    console.error("Error fetching export history:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get filtered export history with pagination
+ */
+export const getFilteredExportHistory = async (filters: {
+  dateFrom?: string;
+  dateTo?: string;
+  medicationName?: string;
+  medicalStaffName?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ data: any[]; total: number }> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    if (filters.dateFrom) queryParams.append("dateFrom", filters.dateFrom);
+    if (filters.dateTo) queryParams.append("dateTo", filters.dateTo);
+    if (filters.medicationName)
+      queryParams.append("medicationName", filters.medicationName);
+    if (filters.medicalStaffName)
+      queryParams.append("medicalStaffName", filters.medicalStaffName);
+    if (filters.limit) queryParams.append("limit", filters.limit.toString());
+    if (filters.offset) queryParams.append("offset", filters.offset.toString());
+
+    const url = `/medicine-exports?${queryParams.toString()}`;
+    return await fetchData<{ data: any[]; total: number }>(url);
+  } catch (error) {
+    console.error("Error fetching filtered export history:", error);
+    throw error;
+  }
+};

@@ -15,12 +15,14 @@ interface FilterBarProps {
   onSearchChange?: (value: string) => void;
   onClassFilterChange?: (value: string) => void;
   onHealthStatusChange?: (value: string) => void;
+  onExportExcel?: () => void;
 }
 
 export function FilterBar({
   onSearchChange,
   onClassFilterChange,
   onHealthStatusChange,
+  onExportExcel,
 }: FilterBarProps) {
   return (
     <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-sky-100 space-y-4">
@@ -71,8 +73,8 @@ export function FilterBar({
           </Select>
 
           <Button
-            variant="outline"
-            className="h-11 px-4 border-sky-200 hover:bg-sky-50 transition-all duration-200 rounded-lg"
+            onClick={onExportExcel}
+            className="h-11 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 rounded-lg shadow-lg hover:shadow-xl border-0"
           >
             <Download className="w-4 h-4 mr-2" />
             Xuất Excel

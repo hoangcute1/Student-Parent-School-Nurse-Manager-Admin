@@ -17,12 +17,8 @@ interface ClassSelectorProps {
 
 export function ClassSelector({ onClassChange }: ClassSelectorProps) {
   const { classes, isLoading, fetchClasses } = useClassStore();
-  const {
-    selectedClassId,
-    setSelectedClassId,
-    fetchStudentsByClass,
-    fetchAllStudents,
-  } = useStudentStore();
+  const { selectedClassId, setSelectedClassId, fetchStudentsByClass } =
+    useStudentStore();
 
   useEffect(() => {
     fetchClasses();
@@ -31,7 +27,7 @@ export function ClassSelector({ onClassChange }: ClassSelectorProps) {
   const handleClassChange = (value: string) => {
     if (value === "all") {
       setSelectedClassId(null);
-      fetchAllStudents();
+      // fetchAllStudents(); // Function not available, will fetch by class instead
     } else {
       setSelectedClassId(value);
       fetchStudentsByClass(value);

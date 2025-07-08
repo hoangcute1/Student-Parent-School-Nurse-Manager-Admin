@@ -21,7 +21,6 @@ interface MedicationFormProps {
     description?: string;
     manufacturer?: string;
     quantity?: number | string;
-    image?: string;
     is_prescription_required?: boolean;
   };
   isEdit?: boolean;
@@ -45,7 +44,6 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
     contraindications: "",
     description: "",
     quantity: "",
-    image: "",
     is_prescription_required: false,
   });
   const [loading, setLoading] = useState(false);
@@ -66,7 +64,6 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
           defaultValues.quantity !== null
             ? String(defaultValues.quantity)
             : "",
-        image: defaultValues.image || "",
         is_prescription_required: !!defaultValues.is_prescription_required,
       });
     } else if (!isEdit) {
@@ -80,14 +77,15 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
         contraindications: "",
         description: "",
         quantity: "",
-        image: "",
         is_prescription_required: false,
       });
     }
   }, [isEdit, defaultValues]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, type, value } = e.target;
     if (type === "checkbox") {
@@ -111,7 +109,6 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
       ...form,
       quantity: form.quantity ? Number(form.quantity) : undefined,
       is_prescription_required: !!form.is_prescription_required,
-      image: form.image?.trim() || undefined,
     };
     await onSubmit(submitData);
     setLoading(false);
@@ -177,11 +174,19 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               <option value="">-- Chọn loại thuốc --</option>
               <option value="analgesic">Giảm đau (analgesic)</option>
               <option value="antibiotic">Kháng sinh (antibiotic)</option>
-              <option value="antihistamine">Chống dị ứng (antihistamine)</option>
+              <option value="antihistamine">
+                Chống dị ứng (antihistamine)
+              </option>
               <option value="antiviral">Kháng virus (antiviral)</option>
-              <option value="antihypertensive">Hạ huyết áp (antihypertensive)</option>
-              <option value="antidepressant">Chống trầm cảm (antidepressant)</option>
-              <option value="anti-inflammatory">Chống viêm (anti-inflammatory)</option>
+              <option value="antihypertensive">
+                Hạ huyết áp (antihypertensive)
+              </option>
+              <option value="antidepressant">
+                Chống trầm cảm (antidepressant)
+              </option>
+              <option value="anti-inflammatory">
+                Chống viêm (anti-inflammatory)
+              </option>
               <option value="antifungal">Kháng nấm (antifungal)</option>
               <option value="antiseptic">Sát khuẩn (antiseptic)</option>
               <option value="vitamin">Vitamin</option>
@@ -247,33 +252,6 @@ export const MedicationFormDialog: React.FC<MedicationFormProps> = ({
               onChange={handleChange}
               className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-sky-400 focus:border-sky-500 shadow-sm transition-all outline-none"
             />
-          </div>
-          <div>
-            <label
-              htmlFor="image"
-              className="block font-semibold text-sky-700 mb-1"
-            >
-              Ảnh thuốc (URL)
-            </label>
-            <input
-              id="image"
-              name="image"
-              placeholder="https://..."
-              value={form.image}
-              onChange={handleChange}
-              className="w-full border border-sky-300 rounded-lg p-3 focus:ring-2 focus:ring-sky-400 focus:border-sky-500 shadow-sm transition-all outline-none"
-            />
-            {form.image && (
-              <div className="mt-2 flex items-center gap-2">
-                <img
-                  src={form.image}
-                  alt="Preview"
-                  className="h-16 w-16 object-cover rounded border border-gray-200 shadow"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
-                <span className="text-xs text-gray-400">Xem trước</span>
-              </div>
-            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
