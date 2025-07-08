@@ -16,10 +16,15 @@ import { MedicationTable } from "./_components/medication-table";
 import { MedicationFormDialog } from "./_components/medication-form-dialog";
 import { UpdateMedicationDialog } from "./_components/update-medication-dialog";
 import { ViewMedicationDialog } from "./_components/view-medication-dialog";
+import { ExportMedicationDialog } from "./_components/export-medication-dialog";
 import { Medication } from "@/lib/type/medications";
 import { AddMedicationDialog } from "./_components/add-medication-dialog";
+import { useCrossTabSync } from "@/hooks/useCrossTabSync";
 
 export default function MedicationsPage() {
+  // Enable cross-tab sync
+  useCrossTabSync();
+
   const {
     medications,
     isLoading,
@@ -28,12 +33,14 @@ export default function MedicationsPage() {
     addMedication,
     updateMedication,
     deleteMedication,
+    exportMedication,
   } = useMedicationStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openViewDialog, setOpenViewDialog] = useState(false);
+  const [openExportDialog, setOpenExportDialog] = useState(false);
   const [selectedMedication, setSelectedMedication] =
     useState<Medication | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -60,6 +67,49 @@ export default function MedicationsPage() {
         .catch((err) => {
           console.error("Failed to delete medication:", err);
         });
+    }
+  };
+
+  const handleExportMedication = (medication: Medication) => {
+    setSelectedMedication(medication);
+    setOpenExportDialog(true);
+  };
+
+  const handleExportConfirm = async (exportData: {
+    medicationId: string;
+    quantity: number;
+    reason: string;
+  }) => {
+    try {
+      // Sử dụng store export function - thêm default medicalStaffName
+      await exportMedication({
+        ...exportData,
+        medicalStaffName: "System Admin", // Giá trị mặc định
+      });
+
+      // Force refresh medications để đồng bộ data
+      await fetchMedications();
+
+      // Log thông tin xuất thuốc
+      console.log("Export medication:", {
+        ...exportData,
+        medicationName: selectedMedication?.name,
+        oldQuantity: selectedMedication?.quantity,
+        newQuantity: (selectedMedication?.quantity || 0) - exportData.quantity,
+        exportDate: new Date().toISOString(),
+      });
+
+      alert(
+        `Đã xuất thành công ${exportData.quantity} ${
+          selectedMedication?.unit || "đơn vị"
+        } thuốc "${selectedMedication?.name}"`
+      );
+
+      setOpenExportDialog(false);
+      setSelectedMedication(null);
+    } catch (error) {
+      console.error("Export medication error:", error);
+      throw error;
     }
   };
 
@@ -330,7 +380,7 @@ export default function MedicationsPage() {
                   <span>Thêm thuốc mới</span>
                 </button>
                 <button
-                  onClick={handleExportToExcel}
+                  onClick={() => setOpenExportDialog(true)}
                   className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
                 >
                   <svg
@@ -380,6 +430,7 @@ export default function MedicationsPage() {
                     onViewMedication={handleViewMedication}
                     onEditMedication={handleEditMedication}
                     onDeleteMedication={handleDeleteMedication}
+                    onExportMedication={handleExportMedication}
                   />
                 </div>
               </CardContent>
@@ -411,6 +462,17 @@ export default function MedicationsPage() {
           medication={selectedMedication}
           onClose={() => {
             setOpenViewDialog(false);
+            setSelectedMedication(null);
+          }}
+        />
+
+        <ExportMedicationDialog
+          open={openExportDialog}
+          onOpenChange={setOpenExportDialog}
+          medication={selectedMedication}
+          onConfirm={handleExportConfirm}
+          onClose={() => {
+            setOpenExportDialog(false);
             setSelectedMedication(null);
           }}
         />

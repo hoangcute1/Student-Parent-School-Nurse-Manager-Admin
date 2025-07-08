@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import {
   Card,
   CardContent,
@@ -20,10 +21,8 @@ import { useStudentStore } from "@/stores/student-store";
 import { useClassStore } from "@/stores/class-store";
 import { useAuthStore } from "@/stores/auth-store";
 import type { AddStudentFormValues } from "./_components/add-student-dialog";
-import type { UpdateStudentFormValues } from "./_components/update-student-dialog";
 import { Student, ViewStudent } from "@/lib/type/students";
 import { AddStudentDialog } from "./_components/add-student-dialog";
-import { UpdateStudentDialog } from "./_components/update-student-dialog";
 import { Users } from "lucide-react";
 
 const mapStudentForDisplay = (students: Student): Student => {
@@ -50,7 +49,6 @@ export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [healthFilter, setHealthFilter] = useState("all");
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [deleteStudentId, setDeleteStudentId] = useState<string | null>(null);
@@ -125,11 +123,6 @@ export default function StudentsPage() {
     setIsViewDialogOpen(true);
   };
 
-  const handleEditStudent = async (studentData: Student) => {
-    await fetchStudentById(studentData.student._id);
-    setIsEditDialogOpen(true);
-  };
-
   const handleDeleteStudent = async (studentData: Student) => {
     if (
       window.confirm(
@@ -149,31 +142,88 @@ export default function StudentsPage() {
     }
   };
 
-  const handleUpdateStudent = async (data: UpdateStudentFormValues) => {
-    if (!user || user.role !== "admin") {
-      alert("Bạn không có quyền chỉnh sửa học sinh");
-      return;
-    }
-    if (selectedStudent) {
-      try {
-        await updateStudent(selectedStudent.student._id, {
-          name: data.name,
-          studentId: data.studentId,
-          birth: data.birth,
-          gender: data.gender,
-          classId: data.classId,
-          parentId: data.parentId || undefined,
-        });
-        setIsEditDialogOpen(false);
-        alert("Cập nhật học sinh thành công");
-      } catch (error: any) {
-        console.error("Error updating student:", error.message, error);
-        alert(
-          `Không thể cập nhật học sinh: ${
-            error.message || "Lỗi không xác định"
-          }`
-        );
-      }
+  const handleExportToExcel = () => {
+    try {
+      // Chuẩn bị dữ liệu để xuất
+      const exportData = displayStudents.map(
+        (studentData: any, index: number) => ({
+          STT: index + 1,
+          "Mã học sinh": studentData.student?.studentId || "",
+          "Họ và tên": studentData.student?.name || "",
+          "Giới tính":
+            studentData.student?.gender === "male"
+              ? "Nam"
+              : studentData.student?.gender === "female"
+              ? "Nữ"
+              : "",
+          "Ngày sinh": studentData.student?.birth
+            ? new Date(studentData.student.birth).toLocaleDateString("vi-VN")
+            : "",
+          Lớp: studentData.class?.name || "",
+          Khối: studentData.class?.grade || "",
+          "Chiều cao": studentData.healthRecord?.height
+            ? `${studentData.healthRecord.height} cm`
+            : "Chưa cập nhật",
+          "Cân nặng": studentData.healthRecord?.weight
+            ? `${studentData.healthRecord.weight} kg`
+            : "Chưa cập nhật",
+          "Nhóm máu": studentData.healthRecord?.blood_type || "Chưa xác định",
+          "Thị lực": studentData.healthRecord?.vision || "Chưa kiểm tra",
+          "Thính lực": studentData.healthRecord?.hearing || "Chưa kiểm tra",
+          "Dị ứng": studentData.healthRecord?.allergies || "Không có",
+          "Bệnh mãn tính":
+            studentData.healthRecord?.chronic_conditions || "Không có",
+          "Lịch sử bệnh án":
+            studentData.healthRecord?.treatment_history || "Không có",
+          "Ghi chú": studentData.healthRecord?.notes || "Không có",
+          "Ngày tạo": studentData.student?.created_at
+            ? new Date(studentData.student.created_at).toLocaleDateString(
+                "vi-VN"
+              )
+            : "",
+        })
+      );
+
+      // Tạo workbook và worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+
+      // Thiết lập độ rộng cột
+      const colWidths = [
+        { wch: 5 }, // STT
+        { wch: 15 }, // Mã học sinh
+        { wch: 25 }, // Họ và tên
+        { wch: 10 }, // Giới tính
+        { wch: 12 }, // Ngày sinh
+        { wch: 10 }, // Lớp
+        { wch: 8 }, // Khối
+        { wch: 12 }, // Chiều cao
+        { wch: 12 }, // Cân nặng
+        { wch: 12 }, // Nhóm máu
+        { wch: 15 }, // Thị lực
+        { wch: 15 }, // Thính lực
+        { wch: 20 }, // Dị ứng
+        { wch: 20 }, // Bệnh mãn tính
+        { wch: 30 }, // Lịch sử bệnh án
+        { wch: 20 }, // Ghi chú
+        { wch: 12 }, // Ngày tạo
+      ];
+      ws["!cols"] = colWidths;
+
+      // Thêm worksheet vào workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Danh sách học sinh");
+
+      // Xuất file với tên có ngày tháng
+      const fileName = `Danh_sach_hoc_sinh_${new Date()
+        .toLocaleDateString("vi-VN")
+        .replace(/\//g, "_")}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+
+      // Hiển thị thông báo thành công
+      alert("Xuất báo cáo Excel thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xuất Excel:", error);
+      alert("Có lỗi xảy ra khi xuất báo cáo!");
     }
   };
 
@@ -275,13 +325,13 @@ export default function StudentsPage() {
               onSearchChange={setSearchQuery}
               onClassFilterChange={setClassFilter}
               onHealthStatusChange={setHealthFilter}
+              onExportExcel={handleExportToExcel}
             />
             <StudentTable
               students={displayStudents}
               isLoading={isLoading}
               error={error}
               onView={handleViewStudent}
-              onEdit={handleEditStudent}
               onDelete={handleDeleteStudent}
               onAddStudent={() => setIsAddDialogOpen(true)}
             />
@@ -291,92 +341,181 @@ export default function StudentsPage() {
         {/* Dialog for viewing student details */}
         {selectedStudentId && (
           <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-            <DialogContent className="max-w-lg p-6 rounded-xl shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-indigo-700 mb-2">
+            <DialogContent className="max-w-4xl p-0 rounded-2xl shadow-2xl border-0 bg-white overflow-hidden">
+              <DialogHeader className="p-6 border-b border-sky-100 bg-gradient-to-r from-sky-50 to-blue-50">
+                <DialogTitle className="text-2xl font-bold text-sky-800 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-sky-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
                   Thông tin học sinh: {selectedStudentId.student.name}
                 </DialogTitle>
               </DialogHeader>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Mã học sinh:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.student.studentId}
-                  </span>
+
+              <div className="p-6 space-y-6">
+                {/* Basic Information Section */}
+                <div className="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-6 border border-sky-200">
+                  <h3 className="text-lg font-semibold text-sky-800 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-sky-500 rounded-full"></div>
+                    Thông tin cơ bản
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
+                      <span className="font-medium text-sky-700 min-w-[120px]">
+                        Mã học sinh:
+                      </span>
+                      <span className="text-sky-900 font-medium">
+                        {selectedStudentId.student.studentId}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
+                      <span className="font-medium text-sky-700 min-w-[120px]">
+                        Lớp:
+                      </span>
+                      <span className="text-sky-900 font-medium">
+                        {selectedStudentId.class?.name || "Chưa phân lớp"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
+                      <span className="font-medium text-sky-700 min-w-[120px]">
+                        Khối:
+                      </span>
+                      <span className="text-sky-900 font-medium">
+                        {selectedStudentId.class?.grade || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
+                      <span className="font-medium text-sky-700 min-w-[120px]">
+                        Ngày sinh:
+                      </span>
+                      <span className="text-sky-900 font-medium">
+                        {selectedStudentId.student.birth
+                          ? new Date(
+                              selectedStudentId.student.birth
+                            ).toLocaleDateString("vi-VN")
+                          : "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
+                      <span className="font-medium text-sky-700 min-w-[120px]">
+                        Giới tính:
+                      </span>
+                      <span className="text-sky-900 font-medium">
+                        {selectedStudentId.student.gender === "male"
+                          ? "Nam"
+                          : selectedStudentId.student.gender === "female"
+                          ? "Nữ"
+                          : "Không rõ"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-sky-100">
+                      <span className="font-medium text-sky-700 min-w-[120px]">
+                        ID phụ huynh:
+                      </span>
+                      <span className="text-sky-900 font-medium">
+                        {selectedStudentId.parent?._id || "N/A"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Lớp:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.class?.name || "Chưa phân lớp"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Khối:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.class?.grade || "N/A"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Ngày sinh:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.student.birth
-                      ? new Date(selectedStudentId.student.birth)
-                          .toISOString()
-                          .split("T")[0]
-                      : ""}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Giới tính:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.student.gender === "male"
-                      ? "Nam"
-                      : selectedStudentId.student.gender === "female"
-                      ? "Nữ"
-                      : "Không rõ"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    ID phụ huynh:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.parent?._id || "N/A"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Dị ứng:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.healthRecord.allergies || "N/A"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Bệnh mãn tính:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.healthRecord.chronic_conditions || "N/A"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold text-gray-600 min-w-[120px]">
-                    Lịch sử bệnh án:
-                  </span>
-                  <span className="text-gray-900">
-                    {selectedStudentId.healthRecord.treatment_history || "N/A"}
-                  </span>
+
+                {/* Health Information Section */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200">
+                  <h3 className="text-lg font-semibold text-emerald-800 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    Thông tin sức khỏe
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Row 1 - Physical measurements */}
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Chiều cao:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.height
+                          ? `${selectedStudentId.healthRecord.height} cm`
+                          : "Chưa cập nhật"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Cân nặng:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.weight
+                          ? `${selectedStudentId.healthRecord.weight} kg`
+                          : "Chưa cập nhật"}
+                      </span>
+                    </div>
+
+                    {/* Row 2 - Blood type and senses */}
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Nhóm máu:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.blood_type ||
+                          "Chưa xác định"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Thị lực:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.vision ||
+                          "Chưa kiểm tra"}
+                      </span>
+                    </div>
+
+                    {/* Row 3 - Hearing and allergies */}
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Thính lực:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.hearing ||
+                          "Chưa kiểm tra"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Dị ứng:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.allergies || "Không có"}
+                      </span>
+                    </div>
+
+                    {/* Row 4 - Chronic conditions and notes */}
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Bệnh mãn tính:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.chronic_conditions ||
+                          "Không có"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-100">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Ghi chú:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.notes || "Không có"}
+                      </span>
+                    </div>
+
+                    {/* Treatment history spans full width */}
+                    <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-emerald-100 md:col-span-2">
+                      <span className="font-medium text-emerald-700 min-w-[120px]">
+                        Lịch sử bệnh án:
+                      </span>
+                      <span className="text-emerald-900 font-medium">
+                        {selectedStudentId.healthRecord.treatment_history ||
+                          "Không có"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </DialogContent>
@@ -389,31 +528,6 @@ export default function StudentsPage() {
           open={isAddDialogOpen}
           onOpenChange={setIsAddDialogOpen}
         />
-
-        {/* Dialog for editing student details */}
-        {selectedStudent && (
-          <UpdateStudentDialog
-            onSubmit={handleUpdateStudent}
-            open={isEditDialogOpen}
-            onOpenChange={setIsEditDialogOpen}
-            defaultValues={{
-              name: selectedStudent.student.name,
-              studentId: selectedStudent.student.studentId,
-              birth: selectedStudent.student.birth
-                ? new Date(selectedStudent.student.birth)
-                    .toISOString()
-                    .split("T")[0]
-                : "",
-              gender:
-                selectedStudent.student.gender === "male" ||
-                selectedStudent.student.gender === "female"
-                  ? selectedStudent.student.gender
-                  : "male",
-              classId: selectedStudent.class?._id || "",
-              parentId: selectedStudent.parent?._id || "",
-            }}
-          />
-        )}
       </div>
     </div>
   );

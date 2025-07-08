@@ -9,7 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pill, Package, AlertTriangle, CheckCircle } from "lucide-react";
+import {
+  Plus,
+  Pill,
+  Package,
+  AlertTriangle,
+  CheckCircle,
+  History,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FilterBar } from "./_components/filter-bar";
 import { useMedicationStore } from "@/stores/medication-store";
 import { MedicationTable } from "./_components/medication-table";
@@ -18,8 +26,13 @@ import { UpdateMedicationDialog } from "./_components/update-medication-dialog";
 import { ViewMedicationDialog } from "./_components/view-medication-dialog";
 import { Medication } from "@/lib/type/medications";
 import { AddMedicationDialog } from "./_components/add-medication-dialog";
+import { useCrossTabSync } from "@/hooks/useCrossTabSync";
 
 export default function MedicationsPage() {
+  // Enable cross-tab sync
+  useCrossTabSync();
+
+  const router = useRouter();
   const {
     medications,
     isLoading,
@@ -232,13 +245,25 @@ export default function MedicationsPage() {
                   Quản lý thông tin về thuốc và hướng dẫn sử dụng
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => setShowAddDialog(true)}
-                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Thêm thuốc mới
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    router.push("/cmscopy/medications/export-history")
+                  }
+                  className="bg-white/70 hover:bg-sky-50 text-sky-700 border-sky-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg"
+                >
+                  <History className="w-4 h-4 mr-2" />
+                  Lịch sử xuất thuốc
+                </Button>
+                <Button
+                  onClick={() => setShowAddDialog(true)}
+                  className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Thêm thuốc mới
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-6">

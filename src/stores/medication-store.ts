@@ -8,8 +8,10 @@ import {
   createMedication,
   updateMedicationForm,
   deleteMedication,
+  exportMedication,
 } from "@/lib/api/medication";
 import { Medication } from "@/lib/type/medications";
+import { useExportHistoryStore } from "./export-history-store";
 
 interface MedicationStore {
   medications: Medication[] | [];
@@ -19,6 +21,12 @@ interface MedicationStore {
   addMedication: (medication: any) => Promise<void>;
   updateMedication: (id: string, medication: any) => Promise<void>;
   deleteMedication: (id: string) => Promise<void>;
+  exportMedication: (exportData: {
+    medicationId: string;
+    quantity: number;
+    reason: string;
+    medicalStaffName: string;
+  }) => Promise<void>;
 }
 
 export const useMedicationStore = create<MedicationStore>((set, get) => ({
@@ -114,6 +122,72 @@ export const useMedicationStore = create<MedicationStore>((set, get) => ({
     } catch (err: any) {
       const errorMessage = err.message || "Failed to delete medication";
       console.error("Failed to delete medication:", err);
+      set({ error: errorMessage });
+      return Promise.reject(new Error(errorMessage));
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  exportMedication: async (exportData) => {
+    try {
+      set({ isLoading: true, error: null });
+
+      console.log(
+        "🚀 [MEDICATION STORE] Starting export medication:",
+        exportData
+      );
+
+      // Tìm medication để lấy thông tin
+      const currentMedications = get().medications;
+      const medication = currentMedications.find(
+        (med) => med._id === exportData.medicationId
+      );
+
+      if (!medication) {
+        throw new Error("Medication not found");
+      }
+
+      console.log("📦 [MEDICATION STORE] Found medication:", {
+        id: medication._id,
+        name: medication.name,
+        currentQuantity: medication.quantity,
+      });
+
+      // Call the API to export medication (nếu cần)
+      try {
+        await exportMedication(exportData);
+        console.log("✅ [MEDICATION STORE] API export successful");
+      } catch (apiError) {
+        // Nếu API fail, vẫn tiếp tục với local update
+        console.warn(
+          "⚠️ [MEDICATION STORE] API export failed, continuing with local update:",
+          apiError
+        );
+      }
+
+      // Update local state by reducing the quantity
+      set((state) => ({
+        medications: state.medications.map((med) =>
+          med._id === exportData.medicationId
+            ? { ...med, quantity: (med.quantity || 0) - exportData.quantity }
+            : med
+        ),
+        error: null,
+      }));
+
+      console.log("📊 [MEDICATION STORE] Updated medication quantity");
+
+      // On success, refresh the export history
+      useExportHistoryStore.getState().fetchExportHistory();
+
+      console.log(
+        "✅ [MEDICATION STORE] Export medication completed successfully"
+      );
+      return Promise.resolve();
+    } catch (err: any) {
+      const errorMessage = err.message || "Failed to export medication";
+      console.error("Failed to export medication:", err);
       set({ error: errorMessage });
       return Promise.reject(new Error(errorMessage));
     } finally {

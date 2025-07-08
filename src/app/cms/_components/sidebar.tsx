@@ -46,19 +46,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             </Badge>
           </div>
         </Link>
-        {/* Thống kê nhanh */}
-        <div className="bg-white rounded-lg border border-sky-200 p-3 mb-4">
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <div>
-              <div className="text-lg font-bold text-sky-800">248</div>
-              <div className="text-xs text-sky-600">Học sinh</div>
-            </div>
-            <div>
-              <div className="text-lg font-bold text-orange-600">12</div>
-              <div className="text-xs text-sky-600">Cần theo dõi</div>
-            </div>
-          </div>
-        </div>{" "}
+        
         <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
           {role === "admin" && (
             <>

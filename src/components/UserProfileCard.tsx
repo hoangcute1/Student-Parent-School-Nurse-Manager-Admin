@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "@/lib/api/api";
+// import { User } from "@/lib/api/api"; // Type not found, using generic type
 import { RoleName } from "@/lib/roles";
+
+// Define User type locally since it's not exported from API
+interface User {
+  id: string;
+  name: string;
+  email?: string;
+  role: RoleName;
+  avatar?: string;
+}
 import { RoleSelector } from "@/components/RoleSelector";
 import {
   Card,
@@ -78,11 +87,16 @@ export function UserProfileCard({
       <CardHeader className="bg-muted/30 p-4">
         <div className="flex items-center space-x-4">
           <Avatar className="h-12 w-12">
-            <AvatarImage src="/placeholder-user.jpg" alt={user.email} />
-            <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+            <AvatarImage
+              src="/placeholder-user.jpg"
+              alt={user.email || user.name}
+            />
+            <AvatarFallback>
+              {getInitials(user.email || user.name)}
+            </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <CardTitle className="text-lg">{user.email}</CardTitle>
+            <CardTitle className="text-lg">{user.email || user.name}</CardTitle>
             <div className="flex items-center space-x-2">
               {!isEditing ? (
                 <Badge variant={getBadgeVariant(role)}>

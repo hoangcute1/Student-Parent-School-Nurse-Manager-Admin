@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,22 +86,8 @@ export function MedicationTable({
                 className="hover:bg-sky-50/50 cursor-pointer border-sky-100 transition-colors duration-200"
               >
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-sky-200">
-                      <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32&text=${
-                          medication.name?.charAt(0) || "M"
-                        }`}
-                      />
-                      <AvatarFallback className="bg-sky-100 text-sky-700 text-xs">
-                        {medication.name?.charAt(0) || "M"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium text-sky-800">
-                        {medication.name || "Chưa có tên"}
-                      </div>
-                    </div>
+                  <div className="font-medium text-sky-800">
+                    {medication.name || "Chưa có tên"}
                   </div>
                 </TableCell>
                 <TableCell className="text-sky-700">
