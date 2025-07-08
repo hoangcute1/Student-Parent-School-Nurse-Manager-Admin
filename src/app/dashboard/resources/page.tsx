@@ -20,14 +20,99 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getParentId } from "@/lib/utils/parent-utils";
+import { getTreatmentHistoryByParentId } from "@/lib/api/treatment-history";
+import { TreatmentHistory } from "@/lib/type/treatment-history";
 
 export default function MedicalHistoryPage() {
   const { fetchStudentsByParent } = useParentStudentsStore();
 
+  // State để lưu treatment history
+  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchStudentsByParent();
+
+    const fetchTreatmentHistoryByParent = () => {
+      getParentId().then((parentId) => {
+        console.log("Fetched parent ID:", parentId);
+        if (parentId) {
+          // Gọi API để lấy treatment history theo parentId
+          setLoading(true);
+          setError(null);
+
+          getTreatmentHistoryByParentId(parentId)
+            .then((data) => {
+              console.log("Treatment history data received:", data);
+              setTreatmentHistory(data);
+              setLoading(false);
+            })
+            .catch((error) => {
+              console.error("Error fetching treatment history:", error);
+              setError("Không thể tải lịch sử bệnh án. Vui lòng thử lại sau.");
+              setLoading(false);
+            });
+
+
+
+
+
+        } else {
+          console.warn("No parent ID found");
+          setError("Không tìm thấy thông tin phụ huynh.");
+          setLoading(false);
+        }
+      })
+     
+    }
+
+    fetchTreatmentHistoryByParent();
+
   }, [fetchStudentsByParent]);
+
+
+  // Hiển thị loading
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Lịch sử bệnh án
+          </h1>
+          <p className="text-blue-600">
+            Theo dõi toàn bộ lịch sử bệnh án, điều trị và chăm sóc sức khỏe của
+            học sinh.
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-blue-600">Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Hiển thị error
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Lịch sử bệnh án
+          </h1>
+          <p className="text-blue-600">
+            Theo dõi toàn bộ lịch sử bệnh án, điều trị và chăm sóc sức khỏe của
+            học sinh.
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-red-600">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">

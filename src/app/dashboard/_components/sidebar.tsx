@@ -33,6 +33,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   useEffect(() => {
     fetchStudentsByParent();
   }, []); // Chỉ chạy một lần khi component mount
+
+  
   useEffect(() => {
     if (studentsData.length > 0) {
       setSelectedStudent(studentsData[0]);
@@ -40,12 +42,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       setSelectedStudent(null);
     }
   }, [studentsData]);
-    // Chỉ gọi fetchStudentsByParent khi user đã authenticated và có role parent
-    if (isAuthenticated && user && user.role === "parent") {
-      fetchStudentsByParent();
-    }
-  }, [fetchStudentsByParent, isAuthenticated, user]);
-
+    
   return (
     <aside
       className={cn(

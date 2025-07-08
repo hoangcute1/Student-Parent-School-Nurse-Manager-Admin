@@ -19,11 +19,21 @@ export default function TreatmentHistoryComponent() {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Sử dụng utility functions
-  const parentId = useParentId();
+  const { parentId, loading: parentIdLoading } = useParentId();
   const isParent = useIsParent();
 
   useEffect(() => {
     const fetchTreatmentHistory = async () => {
+      console.log("=== TREATMENT HISTORY DEBUG ===");
+      console.log("isParent:", isParent);
+      console.log("parentId:", parentId);
+      console.log("parentIdLoading:", parentIdLoading);
+
+      // Đợi parent ID loading xong
+      if (parentIdLoading) {
+        return;
+      }
+
       // Kiểm tra nếu không phải parent
       if (!isParent) {
         setError("Bạn không có quyền truy cập lịch sử bệnh án.");
@@ -43,6 +53,7 @@ export default function TreatmentHistoryComponent() {
         setError(null);
         console.log("Fetching treatment history for parent ID:", parentId);
         const data = await getTreatmentHistoryByParentId(parentId);
+        console.log("Treatment history data received:", data);
         setTreatmentHistory(data);
       } catch (error) {
         console.error("Error fetching treatment history:", error);
@@ -53,7 +64,7 @@ export default function TreatmentHistoryComponent() {
     };
 
     fetchTreatmentHistory();
-  }, [parentId, isParent]);
+  }, [parentId, isParent, parentIdLoading]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

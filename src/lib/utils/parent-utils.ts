@@ -1,43 +1,85 @@
 import { useAuthStore } from "@/stores/auth-store";
+import { getAllParents } from "../api/parent";
+import { useState, useEffect } from "react";
 
 /**
  * Lấy parent ID từ auth store
  * @returns string | null - Parent ID hoặc null nếu không tìm thấy
  */
-export const getParentId = (): string | null => {
+export const getParentId = async (): Promise<string | null> => {
   const { user, profile } = useAuthStore.getState();
-  
-  // Kiểm tra nếu user là parent
-  if (user?.role !== 'parent') {
-    console.warn('User is not a parent, cannot get parent ID');
+  console.log("user", user);
+  console.log("profile", profile);
+
+  try {
+    // Gọi API lấy danh sách parent
+    const data = await getAllParents();
+    console.log("Parents data:", data);
+
+    // Tìm parent có user._id trùng với user hiện tại
+    const userAny = user as any;
+    const foundParent = data.find((parent) => parent.user._id === userAny?._id);
+
+    if (foundParent) {
+      console.log("Found parent ID:", foundParent._id);
+      return foundParent._id;
+    }
+
+    console.warn('No parent ID found in parents list');
+    return null;
+  } catch (error) {
+    console.error('Error fetching parents:', error);
     return null;
   }
-
-  // Trả về user ID nếu user là parent
-  if (user?.parent) {
-    return user.parent._id || null;
-  }
-
-
-  console.warn('No parent ID found in user or profile');
-  return null;
 };
 
 /**
  * Hook để lấy parent ID trong React component
- * @returns string | null - Parent ID hoặc null nếu không tìm thấy
+ * @returns { parentId: string | null, loading: boolean }
  */
-export const useParentId = (): string | null => {
-  const { user, profile } = useAuthStore();
-  
-  // Kiểm tra nếu user là parent
+export const useParentId = () => {
+  const [parentId, setParentId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (user?.role === 'parent') {
+      setLoading(true);
+      getParentId()
+        .then((id) => {
+          setParentId(id);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching parent ID:', error);
+          setParentId(null);
+          setLoading(false);
+        });
+    } else {
+      setParentId(null);
+      setLoading(false);
+    }
+  }, [user]);
+
+  return { parentId, loading };
+};
+
+/**
+ * Hàm đồng bộ để lấy parent ID (không gọi API)
+ * Chỉ lấy từ data có sẵn trong auth store
+ */
+export const getParentIdSync = (): string | null => {
+  const { user } = useAuthStore.getState();
+
   if (user?.role !== 'parent') {
     return null;
   }
 
-  // Trả về user ID nếu user là parent
-  if (user?.parent) {
-    return user.parent._id || null;
+  const userAny = user as any;
+
+  // Trả về user._id nếu có
+  if (userAny?._id) {
+    return userAny._id;
   }
 
   return null;
