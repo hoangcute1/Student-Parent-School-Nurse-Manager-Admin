@@ -24,7 +24,35 @@ export class TreatmentHistory extends Document {
 
   @Prop({ trim: true, required: false })
   notes: string;
+
+  // Additional fields from frontend
+  @Prop({ trim: true, required: false })
+  title: string;
+
+  @Prop({ type: String, required: false })
+  class: string;
+
+  @Prop({ trim: true, required: false })
+  location: string;
+
+  @Prop({ trim: true, required: false })
+  priority: string;
+
+  @Prop({ trim: true, required: false })
+  contactStatus: string;
+
+  @Prop({
+    type: String,
+    enum: ['pending', 'processing', 'resolved'],
+    default: 'pending',
+  })
+  status: string;
+
+  @Prop({ required: false })
+  contactParent: boolean;
+
+  @Prop({ trim: true, required: false })
+  actionTaken: string;
 }
 
-export const TreatmentHistorySchema =
-  SchemaFactory.createForClass(TreatmentHistory);
+export const TreatmentHistorySchema = SchemaFactory.createForClass(TreatmentHistory);

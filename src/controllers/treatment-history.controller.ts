@@ -1,21 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { TreatmentHistoryService } from '@/services/treatment-history.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { CreateTreatmentHistoryDto } from '@/decorations/dto/create-treatment-history.dto';
 import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-history.dto';
@@ -25,9 +10,7 @@ import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-hi
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class TreatmentHistoryController {
-  constructor(
-    private readonly treatmentHistoryService: TreatmentHistoryService,
-  ) {}
+  constructor(private readonly treatmentHistoryService: TreatmentHistoryService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all treatment histories' })
@@ -67,13 +50,24 @@ export class TreatmentHistoryController {
     return this.treatmentHistoryService.findByStaffId(staffId);
   }
 
+  @Get('parent/:parentId')
+  @ApiOperation({ summary: 'Get treatment histories by parent ID' })
+  @ApiParam({ name: 'parentId', description: 'Parent ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return treatment histories for a parent.',
+  })
+  async findByParentId(@Param('parentId') parentId: string) {
+    return this.treatmentHistoryService.findByParentId(parentId);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new treatment history' })
   @ApiResponse({
     status: 201,
     description: 'The treatment history has been created.',
   })
-  async create(@Body() createTreatmentHistoryDto: CreateTreatmentHistoryDto) {
+  async create(@Body() createTreatmentHistoryDto: any) {
     return this.treatmentHistoryService.create(createTreatmentHistoryDto);
   }
 
@@ -85,10 +79,7 @@ export class TreatmentHistoryController {
     description: 'The treatment history has been updated.',
   })
   @ApiResponse({ status: 404, description: 'Treatment history not found.' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateTreatmentHistoryDto: UpdateTreatmentHistoryDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateTreatmentHistoryDto: any) {
     return this.treatmentHistoryService.update(id, updateTreatmentHistoryDto);
   }
 

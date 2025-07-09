@@ -27,6 +27,7 @@ import { HealthRecordModule } from './modules/health-record.module';
 import { MedicineModule } from './modules/medicine.module';
 import { MedicineTreatmentModule } from './modules/medicine-treatment.module';
 import { NotificationModule } from './modules/notification.module';
+import { SimpleNotificationModule } from './modules/simple-notification.module';
 import { ParentStudentModule } from './modules/parent-student.module';
 import { PeriodicCampaignModule } from './modules/periodic-campaign.module';
 import { TreatmentHistoryModule } from './modules/treatment-history.module';
@@ -65,6 +66,7 @@ import { ExportHistoryModule } from './modules/export-history.module';
     MedicineModule,
     MedicineTreatmentModule,
     NotificationModule,
+    SimpleNotificationModule,
     ParentStudentModule,
     PeriodicCampaignModule,
     TreatmentHistoryModule,
