@@ -102,16 +102,43 @@ export function EventTable({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const formatDate = (dateString: string | undefined) => {
+    console.log("Format date input:", dateString);
+
+    if (!dateString) {
+      console.log("No date string provided, returning N/A");
+      return "N/A";
+    }
+
+    try {
+      const date = new Date(dateString);
+
+      // Kiểm tra nếu ngày không hợp lệ
+      if (isNaN(date.getTime())) {
+        console.log("Invalid date:", dateString);
+        return new Date().toLocaleString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+      }
+
+      console.log("Formatted date:", date);
+      return date.toLocaleString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "N/A";
+    }
   };
 
   const getStudentName = (student: any) => {
@@ -193,7 +220,7 @@ export function EventTable({
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-700">
-                        {formatDate(event.createdAt || "")}
+                        {formatDate(event.createdAt)}
                       </span>
                     </div>
                   </TableCell>

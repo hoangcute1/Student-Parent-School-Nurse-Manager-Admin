@@ -73,11 +73,20 @@ export const createTreatmentHistory = async (
 export const getAllTreatmentHistories = async () => {
   const token = getAuthToken();
   console.log("Token:", token);
-  const res = await fetch("http://[::1]:3001/treatment-histories", {
+  const res = await fetch("http://localhost:3001/treatment-histories", {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(await res.text()); // ← err.message có nội dung server trả về
-  return res.json();
+
+  const data = await res.json();
+  // Thêm createdAt vào các trường hợp thiếu
+  const processedData = data.map((item: TreatmentHistory) => ({
+    ...item,
+    createdAt: item.createdAt || new Date().toISOString(),
+  }));
+
+  console.log("Treatment histories fetched:", processedData);
+  return processedData;
 };
 
 /**

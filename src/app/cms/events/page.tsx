@@ -1,32 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  AlertTriangle,
-  Plus,
-  Search,
-  Clock,
-  User,
-  MapPin,
-  Phone,
-  FileText,
-  CheckCircle,
-  X,
-  Download,
-  RefreshCw,
-} from "lucide-react";
+import { Plus, Clock, Download, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import {
   Select,
   SelectContent,
@@ -206,12 +187,11 @@ export default function MedicalEvents() {
     try {
       console.log("Add event data:", data);
       // Gửi dữ liệu tới API treatment-history
+      // Gửi dữ liệu tới API treatment-history
       await createTreatmentHistory({
         title: data.title,
         student: data.student,
-        staff: data.reporter, // Match backend field name
-        record: "67856ee20a12345678901236", // Placeholder for required field
-        date: new Date(), // Add current date for required field
+        reporter: data.reporter,
         class: data.class,
         location: data.location,
         priority: data.priority,
@@ -221,7 +201,8 @@ export default function MedicalEvents() {
 
       // Refresh danh sách events ngay sau khi tạo thành công
       const updatedEvents = await getAllTreatmentHistories();
-      setEventList(updatedEvents);
+      const processedData = ensureCreatedAt(updatedEvents);
+      setEventList(processedData);
 
       setAddEventOpen(false);
       addEventForm.reset();
@@ -253,7 +234,8 @@ export default function MedicalEvents() {
 
       // Refresh danh sách events sau khi cập nhật
       const updatedEvents = await getAllTreatmentHistories();
-      setEventList(updatedEvents);
+      const processedData = ensureCreatedAt(updatedEvents);
+      setEventList(processedData);
 
       setProcessEventOpen(false);
       processEventForm.reset();
@@ -264,10 +246,42 @@ export default function MedicalEvents() {
     }
   };
 
-  const onEmergencyProcess = (data: z.infer<typeof emergencyFormSchema>) => {
-    console.log("Emergency process data:", data);
-    // Add logic for emergency handling
-    setEmergencyProcessOpen(false);
+  const onEmergencyProcess = async (
+    data: z.infer<typeof emergencyFormSchema>
+  ) => {
+    try {
+      console.log("Emergency process data:", data);
+
+      if (!selectedEvent || !selectedEvent._id) {
+        alert("Không tìm thấy thông tin sự kiện!");
+        return;
+      }
+
+      // Cập nhật treatment history với thông tin xử lý khẩn cấp
+      await updateTreatmentHistory(selectedEvent._id, {
+        status: "processing", // Sử dụng trạng thái được định nghĩa trong schema
+        actionTaken:
+          data.immediateAction +
+          (data.transferToHospital
+            ? ` | Chuyển đến bệnh viện: ${data.hospitalName || "Không rõ"}`
+            : ""),
+        notes: data.notes || "",
+        contactParent: data.notifyParent,
+        priority: "Cao", // Tự động nâng mức độ ưu tiên lên cao
+      });
+
+      // Refresh danh sách events sau khi cập nhật
+      const updatedEvents = await getAllTreatmentHistories();
+      const processedData = ensureCreatedAt(updatedEvents);
+      setEventList(processedData);
+
+      setEmergencyProcessOpen(false);
+      emergencyProcessForm.reset();
+      alert("Xử lý sự kiện khẩn cấp thành công!");
+    } catch (error) {
+      console.error("Error processing emergency:", error);
+      alert("Không thể cập nhật xử lý khẩn cấp!");
+    }
   };
 
   // Handle opening modals with event data
@@ -427,11 +441,31 @@ export default function MedicalEvents() {
     getAllTreatmentHistories()
       .then((data) => {
         console.log("Fetched treatment histories:", data);
-        setEventList(data);
+        // Đảm bảo mỗi sự kiện có ngày tạo
+        const processedData = ensureCreatedAt(data);
+        console.log("Processed data with ensured createdAt:", processedData);
+        setEventList(processedData);
       })
-      .catch(() => setEventError("Không thể tải danh sách sự kiện"))
+      .catch((error) => {
+        console.error("Error fetching treatment histories:", error);
+        setEventError("Không thể tải danh sách sự kiện");
+      })
       .finally(() => setEventLoading(false));
   }, []);
+
+  // Hàm đảm bảo mỗi sự kiện có createdAt
+  const ensureCreatedAt = (events: any[]) => {
+    return events.map((event) => {
+      if (!event.createdAt) {
+        console.log("Adding missing createdAt to event:", event._id);
+        return {
+          ...event,
+          createdAt: new Date().toISOString(),
+        };
+      }
+      return event;
+    });
+  };
 
   if (eventLoading) {
     return (
@@ -508,9 +542,14 @@ export default function MedicalEvents() {
             setEventLoading(true);
             getAllTreatmentHistories()
               .then((data) => {
-                setEventList(data);
+                // Đảm bảo mỗi sự kiện có ngày tạo
+                const processedData = ensureCreatedAt(data);
+                setEventList(processedData);
               })
-              .catch(() => setEventError("Không thể tải danh sách sự kiện"))
+              .catch((error) => {
+                console.error("Error refreshing treatment histories:", error);
+                setEventError("Không thể tải danh sách sự kiện");
+              })
               .finally(() => setEventLoading(false));
           }}
           variant="outline"
@@ -1168,40 +1207,53 @@ export default function MedicalEvents() {
                     {selectedEvent.title}
                   </h3>
                   <div className="flex items-center gap-2 mt-2 text-gray-600">
-                    <Badge
-                      className={
-                        selectedEvent.priority === "Cao"
-                          ? "bg-red-100 text-red-800"
-                          : selectedEvent.priority === "Trung bình"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
-                      }
-                    >
-                      {selectedEvent.priority || "Đã xử lý"}
-                    </Badge>
-                    <span>{selectedEvent.time || selectedEvent.date}</span>
+                    <Clock className="w-4 h-4" />
+                    <span>
+                      {selectedEvent.createdAt
+                        ? new Date(selectedEvent.createdAt).toLocaleString(
+                            "vi-VN",
+                            {
+                              dateStyle: "full",
+                              timeStyle: "medium",
+                            }
+                          )
+                        : "Không rõ thời gian tạo"}
+                    </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <p className="text-gray-500">Học sinh</p>
-                    <p className="font-medium">{selectedEvent.student}</p>
+                    <span className="font-medium text-gray-700">Học sinh:</span>{" "}
+                    <span className="text-gray-600">
+                      {typeof selectedEvent.student === "object" &&
+                      selectedEvent.student !== null
+                        ? selectedEvent.student.name
+                        : selectedEvent.student || "Không rõ"}
+                    </span>
                   </div>
                   <div>
-                    <p className="text-gray-500">Lớp</p>
-                    <p className="font-medium">{selectedEvent.class}</p>
+                    <span className="font-medium text-gray-700">Lớp:</span>{" "}
+                    <span className="text-gray-600">{selectedEvent.class}</span>
                   </div>
                   {selectedEvent.location && (
                     <div>
-                      <p className="text-gray-500">Địa điểm</p>
-                      <p className="font-medium">{selectedEvent.location}</p>
+                      <span className="font-medium text-gray-700">
+                        Địa điểm:
+                      </span>{" "}
+                      <span className="text-gray-600">
+                        {selectedEvent.location}
+                      </span>
                     </div>
                   )}
                   {selectedEvent.reporter && (
                     <div>
-                      <p className="text-gray-500">Người báo cáo</p>
-                      <p className="font-medium">{selectedEvent.reporter}</p>
+                      <span className="font-medium text-gray-700">
+                        Người báo cáo:
+                      </span>{" "}
+                      <span className="text-gray-600">
+                        {selectedEvent.reporter}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1245,13 +1297,13 @@ export default function MedicalEvents() {
                 >
                   Đóng
                 </Button>
-                {!selectedEvent.date && ( // Only show for active events, not completed ones
+                {!selectedEvent.status && (
                   <Button
-                    className="bg-teal-600 hover:bg-teal-700"
                     onClick={() => {
                       setViewEventDetailsOpen(false);
                       handleProcessEvent(selectedEvent);
                     }}
+                    className="bg-teal-600 hover:bg-teal-700"
                   >
                     Xử lý sự kiện
                   </Button>
@@ -1284,11 +1336,13 @@ export default function MedicalEvents() {
               </h4>
               <div className="text-sm text-red-700 mt-1">
                 <div>
-                  {selectedEvent.student} - {selectedEvent.class}
+                  Học sinh:{" "}
+                  {typeof selectedEvent.student === "object" &&
+                  selectedEvent.student !== null
+                    ? selectedEvent.student.name
+                    : selectedEvent.student || "Không rõ"}
                 </div>
-                <div>
-                  {selectedEvent.location} - {selectedEvent.time}
-                </div>
+                <div>Địa điểm: {selectedEvent.location}</div>
               </div>
             </div>
           )}
@@ -1303,10 +1357,10 @@ export default function MedicalEvents() {
                 name="immediateAction"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hành động khẩn cấp</FormLabel>
+                    <FormLabel>Hành động khẩn cấp đã thực hiện</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Mô tả hành động khẩn cấp đã thực hiện"
+                        placeholder="Nhập hành động đã thực hiện ngay lập tức"
                         className="min-h-[80px]"
                         {...field}
                       />
@@ -1332,7 +1386,8 @@ export default function MedicalEvents() {
                     <div className="space-y-1 leading-none">
                       <FormLabel>Thông báo cho phụ huynh</FormLabel>
                       <FormDescription>
-                        Đã liên hệ với phụ huynh về tình trạng khẩn cấp
+                        Đánh dấu nếu đã thông báo cho phụ huynh về tình trạng
+                        khẩn cấp
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -1348,14 +1403,19 @@ export default function MedicalEvents() {
                       <input
                         type="checkbox"
                         checked={field.value}
-                        onChange={field.onChange}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          if (!e.target.checked) {
+                            emergencyProcessForm.setValue("hospitalName", "");
+                          }
+                        }}
                         className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-600"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Chuyển đến bệnh viện</FormLabel>
                       <FormDescription>
-                        Trường hợp cần chuyển đến cơ sở y tế
+                        Đánh dấu nếu học sinh đã được chuyển đến bệnh viện
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -1367,10 +1427,10 @@ export default function MedicalEvents() {
                 name="hospitalName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên bệnh viện/Cơ sở y tế</FormLabel>
+                    <FormLabel>Tên bệnh viện</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Nhập tên bệnh viện/cơ sở y tế (nếu có)"
+                        placeholder="Nhập tên bệnh viện"
                         {...field}
                         disabled={
                           !emergencyProcessForm.watch("transferToHospital")
@@ -1390,7 +1450,7 @@ export default function MedicalEvents() {
                     <FormLabel>Ghi chú bổ sung</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Thêm ghi chú về tình trạng học sinh, hướng dẫn tiếp theo, v.v."
+                        placeholder="Thêm ghi chú về tình trạng học sinh, hành động tiếp theo, v.v."
                         className="min-h-[100px]"
                         {...field}
                       />
