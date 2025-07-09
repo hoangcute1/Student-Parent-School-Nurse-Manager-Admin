@@ -12,6 +12,8 @@ import {
   FileText,
   CheckCircle,
   X,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -62,10 +64,16 @@ import {
 } from "@/lib/api/treatment-history";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
+import { TreatmentHistory } from "@/lib/type/treatment-history";
+import { EventStats } from "./components/stats-cards";
+import { FilterBar } from "./_components/filter-bar";
+import { EventTable } from "./components/event-table";
 
 export default function MedicalEvents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedDate, setSelectedDate] = useState("all");
 
   // State for modals
   const [addEventOpen, setAddEventOpen] = useState(false);
@@ -201,12 +209,14 @@ export default function MedicalEvents() {
       await createTreatmentHistory({
         title: data.title,
         student: data.student,
+        staff: data.reporter, // Match backend field name
+        record: "67856ee20a12345678901236", // Placeholder for required field
+        date: new Date(), // Add current date for required field
         class: data.class,
         location: data.location,
         priority: data.priority,
         description: data.description,
         contactStatus: data.contactStatus,
-        reporter: data.reporter, // <-- phải là string // boolean
       });
 
       // Refresh danh sách events ngay sau khi tạo thành công
@@ -300,6 +310,118 @@ export default function MedicalEvents() {
     setEmergencyProcessOpen(true);
   };
 
+  // Filter events based on search and filters
+  const filteredEvents = eventList.filter((event) => {
+    const eventStudent =
+      typeof event.student === "object" && event.student?.name
+        ? event.student.name
+        : typeof event.student === "string"
+        ? event.student
+        : "";
+
+    const matchesSearch =
+      eventStudent.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      selectedStatus === "all" || event.status === selectedStatus;
+
+    const matchesPriority =
+      selectedPriority === "all" || event.priority === selectedPriority;
+
+    // Date filtering logic
+    let matchesDate = true;
+    if (selectedDate !== "all" && event.createdAt) {
+      const eventDate = new Date(event.createdAt);
+      const now = new Date();
+
+      switch (selectedDate) {
+        case "today":
+          matchesDate = eventDate.toDateString() === now.toDateString();
+          break;
+        case "week":
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          matchesDate = eventDate >= weekAgo;
+          break;
+        case "month":
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          matchesDate = eventDate >= monthAgo;
+          break;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesDate;
+  });
+
+  // Calculate stats
+  const stats = {
+    total: eventList.length,
+    pending: eventList.filter((e) => e.status === "pending").length,
+    processing: eventList.filter((e) => e.status === "processing").length,
+    resolved: eventList.filter((e) => e.status === "resolved").length,
+    high: eventList.filter((e) => e.priority === "Cao").length,
+    medium: eventList.filter((e) => e.priority === "Trung bình").length,
+    low: eventList.filter((e) => e.priority === "Thấp").length,
+  };
+
+  // Handle export to Excel
+  const handleExportExcel = () => {
+    try {
+      const headers = [
+        "Tiêu đề",
+        "Học sinh",
+        "Lớp",
+        "Địa điểm",
+        "Mức độ ưu tiên",
+        "Trạng thái",
+        "Ngày tạo",
+      ];
+      const csvContent = [
+        headers.join(","),
+        ...filteredEvents.map((event) => {
+          const studentName =
+            typeof event.student === "object" && event.student?.name
+              ? event.student.name
+              : typeof event.student === "string"
+              ? event.student
+              : "N/A";
+
+          return [
+            `"${event.title || "N/A"}"`,
+            `"${studentName}"`,
+            `"${event.class || "N/A"}"`,
+            `"${event.location || "N/A"}"`,
+            `"${event.priority || "N/A"}"`,
+            `"${event.status || "pending"}"`,
+            `"${
+              event.createdAt
+                ? new Date(event.createdAt).toLocaleDateString("vi-VN")
+                : "N/A"
+            }"`,
+          ].join(",");
+        }),
+      ].join("\n");
+
+      const blob = new Blob(["\ufeff" + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `danh-sach-su-kien-y-te-${new Date().toISOString().split("T")[0]}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Export error:", err);
+    }
+  };
+
   useEffect(() => {
     setEventLoading(true);
     getAllTreatmentHistories()
@@ -311,332 +433,109 @@ export default function MedicalEvents() {
       .finally(() => setEventLoading(false));
   }, []);
 
+  if (eventLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-sky-800">
+            Quản lý sự kiện y tế
+          </h1>
+          <p className="text-sky-600">
+            Theo dõi và xử lý các sự kiện y tế trong trường học
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-sky-600">Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (eventError) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-sky-800">
+            Quản lý sự kiện y tế
+          </h1>
+          <p className="text-sky-600">
+            Theo dõi và xử lý các sự kiện y tế trong trường học
+          </p>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-red-600">{eventError}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-teal-800">
-          Sự cố Y tế
+        <h1 className="text-3xl font-bold tracking-tight text-sky-800">
+          Quản lý sự kiện y tế
         </h1>
-        <p className="text-teal-600">
-          Quản lý và xử lý các sự cố y tế đột xuất
+        <p className="text-sky-600">
+          Theo dõi và xử lý các sự kiện y tế trong trường học
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-red-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">
-              Sự kiện hôm nay
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-800">5</div>
-            <p className="text-xs text-red-600">Cần xử lý ngay</p>
-          </CardContent>
-        </Card>
+      <EventStats stats={stats} />
 
-        <Card className="border-orange-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">
-              Đang xử lý
-            </CardTitle>
-            <Clock className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">8</div>
-            <p className="text-xs text-orange-600">Theo dõi tiếp</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">
-              Đã xử lý
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800">42</div>
-            <p className="text-xs text-green-600">Tuần này</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-sky-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-sky-700">
-              Tổng sự kiện
-            </CardTitle>
-            <FileText className="h-4 w-4 text-sky-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-sky-800">156</div>
-            <p className="text-xs text-sky-600">Tháng này</p>
-          </CardContent>
-        </Card>
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setAddEventOpen(true)}
+            className="bg-sky-600 hover:bg-sky-700 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm sự kiện
+          </Button>
+          <Button
+            onClick={handleExportExcel}
+            variant="outline"
+            className="border-sky-200 text-sky-700 hover:bg-sky-50"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Xuất Excel
+          </Button>
+        </div>
+        <Button
+          onClick={() => {
+            setEventLoading(true);
+            getAllTreatmentHistories()
+              .then((data) => {
+                setEventList(data);
+              })
+              .catch(() => setEventError("Không thể tải danh sách sự kiện"))
+              .finally(() => setEventLoading(false));
+          }}
+          variant="outline"
+          className="border-sky-200 text-sky-700 hover:bg-sky-50"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Làm mới
+        </Button>
       </div>
 
-      <Tabs defaultValue="active" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-teal-50">
-          <TabsTrigger
-            value="active"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Đang xử lý
-          </TabsTrigger>
-          <TabsTrigger
-            value="completed"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Đã xử lý
-          </TabsTrigger>
-          <TabsTrigger
-            value="emergency"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Khẩn cấp
-          </TabsTrigger>
-          <TabsTrigger
-            value="reports"
-            className="data-[state=active]:bg-teal-600 data-[state=active]:text-white"
-          >
-            Báo cáo
-          </TabsTrigger>
-        </TabsList>
+      {/* Filter Bar */}
+      <FilterBar
+        onSearchChange={setSearchTerm}
+        onStatusFilterChange={setSelectedStatus}
+        onPriorityFilterChange={setSelectedPriority}
+        onDateFilterChange={setSelectedDate}
+      />
 
-        <TabsContent value="active" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <CardTitle className="text-teal-800">
-                    Sự kiện đang xử lý
-                  </CardTitle>
-                  <CardDescription className="text-teal-600">
-                    Danh sách các sự cố y tế cần theo dõi và xử lý
-                  </CardDescription>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-teal-600 hover:bg-teal-700"
-                  onClick={() => setAddEventOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Thêm sự kiện
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Tìm kiếm sự kiện..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select
-                  value={selectedStatus}
-                  onValueChange={setSelectedStatus}
-                >
-                  <SelectTrigger className="w-full md:w-48">
-                    <SelectValue placeholder="Trạng thái" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="new">Mới</SelectItem>
-                    <SelectItem value="processing">Đang xử lý</SelectItem>
-                    <SelectItem value="waiting">Chờ phụ huynh</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {eventLoading ? (
-                <div>Đang tải dữ liệu...</div>
-              ) : eventError ? (
-                <div className="text-red-600">{eventError}</div>
-              ) : (
-                <div className="space-y-4">
-                  {eventList.map((event) => (
-                    <div
-                      key={event._id}
-                      className={`p-4 rounded-lg border-l-4 ${event.priority === "Cao"
-                          ? "border-l-red-500 bg-red-50"
-                          : event.priority === "Trung bình"
-                            ? "border-l-yellow-500 bg-yellow-50"
-                            : "border-l-blue-500 bg-blue-50"
-                        }`}
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-bold text-gray-900">
-                            {event.title}
-                          </h4>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {/* Hiển thị tên học sinh nếu có */}
-                              {event.student &&
-                                typeof event.student === "object"
-                                ? `${event.student.name} (${event.student.studentId})`
-                                : event.student || "Không rõ"}{" "}
-                              - {event.class}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {/* Hiển thị ngày giờ nếu có */}
-                              {event.date
-                                ? new Date(event.date).toLocaleString("vi-VN")
-                                : event.time || ""}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {event.location}
-                            </div>
-                          </div>
-                        </div>
-                        <Badge
-                          variant={
-                            event.priority === "Cao"
-                              ? "destructive"
-                              : "secondary"
-                          }
-                          className={
-                            event.priority === "Cao"
-                              ? "bg-red-100 text-red-800"
-                              : event.priority === "Trung bình"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
-                          }
-                        >
-                          {event.priority}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-700 mb-3">
-                        {event.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Phone className="h-3 w-3" />
-                          <span>
-                            Đã liên hệ: {event.contactStatus || "Chưa liên hệ"}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleUpdateEvent(event)}
-                          >
-                            Cập nhật
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-teal-600 hover:bg-teal-700"
-                            onClick={() => handleProcessEvent(event)}
-                          >
-                            Xử lý
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="completed" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-teal-800">Sự kiện đã xử lý</CardTitle>
-              <CardDescription className="text-teal-600">
-                Lịch sử các sự cố y tế đã được giải quyết
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {eventList
-                  .filter((event) => event.status === "resolved")
-                  .map((event, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {event.title}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {event.student} - {event.class} | {event.date}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-100 text-green-800">
-                          Đã xử lý
-                        </Badge>{" "}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewDetails(event)}
-                        >
-                          Chi tiết
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="emergency" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-800">Sự kiện khẩn cấp</CardTitle>
-              <CardDescription className="text-red-600">
-                Các trường hợp cần xử lý ngay lập tức
-              </CardDescription>
-            </CardHeader>
-
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="reports" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-teal-800">
-                  Thống kê theo loại sự kiện
-                </CardTitle>
-                <CardDescription className="text-teal-600">
-                  Phân loại sự cố y tế trong tháng
-                </CardDescription>
-              </CardHeader>
-
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-teal-800">
-                  Thời gian xử lý trung bình
-                </CardTitle>
-                <CardDescription className="text-teal-600">
-                  Hiệu quả xử lý sự cố y tế
-                </CardDescription>
-              </CardHeader>
-
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+      {/* Events Table */}
+      <EventTable
+        events={filteredEvents}
+        onView={handleViewDetails}
+        onEdit={handleUpdateEvent}
+        onProcess={handleProcessEvent}
+      />
 
       {/* Add Event Dialog */}
       <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
@@ -932,7 +831,8 @@ export default function MedicalEvents() {
                                   key={student.student?._id || student._id}
                                   value={student.student?._id || student._id}
                                 >
-                                  {student.student?.name || student.name} ({student.student?._id || student._id})
+                                  {student.student?.name || student.name} (
+                                  {student.student?._id || student._id})
                                 </SelectItem>
                               ))
                             )}
@@ -1115,9 +1015,10 @@ export default function MedicalEvents() {
                 <div>
                   {/* Safely access student name and class */}
                   {typeof selectedEvent.student === "object" &&
-                    selectedEvent.student !== null
-                    ? `${selectedEvent.student.name || "Không rõ"} - ${selectedEvent.student.class || "Không rõ"
-                    }`
+                  selectedEvent.student !== null
+                    ? `${selectedEvent.student.name || "Không rõ"} - ${
+                        selectedEvent.student.class || "Không rõ"
+                      }`
                     : selectedEvent.student || "Không rõ"}
                 </div>
                 <div>
@@ -1272,8 +1173,8 @@ export default function MedicalEvents() {
                         selectedEvent.priority === "Cao"
                           ? "bg-red-100 text-red-800"
                           : selectedEvent.priority === "Trung bình"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-blue-100 text-blue-800"
                       }
                     >
                       {selectedEvent.priority || "Đã xử lý"}
@@ -1518,8 +1419,3 @@ export default function MedicalEvents() {
     </div>
   );
 }
-
-
-
-
-

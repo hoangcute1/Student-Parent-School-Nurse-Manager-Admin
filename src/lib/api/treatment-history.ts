@@ -1,6 +1,8 @@
 import { TreatmentHistory } from "../type/treatment-history";
 import { getParentId } from "../utils/parent-utils";
 import { getAuthToken } from "./auth/token";
+import { createNotification } from "./notification";
+import { getStudentWithParent } from "./student/index";
 
 /**
  * Gửi yêu cầu tạo mới một treatment history (sự kiện y tế)
@@ -27,7 +29,45 @@ export const createTreatmentHistory = async (
     const msg = await res.text();
     throw new Error(msg || `HTTP ${res.status}`);
   }
-  return res.json();
+
+  const createdEvent = await res.json();
+
+  // Tạo notification cho phụ huynh sau khi tạo sự kiện thành công
+  try {
+    const studentId =
+      typeof data.student === "string" ? data.student : data.student?._id;
+
+    if (studentId) {
+      // Lấy thông tin student với parent
+      const studentWithParent = await getStudentWithParent(studentId);
+      console.log("Student with parent data:", studentWithParent);
+
+      // Tìm parent ID từ student data
+      const parentId =
+        studentWithParent?.parent?._id || studentWithParent?.parent;
+
+      if (parentId) {
+        // Tạo notification cho phụ huynh
+        await createNotification({
+          parent: parentId,
+          student: studentId,
+          content: `Sự kiện y tế mới: ${data.title}`,
+          notes: `Đã tạo sự kiện y tế mới cho học sinh. Mức độ ưu tiên: ${data.priority}. Vị trí: ${data.location}. Mô tả: ${data.description}`,
+          type: "MEDICAL_EVENT",
+          relatedId: createdEvent._id,
+        });
+
+        console.log("Notification created successfully for medical event");
+      } else {
+        console.warn("Parent ID not found for student:", studentId);
+      }
+    }
+  } catch (notificationError) {
+    console.error("Error creating notification:", notificationError);
+    // Không throw error để không ảnh hưởng đến việc tạo treatment history
+  }
+
+  return createdEvent;
 };
 
 export const getAllTreatmentHistories = async () => {

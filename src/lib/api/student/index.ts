@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import {
   CreateStudentData,
   Student,
@@ -7,11 +7,10 @@ import {
   ViewStudent,
 } from "@/lib/type/students";
 import { fetchData } from "../api";
-import { Update } from 'next/dist/build/swc/types';
-import { getAuthToken } from '../auth/token';
+import { Update } from "next/dist/build/swc/types";
+import { getAuthToken } from "../auth/token";
 
-
-/** 
+/**
  * Get a student by ID
  */
 export const getStudentById = async (id: string): Promise<ViewStudent> => {
@@ -28,7 +27,7 @@ export const getStudentById = async (id: string): Promise<ViewStudent> => {
  */
 export const getAllStudents = async (): Promise<Student[]> => {
   const token = getAuthToken();
-   console.log("Token:", token);
+  console.log("Token:", token);
   const res = await fetch("http://localhost:3001/students", {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -54,7 +53,6 @@ export const getStudentsByClass = async (
   }
 };
 
-
 export const deleteStudent = async (id: string): Promise<void> => {
   try {
     await fetchData(`/students/${id}`, {
@@ -68,7 +66,7 @@ export const deleteStudent = async (id: string): Promise<void> => {
 
 export const updateStudent = async (
   id: string,
-  studentData: Partial<UpdateStudentData> 
+  studentData: Partial<UpdateStudentData>
 ): Promise<any> => {
   try {
     const response = await fetchData<UpdateStudentData>(`/students/${id}`, {
@@ -82,11 +80,10 @@ export const updateStudent = async (
   }
 };
 
-
 export const createStudent = async (
   studentData: Partial<CreateStudentData>
 ): Promise<any> => {
-  try { 
+  try {
     const response = await fetchData<CreateStudentData>("/students", {
       method: "POST",
       body: JSON.stringify(studentData),
@@ -96,4 +93,26 @@ export const createStudent = async (
     console.error("Error creating student:", error);
     throw error;
   }
+};
+
+/**
+ * Get a student by ID with parent information
+ */
+export const getStudentWithParent = async (id: string): Promise<any> => {
+  const token = getAuthToken();
+  console.log("Getting student with parent, ID:", id);
+
+  const res = await fetch(`http://localhost:3001/students/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg || `HTTP ${res.status}`);
+  }
+
+  return res.json();
 };
