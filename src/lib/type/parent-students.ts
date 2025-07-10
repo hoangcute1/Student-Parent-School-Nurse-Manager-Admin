@@ -1,6 +1,7 @@
 import { Parent } from "@/lib/type/parents";
 import { Student } from "./students";
 import { EditHealthRecord, HealthRecord } from "./health-record";
+import { HealthExaminationPending } from "@/lib/api/health-examination";
 
 interface ParentStudents {
   student: {
@@ -42,6 +43,18 @@ interface ParentStudentsStore {
     studentId: string,
     studentData: Partial<EditHealthRecord>
   ) => Promise<void>;
+  fetchHealthExaminationResults: (studentId: string) => Promise<any>;
+  fetchHealthExaminationsPending: (
+    studentId: string
+  ) => Promise<HealthExaminationPending>;
+  approveHealthExamination: (
+    studentId: string,
+    examinationId: string
+  ) => Promise<{ success: boolean; message: string }>;
+  cancelHealthExamination: (
+    studentId: string,
+    examinationId: string
+  ) => Promise<{ success: boolean; message: string }>;
 }
 
 interface GetAllParentsResponse {

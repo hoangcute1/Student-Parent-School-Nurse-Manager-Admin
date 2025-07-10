@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { fetchData } from "@/lib/api/api";
 
 interface HealthExaminationEvent {
   _id: string;
@@ -76,9 +77,8 @@ export default function HealthExaminationEventList() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/health-examinations/events");
-      const data = await response.json();
-      setEvents(data);
+      const response = await fetchData<any>("/health-examinations/events");
+      setEvents(response);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast.error("Không thể tải danh sách sự kiện khám sức khỏe");

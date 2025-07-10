@@ -1,11 +1,12 @@
 import HealthExaminationEventDetail from "../../_components/health-examination-event-detail";
 
 interface Props {
-  params: {
+  params: Promise<{
     eventId: string;
-  };
+  }>;
 }
 
-export default function EventDetailPage({ params }: Props) {
-  return <HealthExaminationEventDetail eventId={params.eventId} />;
+export default async function EventDetailPage({ params }: Props) {
+  const { eventId } = await params;
+  return <HealthExaminationEventDetail eventId={eventId} />;
 }

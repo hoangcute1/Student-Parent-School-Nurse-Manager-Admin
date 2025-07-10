@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { fetchData } from "@/lib/api/api";
 
 interface HealthExaminationEvent {
   _id: string;
@@ -76,8 +77,7 @@ export default function AllHealthExaminationEventList() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/health-examinations/events");
-      const data = await response.json();
+      const data = await fetchData<any>("/health-examinations/events");
       setEvents(data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -102,23 +102,20 @@ export default function AllHealthExaminationEventList() {
     try {
       console.log("Deleting event with ID:", eventId);
 
-      const response = await fetch(
-        `/api/health-examinations/events/${eventId}`,
+      const response = await fetchData<any>(
+        `/health-examinations/events/${eventId}`,
         {
           method: "DELETE",
         }
       );
 
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(result.message || "Đã xóa sự kiện khám");
+      if (response) {
+        toast.success("Đã xóa sự kiện khám");
         setEvents((prev) => prev.filter((event) => event._id !== eventId));
       } else {
-        const errorData = await response.json();
+        const errorData = response;
         console.error("Delete error:", errorData);
-        throw new Error(
-          errorData.details || errorData.error || `HTTP ${response.status}`
-        );
+        throw new Error("error");
       }
     } catch (error) {
       console.error("Error deleting event:", error);

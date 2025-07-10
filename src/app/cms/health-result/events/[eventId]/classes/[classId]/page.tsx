@@ -1,17 +1,13 @@
 import HealthExaminationClassDetail from "../../../../_components/health-examination-class-detail";
 
 interface Props {
-  params: {
+  params: Promise<{
     eventId: string;
     classId: string;
-  };
+  }>;
 }
 
-export default function ClassDetailPage({ params }: Props) {
-  return (
-    <HealthExaminationClassDetail
-      eventId={params.eventId}
-      classId={params.classId}
-    />
-  );
+export default async function ClassDetailPage({ params }: Props) {
+  const { eventId, classId } = await params;
+  return <HealthExaminationClassDetail eventId={eventId} classId={classId} />;
 }

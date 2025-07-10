@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
-export async function PATCH(
+export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ studentId: string }> }
 ) {
   try {
-    const { id } = await params;
-    const body = await request.json();
+    const { studentId } = await params;
 
     const response = await fetch(
-      `${BACKEND_URL}/health-examinations/${id}/result`,
+      `${BACKEND_URL}/health-examinations/student/${studentId}/completed`,
       {
-        method: "PATCH",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
       }
     );
 
@@ -28,9 +26,9 @@ export async function PATCH(
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error updating health examination result:", error);
+    console.error("Error fetching student health examination results:", error);
     return NextResponse.json(
-      { error: "Failed to update health examination result" },
+      { error: "Failed to fetch student health examination results" },
       { status: 500 }
     );
   }

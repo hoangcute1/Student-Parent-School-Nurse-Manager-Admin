@@ -6,6 +6,7 @@ import TreatmentHistoryComponent from "./_components/treatment-history";
 import HealthExaminationNotifications from "./_components/health-examination-notifications";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect } from "react";
+import { getAuthToken } from "@/lib/auth";
 
 export default function EventsPage() {
   const { studentsData, isLoading, fetchStudentsByParent, updateStudent } =
@@ -14,15 +15,16 @@ export default function EventsPage() {
   useEffect(() => {
     fetchStudentsByParent();
   }, [fetchStudentsByParent]);
+
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Sự cố y tế & Lịch sử bệnh án
+            Thông báo tổng hợp & Thông báo tiêm chủng
           </h1>
           <p className="text-blue-600">
-            Theo dõi thông báo và lịch sử bệnh án của con em bạn
+            Theo dõi thông báo và thông tin tiêm chủng của con em bạn
           </p>
         </div>
       </div>
@@ -33,7 +35,7 @@ export default function EventsPage() {
             value="notifications"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Thông báo sự cố
+            Thông báo tổng hợp
           </TabsTrigger>
           <TabsTrigger
             value="health-examinations"
@@ -45,7 +47,7 @@ export default function EventsPage() {
             value="history"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Lịch sử bệnh án
+            Thông báo tiêm chủng
           </TabsTrigger>
         </TabsList>
 
@@ -55,7 +57,7 @@ export default function EventsPage() {
         </TabsContent>
 
         <TabsContent value="health-examinations" className="space-y-6">
-          <HealthExaminationNotifications parentId="current-parent-id" />
+          <HealthExaminationNotifications />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">

@@ -4,11 +4,12 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { gradeLevel: string } }
+  { params }: { params: Promise<{ gradeLevel: string }> }
 ) {
   try {
+    const { gradeLevel } = await params;
     const response = await fetch(
-      `${BACKEND_URL}/students/grade/${params.gradeLevel}`,
+      `${BACKEND_URL}/students/grade/${gradeLevel}`,
       {
         method: "GET",
         headers: {

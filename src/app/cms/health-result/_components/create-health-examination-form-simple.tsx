@@ -36,6 +36,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
+import { fetchData } from "@/lib/api/api";
+import { useAuthStore } from "@/stores/auth-store";
+import { getAuthToken, parseJwt } from "@/lib/api/auth/token";
 
 interface GradeLevel {
   id: number;
@@ -53,6 +56,7 @@ export default function CreateHealthExaminationForm({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
+  const { user } = useAuthStore();
 
   const gradeLevels: GradeLevel[] = [
     { id: 1, name: "Khối 1", description: "Học sinh lớp 1" },
@@ -124,6 +128,25 @@ export default function CreateHealthExaminationForm({
         throw new Error("Vui lòng chọn ít nhất một khối lớp");
       }
 
+      // Get user ID from auth store
+      let userId = null;
+      if (user && (user as any)._id) {
+        userId = (user as any)._id;
+      } else {
+        // Fallback to getting user ID from token
+        const token = getAuthToken();
+        if (token) {
+          const tokenData = parseJwt(token);
+          userId = tokenData.sub;
+        }
+      }
+
+      if (!userId) {
+        throw new Error(
+          "Không thể xác định người dùng. Vui lòng đăng nhập lại."
+        );
+      }
+
       // Prepare data với đúng format
       const submitData = {
         ...formData,
@@ -131,44 +154,36 @@ export default function CreateHealthExaminationForm({
       };
 
       console.log("Sending form data:", submitData);
-      const response = await fetch("/api/health-examinations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submitData),
+      const response = await fetchData<any>(
+        `/health-examinations?staffId=${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submitData),
+        }
+      );
+
+      // The fetchData function already returns parsed JSON data on success
+      toast.success("Tạo lịch khám thành công!");
+
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        examination_date: "",
+        examination_time: "",
+        location: "",
+        doctor_name: "",
+        examination_type: "",
+        target_type: "grade",
+        grade_levels: [],
       });
+      setSelectedGrades([]);
 
-      if (response.ok) {
-        toast.success("Tạo lịch khám thành công!");
-
-        // Reset form
-        setFormData({
-          title: "",
-          description: "",
-          examination_date: "",
-          examination_time: "",
-          location: "",
-          doctor_name: "",
-          examination_type: "",
-          target_type: "grade",
-          grade_levels: [],
-        });
-        setSelectedGrades([]);
-
-        setOpen(false);
-        onSuccess?.();
-      } else {
-        const errorData = await response.json();
-        console.error("API Error Response:", {
-          status: response.status,
-          errorData: errorData,
-        });
-
-        const errorMessage =
-          errorData.details || errorData.error || `HTTP ${response.status}`;
-        throw new Error(`Failed to create examination: ${errorMessage}`);
-      }
+      setOpen(false);
+      onSuccess?.();
     } catch (error) {
       console.error("Error creating examination:", error);
       toast.error("Không thể tạo lịch khám. Vui lòng thử lại.");

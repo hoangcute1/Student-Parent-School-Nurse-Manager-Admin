@@ -4,10 +4,10 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { eventId: string; classId: string } }
+  { params }: { params: Promise<{ eventId: string; classId: string }> }
 ) {
   try {
-    const { eventId, classId } = params;
+    const { eventId, classId } = await params;
     const url = new URL(request.url);
     const staffId = url.searchParams.get("staffId");
 

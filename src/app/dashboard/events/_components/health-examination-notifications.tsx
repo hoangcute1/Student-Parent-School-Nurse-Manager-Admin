@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +30,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getAuthToken } from "@/lib/auth";
+import { fetchData } from "@/lib/api/api";
 
 interface HealthExaminationNotification {
   _id: string;
@@ -51,13 +53,7 @@ interface HealthExaminationNotification {
   examination_type?: string;
 }
 
-interface HealthExaminationNotificationsProps {
-  parentId: string;
-}
-
-export default function HealthExaminationNotifications({
-  parentId,
-}: HealthExaminationNotificationsProps) {
+export default function HealthExaminationNotifications() {
   const [notifications, setNotifications] = useState<
     HealthExaminationNotification[]
   >([]);
@@ -65,25 +61,39 @@ export default function HealthExaminationNotifications({
   const [responding, setResponding] = useState<string | null>(null);
   const [responseNotes, setResponseNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+  // Lấy parentId từ JWT token
+  const getParentId = () => {
+    try {
+      const token = getAuthToken();
+      if (!token) return "unknown-parent";
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.sub || "unknown-parent";
+    } catch (error) {
+      return "unknown-parent";
+    }
+  };
 
+  const parentId = getParentId();
   useEffect(() => {
     fetchNotifications();
   }, [parentId]);
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`/api/notifications/parent/${parentId}`);
-      const data = await response.json();
-
-      // Filter chỉ lấy health examination notifications
-      const healthExamNotifications = data.filter(
-        (noti: any) => noti.campaign_type === "HealthExamination"
+      console.log(
+        "Fetching health examination notifications for parent:",
+        parentId
       );
+      const response = await fetchData<any>(
+        `/notifications/parent/${parentId}/health-examinations`
+      );
+      console.log("Fetched health examination notifications:", response);
+      const data = response;
 
-      setNotifications(healthExamNotifications);
+      setNotifications(data);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
-      toast.error("Không thể tải thông báo");
+      console.error("Error fetching health examination notifications:", error);
+      toast.error("Không thể tải thông báo khám sức khỏe");
     } finally {
       setLoading(false);
     }
@@ -96,8 +106,8 @@ export default function HealthExaminationNotifications({
     setResponding(notificationId);
 
     try {
-      const response = await fetch(
-        `/api/notifications/${notificationId}/respond`,
+      const response = await fetchData(
+        `/notifications/${notificationId}/respond`,
         {
           method: "PUT",
           headers: {
@@ -112,7 +122,7 @@ export default function HealthExaminationNotifications({
         }
       );
 
-      if (response.ok) {
+      if (response) {
         toast.success(
           status === "Agree"
             ? "Đã xác nhận tham gia lịch khám"

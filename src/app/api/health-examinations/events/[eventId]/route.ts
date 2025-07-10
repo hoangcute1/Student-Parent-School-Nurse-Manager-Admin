@@ -4,9 +4,10 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { eventId: string } }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
+    const { eventId } = await params;
     const { searchParams } = new URL(request.url);
     const staffId = searchParams.get("staffId");
 
@@ -16,9 +17,7 @@ export async function GET(
     }
 
     const response = await fetch(
-      `${BACKEND_URL}/health-examinations/events/${
-        params.eventId
-      }?${queryParams.toString()}`,
+      `${BACKEND_URL}/health-examinations/events/${eventId}?${queryParams.toString()}`,
       {
         method: "GET",
         headers: {
@@ -44,10 +43,10 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { eventId: string } }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    const { eventId } = params;
+    const { eventId } = await params;
 
     // Xóa tất cả lịch khám thuộc sự kiện này
     const response = await fetch(
