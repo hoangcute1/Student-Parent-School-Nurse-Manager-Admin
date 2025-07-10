@@ -1,15 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { Notification, NotificationDocument } from '@/schemas/notification.schema';
 import { CreateNotificationDto } from '@/decorations/dto/create-notification.dto';
 import { UpdateNotificationDto } from '@/decorations/dto/update-notification.dto';
+import { StudentService } from './student.service';
+import { HealthExaminationService } from './health-examination.service';
+import { ParentService } from './parent.service';
+import { ExaminationStatus } from '@/schemas/health-examination.schema';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectModel(Notification.name)
     private notificationModel: Model<NotificationDocument>,
+    private studentService: StudentService,
+    private parentService: ParentService,
+    @Inject(forwardRef(() => HealthExaminationService))
+    private healthExaminationService: HealthExaminationService,
   ) {}
   async create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
     const created = new this.notificationModel({
@@ -29,6 +37,11 @@ export class NotificationService {
       .exec();
   }
   async findById(id: string): Promise<Notification> {
+    // First validate that id is a valid ObjectId format
+    if (!isValidObjectId(id)) {
+      throw new NotFoundException('Không tìm thấy thông báo');
+    }
+
     const found = await this.notificationModel
       .findById(id)
       .populate('parent')
@@ -43,10 +56,57 @@ export class NotificationService {
   }
 
   async findByParentId(parentId: string): Promise<Notification[]> {
+    // First validate that parentId is a valid ObjectId format
+    if (!isValidObjectId(parentId)) {
+      return [];
+    }
+
+    // Then validate that the parent exists
+    try {
+      await this.parentService.findById(parentId);
+    } catch (error) {
+      // If parent doesn't exist, return empty array instead of throwing error
+      if (error instanceof NotFoundException) {
+        return [];
+      }
+      throw error;
+    }
+
     return this.notificationModel.find({ parent: parentId }).populate('student').exec();
   }
 
+  async findHealthExaminationNotificationsByParentId(parentId: string): Promise<Notification[]> {
+    // First validate that parentId is a valid ObjectId format
+    if (!isValidObjectId(parentId)) {
+      return [];
+    }
+
+    // Then validate that the parent exists
+    try {
+      await this.parentService.findById(parentId);
+    } catch (error) {
+      // If parent doesn't exist, return empty array instead of throwing error
+      if (error instanceof NotFoundException) {
+        return [];
+      }
+      throw error;
+    }
+
+    return this.notificationModel
+      .find({
+        parent: parentId,
+        campaign_type: 'HealthExamination',
+      })
+      .populate('student')
+      .exec();
+  }
+
   async findByStudentId(studentId: string): Promise<Notification[]> {
+    // First validate that studentId is a valid ObjectId format
+    if (!isValidObjectId(studentId)) {
+      return [];
+    }
+
     return this.notificationModel.find({ student: studentId }).populate('parent').exec();
   }
   async update(id: string, updateNotificationDto: UpdateNotificationDto): Promise<Notification> {
@@ -112,45 +172,70 @@ export class NotificationService {
     rejectionReason?: string,
   ): Promise<any> {
     // Cập nhật status của notification
-    const notification = await this.notificationModel.findByIdAndUpdate(
-      notificationId,
-      {
-        confirmation_status: status,
-        updated_at: new Date(),
-      },
-      { new: true },
-    );
+    const notification = await this.notificationModel
+      .findByIdAndUpdate(
+        notificationId,
+        {
+          confirmation_status: status,
+          notes: status === 'Agree' ? notes : undefined,
+          rejection_reason: status === 'Disagree' ? rejectionReason : undefined,
+          updated_at: new Date(),
+        },
+        { new: true },
+      )
+      .populate(['student', 'parent']);
 
     if (!notification) {
       throw new NotFoundException('Không tìm thấy thông báo');
     }
 
-    // Nếu là health examination, cập nhật status của examination
-    if (notification.campaign_type === 'HealthExamination') {
-      const HealthExaminationService =
-        require('./health-examination.service').HealthExaminationService;
+    // Cập nhật trạng thái examination dựa trên phản hồi của phụ huynh
+    try {
+      if (status === 'Agree') {
+        // Phụ huynh đồng ý -> cập nhật examination thành APPROVED
+        await this.healthExaminationService.updateStatus(
+          notification.noti_campaign.toString(),
+          ExaminationStatus.APPROVED,
+        );
+        console.log(
+          `Parent agreed to health examination. Examination ${notification.noti_campaign} approved.`,
+        );
 
-      const examinationStatus = status === 'Agree' ? 'Approved' : 'Rejected';
+        return {
+          notification,
+          message: 'Đã xác nhận tham gia lịch khám',
+        };
+      } else {
+        // Phụ huynh từ chối -> cập nhật examination thành REJECTED
+        await this.healthExaminationService.updateStatus(
+          notification.noti_campaign.toString(),
+          ExaminationStatus.REJECTED,
+        );
+        console.log(
+          `Parent disagreed to health examination. Examination ${notification.noti_campaign} rejected.`,
+        );
 
-      // Import động để tránh circular dependency
-      const { HealthExaminationService: ExamService } = await import(
-        './health-examination.service'
-      );
-      // Note: Bạn cần inject HealthExaminationService properly hoặc tạo instance
-
+        return {
+          notification,
+          message: 'Đã từ chối tham gia lịch khám',
+        };
+      }
+    } catch (error) {
+      console.error('Error updating examination status:', error);
+      // Return notification even if examination update fails
       return {
         notification,
-        message: status === 'Agree' ? 'Đã xác nhận tham gia lịch khám' : 'Đã từ chối lịch khám',
+        message:
+          status === 'Agree' ? 'Đã xác nhận tham gia lịch khám' : 'Đã từ chối tham gia lịch khám',
+        warning: 'Không thể cập nhật trạng thái lịch khám',
       };
     }
-
-    return notification;
   }
 
   private async findStudentWithParent(studentId: string) {
     try {
-      // Tìm student và populate parent
-      const student = await this.findStudentById(studentId);
+      // Sử dụng StudentService để lấy student với parent
+      const student = await this.studentService.findById(studentId);
       return student;
     } catch (error) {
       console.error('Error finding student with parent:', error);
@@ -159,11 +244,7 @@ export class NotificationService {
   }
 
   private async findStudentById(studentId: string) {
-    // Tạm thời mock - bạn cần inject StudentModel hoặc StudentService
-    // để thực hiện query thực sự
-    return {
-      _id: studentId,
-      parent: 'mock_parent_id', // Thay thế bằng logic thực tế
-    };
+    // Sử dụng StudentService để lấy student
+    return await this.studentService.findById(studentId);
   }
 }

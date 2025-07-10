@@ -1,9 +1,6 @@
+import { NotificationStatus, NotificationType } from '@/enums/notification.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum, IsDate } from 'class-validator';
-import {
-  NotificationType,
-  NotificationStatus,
-} from '@/schemas/notification.schema';
 
 export class CreateNotificationDto {
   @ApiProperty({

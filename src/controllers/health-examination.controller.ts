@@ -32,6 +32,68 @@ export class HealthExaminationController {
     return this.healthExaminationService.findAll(query);
   }
 
+  @Get('student/:studentId/completed')
+  @ApiOperation({ summary: 'Get completed health examinations for a student' })
+  @ApiResponse({ status: 200, description: 'Completed health examinations retrieved successfully' })
+  async getCompletedExaminationsByStudent(@Param('studentId') studentId: string) {
+    try {
+      const examinations =
+        await this.healthExaminationService.getCompletedExaminationsByStudent(studentId);
+      return examinations;
+    } catch (error) {
+      throw new BadRequestException('Không thể lấy danh sách kết quả khám sức khỏe');
+    }
+  }
+
+  @Get('student/:studentId/pending')
+  @ApiOperation({ summary: 'Get pending health examinations for a student' })
+  @ApiResponse({ status: 200, description: 'Pending health examinations retrieved successfully' })
+  async getPendingExaminationsByStudent(@Param('studentId') studentId: string) {
+    try {
+      const examinations =
+        await this.healthExaminationService.getPendingExaminationsByStudent(studentId);
+      return examinations;
+    } catch (error) {
+      throw new BadRequestException('Không thể lấy danh sách lịch khám đang chờ xử lý');
+    }
+  }
+
+  @Patch('student/:studentId/examination/:examinationId/approve')
+  @ApiOperation({ summary: 'Approve a specific health examination for a student' })
+  @ApiResponse({ status: 200, description: 'Health examination approved successfully' })
+  async approveExaminationByStudent(
+    @Param('studentId') studentId: string,
+    @Param('examinationId') examinationId: string,
+  ) {
+    try {
+      const result = await this.healthExaminationService.approveExaminationByStudent(
+        studentId,
+        examinationId,
+      );
+      return result;
+    } catch (error) {
+      throw new BadRequestException('Không thể phê duyệt lịch khám sức khỏe');
+    }
+  }
+
+  @Patch('student/:studentId/examination/:examinationId/cancel')
+  @ApiOperation({ summary: 'Cancel a specific health examination for a student' })
+  @ApiResponse({ status: 200, description: 'Health examination cancelled successfully' })
+  async cancelExaminationByStudent(
+    @Param('studentId') studentId: string,
+    @Param('examinationId') examinationId: string,
+  ) {
+    try {
+      const result = await this.healthExaminationService.cancelExaminationByStudent(
+        studentId,
+        examinationId,
+      );
+      return result;
+    } catch (error) {
+      throw new BadRequestException('Không thể hủy lịch khám sức khỏe');
+    }
+  }
+
   @Get('approved')
   async getApprovedExaminations(@Query('staffId') staffId?: string) {
     try {
@@ -132,12 +194,7 @@ export class HealthExaminationController {
 
   @Patch(':id/status')
   async updateStatus(@Param('id') id: string, @Body() updateDto: UpdateExaminationStatusDto) {
-    return this.healthExaminationService.updateStatus(
-      id,
-      updateDto.status,
-      updateDto.parent_response_notes,
-      updateDto.rejection_reason,
-    );
+    return this.healthExaminationService.updateStatus(id, updateDto.status);
   }
 
   @Delete(':id')

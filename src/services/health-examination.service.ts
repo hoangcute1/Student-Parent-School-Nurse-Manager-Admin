@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -15,6 +21,7 @@ export class HealthExaminationService {
   constructor(
     @InjectModel(HealthExamination.name)
     private healthExaminationModel: Model<HealthExaminationDocument>,
+    @Inject(forwardRef(() => NotificationService))
     private notificationService: NotificationService,
     private studentService: StudentService,
   ) {}
@@ -152,12 +159,7 @@ export class HealthExaminationService {
     return examination;
   }
 
-  async updateStatus(
-    id: string,
-    status: ExaminationStatus,
-    notes?: string,
-    rejectionReason?: string,
-  ) {
+  async updateStatus(id: string, status: ExaminationStatus) {
     const examination = await this.healthExaminationModel.findById(id);
 
     if (!examination) {
@@ -165,11 +167,77 @@ export class HealthExaminationService {
     }
 
     examination.status = status;
-    if (notes) examination.parent_response_notes = notes;
-    if (rejectionReason) examination.rejection_reason = rejectionReason;
     examination.updated_at = new Date();
 
     return examination.save();
+  }
+
+  async getCompletedExaminationsByStudent(studentId: string) {
+    return this.healthExaminationModel
+      .find({
+        student_id: studentId,
+        status: ExaminationStatus.COMPLETED,
+      })
+      .populate(['student_id', 'created_by'])
+      .sort({ examination_date: -1 });
+  }
+
+  async getPendingExaminationsByStudent(studentId: string) {
+    return this.healthExaminationModel
+      .find({
+        student_id: studentId,
+        status: ExaminationStatus.PENDING,
+      })
+      .populate(['student_id', 'created_by'])
+      .sort({ examination_date: -1 });
+  }
+
+  async approveExaminationByStudent(studentId: string, examinationId: string) {
+    const examination = await this.healthExaminationModel.findOne({
+      _id: examinationId,
+      student_id: studentId,
+      status: ExaminationStatus.PENDING,
+    });
+
+    if (!examination) {
+      throw new NotFoundException('Không tìm thấy lịch khám đang chờ xử lý cho học sinh này');
+    }
+
+    examination.status = ExaminationStatus.APPROVED;
+    examination.updated_at = new Date();
+
+    const result = await examination.save();
+
+    return {
+      message: 'Đã phê duyệt lịch khám sức khỏe',
+      examination: result,
+      student_id: studentId,
+      examination_id: examinationId,
+    };
+  }
+
+  async cancelExaminationByStudent(studentId: string, examinationId: string) {
+    const examination = await this.healthExaminationModel.findOne({
+      _id: examinationId,
+      student_id: studentId,
+      status: ExaminationStatus.PENDING,
+    });
+
+    if (!examination) {
+      throw new NotFoundException('Không tìm thấy lịch khám đang chờ xử lý cho học sinh này');
+    }
+
+    examination.status = ExaminationStatus.CANCELLED;
+    examination.updated_at = new Date();
+
+    const result = await examination.save();
+
+    return {
+      message: 'Đã hủy lịch khám sức khỏe',
+      examination: result,
+      student_id: studentId,
+      examination_id: examinationId,
+    };
   }
 
   async updateHealthExaminationResult(

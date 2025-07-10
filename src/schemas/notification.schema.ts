@@ -1,17 +1,8 @@
 import { CampaignType } from '@/enums/campaign.enum';
+import { NotificationStatus } from '@/enums/notification.enum';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
-export enum NotificationType {
-  VACCINE = 'VaccineCampaign',
-  PERIODIC = 'PeriodicCampaign',
-  HEALTH_EXAMINATION = 'HealthExamination',
-}
-
-export enum NotificationStatus {
-  AGREE = 'Agree',
-  DISAGREE = 'Disagree',
-}
 
 export type NotificationDocument = Notification & Document;
 @Schema({ versionKey: false })
@@ -50,6 +41,9 @@ export class Notification extends Document {
     enum: NotificationStatus,
   })
   confirmation_status: string;
+
+  @Prop({ trim: true })
+  rejection_reason: string;
 
   @Prop({ default: Date.now })
   created_at: Date;

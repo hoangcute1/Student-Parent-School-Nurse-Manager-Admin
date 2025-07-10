@@ -27,6 +27,14 @@ export class NotificationController {
   async findByParentId(@Param('parentId') parentId: string) {
     return this.notificationService.findByParentId(parentId);
   }
+
+  @Get('parent/:parentId/health-examinations')
+  @ApiOperation({ summary: 'Lấy thông báo khám sức khỏe theo ID phụ huynh' })
+  @ApiParam({ name: 'parentId', description: 'ID của phụ huynh' })
+  async findHealthExaminationNotificationsByParentId(@Param('parentId') parentId: string) {
+    return this.notificationService.findHealthExaminationNotificationsByParentId(parentId);
+  }
+
   @Get('student/:studentId')
   @ApiOperation({ summary: 'Lấy thông báo theo ID học sinh' })
   @ApiParam({ name: 'studentId', description: 'ID của học sinh' })
@@ -56,12 +64,12 @@ export class NotificationController {
   }
 
   @Put(':id/respond')
-  @ApiOperation({ summary: 'Phụ huynh phản hồi thông báo lịch khám' })
+  @ApiOperation({ summary: 'Phản hồi thông báo khám sức khỏe' })
   @ApiParam({ name: 'id', description: 'ID của thông báo' })
   async respondToHealthExamination(
     @Param('id') id: string,
     @Body()
-    body: {
+    responseData: {
       status: 'Agree' | 'Disagree';
       notes?: string;
       rejectionReason?: string;
@@ -69,9 +77,9 @@ export class NotificationController {
   ) {
     return this.notificationService.respondToHealthExamination(
       id,
-      body.status,
-      body.notes,
-      body.rejectionReason,
+      responseData.status,
+      responseData.notes,
+      responseData.rejectionReason,
     );
   }
 }
