@@ -45,35 +45,33 @@ export class StudentService {
 
       // Find or create parent by email
       let parent: any;
-        const existingUser = await this.userModel.findOne({ 
-       email: createStudentDto.parentEmail,
-      //  role: 'parent'
+      const existingUser = await this.userModel.findOne({
+        email: createStudentDto.parentEmail,
+        //  role: 'parent'
       });
 
       if (!existingUser) {
         throw new NotFoundException(
-          `Không tìm thấy phụ huynh với email ${createStudentDto.parentEmail}`
+          `Không tìm thấy phụ huynh với email ${createStudentDto.parentEmail}`,
         );
       }
 
-          parent = await this.parentService.findByUserId(existingUser._id as string);
-    if (!parent) {
-      // Create parent profile if user exists but doesn't have parent profile
-      try {
-        parent = await this.parentService.create({
-          user: existingUser._id as string,
-          // name: `Phụ huynh của ${createStudentDto.name}`
-        });
+      parent = await this.parentService.findByUserId(existingUser._id as string);
+      if (!parent) {
+        // Create parent profile if user exists but doesn't have parent profile
+        try {
+          parent = await this.parentService.create({
+            user: existingUser._id as string,
+            // name: `Phụ huynh của ${createStudentDto.name}`
+          });
 
-        if (!parent) {
-          throw new BadRequestException('Không thể tạo thông tin phụ huynh');
+          if (!parent) {
+            throw new BadRequestException('Không thể tạo thông tin phụ huynh');
+          }
+        } catch (error) {
+          throw new BadRequestException(`Lỗi khi tạo thông tin phụ huynh: ${error.message}`);
         }
-      } catch (error) {
-        throw new BadRequestException(
-          `Lỗi khi tạo thông tin phụ huynh: ${error.message}`
-        );
       }
-    }
       // Create student with resolved references
       const studentData = {
         name: createStudentDto.name,
@@ -81,7 +79,7 @@ export class StudentService {
         birth: createStudentDto.birth,
         gender: createStudentDto.gender,
         class: classDoc._id,
-        parent: parent._id
+        parent: parent._id,
       };
 
       const createdStudent = new this.studentModel(studentData);
@@ -99,18 +97,14 @@ export class StudentService {
       }
 
       return student;
-
     } catch (error) {
       if (error instanceof ConflictException || error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Có lỗi xảy ra khi tạo học sinh: ' + error.message
-      );
+      throw new InternalServerErrorException('Có lỗi xảy ra khi tạo học sinh: ' + error.message);
     }
   }
 
- 
   async findAll(
     filterDto?: FilterStudentDto,
   ): Promise<{ data: Student[]; total: number; page: number; limit: number }> {
@@ -415,6 +409,56 @@ export class StudentService {
 
   async findByClassId(classId: string): Promise<Student[]> {
     return this.studentModel.find({ class: classId }).populate('parent').populate('class').exec();
+  }
+
+  async findByGradeLevel(gradeLevel: number) {
+    try {
+      // Logic để tìm học sinh theo khối học
+      // Giả sử khối học được xác định bởi ký tự đầu trong tên lớp
+      const gradePattern = new RegExp(`^${gradeLevel}`, 'i');
+
+      const classes = await this.classService.findByGradeLevel(gradeLevel);
+      const classIds = classes.map((cls) => cls._id);
+
+      const students = await this.studentModel
+        .find({ class: { $in: classIds } })
+        .populate('class', 'name')
+        .populate('parent', 'name email')
+        .exec();
+
+      return students.map((student) => formatStudentResponse(student));
+    } catch (error) {
+      console.error('Error finding students by grade level:', error);
+      throw new InternalServerErrorException('Không thể tìm học sinh theo khối học');
+    }
+  }
+
+  async searchStudents(query: string) {
+    try {
+      if (!query || query.trim().length < 2) {
+        return [];
+      }
+
+      const searchRegex = new RegExp(query, 'i');
+
+      const students = await this.studentModel
+        .find({
+          $or: [{ name: searchRegex }, { studentId: searchRegex }],
+        })
+        .populate('class', 'name')
+        .limit(20)
+        .exec();
+
+      return students.map((student) => ({
+        _id: student._id,
+        name: student.name,
+        student_code: student.studentId,
+        class_name: (student.class as any)?.name || 'N/A',
+      }));
+    } catch (error) {
+      console.error('Error searching students:', error);
+      throw new InternalServerErrorException('Không thể tìm kiếm học sinh');
+    }
   }
 }
 

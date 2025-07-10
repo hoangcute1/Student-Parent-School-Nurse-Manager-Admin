@@ -37,6 +37,7 @@ import { ClassModule } from './modules/class.module';
 import { TokenModule } from './modules/token.module';
 import { TestModule } from './modules/test.module';
 import { ExportHistoryModule } from './modules/export-history.module';
+import { HealthExaminationModule } from './modules/health-examination.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ExportHistoryModule } from './modules/export-history.module';
     CampaignClassModule,
     CampaignStudentModule,
     HealthRecordModule,
+    HealthExaminationModule,
     MedicineModule,
     MedicineTreatmentModule,
     NotificationModule,

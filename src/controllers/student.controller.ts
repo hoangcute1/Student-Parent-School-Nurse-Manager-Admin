@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
 import { formatStudentResponse, StudentService } from '@/services/student.service';
 import {
   ApiTags,
@@ -94,5 +94,20 @@ export class StudentController {
   async findByClass(@Param('classId') classId: string) {
     const students = await this.studentService.findByClassId(classId);
     return students.map((student) => formatStudentResponse(student));
+  }
+
+  @Get('grade/:gradeLevel')
+  @ApiOperation({ summary: 'Lấy danh sách học sinh theo khối học' })
+  @ApiParam({ name: 'gradeLevel', description: 'Khối học (1-5)' })
+  @ApiResponse({ status: 200, description: 'Danh sách học sinh theo khối.' })
+  async findByGradeLevel(@Param('gradeLevel') gradeLevel: string) {
+    return await this.studentService.findByGradeLevel(parseInt(gradeLevel));
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Tìm kiếm học sinh' })
+  @ApiResponse({ status: 200, description: 'Kết quả tìm kiếm học sinh.' })
+  async searchStudents(@Query('q') query: string) {
+    return await this.studentService.searchStudents(query);
   }
 }

@@ -5,6 +5,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 export enum NotificationType {
   VACCINE = 'VaccineCampaign',
   PERIODIC = 'PeriodicCampaign',
+  HEALTH_EXAMINATION = 'HealthExamination',
 }
 
 export enum NotificationStatus {
@@ -15,7 +16,7 @@ export enum NotificationStatus {
 export type NotificationDocument = Notification & Document;
 @Schema({ versionKey: false })
 export class Notification extends Document {
-   @Prop({
+  @Prop({
     type: MongooseSchema.Types.ObjectId,
     refPath: 'campaign_type', // Sử dụng refPath thay vì ref
     required: true,

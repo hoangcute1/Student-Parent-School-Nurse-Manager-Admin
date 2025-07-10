@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { NotificationService } from '@/services/notification.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CreateNotificationDto } from '@/decorations/dto/create-notification.dto';
@@ -52,10 +44,7 @@ export class NotificationController {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin thông báo' })
   @ApiParam({ name: 'id', description: 'ID của thông báo' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateNotificationDto: UpdateNotificationDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
     return this.notificationService.update(id, updateNotificationDto);
   }
 
@@ -64,5 +53,25 @@ export class NotificationController {
   @ApiParam({ name: 'id', description: 'ID của thông báo' })
   async remove(@Param('id') id: string) {
     return this.notificationService.remove(id);
+  }
+
+  @Put(':id/respond')
+  @ApiOperation({ summary: 'Phụ huynh phản hồi thông báo lịch khám' })
+  @ApiParam({ name: 'id', description: 'ID của thông báo' })
+  async respondToHealthExamination(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      status: 'Agree' | 'Disagree';
+      notes?: string;
+      rejectionReason?: string;
+    },
+  ) {
+    return this.notificationService.respondToHealthExamination(
+      id,
+      body.status,
+      body.notes,
+      body.rejectionReason,
+    );
   }
 }
