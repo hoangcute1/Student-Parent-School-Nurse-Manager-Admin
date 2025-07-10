@@ -21,6 +21,32 @@ export interface HealthExaminationPending {
   updatedAt: string;
 }
 
+export interface HealthExaminationCompleted {
+  _id: string;
+  title: string;
+  description: string;
+  examination_date: string;
+  examination_time: string;
+  location: string;
+  doctor_name?: string;
+  examination_type: string;
+  health_result?: string;
+  examination_notes?: string;
+  recommendations?: string;
+  follow_up_required?: boolean;
+  created_at: string;
+  updated_at: string;
+  student_id: {
+    _id: string;
+    full_name: string;
+    student_id: string;
+  };
+  created_by: {
+    _id: string;
+    full_name: string;
+  };
+}
+
 export const getHealthExaminationsPending = async (
   studentId: string
 ): Promise<any> => {
@@ -31,6 +57,32 @@ export const getHealthExaminationsPending = async (
 
   const response = await fetchData(
     `/health-examinations/student/${studentId}/pending`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response) {
+    throw new Error(`HTTP error! status: ${response}`);
+  }
+
+  return response;
+};
+
+export const getHealthExaminationsCompleted = async (
+  studentId: string
+): Promise<HealthExaminationCompleted[]> => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  const response = await fetchData<HealthExaminationCompleted[]>(
+    `/health-examinations/student/${studentId}/completed`,
     {
       method: "GET",
       headers: {
