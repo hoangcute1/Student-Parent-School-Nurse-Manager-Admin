@@ -67,7 +67,7 @@ export class TreatmentHistoryController {
     status: 201,
     description: 'The treatment history has been created.',
   })
-  async create(@Body() createTreatmentHistoryDto: any) {
+  async create(@Body() createTreatmentHistoryDto: CreateTreatmentHistoryDto) {
     return this.treatmentHistoryService.create(createTreatmentHistoryDto);
   }
 
