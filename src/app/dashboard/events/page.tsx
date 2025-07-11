@@ -4,6 +4,7 @@ import ImportantNoti from "./_components/important-noti";
 import NotiList from "./_components/noti-list";
 import TreatmentHistoryComponent from "./_components/treatment-history";
 import HealthExaminationNotifications from "./_components/health-examination-notifications";
+import VaccinationNotifications from "./_components/vaccination-notifications";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect } from "react";
 import { getAuthToken } from "@/lib/auth";
@@ -30,7 +31,7 @@ export default function EventsPage() {
       </div>
 
       <Tabs defaultValue="notifications" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger
             value="notifications"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -44,10 +45,10 @@ export default function EventsPage() {
             Lịch khám sức khỏe
           </TabsTrigger>
           <TabsTrigger
-            value="history"
+            value="vaccinations"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Thông báo tiêm chủng
+            Thông báo khác
           </TabsTrigger>
         </TabsList>
 
@@ -58,6 +59,10 @@ export default function EventsPage() {
 
         <TabsContent value="health-examinations" className="space-y-6">
           <HealthExaminationNotifications />
+        </TabsContent>
+
+        <TabsContent value="vaccinations" className="space-y-6">
+          <VaccinationNotifications />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">

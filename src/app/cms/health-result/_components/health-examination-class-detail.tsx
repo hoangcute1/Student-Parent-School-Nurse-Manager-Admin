@@ -350,20 +350,36 @@ export default function HealthExaminationClassDetail({
 
     // Validation based on examination type
     let validationErrors = [];
-    
+
     const examType = classDetail.event_details.examination_type;
-    
-    if (examType === "Khám sức khỏe định kỳ" || examType === "Khám sức khoẻ định kỳ" || examType === "Kham suc khoe dinh ky" || !examType || examType === "") {
+
+    if (
+      examType === "Khám sức khỏe định kỳ" ||
+      examType === "Khám sức khoẻ định kỳ" ||
+      examType === "Kham suc khoe dinh ky" ||
+      !examType ||
+      examType === ""
+    ) {
       if (!height) validationErrors.push("Chiều cao");
       if (!weight) validationErrors.push("Cân nặng");
       if (!vision) validationErrors.push("Thị lực");
       if (!healthStatus) validationErrors.push("Trạng thái sức khỏe");
-    } else if (examType === "Khám răng miệng" || examType === "Kham rang mieng" || examType === "Khám răng" || examType === "Dental examination") {
+    } else if (
+      examType === "Khám răng miệng" ||
+      examType === "Kham rang mieng" ||
+      examType === "Khám răng" ||
+      examType === "Dental examination"
+    ) {
       if (!milkTeeth && milkTeeth !== "0") validationErrors.push("Số răng sữa");
-      if (!permanentTeeth && permanentTeeth !== "0") validationErrors.push("Số răng vĩnh viễn");
+      if (!permanentTeeth && permanentTeeth !== "0")
+        validationErrors.push("Số răng vĩnh viễn");
       if (!cavities && cavities !== "0") validationErrors.push("Số răng sâu");
       if (!dentalStatus) validationErrors.push("Trạng thái răng miệng");
-    } else if (examType === "Khám mắt" || examType === "Kham mat" || examType === "Eye examination") {
+    } else if (
+      examType === "Khám mắt" ||
+      examType === "Kham mat" ||
+      examType === "Eye examination"
+    ) {
       if (!rightEyeVision) validationErrors.push("Thị lực mắt phải");
       if (!leftEyeVision) validationErrors.push("Thị lực mắt trái");
       if (!eyeStatus) validationErrors.push("Trạng thái mắt");
@@ -387,8 +403,14 @@ export default function HealthExaminationClassDetail({
 
       // Add specific fields based on examination type
       const examType = classDetail.event_details.examination_type;
-      
-      if (examType === "Khám sức khỏe định kỳ" || examType === "Khám sức khoẻ định kỳ" || examType === "Kham suc khoe dinh ky" || !examType || examType === "") {
+
+      if (
+        examType === "Khám sức khỏe định kỳ" ||
+        examType === "Khám sức khoẻ định kỳ" ||
+        examType === "Kham suc khoe dinh ky" ||
+        !examType ||
+        examType === ""
+      ) {
         examinationData.health_result = JSON.stringify({
           height,
           weight,
@@ -397,7 +419,12 @@ export default function HealthExaminationClassDetail({
           status: healthStatus,
           type: "Khám sức khỏe định kỳ",
         });
-      } else if (examType === "Khám răng miệng" || examType === "Kham rang mieng" || examType === "Khám răng" || examType === "Dental examination") {
+      } else if (
+        examType === "Khám răng miệng" ||
+        examType === "Kham rang mieng" ||
+        examType === "Khám răng" ||
+        examType === "Dental examination"
+      ) {
         examinationData.health_result = JSON.stringify({
           milk_teeth: milkTeeth,
           permanent_teeth: permanentTeeth,
@@ -405,7 +432,11 @@ export default function HealthExaminationClassDetail({
           status: dentalStatus,
           type: "Khám răng miệng",
         });
-      } else if (examType === "Khám mắt" || examType === "Kham mat" || examType === "Eye examination") {
+      } else if (
+        examType === "Khám mắt" ||
+        examType === "Kham mat" ||
+        examType === "Eye examination"
+      ) {
         examinationData.health_result = JSON.stringify({
           right_eye_vision: rightEyeVision,
           left_eye_vision: leftEyeVision,
@@ -570,29 +601,39 @@ export default function HealthExaminationClassDetail({
                       {getStatusIcon(student.status)}
                       <div>
                         <div className="font-medium">
-                          {student.student?.full_name || 
-                           (student.student as any)?.name ||
-                           (student as any).full_name ||
-                           (student as any).name ||
-                           "Không xác định"}
+                          {student.student?.full_name ||
+                            (student.student as any)?.name ||
+                            (student as any).full_name ||
+                            (student as any).name ||
+                            "Không xác định"}
                         </div>
                         <div className="text-sm text-gray-600">
-                          MSSV: {student.student?.student_id || 
-                                 (student.student as any)?.studentId ||
-                                 (student.student as any)?.id ||
-                                 (student as any).student_id ||
-                                 (student as any).studentId ||
-                                 (student as any).id ||
-                                 "Không xác định"}
+                          MSSV:{" "}
+                          {student.student?.student_id ||
+                            (student.student as any)?.studentId ||
+                            (student.student as any)?.id ||
+                            (student as any).student_id ||
+                            (student as any).studentId ||
+                            (student as any).id ||
+                            "Không xác định"}
                         </div>
                         {student.health_result && (
                           <div className="text-sm text-blue-600">
                             {(() => {
                               try {
-                                const parsedResult = JSON.parse(student.health_result);
-                                return `Trạng thái: ${parsedResult.status || "Đã khám"}`;
+                                const parsedResult = JSON.parse(
+                                  student.health_result
+                                );
+                                return `Trạng thái: ${
+                                  parsedResult.status || "Đã khám"
+                                }`;
                               } catch {
-                                return `Kết quả: ${student.health_result.length > 50 ? student.health_result.substring(0, 50) + "..." : student.health_result}`;
+                                return `Kết quả: ${
+                                  student.health_result.length > 50
+                                    ? student.health_result.substring(0, 50) +
+                                      "..."
+                                    : student.health_result
+                                }`;
                               }
                             })()}
                           </div>
@@ -656,28 +697,30 @@ export default function HealthExaminationClassDetail({
           {selectedStudent && classDetail && (
             <div className="space-y-4">
               <div>
-                <strong>Học sinh:</strong> {
-                  selectedStudent.student?.full_name || 
+                <strong>Học sinh:</strong>{" "}
+                {selectedStudent.student?.full_name ||
                   (selectedStudent.student as any)?.name ||
                   (selectedStudent as any).full_name ||
                   (selectedStudent as any).name ||
-                  "Không xác định"
-                }{" "}
-                (MSSV: {
-                  selectedStudent.student?.student_id || 
+                  "Không xác định"}{" "}
+                (MSSV:{" "}
+                {selectedStudent.student?.student_id ||
                   (selectedStudent.student as any)?.studentId ||
                   (selectedStudent.student as any)?.id ||
                   (selectedStudent as any).student_id ||
                   (selectedStudent as any).studentId ||
                   (selectedStudent as any).id ||
-                  "Không xác định"
-                })
+                  "Không xác định"}
+                )
               </div>
 
               {/* Form fields based on examination type */}
-              {(classDetail.event_details.examination_type === "Khám sức khỏe định kỳ" ||
-                classDetail.event_details.examination_type === "Khám sức khoẻ định kỳ" ||
-                classDetail.event_details.examination_type === "Kham suc khoe dinh ky" ||
+              {(classDetail.event_details.examination_type ===
+                "Khám sức khỏe định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Khám sức khoẻ định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Kham suc khoe dinh ky" ||
                 !classDetail.event_details.examination_type ||
                 classDetail.event_details.examination_type === "") && (
                 <div className="space-y-4">
@@ -719,8 +762,12 @@ export default function HealthExaminationClassDetail({
                       {bmi && (
                         <div className="text-xs text-gray-600">
                           {parseFloat(bmi) < 18.5 && "Dưới mức tiêu chuẩn"}
-                          {parseFloat(bmi) >= 18.5 && parseFloat(bmi) < 24.9 && "Bình thường"}
-                          {parseFloat(bmi) >= 25 && parseFloat(bmi) < 29.9 && "Thừa cân"}
+                          {parseFloat(bmi) >= 18.5 &&
+                            parseFloat(bmi) < 24.9 &&
+                            "Bình thường"}
+                          {parseFloat(bmi) >= 25 &&
+                            parseFloat(bmi) < 29.9 &&
+                            "Thừa cân"}
                           {parseFloat(bmi) >= 30 && "Béo phì"}
                         </div>
                       )}
@@ -767,10 +814,13 @@ export default function HealthExaminationClassDetail({
                 </div>
               )}
 
-              {(classDetail.event_details.examination_type === "Khám răng miệng" ||
-                classDetail.event_details.examination_type === "Kham rang mieng" ||
+              {(classDetail.event_details.examination_type ===
+                "Khám răng miệng" ||
+                classDetail.event_details.examination_type ===
+                  "Kham rang mieng" ||
                 classDetail.event_details.examination_type === "Khám răng" ||
-                classDetail.event_details.examination_type === "Dental examination") && (
+                classDetail.event_details.examination_type ===
+                  "Dental examination") && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -820,9 +870,15 @@ export default function HealthExaminationClassDetail({
                       <option value="">Chọn trạng thái</option>
                       <option value="Bình thường">Bình thường</option>
                       <option value="Cần theo dõi">Cần theo dõi</option>
-                      <option value="Cần điều trị sâu răng">Cần điều trị sâu răng</option>
-                      <option value="Cần vệ sinh răng miệng">Cần vệ sinh răng miệng</option>
-                      <option value="Cần tư vấn nha khoa">Cần tư vấn nha khoa</option>
+                      <option value="Cần điều trị sâu răng">
+                        Cần điều trị sâu răng
+                      </option>
+                      <option value="Cần vệ sinh răng miệng">
+                        Cần vệ sinh răng miệng
+                      </option>
+                      <option value="Cần tư vấn nha khoa">
+                        Cần tư vấn nha khoa
+                      </option>
                     </select>
                   </div>
 
@@ -841,11 +897,14 @@ export default function HealthExaminationClassDetail({
 
               {(classDetail.event_details.examination_type === "Khám mắt" ||
                 classDetail.event_details.examination_type === "Kham mat" ||
-                classDetail.event_details.examination_type === "Eye examination") && (
+                classDetail.event_details.examination_type ===
+                  "Eye examination") && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="right_eye_vision">Thị lực mắt phải (.../10)</Label>
+                      <Label htmlFor="right_eye_vision">
+                        Thị lực mắt phải (.../10)
+                      </Label>
                       <Input
                         id="right_eye_vision"
                         placeholder="VD: 10/10 hoặc 8/10"
@@ -855,7 +914,9 @@ export default function HealthExaminationClassDetail({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="left_eye_vision">Thị lực mắt trái (.../10)</Label>
+                      <Label htmlFor="left_eye_vision">
+                        Thị lực mắt trái (.../10)
+                      </Label>
                       <Input
                         id="left_eye_vision"
                         placeholder="VD: 10/10 hoặc 9/10"
@@ -882,7 +943,9 @@ export default function HealthExaminationClassDetail({
                       <option value="Cận thị nặng">Cận thị nặng</option>
                       <option value="Viễn thị">Viễn thị</option>
                       <option value="Loạn thị">Loạn thị</option>
-                      <option value="Cần khám chuyên khoa">Cần khám chuyên khoa</option>
+                      <option value="Cần khám chuyên khoa">
+                        Cần khám chuyên khoa
+                      </option>
                     </select>
                   </div>
 
@@ -900,22 +963,31 @@ export default function HealthExaminationClassDetail({
               )}
 
               {/* Fallback form if examination type doesn't match known types */}
-              {!(classDetail.event_details.examination_type === "Khám sức khỏe định kỳ" ||
-                 classDetail.event_details.examination_type === "Khám sức khoẻ định kỳ" ||
-                 classDetail.event_details.examination_type === "Kham suc khoe dinh ky" ||
-                 !classDetail.event_details.examination_type ||
-                 classDetail.event_details.examination_type === "" ||
-                 classDetail.event_details.examination_type === "Khám răng miệng" ||
-                 classDetail.event_details.examination_type === "Kham rang mieng" ||
-                 classDetail.event_details.examination_type === "Khám răng" ||
-                 classDetail.event_details.examination_type === "Dental examination" ||
-                 classDetail.event_details.examination_type === "Khám mắt" ||
-                 classDetail.event_details.examination_type === "Kham mat" ||
-                 classDetail.event_details.examination_type === "Eye examination") && (
+              {!(
+                classDetail.event_details.examination_type ===
+                  "Khám sức khỏe định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Khám sức khoẻ định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Kham suc khoe dinh ky" ||
+                !classDetail.event_details.examination_type ||
+                classDetail.event_details.examination_type === "" ||
+                classDetail.event_details.examination_type ===
+                  "Khám răng miệng" ||
+                classDetail.event_details.examination_type ===
+                  "Kham rang mieng" ||
+                classDetail.event_details.examination_type === "Khám răng" ||
+                classDetail.event_details.examination_type ===
+                  "Dental examination" ||
+                classDetail.event_details.examination_type === "Khám mắt" ||
+                classDetail.event_details.examination_type === "Kham mat" ||
+                classDetail.event_details.examination_type === "Eye examination"
+              ) && (
                 <div className="space-y-4">
                   <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="text-yellow-800">
-                      <strong>Loại khám không được hỗ trợ:</strong> "{classDetail.event_details.examination_type}"
+                      <strong>Loại khám không được hỗ trợ:</strong> "
+                      {classDetail.event_details.examination_type}"
                     </div>
                     <div className="text-sm mt-2">
                       Vui lòng liên hệ admin để cập nhật form cho loại khám này.
@@ -1019,22 +1091,21 @@ export default function HealthExaminationClassDetail({
           {selectedStudent && (
             <div className="space-y-4">
               <div>
-                <strong>Học sinh:</strong> {
-                  selectedStudent.student?.full_name || 
+                <strong>Học sinh:</strong>{" "}
+                {selectedStudent.student?.full_name ||
                   (selectedStudent.student as any)?.name ||
                   (selectedStudent as any).full_name ||
                   (selectedStudent as any).name ||
-                  "Không xác định"
-                }{" "}
-                (MSSV: {
-                  selectedStudent.student?.student_id || 
+                  "Không xác định"}{" "}
+                (MSSV:{" "}
+                {selectedStudent.student?.student_id ||
                   (selectedStudent.student as any)?.studentId ||
                   (selectedStudent.student as any)?.id ||
                   (selectedStudent as any).student_id ||
                   (selectedStudent as any).studentId ||
                   (selectedStudent as any).id ||
-                  "Không xác định"
-                })
+                  "Không xác định"}
+                )
               </div>
 
               <div className="space-y-2">

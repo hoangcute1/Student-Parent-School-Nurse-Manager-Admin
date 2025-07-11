@@ -53,7 +53,7 @@ const navLinks = [
     label: "Quản lý Khám sức khỏe",
     description: "Theo dõi sức khỏe định kỳ",
   },
-  
+
   {
     href: "/cms/events",
     icon: ClipboardCheck,
@@ -61,7 +61,7 @@ const navLinks = [
     description: "Xử lý y tế khẩn cấp",
   },
   {
-    href: "/cms/vaccinations",
+    href: "/cms/vaccination-management",
     icon: Syringe,
     label: "Quản lý tiêm chủng ",
     description: "Giám sát tiêm chủng",
