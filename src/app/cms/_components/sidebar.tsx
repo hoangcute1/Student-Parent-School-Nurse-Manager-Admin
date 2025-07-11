@@ -46,37 +46,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             </Badge>
           </div>
         </Link>
-        
-        <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
-          {role === "admin" && (
-            <>
-              <div className="text-xs font-medium text-sky-500 uppercase tracking-wider mb-2 mt-2">
-                Quản lý hệ thống
-              </div>
-              {adminNavLinks.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${
-                      isActive ? "bg-sky-100" : ""
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                    <div className="flex-1">
-                      <div className="font-medium">{item.label}</div>
-                      <div className="text-xs text-sky-600 mt-0.5">
-                        {item.description}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-              <div className="border-t border-sky-200 my-2" />
-            </>
-          )}
 
+        <nav className="grid gap-1 text-sm font-medium overflow-y-auto">
           {/* Standard navigation links */}
           {navLinks.map((item) => {
             const isActive = pathname === item.href;
@@ -84,9 +55,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${
-                  isActive ? "bg-sky-100" : ""
-                }`}
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${isActive ? "bg-sky-100" : ""
+                  }`}
               >
                 <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 <div className="flex-1">

@@ -26,14 +26,12 @@ import { TreatmentHistory } from "@/lib/type/treatment-history";
 interface EventTableProps {
   events: TreatmentHistory[];
   onView: (event: TreatmentHistory) => void;
-  onProcess: (event: TreatmentHistory) => void;
 }
 
 export function EventTable({
   events,
   onView,
-  onProcess,
-  }: EventTableProps) {
+}: EventTableProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -148,7 +146,7 @@ export function EventTable({
           <TableHeader>
             <TableRow className="bg-sky-50/50 border-b border-sky-100">
               <TableHead className="text-gray-700 font-semibold">
-                Tiêu đề sự kiện
+                Tiêu đề sự cố
               </TableHead>
               <TableHead className="text-gray-700 font-semibold">
                 Học sinh
@@ -177,7 +175,7 @@ export function EventTable({
                   colSpan={7}
                   className="text-center py-8 text-gray-500"
                 >
-                  Không có sự kiện nào
+                  Không có sự cố nào
                 </TableCell>
               </TableRow>
             ) : (
@@ -227,14 +225,6 @@ export function EventTable({
                         className="text-sky-600 hover:text-sky-700 hover:bg-sky-50"
                       >
                         <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onProcess(event)}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      >
-                        <Activity className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
