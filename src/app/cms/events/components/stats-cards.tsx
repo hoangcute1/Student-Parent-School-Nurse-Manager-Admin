@@ -84,7 +84,7 @@ export function EventStats({ stats, trends }: EventStatsProps) {
     stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatsCard
         title="Tổng sự kiện"
         value={stats.total}
@@ -115,7 +115,7 @@ export function EventStats({ stats, trends }: EventStatsProps) {
             : undefined
         }
       />
-      <StatsCard
+      {/* <StatsCard
         title="Đang xử lý"
         value={stats.processing}
         icon={<Activity className="w-5 h-5 text-blue-600" />}
@@ -129,8 +129,15 @@ export function EventStats({ stats, trends }: EventStatsProps) {
               }
             : undefined
         }
-      />
+      /> */}
+     
       <StatsCard
+        title="Ưu tiên cao"
+        value={stats.high}
+        icon={<AlertTriangle className="w-5 h-5 text-red-600" />}
+        color="border-red-200"
+      />
+       <StatsCard
         title="Đã giải quyết"
         value={stats.resolved}
         icon={<CheckCircle className="w-5 h-5 text-green-600" />}
@@ -145,18 +152,7 @@ export function EventStats({ stats, trends }: EventStatsProps) {
             : undefined
         }
       />
-      <StatsCard
-        title="Ưu tiên cao"
-        value={stats.high}
-        icon={<AlertTriangle className="w-5 h-5 text-red-600" />}
-        color="border-red-200"
-      />
-      <StatsCard
-        title="Tỷ lệ giải quyết"
-        value={resolutionRate}
-        icon={<TrendingUp className="w-5 h-5 text-emerald-600" />}
-        color="border-emerald-200"
-      />
+      
     </div>
   );
 }
