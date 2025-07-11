@@ -228,6 +228,14 @@ export function EventTable({
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
+                      {/* <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(event)}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button> */}
                       <Button
                         variant="ghost"
                         size="sm"

@@ -104,7 +104,7 @@ export const updateTreatmentHistory = async (
   console.log("Token to update treatment history:", token);
 
   const res = await fetch(
-    `http://localhost:3001/treatment-histories/${id}/status`,
+    `http://localhost:3001/treatment-histories/${id}`, // ✅ Sửa tại đây
     {
       method: "PUT",
       headers: {
@@ -121,6 +121,7 @@ export const updateTreatmentHistory = async (
   }
   return res.json();
 };
+
 
 /**
  * Lấy treatment history theo parent ID

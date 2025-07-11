@@ -213,10 +213,39 @@ export default function MedicalEvents() {
     }
   };
 
-  const onUpdateEvent = (data: z.infer<typeof eventFormSchema>) => {
-    console.log("Update event data:", data);
-    // Add logic to update event
-    setUpdateEventOpen(false);
+  const onUpdateEvent = async (data: z.infer<typeof eventFormSchema>) => {
+    try {
+      console.log("Update event data:", data);
+
+      if (!selectedEvent || !selectedEvent._id) {
+        alert("Không tìm thấy thông tin sự kiện!");
+        return;
+      }
+
+      // Gọi API cập nhật
+      await updateTreatmentHistory(selectedEvent._id, {
+        title: data.title,
+        student: data.student,
+        class: data.class,
+        location: data.location,
+        priority: data.priority,
+        description: data.description,
+        contactStatus: data.contactStatus,
+        reporter: data.reporter,
+      });
+
+      // Refresh danh sách
+      const updatedEvents = await getAllTreatmentHistories();
+      const processedData = ensureCreatedAt(updatedEvents);
+      setEventList(processedData);
+
+      setUpdateEventOpen(false);
+      updateEventForm.reset();
+      alert("Cập nhật sự cố y tế thành công!");
+    } catch (error) {
+      console.error("Error updating event:", error);
+      alert("Không thể cập nhật sự cố y tế!");
+    }
   };
 
   const onProcessEvent = async (data: z.infer<typeof processFormSchema>) => {
@@ -1102,8 +1131,8 @@ export default function MedicalEvents() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="processing">Đang xử lý</SelectItem>
-                        <SelectItem value="resolved">Chờ phụ huynh</SelectItem>
-                        <SelectItem value="pending">Đã xử lý xong</SelectItem>
+                        <SelectItem value="resolved">Đã giải quyết</SelectItem>
+                        <SelectItem value="pending">Chờ xử lý</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
