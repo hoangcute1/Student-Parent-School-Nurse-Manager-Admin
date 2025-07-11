@@ -18,15 +18,7 @@ import {
   Users,
   CheckCircle,
   Clock,
-  XCircle,
-  Eye,
-  Edit,
-  Trash2,
-  Send,
 } from "lucide-react";
-import { fetchData } from "@/lib/api/api";
-import { useAuthStore } from "@/stores/auth-store";
-import { CreateVaccinationSchedule } from "./create-vaccination-schedule";
 import { useVaccinationStore } from "@/stores/vaccination-store";
 
 interface VaccinationEvent {

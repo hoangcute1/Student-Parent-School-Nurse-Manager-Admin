@@ -56,14 +56,7 @@ export const getHealthExaminationsPending = async (
   }
 
   const response = await fetchData(
-    `/health-examinations/student/${studentId}/pending`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    `/health-examinations/student/${studentId}/pending`
   );
 
   if (!response) {

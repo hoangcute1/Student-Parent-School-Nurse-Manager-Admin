@@ -157,5 +157,19 @@ export const useParentStudentsStore = create<ParentStudentsStore>(
         throw error;
       }
     },
+
+    fetchVaccinationSchedulesPending: async (
+      studentId: string
+    ): Promise<any[]> => {
+      try {
+        const response = await fetchData<any[]>(
+          `/vaccination-schedules/pending/student/${studentId}`
+        );
+        return response;
+      } catch (error) {
+        console.error("Error fetching pending vaccination schedules:", error);
+        throw error;
+      }
+    },
   })
 );
