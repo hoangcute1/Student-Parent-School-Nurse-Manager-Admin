@@ -3,12 +3,18 @@ import {
   getStudentsByParentId,
   updateStudentByStudentId,
 } from "@/lib/api/parent-students/parent-students";
+import {
+  getHealthExaminationsPending,
+  approveHealthExamination,
+  cancelHealthExamination,
+} from "@/lib/api/health-examination";
 import { EditHealthRecord } from "@/lib/type/health-record";
 import {
   ParentStudents,
   ParentStudentsStore,
 } from "@/lib/type/parent-students";
 import { create } from "zustand";
+import { fetchData } from "@/lib/api/api";
 
 export const useParentStudentsStore = create<ParentStudentsStore>(
   (set, get) => ({
@@ -94,6 +100,61 @@ export const useParentStudentsStore = create<ParentStudentsStore>(
         set({ error: errorMessage });
       } finally {
         set({ isLoading: false });
+      }
+    },
+
+    fetchHealthExaminationResults: async (studentId: string) => {
+      try {
+        const response = await fetchData<any>(
+          `/health-examinations/student/${studentId}/completed`
+        );
+
+        if (response) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response;
+      } catch (error) {
+        console.error("Error fetching health examination results:", error);
+        throw error;
+      }
+    },
+
+    fetchHealthExaminationsPending: async (studentId: string): Promise<any> => {
+      try {
+        const results = await getHealthExaminationsPending(studentId);
+        console.log("Health examinations pending:", results);
+        return results;
+      } catch (error) {
+        console.error("Error fetching health examinations pending:", error);
+        throw error;
+      }
+    },
+
+    approveHealthExamination: async (
+      studentId: string,
+      examinationId: string
+    ): Promise<{ success: boolean; message: string }> => {
+      try {
+        const result = await approveHealthExamination(studentId, examinationId);
+        console.log("Health examination approved:", result);
+        return result;
+      } catch (error) {
+        console.error("Error approving health examination:", error);
+        throw error;
+      }
+    },
+
+    cancelHealthExamination: async (
+      studentId: string,
+      examinationId: string
+    ): Promise<{ success: boolean; message: string }> => {
+      try {
+        const result = await cancelHealthExamination(studentId, examinationId);
+        console.log("Health examination cancelled:", result);
+        return result;
+      } catch (error) {
+        console.error("Error cancelling health examination:", error);
+        throw error;
       }
     },
   })

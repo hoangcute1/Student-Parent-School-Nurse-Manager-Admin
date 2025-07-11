@@ -8,8 +8,11 @@ import {
   TrendingUp,
   AlertCircle,
   CheckCircle,
+  Calendar,
+  MapPin,
+  User,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,20 +44,14 @@ import {
 import { Progress } from "@/components/layout/sidebar/progress";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import { HealthRecordDialog } from "./health-record-dialog";
+import {
+  getHealthExaminationsCompleted,
+  HealthExaminationCompleted,
+} from "@/lib/api/health-examination";
 
 // Component hiển thị thông tin chi tiết của lần khám
 interface ExaminationDetailsProps {
-  exam: {
-    date: string;
-    type: string;
-    doctor: string;
-    result: string;
-    notes: string;
-    measurements?: { name: string; value: string }[];
-    location?: string;
-    recommendations?: string;
-    nextAppointment?: string;
-  };
+  exam: ExaminationHistoryItem;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -177,14 +174,31 @@ function ExaminationDetailsDialog({
   );
 }
 
+// Define the examination history item type
+interface ExaminationHistoryItem {
+  date: string;
+  type: string;
+  doctor: string;
+  result: string;
+  notes: string;
+  location?: string;
+  measurements?: { name: string; value: string }[];
+  recommendations?: string;
+  nextAppointment?: string;
+}
+
 export default function RegularResultsPage() {
   const { selectedStudent } = useParentStudentsStore();
-  const [selectedExam, setSelectedExam] = useState<
-    (typeof examinationHistory)[0] | null
-  >(null);
+  const [selectedExam, setSelectedExam] =
+    useState<ExaminationHistoryItem | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [healthExaminations, setHealthExaminations] = useState<
+    HealthExaminationCompleted[]
+  >([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleOpenDialog = (exam: (typeof examinationHistory)[0]) => {
+  const handleOpenDialog = (exam: ExaminationHistoryItem) => {
     setSelectedExam(exam);
     setIsDetailsOpen(true);
   };
@@ -192,6 +206,125 @@ export default function RegularResultsPage() {
   const handleCloseDialog = () => {
     setIsDetailsOpen(false);
   };
+
+  // Fetch health examination results when student is selected
+  useEffect(() => {
+    if (selectedStudent) {
+      fetchHealthExaminations();
+    }
+  }, [selectedStudent]);
+
+  const fetchHealthExaminations = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const results = await getHealthExaminationsCompleted(
+        selectedStudent.student._id
+      );
+      setHealthExaminations(results);
+    } catch (err) {
+      console.error("Error fetching health examinations:", err);
+      setError("Không thể tải kết quả khám sức khỏe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Transform health examination data to match the expected format
+  const transformHealthExamToResult = (exam: HealthExaminationCompleted) => {
+    let measurements: { name: string; value: string }[] = [];
+
+    // Parse health_result JSON if it exists
+    if (exam.health_result) {
+      try {
+        const parsedResult = JSON.parse(exam.health_result);
+        if (parsedResult.type === "Khám sức khỏe định kỳ") {
+          measurements = [
+            { name: "Chiều cao", value: parsedResult.height || "N/A" },
+            { name: "Cân nặng", value: parsedResult.weight || "N/A" },
+            { name: "BMI", value: parsedResult.bmi || "N/A" },
+            { name: "Thị lực", value: parsedResult.vision || "N/A" },
+          ];
+        } else if (parsedResult.type === "Khám răng miệng") {
+          measurements = [
+            { name: "Răng sữa", value: parsedResult.milk_teeth || "N/A" },
+            {
+              name: "Răng vĩnh viễn",
+              value: parsedResult.permanent_teeth || "N/A",
+            },
+            { name: "Sâu răng", value: parsedResult.cavities || "Không có" },
+          ];
+        } else if (parsedResult.type === "Khám mắt") {
+          measurements = [
+            {
+              name: "Thị lực mắt phải",
+              value: parsedResult.right_eye_vision || "N/A",
+            },
+            {
+              name: "Thị lực mắt trái",
+              value: parsedResult.left_eye_vision || "N/A",
+            },
+            { name: "Nhãn áp", value: parsedResult.eye_pressure || "N/A" },
+          ];
+        }
+      } catch (error) {
+        console.error("Error parsing health result:", error);
+      }
+    }
+
+    return {
+      type: exam.examination_type,
+      date: new Date(exam.examination_date).toLocaleDateString("vi-VN"),
+      status: exam.recommendations
+        ? exam.recommendations.includes("bình thường") ||
+          exam.recommendations.includes("tốt")
+          ? "Bình thường"
+          : "Cần theo dõi"
+        : "Bình thường",
+      measurements,
+      notes: exam.examination_notes || "Không có ghi chú",
+      doctor:
+        exam.created_by?.full_name || exam.doctor_name || "Không xác định",
+      location: exam.location || "Không xác định",
+      recommendations: exam.recommendations || "",
+      needFollowUp: exam.follow_up_required || false,
+    };
+  };
+
+  // Convert health examinations to recent results format (if there are any real results)
+  const recentResultsFromAPI = healthExaminations
+    .slice(0, 6)
+    .map(transformHealthExamToResult);
+
+  // Use real data if available, otherwise fall back to mock data
+  const displayRecentResults =
+    recentResultsFromAPI.length > 0 ? recentResultsFromAPI : recentResults;
+
+  // Convert health examinations to history format
+  const examinationHistoryFromAPI = healthExaminations.map((exam) => ({
+    date: new Date(exam.examination_date).toLocaleDateString("vi-VN"),
+    type: exam.examination_type,
+    doctor: exam.created_by?.full_name || exam.doctor_name || "Không xác định",
+    result: exam.recommendations
+      ? exam.recommendations.includes("bình thường") ||
+        exam.recommendations.includes("tốt")
+        ? "Bình thường"
+        : "Cần theo dõi"
+      : "Bình thường",
+    notes: exam.examination_notes || "Không có ghi chú",
+    location: exam.location || "Không xác định",
+    measurements: transformHealthExamToResult(exam).measurements,
+    recommendations: exam.recommendations || "",
+    nextAppointment: exam.follow_up_required ? "Cần tư vấn thêm" : "",
+  }));
+
+  // Use real data if available, otherwise fall back to mock data
+  const displayExaminationHistory =
+    examinationHistoryFromAPI.length > 0
+      ? examinationHistoryFromAPI
+      : examinationHistory;
 
   // Hiển thị thông báo nếu không có học sinh nào được chọn
   if (!selectedStudent) {
@@ -286,8 +419,30 @@ export default function RegularResultsPage() {
             </div>
           </div>
 
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="text-blue-600">Đang tải kết quả khám...</div>
+            </div>
+          ) : error ? (
+            <Card className="border-red-200 bg-red-50/30">
+              <CardContent className="p-6">
+                <div className="text-center text-red-600">
+                  {error}. Hiển thị dữ liệu mẫu.
+                </div>
+              </CardContent>
+            </Card>
+          ) : displayRecentResults.length === 0 ? (
+            <Card className="border-blue-100 bg-blue-50/30">
+              <CardContent className="p-6">
+                <div className="text-center text-blue-600">
+                  Chưa có kết quả khám nào cho học sinh này.
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentResults.map((result, index) => (
+            {displayRecentResults.map((result, index) => (
               <Card
                 key={index}
                 className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
@@ -374,8 +529,30 @@ export default function RegularResultsPage() {
             </div>
           </div>
 
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="text-blue-600">Đang tải kết quả tiêm...</div>
+            </div>
+          ) : error ? (
+            <Card className="border-red-200 bg-red-50/30">
+              <CardContent className="p-6">
+                <div className="text-center text-red-600">
+                  {error}. Hiển thị dữ liệu mẫu.
+                </div>
+              </CardContent>
+            </Card>
+          ) : displayRecentResults.length === 0 ? (
+            <Card className="border-blue-100 bg-blue-50/30">
+              <CardContent className="p-6">
+                <div className="text-center text-blue-600">
+                  Chưa có kết quả tiêm nào cho học sinh này.
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentResults.map((result, index) => (
+            {displayRecentResults.map((result, index) => (
               <Card
                 key={index}
                 className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
@@ -471,6 +648,28 @@ export default function RegularResultsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="mt-6 space-y-4">
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="text-blue-600">Đang tải lịch sử khám...</div>
+            </div>
+          ) : error ? (
+            <Card className="border-red-200 bg-red-50/30">
+              <CardContent className="p-6">
+                <div className="text-center text-red-600">
+                  {error}. Hiển thị dữ liệu mẫu.
+                </div>
+              </CardContent>
+            </Card>
+          ) : displayExaminationHistory.length === 0 ? (
+            <Card className="border-blue-100 bg-blue-50/30">
+              <CardContent className="p-6">
+                <div className="text-center text-blue-600">
+                  Chưa có lịch sử khám nào cho học sinh này.
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <div className="rounded-md border border-blue-200">
             <Table>
               <TableHeader className="bg-blue-50">
@@ -486,7 +685,7 @@ export default function RegularResultsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {examinationHistory.map((exam, index) => (
+                {displayExaminationHistory.map((exam, index) => (
                   <TableRow
                     key={index}
                     className="hover:bg-blue-50 cursor-pointer"
