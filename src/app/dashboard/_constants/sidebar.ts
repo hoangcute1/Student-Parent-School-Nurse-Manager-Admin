@@ -13,12 +13,6 @@ const parentNav = [
     label: "Gửi thuốc",
     description: "Theo dõi thuốc học sinh",
   },
-  {
-    href: "/dashboard/events",
-    icon: Bell,
-    label: "Thông báo",
-    description: "",
-  },
   
 
 ];
@@ -41,6 +35,12 @@ const studentNav = [
     icon: MessageCircle,
     label: "Gửi phản hồi",
     description: "Gửi phản hồi và ý kiến",
+  },
+  {
+    href: "/dashboard/events",
+    icon: Bell,
+    label: "Thông báo",
+    description: "",
   },
 ];
 

@@ -55,6 +55,7 @@ interface ParentStudentsStore {
     studentId: string,
     examinationId: string
   ) => Promise<{ success: boolean; message: string }>;
+  fetchVaccinationSchedulesPending: (studentId: string) => Promise<any[]>;
 }
 
 interface GetAllParentsResponse {
