@@ -12,14 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Calendar,
-  MapPin,
-  Users,
-  CheckCircle,
-  Clock,
-} from "lucide-react";
+import { Calendar, MapPin, Users, CheckCircle, Clock } from "lucide-react";
 import { useVaccinationStore } from "@/stores/vaccination-store";
+import { useRouter } from "next/navigation";
 
 interface VaccinationEvent {
   _id: string;
@@ -39,8 +34,17 @@ interface VaccinationEvent {
   classes: any[];
 }
 
-export function VaccinationList() {
+interface VaccinationListProps {
+  onViewDetail?: (id: string) => void;
+  onDelete?: (event: VaccinationEvent) => void;
+}
+
+export function VaccinationList({
+  onViewDetail,
+  onDelete,
+}: VaccinationListProps) {
   const { events, loading, error, fetchEvents } = useVaccinationStore();
+  const router = useRouter();
 
   useEffect(() => {
     fetchEvents();
@@ -147,7 +151,15 @@ export function VaccinationList() {
                 </TableHeader>
                 <TableBody>
                   {filteredEvents.map((event) => (
-                    <TableRow key={event._id}>
+                    <TableRow
+                      key={event._id}
+                      className="cursor-pointer hover:bg-blue-50"
+                      onClick={() =>
+                        router.push(
+                          `/cms/vaccination-management/event/${event._id}`
+                        )
+                      }
+                    >
                       <TableCell>
                         <div>
                           <p className="font-medium">{event.title}</p>
@@ -206,6 +218,33 @@ export function VaccinationList() {
                         <span className="text-sm">
                           {event.total_students} học sinh
                         </span>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              onViewDetail && onViewDetail(event._id)
+                            }
+                            tabIndex={-1}
+                          >
+                            Xem chi tiết
+                          </Button>
+                          {event.approved_count === 0 &&
+                            event.rejected_count === 0 &&
+                            event.completed_count === 0 && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                data-delete
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDelete && onDelete(event);
+                                }}
+                              >
+                                Xoá
+                              </Button>
+                            )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

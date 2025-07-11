@@ -129,28 +129,12 @@ export function VaccinationDetail({
           <div className="w-64 border-r bg-gray-50 p-4">
             <nav className="space-y-2">
               <Button
-                variant={selectedTab === "overview" ? "default" : "ghost"}
+                variant={"default"}
                 className="w-full justify-start"
                 onClick={() => setSelectedTab("overview")}
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 Tổng quan
-              </Button>
-              <Button
-                variant={selectedTab === "responses" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setSelectedTab("responses")}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Phản hồi phụ huynh
-              </Button>
-              <Button
-                variant={selectedTab === "vaccination" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setSelectedTab("vaccination")}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Thực hiện tiêm
               </Button>
             </nav>
           </div>

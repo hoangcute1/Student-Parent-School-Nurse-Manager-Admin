@@ -8,6 +8,8 @@ import { Calendar, CheckCircle, Clock, Syringe } from "lucide-react";
 import { CreateVaccinationSchedule } from "./_components/create-vaccination-schedule";
 import { VaccinationList } from "./_components/vaccination-list";
 import { VaccinationDetail } from "./_components/vaccination-detail";
+import { fetchData } from "@/lib/api/api";
+import { toast } from "sonner";
 
 export default function VaccinationManagementPage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -45,6 +47,29 @@ export default function VaccinationManagementPage() {
 
   const handleCreateClose = () => {
     setShowCreateForm(false);
+  };
+
+  const handleDeleteSchedule = async (event: any) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"))
+      return;
+    try {
+      if (Array.isArray(event.vaccinations) && event.vaccinations.length > 0) {
+        for (const v of event.vaccinations) {
+          await fetchData(`/vaccination-schedules/${v._id}`, {
+            method: "DELETE",
+          });
+        }
+      } else {
+        // fallback: xoá theo event._id nếu không có vaccinations
+        await fetchData(`/vaccination-schedules/${event._id}`, {
+          method: "DELETE",
+        });
+      }
+      toast.success("Đã xoá sự kiện tiêm chủng thành công!");
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.message || "Xoá sự kiện thất bại");
+    }
   };
 
   return (
@@ -97,6 +122,7 @@ export default function VaccinationManagementPage() {
             filter="my"
             refreshKey={refreshKey}
             onViewDetail={setSelectedScheduleId}
+            onDelete={handleDeleteSchedule}
             schedules={schedules}
           />
         </TabsContent>
@@ -107,6 +133,7 @@ export default function VaccinationManagementPage() {
             filter="all"
             refreshKey={refreshKey}
             onViewDetail={setSelectedScheduleId}
+            onDelete={handleDeleteSchedule}
             schedules={schedules}
           />
         </TabsContent>
