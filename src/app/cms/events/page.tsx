@@ -186,17 +186,14 @@ export default function MedicalEvents() {
   const onAddEvent = async (data: z.infer<typeof eventFormSchema>) => {
     try {
       console.log("Add event data:", data);
-      // Gửi dữ liệu tới API treatment-history
-      // Gửi dữ liệu tới API treatment-history
+      // Gửi theo đúng backend schema
       await createTreatmentHistory({
-        title: data.title,
         student: data.student,
-        reporter: data.reporter,
-        class: data.class,
-        location: data.location,
-        priority: data.priority,
+        staff: data.reporter || "Unknown Staff", // Required field
+        record: "507f1f77bcf86cd799439011", // Required field - ObjectId giả (24 ký tự hex)
+        date: new Date().toISOString(),
         description: data.description,
-        contactStatus: data.contactStatus,
+        notes: `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`,
       });
 
       // Refresh danh sách events ngay sau khi tạo thành công
@@ -222,16 +219,14 @@ export default function MedicalEvents() {
         return;
       }
 
-      // Gọi API cập nhật
+      // Gọi API cập nhật theo backend schema
       await updateTreatmentHistory(selectedEvent._id, {
-        title: data.title,
         student: data.student,
-        class: data.class,
-        location: data.location,
-        priority: data.priority,
+        staff: data.reporter || selectedEvent.staff || "Unknown Staff",
+        record: selectedEvent.record || "507f1f77bcf86cd799439011", // ObjectId giả
+        date: selectedEvent.date || new Date().toISOString(),
         description: data.description,
-        contactStatus: data.contactStatus,
-        reporter: data.reporter,
+        notes: `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`,
       });
 
       // Refresh danh sách
@@ -254,11 +249,13 @@ export default function MedicalEvents() {
       console.log("Event ID being processed:", data._id);
 
       // Cập nhật treatment history với thông tin xử lý
+      const existingEvent = eventList.find(e => e._id === data._id);
+      const currentNotes = existingEvent?.notes || "";
+      const processInfo = `Contact Parent: ${data.contactParent} | Action: ${data.actionTaken} | Process Notes: ${data.notes}`;
+
       await updateTreatmentHistory(data._id, {
-        status: data.status,
-        notes: data.notes,
-        contactParent: data.contactParent,
-        actionTaken: data.actionTaken,
+        status: data.status, // Cập nhật trường status thực tế
+        notes: currentNotes ? `${currentNotes} | ${processInfo}` : processInfo,
       });
 
       // Refresh danh sách events sau khi cập nhật
