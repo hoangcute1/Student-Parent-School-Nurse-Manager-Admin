@@ -38,6 +38,7 @@ import { TokenModule } from './modules/token.module';
 import { TestModule } from './modules/test.module';
 import { ExportHistoryModule } from './modules/export-history.module';
 import { HealthExaminationModule } from './modules/health-examination.module';
+import { VaccinationScheduleModule } from './modules/vaccination-schedule.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { HealthExaminationModule } from './modules/health-examination.module';
     TreatmentHistoryModule,
     VaccineModule,
     VaccineCampaignModule,
+    VaccinationScheduleModule,
     TestModule,
     ExportHistoryModule,
   ],
