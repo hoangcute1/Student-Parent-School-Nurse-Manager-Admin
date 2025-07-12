@@ -69,11 +69,12 @@ interface VaccinationResultDetail {
   injection_site?: string;
   reaction_severity?: string;
   adverse_events?: string;
+  postVaccinationMonitoring?: string;
   type?: string;
 }
 
 export default function VaccinationResults() {
-  const { studentsData } = useParentStudentsStore();
+  const { selectedStudent } = useParentStudentsStore();
   const [results, setResults] = useState<VaccinationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,32 +83,18 @@ export default function VaccinationResults() {
 
   useEffect(() => {
     fetchVaccinationResults();
-  }, [studentsData]);
+  }, [selectedStudent]);
 
   const fetchVaccinationResults = async () => {
-    if (!studentsData || studentsData.length === 0) return;
+    if (!selectedStudent) return;
 
     try {
       setLoading(true);
-      const allResults: VaccinationResult[] = [];
-
-      for (const student of studentsData) {
-        try {
-          // TODO: Replace with actual API endpoint for vaccination results
-          const studentResults = await fetchData<VaccinationResult[]>(
-            `/vaccination-schedules/results/student/${student.student._id}`
-          );
-          allResults.push(...studentResults);
-        } catch (error) {
-          console.error(
-            `Error fetching vaccination results for student ${student.student._id}:`,
-            error
-          );
-        }
-      }
-
+      const results = await fetchData<VaccinationResult[]>(
+        `/vaccination-schedules/results/student/${selectedStudent.student._id}`
+      );
       setResults(
-        allResults.sort(
+        results.sort(
           (a, b) =>
             new Date(b.vaccination_date).getTime() -
             new Date(a.vaccination_date).getTime()
@@ -176,6 +163,29 @@ export default function VaccinationResults() {
         result.vaccine_type.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Hiển thị thông báo nếu không có học sinh nào được chọn
+  if (!selectedStudent) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+            Kết quả tiêm chủng
+          </h1>
+          <p className="text-blue-600">
+            Xem kết quả tiêm chủng và theo dõi lịch sử tiêm của học sinh.
+          </p>
+        </div>
+        <Card className="border-blue-100 bg-blue-50/30">
+          <CardContent className="p-6">
+            <div className="text-center text-blue-600">
+              Chưa có học sinh nào được chọn. Vui lòng chọn học sinh từ sidebar.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -186,307 +196,234 @@ export default function VaccinationResults() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Syringe className="h-5 w-5 text-blue-600" />
-                Kết quả tiêm chủng
-              </CardTitle>
-              <CardDescription>
-                Xem lịch sử và kết quả tiêm chủng của con em
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Lọc
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Xuất báo cáo
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm kiếm theo tên vắc-xin, học sinh..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-          </div>
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+          Kết quả tiêm chủng - {selectedStudent.student.name}
+        </h1>
+        <p className="text-blue-600">
+          Xem kết quả tiêm chủng và theo dõi lịch sử tiêm của học sinh.
+        </p>
+      </div>
 
-          {filteredResults.length === 0 ? (
-            <div className="text-center py-8">
-              <Syringe className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                Chưa có kết quả tiêm chủng
-              </h3>
-              <p className="text-gray-500">
-                Kết quả tiêm chủng sẽ được cập nhật sau khi hoàn thành tiêm.
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Thông tin tiêm chủng</TableHead>
-                  <TableHead>Học sinh</TableHead>
-                  <TableHead>Ngày tiêm</TableHead>
-                  <TableHead>Phản ứng</TableHead>
-                  <TableHead>Theo dõi</TableHead>
-                  <TableHead>Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredResults.map((result) => {
-                  const vaccinationDetail = result.vaccination_result
-                    ? parseVaccinationResult(result.vaccination_result)
-                    : {};
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Tìm kiếm theo tên vắc-xin, học sinh..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
 
-                  return (
-                    <TableRow key={result._id}>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="font-medium">{result.title}</div>
-                          {result.vaccine_type && (
-                            <div className="text-sm text-blue-600">
-                              {result.vaccine_type}
-                            </div>
-                          )}
-                          {result.location && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <MapPin className="w-3 h-3" />
-                              {result.location}
-                            </div>
-                          )}
+      {filteredResults.length === 0 ? (
+        <div className="text-center py-8">
+          <Syringe className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-semibold text-gray-900">
+            Chưa có kết quả tiêm chủng
+          </h3>
+          <p className="text-gray-500">
+            Kết quả tiêm chủng sẽ được cập nhật sau khi hoàn thành tiêm.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredResults.map((result) => {
+            const vaccinationDetail = result.vaccination_result
+              ? parseVaccinationResult(result.vaccination_result)
+              : {};
+
+            return (
+              <Card
+                key={result._id}
+                className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <Syringe className="h-5 w-5 text-blue-600" />
+                      <CardTitle className="text-lg text-blue-800">
+                        {result.title}
+                      </CardTitle>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      <CheckCircle className="mr-1 h-3 w-3" />
+                      Hoàn thành
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-blue-600">
+                    Ngày tiêm:{" "}
+                    {new Date(result.vaccination_date).toLocaleDateString(
+                      "vi-VN"
+                    )}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Loại vắc-xin:</span>
+                      <span className="font-semibold text-blue-800">
+                        {result.vaccine_type || "Không xác định"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Địa điểm:</span>
+                      <span className="font-semibold text-blue-800">
+                        {result.location || "Không xác định"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Bác sĩ:</span>
+                      <span className="font-semibold text-blue-800">
+                        {(() => {
+                          // Try to get doctor name from vaccination_result JSON first
+                          if (result.vaccination_result) {
+                            try {
+                              const parsedResult = JSON.parse(
+                                result.vaccination_result
+                              );
+                              if (parsedResult.doctor_name) {
+                                return parsedResult.doctor_name;
+                              }
+                            } catch (error) {
+                              console.error(
+                                "Error parsing vaccination result:",
+                                error
+                              );
+                            }
+                          }
+                          // Fallback to result.doctor_name
+                          return (
+                            result.doctor_name || "Bác sĩ phụ trách sự kiện"
+                          );
+                        })()}
+                      </span>
+                    </div>
+                    {vaccinationDetail.postVaccinationMonitoring && (
+                      <div className="text-xs text-gray-500 mt-2">
+                        {vaccinationDetail.postVaccinationMonitoring}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+                <div className="px-6 pb-4">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => setSelectedResult(result)}
+                      >
+                        Xem chi tiết
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Syringe className="w-5 h-5" />
+                          Chi tiết kết quả tiêm chủng
+                        </DialogTitle>
+                        <DialogDescription>
+                          {result.student.name} - {result.title}
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className="space-y-6">
+                        {/* Basic Information */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Ngày tiêm
+                            </label>
+                            <p className="text-sm">
+                              {new Date(
+                                result.vaccination_date
+                              ).toLocaleDateString("vi-VN")}{" "}
+                              lúc {result.vaccination_time}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Loại vắc-xin
+                            </label>
+                            <p className="text-sm">
+                              {result.vaccine_type || "Không xác định"}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Địa điểm tiêm
+                            </label>
+                            <p className="text-sm">
+                              {result.location || "Không xác định"}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Bác sĩ phụ trách
+                            </label>
+                            <p className="text-sm">
+                              {(() => {
+                                // Try to get doctor name from vaccination_result JSON first
+                                if (result.vaccination_result) {
+                                  try {
+                                    const parsedResult = JSON.parse(
+                                      result.vaccination_result
+                                    );
+                                    if (parsedResult.doctor_name) {
+                                      return parsedResult.doctor_name;
+                                    }
+                                  } catch (error) {
+                                    console.error(
+                                      "Error parsing vaccination result:",
+                                      error
+                                    );
+                                  }
+                                }
+                                // Fallback to result.doctor_name
+                                return (
+                                  result.doctor_name ||
+                                  "Bác sĩ phụ trách sự kiện"
+                                );
+                              })()}
+                            </p>
+                          </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="font-medium">
-                            {result.student.name}
+
+                        {/* Theo dõi sau tiêm */}
+                        {vaccinationDetail.postVaccinationMonitoring && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Theo dõi sau tiêm
+                            </label>
+                            <p className="text-sm bg-blue-50 p-3 rounded-md">
+                              {vaccinationDetail.postVaccinationMonitoring}
+                            </p>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {result.student.student_id}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1 text-sm">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(
-                              result.vaccination_date
-                            ).toLocaleDateString("vi-VN")}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {result.vaccination_time}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {vaccinationDetail.reaction_severity ? (
-                          <div className="space-y-1">
-                            {getReactionSeverityBadge(
-                              vaccinationDetail.reaction_severity
-                            )}
-                            {vaccinationDetail.reaction && (
-                              <div className="text-xs text-gray-600">
-                                {getReactionLabel(vaccinationDetail.reaction)}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Chưa cập nhật</span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        {result.follow_up_required ? (
-                          <div className="space-y-1">
-                            <Badge className="bg-yellow-100 text-yellow-800">
-                              <AlertTriangle className="w-3 h-3 mr-1" />
-                              Cần theo dõi
-                            </Badge>
-                            {result.follow_up_date && (
-                              <div className="text-xs text-gray-600">
-                                Hẹn:{" "}
-                                {new Date(
-                                  result.follow_up_date
-                                ).toLocaleDateString("vi-VN")}
-                              </div>
-                            )}
+
+                        {/* Khuyến nghị */}
+                        {result.recommendations && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Khuyến nghị
+                            </label>
+                            <p className="text-sm bg-green-50 p-3 rounded-md">
+                              {result.recommendations}
+                            </p>
                           </div>
-                        ) : (
-                          <Badge className="bg-green-100 text-green-800">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Hoàn thành
-                          </Badge>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedResult(result)}
-                            >
-                              Xem chi tiết
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2">
-                                <Syringe className="w-5 h-5" />
-                                Chi tiết kết quả tiêm chủng
-                              </DialogTitle>
-                              <DialogDescription>
-                                {result.student.name} - {result.title}
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="space-y-6">
-                              {/* Basic Information */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Ngày tiêm
-                                  </label>
-                                  <p className="text-sm">
-                                    {new Date(
-                                      result.vaccination_date
-                                    ).toLocaleDateString("vi-VN")}{" "}
-                                    lúc {result.vaccination_time}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Loại vắc-xin
-                                  </label>
-                                  <p className="text-sm">
-                                    {result.vaccine_type || "Không xác định"}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Địa điểm tiêm
-                                  </label>
-                                  <p className="text-sm">
-                                    {result.location || "Không xác định"}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Bác sĩ thực hiện
-                                  </label>
-                                  <p className="text-sm">
-                                    {result.doctor_name || "Không xác định"}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Vaccination Details */}
-                              {vaccinationDetail.injection_site && (
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                      Vị trí tiêm
-                                    </label>
-                                    <p className="text-sm">
-                                      {getInjectionSiteLabel(
-                                        vaccinationDetail.injection_site
-                                      )}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <label className="text-sm font-medium text-gray-500">
-                                      Phản ứng sau tiêm
-                                    </label>
-                                    <p className="text-sm">
-                                      {vaccinationDetail.reaction
-                                        ? getReactionLabel(
-                                            vaccinationDetail.reaction
-                                          )
-                                        : "Bình thường"}
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Adverse Events */}
-                              {vaccinationDetail.adverse_events && (
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Biến cố bất lợi
-                                  </label>
-                                  <p className="text-sm bg-red-50 p-3 rounded-md">
-                                    {vaccinationDetail.adverse_events}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Notes and Recommendations */}
-                              {result.vaccination_notes && (
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Ghi chú tiêm chủng
-                                  </label>
-                                  <p className="text-sm bg-blue-50 p-3 rounded-md">
-                                    {result.vaccination_notes}
-                                  </p>
-                                </div>
-                              )}
-
-                              {result.recommendations && (
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">
-                                    Khuyến nghị
-                                  </label>
-                                  <p className="text-sm bg-green-50 p-3 rounded-md">
-                                    {result.recommendations}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Follow-up */}
-                              {result.follow_up_required && (
-                                <div className="bg-yellow-50 p-4 rounded-md">
-                                  <div className="flex items-center gap-2">
-                                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                                    <span className="font-medium text-yellow-800">
-                                      Cần theo dõi thêm
-                                    </span>
-                                  </div>
-                                  {result.follow_up_date && (
-                                    <p className="text-sm text-yellow-700 mt-1">
-                                      Ngày hẹn tái khám:{" "}
-                                      {new Date(
-                                        result.follow_up_date
-                                      ).toLocaleDateString("vi-VN")}
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

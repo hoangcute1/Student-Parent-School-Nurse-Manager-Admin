@@ -17,6 +17,8 @@ import {
   Activity,
   CheckCircle,
   Eye,
+  Edit,
+  Trash2,
   User,
   MapPin,
   Calendar,
@@ -26,14 +28,18 @@ import { TreatmentHistory } from "@/lib/type/treatment-history";
 interface EventTableProps {
   events: TreatmentHistory[];
   onView: (event: TreatmentHistory) => void;
+  onEdit: (event: TreatmentHistory) => void;
   onProcess: (event: TreatmentHistory) => void;
+  onDelete?: (event: TreatmentHistory) => void;
 }
 
 export function EventTable({
   events,
   onView,
+  onEdit,
   onProcess,
-  }: EventTableProps) {
+  onDelete,
+}: EventTableProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -97,19 +103,11 @@ export function EventTable({
   };
 
   const formatDate = (dateString: string | undefined) => {
-    console.log("Format date input:", dateString);
-
-    if (!dateString) {
-      console.log("No date string provided, returning N/A");
-      return "N/A";
-    }
+    if (!dateString) return "N/A";
 
     try {
       const date = new Date(dateString);
-
-      // Kiểm tra nếu ngày không hợp lệ
       if (isNaN(date.getTime())) {
-        console.log("Invalid date:", dateString);
         return new Date().toLocaleString("vi-VN", {
           day: "2-digit",
           month: "2-digit",
@@ -120,7 +118,6 @@ export function EventTable({
         });
       }
 
-      console.log("Formatted date:", date);
       return date.toLocaleString("vi-VN", {
         day: "2-digit",
         month: "2-digit",
@@ -130,7 +127,6 @@ export function EventTable({
         hour12: false,
       });
     } catch (error) {
-      console.error("Error formatting date:", error);
       return "N/A";
     }
   };
@@ -139,6 +135,30 @@ export function EventTable({
     if (typeof student === "string") return student;
     if (typeof student === "object" && student?.name) return student.name;
     return "N/A";
+  };
+
+  // Parse thông tin từ notes field hoặc fallback về description
+  const parseFromNotes = (notes: string | undefined, description: string | undefined, actualStatus?: string) => {
+    const defaultData = {
+      title: description || "Sự kiện y tế",
+      location: "N/A", 
+      priority: "Thấp",
+      contactStatus: actualStatus || "pending"
+    };
+
+    if (!notes) return defaultData;
+    
+    const titleMatch = notes.match(/Title: ([^|]+)/);
+    const locationMatch = notes.match(/Location: ([^|]+)/);
+    const priorityMatch = notes.match(/Priority: ([^|]+)/);
+    const contactStatusMatch = notes.match(/Contact Status: ([^|]+)/);
+    
+    return {
+      title: titleMatch ? titleMatch[1].trim() : (description || "Sự kiện y tế"),
+      location: locationMatch ? locationMatch[1].trim() : "N/A", 
+      priority: priorityMatch ? priorityMatch[1].trim() : "Thấp",
+      contactStatus: actualStatus || (contactStatusMatch ? contactStatusMatch[1].trim() : "pending")
+    };
   };
 
   return (
@@ -181,73 +201,86 @@ export function EventTable({
                 </TableCell>
               </TableRow>
             ) : (
-              events.map((event) => (
-                <TableRow
-                  key={event._id}
-                  className="hover:bg-sky-50/30 transition-colors duration-200 border-b border-sky-50"
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-sky-600" />
-                      <span className="text-gray-900">{event.title}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">
-                        {getStudentName(event.student)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{event.location}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getPriorityBadge(event.priority)}</TableCell>
-                  <TableCell>
-                    {getStatusBadge(event.status || "pending")}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">
-                        {formatDate(event.createdAt)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 justify-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onView(event)}
-                        className="text-sky-600 hover:text-sky-700 hover:bg-sky-50"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      {/* <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(event)}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button> */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onProcess(event)}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      >
-                        <Activity className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              events.map((event) => {
+                const parsedData = parseFromNotes(event.notes, event.description, event.status);
+                return (
+                  <TableRow
+                    key={event._id}
+                    className="hover:bg-sky-50/30 transition-colors duration-200 border-b border-sky-50"
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-sky-600" />
+                        <span className="text-gray-900">{parsedData.title}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-700">
+                          {getStudentName(event.student)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-700">{parsedData.location}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{getPriorityBadge(parsedData.priority)}</TableCell>
+                    <TableCell>
+                      {getStatusBadge(parsedData.contactStatus)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-700">
+                          {formatDate(event.date)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onView({...event, ...parsedData})}
+                          className="text-sky-600 hover:text-sky-700 hover:bg-sky-50"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit({...event, ...parsedData})}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onProcess({...event, ...parsedData})}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Activity className="w-4 h-4" />
+                        </Button>
+                        {onDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onDelete({...event, ...parsedData})}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

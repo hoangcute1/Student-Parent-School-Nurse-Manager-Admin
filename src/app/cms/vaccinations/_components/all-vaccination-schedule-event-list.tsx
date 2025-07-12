@@ -78,7 +78,7 @@ export default function AllVaccinationScheduleEventList() {
   const fetchEvents = async () => {
     try {
       const data = await fetchData<any>("/vaccination-schedules/events");
-      console.log(data)
+      console.log(data);
       setEvents(data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -193,6 +193,20 @@ export default function AllVaccinationScheduleEventList() {
     }
   });
 
+  // Helper to check if a date is today
+  function isToday(dateString: string) {
+    if (!dateString) return false;
+    const d = new Date(dateString);
+    const today = new Date();
+    return (
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear()
+    );
+  }
+
+  const todayEvents = events.filter((event) => isToday(event.vaccination_date));
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -205,73 +219,16 @@ export default function AllVaccinationScheduleEventList() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-blue-800">
-            Tất cả sự kiện tiêm chủng
-          </CardTitle>
+          <CardTitle className="text-blue-800">Lịch tiêm hôm nay</CardTitle>
           <CardDescription>
-            Quản lý toàn bộ các sự kiện tiêm chủng theo khối lớp
+            Danh sách các sự kiện tiêm chủng diễn ra trong ngày hôm nay
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Filter buttons */}
-          <div className="flex gap-2 mb-6">
-            <Button
-              variant={filter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("all")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Tất cả ({events.length})
-            </Button>
-            <Button
-              variant={filter === "pending" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("pending")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Chờ phản hồi (
-              {events.reduce((sum, event) => sum + event.pending_count, 0)})
-            </Button>
-            <Button
-              variant={filter === "approved" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("approved")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Đã phê duyệt (
-              {events.reduce((sum, event) => sum + event.approved_count, 0)})
-            </Button>
-            <Button
-              variant={filter === "rejected" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("rejected")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Đã từ chối (
-              {events.reduce((sum, event) => sum + event.rejected_count, 0)})
-            </Button>
-            <Button
-              variant={filter === "completed" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("completed")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Hoàn thành (
-              {events.reduce((sum, event) => sum + event.completed_count, 0)})
-            </Button>
-          </div>
-
-          {filteredEvents.length === 0 ? (
-            <div className="text-center py-8">
-              <Syringe className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                Không có sự kiện nào
-              </h3>
-              <p className="text-gray-500">
-                {filter === "all"
-                  ? "Chưa có sự kiện tiêm chủng nào"
-                  : `Không có sự kiện nào ${filter}`}
-              </p>
+          {/* Chỉ hiển thị sự kiện hôm nay */}
+          {todayEvents.length === 0 ? (
+            <div className="text-center text-blue-600 py-6">
+              Hiện không có lịch tiêm nào trong ngày hôm nay
             </div>
           ) : (
             <Table>
@@ -285,7 +242,7 @@ export default function AllVaccinationScheduleEventList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEvents.map((event) => (
+                {todayEvents.map((event) => (
                   <TableRow
                     key={event._id}
                     className="hover:bg-gray-50 transition-colors"

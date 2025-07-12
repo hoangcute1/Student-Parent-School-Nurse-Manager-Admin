@@ -27,7 +27,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Thông tin học sinh */}
+      
 
       {/* Tabs thông tin */}
       <Tabs defaultValue="medications" className="w-full">

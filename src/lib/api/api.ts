@@ -49,20 +49,49 @@ export async function fetchData<T>(
       ...options,
       headers,
     });
+
+    console.log(`API Response received:`, {
+      url: url,
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries()),
+    });
     if (!response.ok) {
       let errorData;
       try {
         errorData = await response.json();
-      } catch {
+      } catch (parseError) {
+        console.error("Failed to parse error response as JSON:", parseError);
         errorData = { message: response.statusText };
       }
-      console.error("API Error Response:", {
+
+      console.error("🚨 API Error Response:", {
+        url: url,
+        method: options.method || "GET",
         status: response.status,
         statusText: response.statusText,
         errorData,
+        headers: Object.fromEntries(response.headers.entries()),
       });
+
+      // Thêm thông báo lỗi cụ thể cho từng status code
+      let userFriendlyMessage = errorData.message;
+      if (response.status === 401) {
+        userFriendlyMessage = "Email hoặc mật khẩu không chính xác";
+      } else if (response.status === 403) {
+        userFriendlyMessage = "Tài khoản không có quyền truy cập";
+      } else if (response.status === 404) {
+        userFriendlyMessage = "Không tìm thấy API endpoint";
+      } else if (response.status === 500) {
+        userFriendlyMessage = "Lỗi server nội bộ";
+      } else if (response.status >= 500) {
+        userFriendlyMessage = "Server đang gặp sự cố";
+      }
+
       throw new Error(
-        errorData.message ||
+        userFriendlyMessage ||
+          errorData.message ||
           `API error: ${response.status} ${response.statusText}`
       );
     }

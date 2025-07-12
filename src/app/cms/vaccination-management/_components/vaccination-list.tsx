@@ -37,11 +37,13 @@ interface VaccinationEvent {
 interface VaccinationListProps {
   onViewDetail?: (id: string) => void;
   onDelete?: (event: VaccinationEvent) => void;
+  filter?: "today" | "all"; // thêm prop filter
 }
 
 export function VaccinationList({
   onViewDetail,
   onDelete,
+  filter = "all", // mặc định là all
 }: VaccinationListProps) {
   const { events, loading, error, fetchEvents } = useVaccinationStore();
   const router = useRouter();
@@ -50,7 +52,23 @@ export function VaccinationList({
     fetchEvents();
   }, [fetchEvents]);
 
-  const filteredEvents = events;
+  // Helper để kiểm tra ngày hôm nay
+  function isToday(dateString: string) {
+    if (!dateString) return false;
+    const d = new Date(dateString);
+    const today = new Date();
+    return (
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear()
+    );
+  }
+
+  // Lọc sự kiện theo filter
+  const filteredEvents =
+    filter === "today"
+      ? events.filter((event) => isToday(event.vaccination_date))
+      : events;
 
   return (
     <div className="space-y-6">
@@ -151,15 +169,7 @@ export function VaccinationList({
                 </TableHeader>
                 <TableBody>
                   {filteredEvents.map((event) => (
-                    <TableRow
-                      key={event._id}
-                      className="cursor-pointer hover:bg-blue-50"
-                      onClick={() =>
-                        router.push(
-                          `/cms/vaccination-management/event/${event._id}`
-                        )
-                      }
-                    >
+                    <TableRow key={event._id} className="hover:bg-blue-50">
                       <TableCell>
                         <div>
                           <p className="font-medium">{event.title}</p>
@@ -225,25 +235,26 @@ export function VaccinationList({
                             onClick={() =>
                               onViewDetail && onViewDetail(event._id)
                             }
-                            tabIndex={-1}
                           >
                             Xem chi tiết
                           </Button>
-                          {event.approved_count === 0 &&
-                            event.rejected_count === 0 &&
-                            event.completed_count === 0 && (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                data-delete
-                                onClick={(e) => {
-                                  e.stopPropagation();
+                          {event.completed_count > 0 && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    "Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"
+                                  )
+                                ) {
                                   onDelete && onDelete(event);
-                                }}
-                              >
-                                Xoá
-                              </Button>
-                            )}
+                                }
+                              }}
+                            >
+                              Xoá
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

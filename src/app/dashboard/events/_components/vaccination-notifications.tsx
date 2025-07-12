@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchData } from "@/lib/api/api";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 interface VaccinationNotification {
   _id: string;
@@ -64,10 +65,14 @@ export default function VaccinationNotifications() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [respondingToNotification, setRespondingToNotification] =
     useState(false);
+  const { studentsData, fetchVaccinationSchedulesPending } =
+    useParentStudentsStore();
+  const [pendingVaccinations, setPendingVaccinations] = useState<any[]>([]);
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+    fetchPendingVaccinations();
+  }, [studentsData]);
 
   const fetchNotifications = async () => {
     try {
@@ -82,6 +87,29 @@ export default function VaccinationNotifications() {
       toast.error("Không thể tải thông báo tiêm chủng");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPendingVaccinations = async () => {
+    if (!studentsData || studentsData.length === 0) {
+      setPendingVaccinations([]);
+      return;
+    }
+    try {
+      const allResults = await Promise.all(
+        studentsData.map((student: any) =>
+          fetchVaccinationSchedulesPending(student.student._id).then(
+            (res: any) =>
+              (res || []).map((item: any) => ({
+                ...item,
+                student: student.student,
+              }))
+          )
+        )
+      );
+      setPendingVaccinations(allResults.flat());
+    } catch (error) {
+      setPendingVaccinations([]);
     }
   };
 
@@ -165,6 +193,35 @@ export default function VaccinationNotifications() {
     return { description, date, time, location, doctor, vaccineType };
   };
 
+  // Helper to calculate days remaining
+  function calculateDaysRemaining(dateString: string) {
+    if (!dateString) return 9999;
+    const examDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = examDate.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  // Chia pendingVaccinations thành 2 nhóm
+  const importantVaccinations = pendingVaccinations.filter((vacc: any) => {
+    const days = calculateDaysRemaining(vacc.vaccination_date);
+    return days <= 14;
+  });
+  const upcomingVaccinations = pendingVaccinations.filter((vacc: any) => {
+    const days = calculateDaysRemaining(vacc.vaccination_date);
+    return days > 14;
+  });
+
+  function formatDateOnly(dateString: string) {
+    if (!dateString) return "-";
+    const d = new Date(dateString);
+    return d.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -175,248 +232,230 @@ export default function VaccinationNotifications() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-blue-800">
-          Thông báo tiêm chủng
-        </h3>
-        <Badge variant="outline" className="text-blue-600">
-          {
-            notifications.filter((n) => n.confirmation_status === "Pending")
-              .length
-          }{" "}
-          chờ phản hồi
-        </Badge>
-      </div>
-
+      {/* Thông báo quan trọng */}
+      {importantVaccinations.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-base font-semibold text-blue-800">
+            Thông báo quan trọng
+          </h3>
+          {importantVaccinations.map((vacc: any) => (
+            <Card key={vacc._id} className="border-l-4 border-l-blue-500">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-blue-800">
+                      {vacc.title || "Lịch tiêm chủng"}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Học sinh: {vacc.student?.name}
+                      {vacc.student?.class?.name &&
+                        ` - Lớp ${vacc.student.class.name}`}
+                    </CardDescription>
+                  </div>
+                  <Badge className="bg-yellow-100 text-yellow-800">
+                    Chờ xác nhận
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Syringe className="w-4 h-4" />
+                    <span>Tên vắc-xin: {vacc.vaccine_type || "-"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Calendar className="w-4 h-4" />
+                    <span>
+                      Thời gian tiêm: {formatDateOnly(vacc.vaccination_date)}
+                      {vacc.vaccination_time
+                        ? ` lúc ${vacc.vaccination_time}`
+                        : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <MapPin className="w-4 h-4" />
+                    <span>Địa điểm: {vacc.location || "-"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <User className="w-4 h-4" />
+                    <span>Bác sĩ phụ trách: {vacc.doctor_name || "-"}</span>
+                  </div>
+                </div>
+                {vacc.description && (
+                  <div className="text-blue-700 text-sm">
+                    <span className="font-medium">Ghi chú:</span>{" "}
+                    {vacc.description}
+                  </div>
+                )}
+                {/* Nút đồng ý và không đồng ý */}
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => respondToNotification(vacc._id, "Agree")}
+                  >
+                    Đồng ý
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                    onClick={() => respondToNotification(vacc._id, "Disagree")}
+                  >
+                    Không đồng ý
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {/* Sự kiện sắp tới */}
+      {upcomingVaccinations.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-base font-semibold text-blue-800">
+            Sự kiện sắp tới
+          </h3>
+          {upcomingVaccinations.map((vacc: any) => (
+            <Card key={vacc._id} className="border-l-4 border-l-blue-500">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-blue-800">
+                      {vacc.title || "Lịch tiêm chủng"}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Học sinh: {vacc.student?.name}
+                      {vacc.student?.class?.name &&
+                        ` - Lớp ${vacc.student.class.name}`}
+                    </CardDescription>
+                  </div>
+                  <Badge className="bg-yellow-100 text-yellow-800">
+                    Chờ xác nhận
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Syringe className="w-4 h-4" />
+                    <span>Tên vắc-xin: {vacc.vaccine_type || "-"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Calendar className="w-4 h-4" />
+                    <span>
+                      Thời gian tiêm: {formatDateOnly(vacc.vaccination_date)}
+                      {vacc.vaccination_time
+                        ? ` lúc ${vacc.vaccination_time}`
+                        : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <MapPin className="w-4 h-4" />
+                    <span>Địa điểm: {vacc.location || "-"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <User className="w-4 h-4" />
+                    <span>Bác sĩ phụ trách: {vacc.doctor_name || "-"}</span>
+                  </div>
+                </div>
+                {vacc.description && (
+                  <div className="text-blue-700 text-sm">
+                    <span className="font-medium">Ghi chú:</span>{" "}
+                    {vacc.description}
+                  </div>
+                )}
+                {/* Nút đồng ý và không đồng ý */}
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => respondToNotification(vacc._id, "Agree")}
+                  >
+                    Đồng ý
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                    onClick={() => respondToNotification(vacc._id, "Disagree")}
+                  >
+                    Không đồng ý
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {/* Danh sách các thông báo lịch sử */}
       {notifications.map((notification) => {
         const { description, date, time, location, doctor, vaccineType } =
           parseNotesForVaccinationDetails(notification.notes);
-
         return (
-          <Card key={notification._id} className="border-l-4 border-l-blue-500">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-blue-800">
-                    {notification.content}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    Học sinh: {notification.student.name}
-                    {notification.student.class_name &&
-                      ` - Lớp ${notification.student.class_name}`}
-                  </CardDescription>
+          <div
+            key={notification._id}
+            className={
+              "flex items-start gap-3 p-3 rounded-lg border border-blue-100 bg-blue-50"
+            }
+          >
+            <div className="rounded-full p-2 bg-blue-100">
+              <Syringe className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium text-blue-800">
+                {notification.content || "Lịch sử tiêm chủng"}
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-1">
+                <div className="flex items-center gap-2 text-blue-600">
+                  <Syringe className="w-4 h-4" />
+                  <span>
+                    Tên vắc-xin:{" "}
+                    {vaccineType || notification.vaccine_type || "-"}
+                  </span>
                 </div>
-                {getStatusBadge(notification.confirmation_status)}
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">{description}</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2 text-blue-600">
+                  <User className="w-4 h-4" />
+                  <span>
+                    Học sinh: {notification.student?.name || "-"}
+                    {notification.student?.class_name &&
+                      ` - Lớp ${notification.student.class_name}`}
+                  </span>
+                </div>
                 <div className="flex items-center gap-2 text-blue-600">
                   <Calendar className="w-4 h-4" />
-                  <span>Ngày tiêm: {date}</span>
+                  <span>
+                    Thời gian tiêm:{" "}
+                    {formatDateOnly(date || notification.vaccination_date)}
+                    {time || notification.vaccination_time
+                      ? ` lúc ${time || notification.vaccination_time}`
+                      : ""}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-blue-600">
-                  <Clock className="w-4 h-4" />
-                  <span>Giờ tiêm: {time}</span>
+                  <MapPin className="w-4 h-4" />
+                  <span>
+                    Địa điểm: {location || notification.location || "-"}
+                  </span>
                 </div>
-                {location && (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <MapPin className="w-4 h-4" />
-                    <span>Địa điểm: {location}</span>
-                  </div>
-                )}
-                {vaccineType && (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <Syringe className="w-4 h-4" />
-                    <span>Loại vắc-xin: {vaccineType}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 text-blue-600">
+                  <User className="w-4 h-4" />
+                  <span>
+                    Bác sĩ phụ trách:{" "}
+                    {doctor || notification.doctor_name || "-"}
+                  </span>
+                </div>
               </div>
-
-              {notification.confirmation_status === "Pending" && (
-                <div className="flex gap-2 pt-4 border-t">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        className="bg-green-600 hover:bg-green-700"
-                        onClick={() => {
-                          setSelectedNotification(notification);
-                          setResponseNotes("");
-                          setRejectionReason("");
-                        }}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Đồng ý
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Xác nhận tham gia tiêm chủng</DialogTitle>
-                        <DialogDescription>
-                          Bạn đồng ý cho con em tham gia tiêm chủng này?
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="response-notes">
-                            Ghi chú (tùy chọn)
-                          </Label>
-                          <Textarea
-                            id="response-notes"
-                            value={responseNotes}
-                            onChange={(e) => setResponseNotes(e.target.value)}
-                            placeholder="Ghi chú thêm từ phụ huynh..."
-                            rows={3}
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setSelectedNotification(null)}
-                          >
-                            Hủy
-                          </Button>
-                          <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() =>
-                              respondToNotification(
-                                notification._id,
-                                "Agree",
-                                responseNotes
-                              )
-                            }
-                            disabled={respondingToNotification}
-                          >
-                            {respondingToNotification
-                              ? "Đang xử lý..."
-                              : "Xác nhận đồng ý"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="text-red-600 border-red-600 hover:bg-red-50"
-                        onClick={() => {
-                          setSelectedNotification(notification);
-                          setResponseNotes("");
-                          setRejectionReason("");
-                        }}
-                      >
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Từ chối
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Từ chối tham gia tiêm chủng</DialogTitle>
-                        <DialogDescription>
-                          Vui lòng cho biết lý do từ chối để nhà trường hiểu rõ
-                          hơn.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="rejection-reason">
-                            Lý do từ chối *
-                          </Label>
-                          <Textarea
-                            id="rejection-reason"
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            placeholder="Vui lòng cho biết lý do từ chối..."
-                            rows={3}
-                            required
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setSelectedNotification(null)}
-                          >
-                            Hủy
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() =>
-                              respondToNotification(
-                                notification._id,
-                                "Disagree",
-                                undefined,
-                                rejectionReason
-                              )
-                            }
-                            disabled={
-                              respondingToNotification ||
-                              !rejectionReason.trim()
-                            }
-                          >
-                            {respondingToNotification
-                              ? "Đang xử lý..."
-                              : "Xác nhận từ chối"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+              {description && (
+                <div className="text-blue-700 text-sm mt-2">
+                  <span className="font-medium">Ghi chú:</span> {description}
                 </div>
               )}
-
-              {notification.confirmation_status === "Agree" && (
-                <div className="bg-green-50 p-3 rounded-md">
-                  <div className="flex items-center gap-2 text-green-800">
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="font-medium">
-                      Đã xác nhận tham gia tiêm chủng
-                    </span>
-                  </div>
-                  {responseNotes && (
-                    <p className="text-sm text-green-700 mt-1">
-                      Ghi chú: {responseNotes}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {notification.confirmation_status === "Disagree" && (
-                <div className="bg-red-50 p-3 rounded-md">
-                  <div className="flex items-center gap-2 text-red-800">
-                    <XCircle className="w-4 h-4" />
-                    <span className="font-medium">
-                      Đã từ chối tham gia tiêm chủng
-                    </span>
-                  </div>
-                  {rejectionReason && (
-                    <p className="text-sm text-red-700 mt-1">
-                      Lý do: {rejectionReason}
-                    </p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <div className="mt-2 flex items-center gap-2">
+                {getStatusBadge(notification.confirmation_status)}
+              </div>
+            </div>
+          </div>
         );
       })}
-
-      {notifications.length === 0 && (
-        <div className="text-center py-8">
-          <Syringe className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">
-            Chưa có thông báo tiêm chủng nào
-          </h3>
-          <p className="text-gray-500">
-            Các thông báo về lịch tiêm chủng sẽ xuất hiện tại đây.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
