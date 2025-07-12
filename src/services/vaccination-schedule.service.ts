@@ -296,11 +296,17 @@ export class VaccinationScheduleService {
         { path: 'created_by' },
       ]);
 
-    // Filter by class
+    // Filter by class - chỉ lấy học sinh đã đồng ý (APPROVED/AGREED) và đã tiêm (COMPLETED)
     const classVaccinations = vaccinations.filter((vaccination) => {
       if (vaccination.student_id && typeof vaccination.student_id === 'object') {
         const studentData = vaccination.student_id as any;
-        return studentData.class && studentData.class._id.toString() === classId;
+        // So sánh status không phân biệt hoa/thường
+        const st = String(vaccination.status).toUpperCase();
+        return (
+          studentData.class &&
+          studentData.class._id.toString() === classId &&
+          (st === 'APPROVED' || st === 'AGREED' || st === 'COMPLETED')
+        );
       }
       return false;
     });
@@ -461,29 +467,46 @@ export class VaccinationScheduleService {
       const results = await this.vaccinationScheduleModel
         .find({
           student_id: studentId,
-          status: { $in: ['Completed'] },
+          status: { $in: ['Completed', 'COMPLETED'] }, // Fix: include both cases
         })
         .populate('student_id', 'name student_id')
         .populate('created_by', 'name')
         .sort({ vaccination_date: -1 })
         .exec();
 
-      return results.map((schedule) => ({
-        _id: schedule._id,
-        title: schedule.title,
-        vaccination_date: schedule.vaccination_date,
-        vaccination_time: schedule.vaccination_time,
-        location: schedule.location,
-        doctor_name: (schedule.created_by as any)?.name,
-        vaccine_type: schedule.vaccine_type,
-        vaccination_result: schedule.vaccination_result,
-        vaccination_notes: schedule.vaccination_notes,
-        recommendations: schedule.recommendations,
-        follow_up_required: schedule.follow_up_required,
-        follow_up_date: schedule.follow_up_date,
-        student: schedule.student_id,
-        created_at: schedule.created_at,
-      }));
+      return results.map((schedule) => {
+        // Try to get doctor name from vaccination_result JSON first, then from doctor_name field
+        let doctorName = schedule.doctor_name;
+
+        if (schedule.vaccination_result) {
+          try {
+            const parsedResult = JSON.parse(schedule.vaccination_result);
+            if (parsedResult.doctor_name) {
+              doctorName = parsedResult.doctor_name;
+            }
+          } catch (error) {
+            console.error('Error parsing vaccination result:', error);
+          }
+        }
+
+        return {
+          _id: schedule._id,
+          title: schedule.title,
+          vaccination_date: schedule.vaccination_date,
+          vaccination_time: schedule.vaccination_time,
+          location: schedule.location,
+          doctor_name:
+            doctorName || (schedule.created_by as any)?.name || 'Bác sĩ phụ trách sự kiện',
+          vaccine_type: schedule.vaccine_type,
+          vaccination_result: schedule.vaccination_result,
+          vaccination_notes: schedule.vaccination_notes,
+          recommendations: schedule.recommendations,
+          follow_up_required: schedule.follow_up_required,
+          follow_up_date: schedule.follow_up_date,
+          student: schedule.student_id,
+          created_at: schedule.created_at,
+        };
+      });
     } catch (error) {
       console.error('Error fetching vaccination results by student:', error);
       throw error;
