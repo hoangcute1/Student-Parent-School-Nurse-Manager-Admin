@@ -4,7 +4,7 @@ import Overall from "./_components/overall";
 import RegularResultsPage from "./_components/regular-result";
 import VaccinationResults from "./_components/vaccination-results";
 import { useEffect, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Activity, Syringe } from "lucide-react";
 
 export default function RegularResult() {
@@ -19,22 +19,11 @@ export default function RegularResult() {
     <div className="flex flex-col gap-12">
       <Overall />
 
+      {/* Xoá TabsList và TabsTrigger, chỉ giữ lại nội dung các tab */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="health" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Kết quả khám sức khỏe
-          </TabsTrigger>
-          <TabsTrigger value="vaccination" className="flex items-center gap-2">
-            <Syringe className="h-4 w-4" />
-            Kết quả tiêm chủng
-          </TabsTrigger>
-        </TabsList>
-
         <TabsContent value="health" className="mt-6">
           <RegularResultsPage />
         </TabsContent>
-
         <TabsContent value="vaccination" className="mt-6">
           <VaccinationResults />
         </TabsContent>

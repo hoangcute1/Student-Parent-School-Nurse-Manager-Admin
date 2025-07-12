@@ -12,14 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Calendar,
-  MapPin,
-  Users,
-  CheckCircle,
-  Clock,
-} from "lucide-react";
+import { Calendar, MapPin, Users, CheckCircle, Clock } from "lucide-react";
 import { useVaccinationStore } from "@/stores/vaccination-store";
+import { useRouter } from "next/navigation";
 
 interface VaccinationEvent {
   _id: string;
@@ -39,14 +34,41 @@ interface VaccinationEvent {
   classes: any[];
 }
 
-export function VaccinationList() {
+interface VaccinationListProps {
+  onViewDetail?: (id: string) => void;
+  onDelete?: (event: VaccinationEvent) => void;
+  filter?: "today" | "all"; // thêm prop filter
+}
+
+export function VaccinationList({
+  onViewDetail,
+  onDelete,
+  filter = "all", // mặc định là all
+}: VaccinationListProps) {
   const { events, loading, error, fetchEvents } = useVaccinationStore();
+  const router = useRouter();
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
-  const filteredEvents = events;
+  // Helper để kiểm tra ngày hôm nay
+  function isToday(dateString: string) {
+    if (!dateString) return false;
+    const d = new Date(dateString);
+    const today = new Date();
+    return (
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear()
+    );
+  }
+
+  // Lọc sự kiện theo filter
+  const filteredEvents =
+    filter === "today"
+      ? events.filter((event) => isToday(event.vaccination_date))
+      : events;
 
   return (
     <div className="space-y-6">
@@ -147,7 +169,7 @@ export function VaccinationList() {
                 </TableHeader>
                 <TableBody>
                   {filteredEvents.map((event) => (
-                    <TableRow key={event._id}>
+                    <TableRow key={event._id} className="hover:bg-blue-50">
                       <TableCell>
                         <div>
                           <p className="font-medium">{event.title}</p>
@@ -206,6 +228,34 @@ export function VaccinationList() {
                         <span className="text-sm">
                           {event.total_students} học sinh
                         </span>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              onViewDetail && onViewDetail(event._id)
+                            }
+                          >
+                            Xem chi tiết
+                          </Button>
+                          {event.completed_count > 0 && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    "Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"
+                                  )
+                                ) {
+                                  onDelete && onDelete(event);
+                                }
+                              }}
+                            >
+                              Xoá
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
