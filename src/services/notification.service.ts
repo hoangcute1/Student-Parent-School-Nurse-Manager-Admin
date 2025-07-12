@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  forwardRef,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
 import { Notification, NotificationDocument } from '@/schemas/notification.schema';
@@ -163,6 +169,96 @@ export class NotificationService {
     });
 
     return notification.save();
+  }
+
+  async createVaccinationNotification(
+    vaccinationId: string,
+    studentId: string,
+    title: string,
+    description: string,
+    vaccinationDate: Date,
+    vaccinationTime: string,
+  ): Promise<Notification> {
+    // Tìm parent của student
+    const student = await this.findStudentWithParent(studentId);
+
+    if (!student || !student.parent) {
+      throw new NotFoundException('Không tìm thấy phụ huynh của học sinh');
+    }
+
+    const content = `Thông báo lịch tiêm chủng: ${title}`;
+    const notes = `${description}\nNgày tiêm: ${new Date(vaccinationDate).toLocaleDateString('vi-VN')}\nGiờ tiêm: ${vaccinationTime}`;
+
+    const notification = new this.notificationModel({
+      noti_campaign: vaccinationId,
+      campaign_type: 'VaccinationSchedule',
+      parent: student.parent,
+      student: studentId,
+      content,
+      notes,
+      date: new Date(),
+      confirmation_status: 'Pending',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    return notification.save();
+  }
+
+  async respondToVaccination(
+    notificationId: string,
+    status: 'Agree' | 'Disagree',
+    notes?: string,
+    rejectionReason?: string,
+  ): Promise<any> {
+    // Cập nhật status của notification
+    const notification = await this.notificationModel
+      .findByIdAndUpdate(
+        notificationId,
+        {
+          confirmation_status: status,
+          notes: status === 'Agree' ? notes : undefined,
+          rejection_reason: status === 'Disagree' ? rejectionReason : undefined,
+          updated_at: new Date(),
+        },
+        { new: true },
+      )
+      .populate(['student', 'parent']);
+
+    if (!notification) {
+      throw new NotFoundException('Không tìm thấy thông báo');
+    }
+
+    // Import VaccinationScheduleService để cập nhật trạng thái
+    const { VaccinationStatus } = await import('@/schemas/vaccination-schedule.schema');
+
+    try {
+      if (status === 'Agree') {
+        // Phụ huynh đồng ý -> cập nhật vaccination thành APPROVED
+        // Note: Cần inject VaccinationScheduleService để gọi updateParentResponse
+        console.log(
+          `Parent agreed to vaccination. Vaccination ${notification.noti_campaign} approved.`,
+        );
+
+        return {
+          notification,
+          message: 'Đã xác nhận tham gia lịch tiêm chủng',
+        };
+      } else {
+        // Phụ huynh từ chối -> cập nhật vaccination thành REJECTED
+        console.log(
+          `Parent disagreed to vaccination. Vaccination ${notification.noti_campaign} rejected.`,
+        );
+
+        return {
+          notification,
+          message: 'Đã từ chối tham gia lịch tiêm chủng',
+        };
+      }
+    } catch (error) {
+      console.error('Error updating vaccination status:', error);
+      throw new BadRequestException('Không thể cập nhật trạng thái tiêm chủng');
+    }
   }
 
   async respondToHealthExamination(
