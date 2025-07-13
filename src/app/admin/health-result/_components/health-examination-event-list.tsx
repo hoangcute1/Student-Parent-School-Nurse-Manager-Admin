@@ -62,7 +62,7 @@ interface ClassInfo {
   rejected_count: number;
   completed_count: number;
 }
-
+ 
 export default function HealthExaminationEventList() {
   const [events, setEvents] = useState<HealthExaminationEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,7 +154,7 @@ export default function HealthExaminationEventList() {
     }
   });
   const handleViewEventDetail = (eventId: string) => {
-    router.push(`/cms/health-result/events/${eventId}`);
+    router.push(`/admin/health-result/events/${eventId}`);
   };
 
   if (loading) {
@@ -234,96 +234,109 @@ export default function HealthExaminationEventList() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Thông tin sự kiện</TableHead>
+                  <TableHead>Tên sự kiện</TableHead>
+                  <TableHead>Ngày khám</TableHead>
                   <TableHead>Khối lớp</TableHead>
-                  <TableHead>Ngày & Giờ</TableHead>
-                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Số học sinh</TableHead>
+                  <TableHead>Tỷ lệ hoàn thành</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEvents.map((event) => (
-                  <TableRow
-                    key={event._id}
-                    className="cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => handleViewEventDetail(event._id)}
-                  >
-                    <TableCell>
-                      <div className="space-y-1">
-                        <p className="font-medium text-blue-800">
-                          {event.title}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {event.description.substring(0, 100)}...
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          {event.examination_type && (
-                            <span className="flex items-center gap-1">
-                              <Stethoscope className="w-3 h-3" />
-                              {event.examination_type}
-                            </span>
-                          )}
-                          {event.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {event.location}
-                            </span>
-                          )}
-                          {event.doctor_name && (
-                            <span className="flex items-center gap-1">
-                              <Users className="w-3 h-3" />
-                              {event.doctor_name}
-                            </span>
-                          )}
+                {filteredEvents.map((event) => {
+                  const completionRate = event.total_students > 0 
+                    ? (event.completed_count / event.total_students) * 100 
+                    : 0;
+                  return (
+                    <TableRow
+                      key={event._id}
+                      className="cursor-pointer hover:bg-gray-50 transition-colors"
+                      onClick={() => handleViewEventDetail(event._id)}
+                    >
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-medium text-blue-800">
+                            {event.title}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {event.description.substring(0, 80)}...
+                          </p>
                         </div>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    <TableCell>
-                      <div className="space-y-1">
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1 text-sm">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(event.examination_date).toLocaleDateString(
+                              "vi-VN"
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-sm">
+                            <Clock className="w-3 h-3" />
+                            {event.examination_time}
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1">
+                            <GraduationCap className="w-4 h-4 text-blue-600" />
+                            <span className="font-medium">
+                              {getGradeLevelsDisplay(event.grade_levels)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {event.classes.length} lớp
+                          </p>
+                        </div>
+                      </TableCell>
+
+                      <TableCell>
                         <div className="flex items-center gap-1">
-                          <GraduationCap className="w-4 h-4 text-blue-600" />
-                          <span className="font-medium">
-                            {getGradeLevelsDisplay(event.grade_levels)}
-                          </span>
+                          <Users className="w-4 h-4 text-green-600" />
+                          <span className="font-medium">{event.total_students}</span>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          {event.classes.length} lớp, {event.total_students} học
-                          sinh
-                        </p>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1 text-sm">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(event.examination_date).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 text-sm">
-                          <Clock className="w-3 h-3" />
-                          {event.examination_time}
-                        </div>
-                      </div>
-                    </TableCell>
+                      <TableCell>
+                        {(() => {
+                          if (completionRate >= 80) {
+                            return (
+                              <Badge className="bg-green-100 text-green-800">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                {Math.round(completionRate)}%
+                              </Badge>
+                            );
+                          } else if (completionRate >= 60) {
+                            return (
+                              <Badge className="bg-blue-100 text-blue-800">
+                                {Math.round(completionRate)}%
+                              </Badge>
+                            );
+                          } else if (completionRate >= 40) {
+                            return (
+                              <Badge className="bg-yellow-100 text-yellow-800">
+                                {Math.round(completionRate)}%
+                              </Badge>
+                            );
+                          } else {
+                            return (
+                              <Badge className="bg-red-100 text-red-800">
+                                {Math.round(completionRate)}%
+                              </Badge>
+                            );
+                          }
+                        })()}
+                      </TableCell>
 
-                    <TableCell>
-                      {getStatusBadge(
-                        event.approved_count,
-                        event.pending_count,
-                        event.rejected_count,
-                        event.completed_count,
-                        event.total_students
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

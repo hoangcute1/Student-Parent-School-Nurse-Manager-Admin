@@ -141,11 +141,11 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
   };
 
   const handleViewClassDetail = (classId: string) => {
-    router.push(`/cms/health-result/events/${eventId}/classes/${classId}`);
+    router.push(`/admin/health-result/events/${eventId}/classes/${classId}`);
   };
 
   const handleBack = () => {
-    router.push("/cms/health-result");
+    router.push("/admin/health-result");
   };
 
   if (loading) {
