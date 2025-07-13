@@ -126,6 +126,13 @@ export default function VaccinationClassDetailPage() {
     if (eventId && classId) fetchClassDetail();
   }, [eventId, classId]);
 
+  // Thêm log để kiểm tra event object
+  useEffect(() => {
+    if (event) {
+      console.log("eventData:", event);
+    }
+  }, [event]);
+
   const handleVaccinate = (student: any) => {
     setSelectedStudent(student);
     setVaccinationForm({
@@ -328,10 +335,7 @@ export default function VaccinationClassDetailPage() {
             <div className="mb-2">{event.vaccination_time || "-"}</div>
             <div className="font-semibold">Loại vaccine:</div>
             <div className="mb-2 text-blue-700 font-bold">
-              {event.vaccine_type?.name ||
-                event.vaccine_type?.title ||
-                event.vaccine_type ||
-                "-"}
+              {event.vaccine_type || event.vaccineType || event.vaccine || "-"}
             </div>
           </div>
           <div>
@@ -358,9 +362,9 @@ export default function VaccinationClassDetailPage() {
           <div className="space-y-4">
             {classDetail?.students
               ?.filter(
-                (s) => s.status === "Approved" || s.status === "Completed"
+                (s: any) => s.status === "Approved" || s.status === "Completed"
               )
-              .map((student) => (
+              .map((student: any) => (
                 <div
                   key={
                     student.student?._id ||
