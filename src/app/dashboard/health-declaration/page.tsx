@@ -42,7 +42,7 @@ export default function ParentHealthRecords() {
   const handleUpdateHealthRecord = async (data: EditHealthRecordFormValues) => {
     if (selectedEditRecord) {
       try {
-        await updateStudent(selectedEditRecord.student._id, {
+        await updateStudent(selectedEditRecord.student?._id || "", {
           allergies: data.allergies,
           chronic_conditions: data.chronic_conditions,
           height: data.height,
@@ -70,7 +70,7 @@ export default function ParentHealthRecords() {
 
   // Hiển thị tất cả hồ sơ của phụ huynh (không lọc theo học sinh được chọn)
   const filteredData = studentsData.filter((eachStudent) =>
-    eachStudent.student.name.toLowerCase().includes(searchTerm.toLowerCase())
+    eachStudent.student?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -169,14 +169,14 @@ export default function ParentHealthRecords() {
                   ) : (
                     filteredData.map((eachStudent, idx) => (
                       <TableRow
-                        key={eachStudent.student._id || idx}
+                        key={eachStudent.student?._id || idx}
                         className="hover:bg-sky-50 transition-colors border-sky-100"
                       >
                         <TableCell className="font-medium text-sky-900 text-base">
-                          {eachStudent.student.name}
+                          {eachStudent.student?.name || "N/A"}
                         </TableCell>
                         <TableCell className="text-sky-800 font-medium">
-                          {eachStudent.student.class.name}
+                          {eachStudent.student?.class?.name || "N/A"}
                         </TableCell>
                         <TableCell>
                           {eachStudent.healthRecord?.allergies ? (
@@ -283,7 +283,7 @@ export default function ParentHealthRecords() {
               selectedEditRecord.healthRecord?.treatment_history || "",
             notes: selectedEditRecord.healthRecord?.notes || "",
           }}
-          studentName={selectedEditRecord.student.name}
+          studentName={selectedEditRecord.student?.name || "N/A"}
         />
       )}
     </div>
