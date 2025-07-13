@@ -15,6 +15,9 @@ export default function VaccinationManagementPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEventForClasses, setSelectedEventForClasses] = useState<
+    string | null
+  >(null); // Thêm state cho việc xem danh sách lớp
   const [schedules, setSchedules] = useState<any[]>([]);
 
   // Load schedules from localStorage on component mount
@@ -98,7 +101,7 @@ export default function VaccinationManagementPage() {
             value="my-schedules"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Lịch tiêm chủng hôm nay
+            Lịch tiêm chủng sắp tới
           </TabsTrigger>
           <TabsTrigger
             value="all-schedules"
@@ -111,8 +114,9 @@ export default function VaccinationManagementPage() {
         <TabsContent value="my-schedules" className="space-y-4">
           {" "}
           <VaccinationList
-            filter="today" // chỉ hiện lịch tiêm hôm nay
+            filter="all" // hiện tất cả lịch tiêm chủng hiện tại và tương lai
             onViewDetail={setSelectedEventId}
+            onViewClasses={setSelectedEventForClasses} // Thêm prop mới
             onDelete={handleDeleteSchedule}
           />
         </TabsContent>
@@ -122,6 +126,7 @@ export default function VaccinationManagementPage() {
           <VaccinationList
             filter="all" // hiện tất cả lịch tiêm
             onViewDetail={setSelectedEventId}
+            onViewClasses={setSelectedEventForClasses} // Thêm prop mới
             onDelete={handleDeleteSchedule}
           />
         </TabsContent>
@@ -135,11 +140,19 @@ export default function VaccinationManagementPage() {
         />
       )}
 
-      {/* Modal xem chi tiết */}
+      {/* Modal xem chi tiết sự kiện */}
       {selectedEventId && (
         <VaccinationDetail
           eventId={selectedEventId}
           onClose={() => setSelectedEventId(null)}
+        />
+      )}
+
+      {/* Modal xem danh sách lớp */}
+      {selectedEventForClasses && (
+        <VaccinationDetail
+          eventId={selectedEventForClasses}
+          onClose={() => setSelectedEventForClasses(null)}
         />
       )}
     </div>

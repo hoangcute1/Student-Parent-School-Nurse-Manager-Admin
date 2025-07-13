@@ -36,12 +36,14 @@ interface VaccinationEvent {
 
 interface VaccinationListProps {
   onViewDetail?: (id: string) => void;
+  onViewClasses?: (id: string) => void; // Thêm prop mới cho việc xem danh sách lớp
   onDelete?: (event: VaccinationEvent) => void;
   filter?: "today" | "all"; // thêm prop filter
 }
 
 export function VaccinationList({
   onViewDetail,
+  onViewClasses, // không dùng nữa
   onDelete,
   filter = "all", // mặc định là all
 }: VaccinationListProps) {
@@ -169,7 +171,18 @@ export function VaccinationList({
                 </TableHeader>
                 <TableBody>
                   {filteredEvents.map((event) => (
-                    <TableRow key={event._id} className="hover:bg-blue-50">
+                    <TableRow
+                      key={event._id}
+                      className="hover:bg-blue-50 cursor-pointer"
+                      onClick={(e) => {
+                        // Chỉ xử lý click khi không click vào button
+                        if (!(e.target as HTMLElement).closest("button")) {
+                          router.push(
+                            `/cms/vaccination-management/event/${event._id}`
+                          );
+                        }
+                      }}
+                    >
                       <TableCell>
                         <div>
                           <p className="font-medium">{event.title}</p>
@@ -232,9 +245,10 @@ export function VaccinationList({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              onViewDetail && onViewDetail(event._id)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation(); // Ngăn event bubble lên TableRow
+                              onViewDetail && onViewDetail(event._id);
+                            }}
                           >
                             Xem chi tiết
                           </Button>
@@ -242,7 +256,8 @@ export function VaccinationList({
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation(); // Ngăn event bubble lên TableRow
                                 if (
                                   window.confirm(
                                     "Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"
