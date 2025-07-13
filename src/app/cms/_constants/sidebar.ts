@@ -12,23 +12,7 @@ import {
   Users,
 } from "lucide-react";
 
-const adminNavLinks = [
-  {
-    href: "/cms/manage-parents",
-    icon: Users,
-    label: "Quản lý phụ huynh",
-    description: "Quản lý phụ huynh",
-  },
-  {
-    href: "/cms/manage-staffs",
-    icon: Users,
-    label: "Quản lý nhân viên",
-    description: "Quản lý nhân viên",
-  },
-];
-
 const navLinks = [
-  { href: "/cms", icon: Home, label: "Tổng quát", description: "Tổng quát" },
   {
     href: "/cms/manage-students",
     icon: Users,
@@ -75,4 +59,4 @@ const navLinks = [
   },
 ];
 
-export { navLinks, adminNavLinks };
+export { navLinks };

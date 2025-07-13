@@ -98,7 +98,7 @@ interface StudentStore {
     studentData: Partial<UpdateStudentData>
   ) => Promise<void>;
   fetchStudentById: (id: string) => Promise<void>;
-  createStudent: (studentData: Partial<CreateStudentData>) => Promise<void>;
+  createStudent: (studentData: Partial<CreateStudentData>) => Promise<any>;
 }
 
 export type {

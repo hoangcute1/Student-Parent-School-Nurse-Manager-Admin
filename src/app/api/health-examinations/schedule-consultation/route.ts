@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     console.log("Received body:", body);
 
     // Lấy token từ cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("authToken")?.value;
 
     if (!token) {

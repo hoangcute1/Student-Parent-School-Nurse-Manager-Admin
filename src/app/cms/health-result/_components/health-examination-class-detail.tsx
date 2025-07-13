@@ -529,6 +529,12 @@ export default function HealthExaminationClassDetail({
     }
   };
 
+  const handleVaccinate = (student: Student) => {
+    alert(
+      `Tiêm cho học sinh: ${student.student?.full_name || student.student?._id}`
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -717,6 +723,24 @@ export default function HealthExaminationClassDetail({
                     </div>
                     <div className="flex items-center space-x-2">
                       {getStatusBadge(student.status)}
+
+                      {/* Nút Tiêm */}
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleVaccinate(student)}
+                        className={`flex items-center space-x-1 ${
+                          student.status === "Completed"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={student.status === "Completed"}
+                      >
+                        💉
+                        <span>
+                          {student.status === "Completed" ? "Đã tiêm" : "Tiêm"}
+                        </span>
+                      </Button>
 
                       {/* Nút Khám */}
                       <Button

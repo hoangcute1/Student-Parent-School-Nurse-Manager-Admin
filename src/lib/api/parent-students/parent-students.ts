@@ -18,16 +18,35 @@ export const getStudentsByParentId = async (
 
 export const updateStudentByStudentId = async (
   studentId: string,
-  studentData: Partial<EditHealthRecord> 
+  studentData: Partial<EditHealthRecord>
 ): Promise<any> => {
   try {
-    const response = await fetchData<EditHealthRecord>(`health-records/student/${studentId}`, {
-      method: "PUT",
-      body: JSON.stringify(studentData),
-    });
+    const response = await fetchData<EditHealthRecord>(
+      `health-records/student/${studentId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(studentData),
+      }
+    );
     return response;
   } catch (error) {
     console.error(`Error updating student with ID ${studentId}:`, error);
+    throw error;
+  }
+};
+
+export const createParentStudentByEmail = async (
+  parentEmail: string,
+  studentId: string
+): Promise<any> => {
+  try {
+    const response = await fetchData(`/parent-students/by-email`, {
+      method: "POST",
+      body: JSON.stringify({ parentEmail, studentId }),
+    });
+    return response;
+  } catch (error) {
+    console.error(`Error creating parent-student by email:`, error);
     throw error;
   }
 };

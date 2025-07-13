@@ -1,6 +1,5 @@
+import { fetchData } from "@/lib/api/api";
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function GET(
   request: NextRequest,
@@ -16,8 +15,8 @@ export async function GET(
       queryParams.append("staffId", staffId);
     }
 
-    const response = await fetch(
-      `${BACKEND_URL}/health-examinations/events/${eventId}?${queryParams.toString()}`,
+    const response = await fetchData<any>(
+      `/health-examinations/events/${eventId}?${queryParams.toString()}`,
       {
         method: "GET",
         headers: {
@@ -25,12 +24,12 @@ export async function GET(
         },
       }
     );
-
-    if (!response.ok) {
+    console.log("Response from backend:", response);
+    if (!response) {
       throw new Error("Failed to fetch health examination event detail");
     }
 
-    const data = await response.json();
+    const data = response;
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error fetching health examination event detail:", error);
@@ -49,8 +48,8 @@ export async function DELETE(
     const { eventId } = await params;
 
     // Xóa tất cả lịch khám thuộc sự kiện này
-    const response = await fetch(
-      `${BACKEND_URL}/health-examinations/events/${eventId}`,
+    const response = await fetchData<any>(
+      `/health-examinations/events/${eventId}`,
       {
         method: "DELETE",
         headers: {
@@ -59,8 +58,8 @@ export async function DELETE(
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.text();
+    if (!response) {
+      const errorData = response;
       console.error("Backend error response:", {
         status: response.status,
         statusText: response.statusText,
@@ -76,7 +75,7 @@ export async function DELETE(
       );
     }
 
-    const data = await response.json();
+    const data = response;
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error deleting health examination event:", error);
