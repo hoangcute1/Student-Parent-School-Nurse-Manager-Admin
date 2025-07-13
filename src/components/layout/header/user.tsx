@@ -61,7 +61,7 @@ export default function User() {
 
   return (
     <div className="flex">
-      <Notification />
+      {role === "parent" && <Notification />}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
