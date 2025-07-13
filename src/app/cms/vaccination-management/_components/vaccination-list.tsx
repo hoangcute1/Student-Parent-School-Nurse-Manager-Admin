@@ -252,7 +252,7 @@ export function VaccinationList({
                           >
                             Xem chi tiết
                           </Button>
-                          {event.completed_count > 0 && (
+                          {onDelete && (
                             <Button
                               size="sm"
                               variant="destructive"
@@ -263,7 +263,7 @@ export function VaccinationList({
                                     "Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"
                                   )
                                 ) {
-                                  onDelete && onDelete(event);
+                                  onDelete(event);
                                 }
                               }}
                             >

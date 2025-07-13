@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -23,20 +23,45 @@ import {
   Activity,
   TrendingUp,
 } from "lucide-react";
+import { fetchData } from "@/lib/api/api";
 
 export default function HealthResultPage() {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    students: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const events = await fetchData<any[]>("/health-examinations/events");
+        let total = events.length;
+        let completed = 0;
+        let pending = 0;
+        let students = 0;
+        events.forEach((event) => {
+          completed += event.completed_count || 0;
+          pending += event.pending_count || 0;
+          students += event.total_students || 0;
+        });
+        setStats({
+          total,
+          completed,
+          pending,
+          students,
+        });
+      } catch (err) {
+        // fallback giữ nguyên stats cũ
+      }
+    };
+    fetchStats();
+  }, [refreshKey]);
 
   const handleExaminationCreated = () => {
     setRefreshKey((prev) => prev + 1);
-  };
-
-  // Mock stats - you can replace with real data
-  const stats = {
-    total: 24,
-    completed: 18,
-    pending: 6,
-    students: 1245,
   };
 
   return (
@@ -157,17 +182,17 @@ export default function HealthResultPage() {
             <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="p-6">
                 <Tabs defaultValue="events" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-gray-50 border border-gray-200">
+                  <TabsList className="flex w-full bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
                     <TabsTrigger
                       value="events"
-                      className="data-[state=active]:bg-white data-[state=active]:text-sky-700 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-sky-200 transition-all duration-200"
+                      className="flex-1 data-[state=active]:bg-sky-100 data-[state=active]:text-sky-700 data-[state=active]:shadow-sm data-[state=active]:border-none data-[state=active]:z-10 transition-all duration-200 rounded-none"
                     >
                       <Calendar className="w-4 h-4 mr-2" />
                       Sự kiện khám (Khối lớp)
                     </TabsTrigger>
                     <TabsTrigger
                       value="all-examinations"
-                      className="data-[state=active]:bg-white data-[state=active]:text-sky-700 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-sky-200 transition-all duration-200"
+                      className="flex-1 data-[state=active]:bg-sky-100 data-[state=active]:text-sky-700 data-[state=active]:shadow-sm data-[state=active]:border-none data-[state=active]:z-10 transition-all duration-200 rounded-none"
                     >
                       <Stethoscope className="w-4 h-4 mr-2" />
                       Tất cả lịch khám
