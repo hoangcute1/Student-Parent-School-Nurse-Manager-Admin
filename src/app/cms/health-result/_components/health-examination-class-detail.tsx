@@ -36,7 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useRouter } from "next/router";
+import { fetchData } from "@/lib/api/api";
 
 interface Student {
   examination_id: string;
@@ -99,13 +99,15 @@ export default function HealthExaminationClassDetail({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConsultationDialogOpen, setIsConsultationDialogOpen] =
     useState(false);
+  const [consultationStatus, setConsultationStatus] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   // Form state for health examination result
   const [healthResult, setHealthResult] = useState("");
   const [examinationNotes, setExaminationNotes] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [updating, setUpdating] = useState(false);
-  const router = useRouter();
   // Form state for consultation scheduling
   const [consultationTitle, setConsultationTitle] = useState("");
   const [consultationDate, setConsultationDate] = useState<Date | undefined>(
@@ -156,23 +158,48 @@ export default function HealthExaminationClassDetail({
   const fetchClassDetail = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/health-examinations/events/${encodeURIComponent(
-          eventId
-        )}/classes/${classId}`
+      setError(null); // Clear previous errors
+
+      console.log("Fetching class detail for:", { eventId, classId });
+
+      const response = await fetchData<any>(
+        `/health-examinations/events/${eventId}/classes/${classId}`
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch class detail");
+      if (!response) {
+        throw new Error("Không nhận được dữ liệu từ server");
       }
 
-      const data = await response.json();
-      setClassDetail(data);
+      console.log("Class detail received:", response);
+      setClassDetail(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching class detail:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
+      setError(`Không thể lấy chi tiết lớp học: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to check if student has consultation scheduled
+  const hasConsultationScheduled = (student: Student) => {
+    // Check if student has follow_up_required set to true (from backend)
+    if (student.follow_up_required === true) {
+      return true;
+    }
+
+    // Check if student has consultation in examination_notes or recommendations
+    const hasConsultationNote =
+      student.examination_notes?.toLowerCase().includes("tư vấn") ||
+      student.examination_notes?.toLowerCase().includes("consultation") ||
+      student.recommendations?.toLowerCase().includes("tư vấn") ||
+      student.recommendations?.toLowerCase().includes("consultation");
+
+    // Check if we have manually set consultation status for this student
+    const manualConsultationStatus = consultationStatus[student.student._id];
+
+    return hasConsultationNote || manualConsultationStatus;
   };
 
   const getStatusBadge = (status: string) => {
@@ -193,15 +220,15 @@ export default function HealthExaminationClassDetail({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Approved":
-        return <UserCheck className="h-4 w-4 text-green-500" />;
+        return <UserCheck className="w-5 h-5 text-green-600" />;
       case "Pending":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <Clock className="w-5 h-5 text-yellow-600" />;
       case "Rejected":
-        return <UserX className="h-4 w-4 text-red-500" />;
+        return <UserX className="w-5 h-5 text-red-600" />;
       case "Completed":
-        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+        return <CheckCircle className="w-5 h-5 text-blue-600" />;
       default:
-        return null;
+        return <Clock className="w-5 h-5 text-gray-600" />;
     }
   };
 
@@ -307,7 +334,7 @@ export default function HealthExaminationClassDetail({
     setConsultationNotes("");
   };
   const handleGoBack = () => {
-    router.back();
+    window.history.back();
   };
   const handleScheduleConsultation = async () => {
     if (
@@ -323,33 +350,49 @@ export default function HealthExaminationClassDetail({
 
     setSchedulingConsultation(true);
     try {
-      const response = await fetch(
-        `/api/health-examinations/schedule-consultation`,
+      const response = await fetchData<any>(
+        `/health-examinations/schedule-consultation?studentId=${selectedStudent.student._id}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({
-            student_id: selectedStudent.student._id,
             title: consultationTitle,
             consultation_date: consultationDate.toISOString(),
             consultation_time: consultationTime,
             doctor: consultationDoctor,
             notes: consultationNotes,
           }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      if (!response.ok) {
+      if (!response) {
         throw new Error("Không thể lập lịch hẹn tư vấn");
       }
 
       alert("Lập lịch hẹn tư vấn thành công!");
       closeConsultationDialog();
+
+      // Update consultation status for this student
+      setConsultationStatus((prev) => ({
+        ...prev,
+        [selectedStudent.student._id]: true,
+      }));
+
+      // Reset form
+      setConsultationTitle("");
+      setConsultationDate(undefined);
+      setConsultationTime("");
+      setConsultationDoctor("");
+      setConsultationNotes("");
     } catch (error) {
       console.error("Error scheduling consultation:", error);
-      alert("Có lỗi xảy ra khi lập lịch hẹn tư vấn");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Có lỗi xảy ra khi lập lịch hẹn tư vấn";
+      alert(errorMessage);
     } finally {
       setSchedulingConsultation(false);
     }
@@ -460,18 +503,18 @@ export default function HealthExaminationClassDetail({
         });
       }
 
-      const response = await fetch(
-        `/api/health-examinations/${selectedStudent.examination_id}/result`,
+      const updateResponse = await fetchData<any>(
+        `/health-examinations/${selectedStudent.examination_id}/result`,
         {
           method: "PATCH",
+          body: JSON.stringify(examinationData),
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(examinationData),
         }
       );
 
-      if (!response.ok) {
+      if (!updateResponse) {
         throw new Error("Failed to update examination result");
       }
 
@@ -518,14 +561,14 @@ export default function HealthExaminationClassDetail({
     <div className="space-y-6">
       {/* Header */}
       <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGoBack}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
+        variant="outline"
+        size="sm"
+        onClick={handleGoBack}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Quay lại
+      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
@@ -694,15 +737,27 @@ export default function HealthExaminationClassDetail({
                       </Button>
 
                       {/* Nút Chuông (Lập lịch hẹn tư vấn) */}
-                      <Button
-                        size="sm"
-                        onClick={() => openConsultationDialog(student)}
-                        variant="outline"
-                        className="flex items-center space-x-1"
-                      >
-                        <Bell className="h-4 w-4" />
-                        <span>Lập lịch hẹn tư vấn</span>
-                      </Button>
+                      {hasConsultationScheduled(student) ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="flex items-center space-x-1 opacity-75 cursor-not-allowed"
+                          disabled
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Đã lập lịch hẹn</span>
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => openConsultationDialog(student)}
+                          variant="outline"
+                          className="flex items-center space-x-1"
+                        >
+                          <Bell className="h-4 w-4" />
+                          <span>Lập lịch hẹn tư vấn</span>
+                        </Button>
+                      )}
 
                       {/* Nút Xem kết quả */}
                       <Button

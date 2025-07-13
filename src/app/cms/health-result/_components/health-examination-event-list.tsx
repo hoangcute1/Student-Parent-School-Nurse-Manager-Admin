@@ -78,10 +78,19 @@ export default function HealthExaminationEventList() {
   const fetchEvents = async () => {
     try {
       const response = await fetchData<any>("/health-examinations/events");
+
+      // Ensure response is an array
+      if (!Array.isArray(response)) {
+        console.warn("Events response is not an array:", response);
+        setEvents([]);
+        return;
+      }
+
       setEvents(response);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast.error("Không thể tải danh sách sự kiện khám sức khỏe");
+      setEvents([]); // Set empty array on error
     } finally {
       setLoading(false);
     }

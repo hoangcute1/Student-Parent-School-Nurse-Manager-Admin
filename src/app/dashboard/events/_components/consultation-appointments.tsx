@@ -1,72 +1,73 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, Clock, User, MapPin, FileText } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  User,
+  MapPin,
+  FileText,
+  UserCheck,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { fetchData } from "@/lib/api/api";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
-import { createNotification } from "@/lib/api/notification";
 
 interface ConsultationAppointment {
   _id: string;
-  parent: string;
+  consultation_title: string;
+  consultation_date: string;
+  consultation_time: string;
+  consultation_doctor: string;
+  consultation_notes: string;
   student: {
     _id: string;
-    name: string;
-    studentId: string;
+    full_name: string;
+    student_id: string;
+    email?: string;
+    phone?: string;
   };
-  content: string;
-  notes: string;
-  type: string;
-  relatedId?: string;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
+  original_examination: {
+    title: string;
+    examination_date: string;
+    examination_type: string;
+    status: string;
+  };
+  created_by: {
+    name: string;
+    email: string;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 export default function ConsultationAppointments() {
+  const { selectedStudent } = useParentStudentsStore();
   const [consultations, setConsultations] = useState<ConsultationAppointment[]>(
     []
   );
   const [loading, setLoading] = useState(true);
-  const { studentsData } = useParentStudentsStore();
 
   useEffect(() => {
     fetchConsultationAppointments();
-  }, [studentsData]);
+    // eslint-disable-next-line
+  }, [selectedStudent]); // Lắng nghe selectedStudent
 
   const fetchConsultationAppointments = async () => {
     try {
       setLoading(true);
-
-      // Lấy tất cả notifications của phụ huynh
-      const response = await fetch("/api/notifications/parent/current");
-      if (!response.ok) {
-        throw new Error("Failed to fetch consultations");
+      let url = "/health-examinations/consultations";
+      if (selectedStudent && selectedStudent.student?._id) {
+        url += `?studentId=${selectedStudent.student._id}`;
       }
-
-      const allNotifications = await response.json();
-
-      // Lọc ra các notification có type là CONSULTATION_APPOINTMENT
-      const consultationNotifications = allNotifications.filter(
-        (notification: any) => notification.type === "CONSULTATION_APPOINTMENT"
-      );
-
-      setConsultations(consultationNotifications);
+      const response = await fetchData<ConsultationAppointment[]>(url);
+      setConsultations(response || []);
     } catch (error) {
       console.error("Error fetching consultation appointments:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const markAsRead = async (consultationId: string) => {
-    try {
-      // TODO: Implement mark as read functionality
-      console.log("Marking consultation as read:", consultationId);
-    } catch (error) {
-      console.error("Error marking consultation as read:", error);
     }
   };
 
@@ -115,40 +116,45 @@ export default function ConsultationAppointments() {
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-blue-800 mb-1">
-                        {consultation.content}
+                        {consultation.consultation_title}
                       </h3>
                       <div className="text-sm text-gray-600 space-y-1">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           <span>
                             Học sinh:{" "}
-                            {consultation.student?.name || "Không xác định"}
+                            {consultation.student?.full_name ||
+                              "Không xác định"}{" "}
+                            (MSSV: {consultation.student?.student_id || "-"})
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
                           <span>
-                            Ngày tạo:{" "}
-                            {new Date(
-                              consultation.createdAt
-                            ).toLocaleDateString("vi-VN")}
+                            Ngày hẹn:{" "}
+                            {consultation.consultation_date
+                              ? new Date(
+                                  consultation.consultation_date
+                                ).toLocaleDateString("vi-VN")
+                              : "-"}{" "}
+                            lúc {consultation.consultation_time || "-"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <UserCheck className="w-4 h-4" />
+                          <span>
+                            Bác sĩ: {consultation.consultation_doctor || "-"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>
+                            Loại khám:{" "}
+                            {consultation.original_examination
+                              ?.examination_type || "-"}
                           </span>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!consultation.isRead && (
-                        <Badge className="bg-red-500 text-white text-xs">
-                          Mới
-                        </Badge>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => markAsRead(consultation._id)}
-                      >
-                        Đánh dấu đã đọc
-                      </Button>
                     </div>
                   </div>
 
@@ -156,11 +162,11 @@ export default function ConsultationAppointments() {
                     <div className="flex items-center gap-2 mb-2">
                       <FileText className="w-4 h-4 text-blue-600" />
                       <span className="font-medium text-blue-800">
-                        Chi tiết lịch hẹn:
+                        Ghi chú tư vấn:
                       </span>
                     </div>
                     <div className="text-sm text-gray-700 whitespace-pre-line">
-                      {consultation.notes}
+                      {consultation.consultation_notes || "Không có ghi chú."}
                     </div>
                   </div>
                 </CardContent>
