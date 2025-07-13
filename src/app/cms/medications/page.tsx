@@ -248,7 +248,7 @@ export default function MedicationsPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
-            Dashboard - Quản lý thuốc
+            Quản lý thuốc
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Theo dõi kho thuốc, thống kê sử dụng và quản lý tồn kho

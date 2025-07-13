@@ -201,19 +201,18 @@ export default function HealthExaminationClassDetail({
     <div className="space-y-6">
       {/* Header with Back Button */}
       <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGoBack}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
+        variant="outline"
+        size="sm"
+        onClick={handleGoBack}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Quay lại
+      </Button>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-             
               <CardTitle className="text-2xl">
                 Chi tiết lớp {classDetail.class_info.name}
               </CardTitle>
@@ -257,13 +256,15 @@ export default function HealthExaminationClassDetail({
         <CardHeader>
           <CardTitle>Danh sách học sinh đã đồng ý khám</CardTitle>
           <div className="text-sm text-gray-600">
-            Chỉ hiển thị học sinh đã được phụ huynh đồng ý khám sức khỏe
+            Hiển thị học sinh đã được phụ huynh đồng ý khám sức khỏe (bao gồm cả
+            đã khám xong)
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {classDetail.students.filter(
-              (student) => student.status === "Approved"
+              (student) =>
+                student.status === "Approved" || student.status === "Completed"
             ).length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <div className="text-lg font-medium">
@@ -280,6 +281,9 @@ export default function HealthExaminationClassDetail({
                       Đã đồng ý: {classDetail.statistics.approved}
                     </span>
                     <span className="inline-block mx-2">
+                      Đã hoàn thành: {classDetail.statistics.completed}
+                    </span>
+                    <span className="inline-block mx-2">
                       Chờ phản hồi: {classDetail.statistics.pending}
                     </span>
                     <span className="inline-block mx-2">
@@ -290,7 +294,11 @@ export default function HealthExaminationClassDetail({
               </div>
             ) : (
               classDetail.students
-                .filter((student) => student.status === "Approved")
+                .filter(
+                  (student) =>
+                    student.status === "Approved" ||
+                    student.status === "Completed"
+                )
                 .map((student) => (
                   <div
                     key={student.examination_id}
@@ -300,29 +308,39 @@ export default function HealthExaminationClassDetail({
                       {getStatusIcon(student.status)}
                       <div>
                         <div className="font-medium">
-                          {student.student?.full_name || 
-                           (student.student as any)?.name ||
-                           (student as any).full_name ||
-                           (student as any).name ||
-                           "Không xác định"}
+                          {student.student?.full_name ||
+                            (student.student as any)?.name ||
+                            (student as any).full_name ||
+                            (student as any).name ||
+                            "Không xác định"}
                         </div>
                         <div className="text-sm text-gray-600">
-                          MSSV: {student.student?.student_id || 
-                                 (student.student as any)?.studentId ||
-                                 (student.student as any)?.id ||
-                                 (student as any).student_id ||
-                                 (student as any).studentId ||
-                                 (student as any).id ||
-                                 "Không xác định"}
+                          MSSV:{" "}
+                          {student.student?.student_id ||
+                            (student.student as any)?.studentId ||
+                            (student.student as any)?.id ||
+                            (student as any).student_id ||
+                            (student as any).studentId ||
+                            (student as any).id ||
+                            "Không xác định"}
                         </div>
                         {student.health_result && (
                           <div className="text-sm text-blue-600">
                             {(() => {
                               try {
-                                const parsedResult = JSON.parse(student.health_result);
-                                return `Trạng thái: ${parsedResult.status || "Đã khám"}`;
+                                const parsedResult = JSON.parse(
+                                  student.health_result
+                                );
+                                return `Trạng thái: ${
+                                  parsedResult.status || "Đã khám"
+                                }`;
                               } catch {
-                                return `Kết quả: ${student.health_result.length > 50 ? student.health_result.substring(0, 50) + "..." : student.health_result}`;
+                                return `Kết quả: ${
+                                  student.health_result.length > 50
+                                    ? student.health_result.substring(0, 50) +
+                                      "..."
+                                    : student.health_result
+                                }`;
                               }
                             })()}
                           </div>
@@ -360,137 +378,163 @@ export default function HealthExaminationClassDetail({
           {selectedStudent && classDetail && (
             <div className="space-y-4">
               <div>
-                <strong>Học sinh:</strong> {
-                  selectedStudent.student?.full_name || 
+                <strong>Học sinh:</strong>{" "}
+                {selectedStudent.student?.full_name ||
                   (selectedStudent.student as any)?.name ||
                   (selectedStudent as any).full_name ||
                   (selectedStudent as any).name ||
-                  "Không xác định"
-                }{" "}
-                (MSSV: {
-                  selectedStudent.student?.student_id || 
+                  "Không xác định"}{" "}
+                (MSSV:{" "}
+                {selectedStudent.student?.student_id ||
                   (selectedStudent.student as any)?.studentId ||
                   (selectedStudent.student as any)?.id ||
                   (selectedStudent as any).student_id ||
                   (selectedStudent as any).studentId ||
                   (selectedStudent as any).id ||
-                  "Không xác định"
-                })
+                  "Không xác định"}
+                )
               </div>
 
               {/* Display health result based on examination type */}
-              {selectedStudent.health_result && (() => {
-                try {
-                  const parsedResult = JSON.parse(selectedStudent.health_result);
-                  
-                  if (parsedResult.type === "Khám sức khỏe định kỳ") {
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Chiều cao (cm)</Label>
-                            <Input value={parsedResult.height || ""} disabled />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Cân nặng (kg)</Label>
-                            <Input value={parsedResult.weight || ""} disabled />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Chỉ số BMI</Label>
-                            <Input value={parsedResult.bmi || ""} disabled />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Thị lực</Label>
-                            <Input value={parsedResult.vision || ""} disabled />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Trạng thái sức khỏe</Label>
-                          <Input value={parsedResult.status || ""} disabled />
-                        </div>
-                      </div>
+              {selectedStudent.health_result &&
+                (() => {
+                  try {
+                    const parsedResult = JSON.parse(
+                      selectedStudent.health_result
                     );
-                  } else if (parsedResult.type === "Khám răng miệng") {
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label>Số răng sữa</Label>
-                            <Input value={parsedResult.milk_teeth || ""} disabled />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Số răng vĩnh viễn</Label>
-                            <Input value={parsedResult.permanent_teeth || ""} disabled />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Số răng sâu</Label>
-                            <Input value={parsedResult.cavities || ""} disabled />
-                          </div>
-                        </div>
 
-                        <div className="space-y-2">
-                          <Label>Trạng thái răng miệng</Label>
-                          <Input value={parsedResult.status || ""} disabled />
-                        </div>
-                      </div>
-                    );
-                  } else if (parsedResult.type === "Khám mắt") {
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Thị lực mắt phải</Label>
-                            <Input value={parsedResult.right_eye_vision || ""} disabled />
+                    if (parsedResult.type === "Khám sức khỏe định kỳ") {
+                      return (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Chiều cao (cm)</Label>
+                              <Input
+                                value={parsedResult.height || ""}
+                                disabled
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Cân nặng (kg)</Label>
+                              <Input
+                                value={parsedResult.weight || ""}
+                                disabled
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label>Thị lực mắt trái</Label>
-                            <Input value={parsedResult.left_eye_vision || ""} disabled />
-                          </div>
-                        </div>
 
-                        <div className="space-y-2">
-                          <Label>Trạng thái mắt</Label>
-                          <Input value={parsedResult.status || ""} disabled />
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Chỉ số BMI</Label>
+                              <Input value={parsedResult.bmi || ""} disabled />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Thị lực</Label>
+                              <Input
+                                value={parsedResult.vision || ""}
+                                disabled
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Trạng thái sức khỏe</Label>
+                            <Input value={parsedResult.status || ""} disabled />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  } else {
+                      );
+                    } else if (parsedResult.type === "Khám răng miệng") {
+                      return (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label>Số răng sữa</Label>
+                              <Input
+                                value={parsedResult.milk_teeth || ""}
+                                disabled
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Số răng vĩnh viễn</Label>
+                              <Input
+                                value={parsedResult.permanent_teeth || ""}
+                                disabled
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Số răng sâu</Label>
+                              <Input
+                                value={parsedResult.cavities || ""}
+                                disabled
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Trạng thái răng miệng</Label>
+                            <Input value={parsedResult.status || ""} disabled />
+                          </div>
+                        </div>
+                      );
+                    } else if (parsedResult.type === "Khám mắt") {
+                      return (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Thị lực mắt phải</Label>
+                              <Input
+                                value={parsedResult.right_eye_vision || ""}
+                                disabled
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Thị lực mắt trái</Label>
+                              <Input
+                                value={parsedResult.left_eye_vision || ""}
+                                disabled
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Trạng thái mắt</Label>
+                            <Input value={parsedResult.status || ""} disabled />
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="space-y-2">
+                          <Label>Kết quả khám</Label>
+                          <Textarea
+                            value={selectedStudent.health_result}
+                            disabled
+                            rows={4}
+                          />
+                        </div>
+                      );
+                    }
+                  } catch (error) {
                     return (
                       <div className="space-y-2">
                         <Label>Kết quả khám</Label>
-                        <Textarea 
-                          value={selectedStudent.health_result} 
-                          disabled 
+                        <Textarea
+                          value={selectedStudent.health_result}
+                          disabled
                           rows={4}
                         />
                       </div>
                     );
                   }
-                } catch (error) {
-                  return (
-                    <div className="space-y-2">
-                      <Label>Kết quả khám</Label>
-                      <Textarea 
-                        value={selectedStudent.health_result} 
-                        disabled 
-                        rows={4}
-                      />
-                    </div>
-                  );
-                }
-              })()}
+                })()}
 
               {/* Examination Notes */}
               {selectedStudent.examination_notes && (
                 <div className="space-y-2">
                   <Label>Ghi chú khám</Label>
-                  <Textarea 
-                    value={selectedStudent.examination_notes} 
-                    disabled 
+                  <Textarea
+                    value={selectedStudent.examination_notes}
+                    disabled
                     rows={3}
                   />
                 </div>
@@ -500,9 +544,9 @@ export default function HealthExaminationClassDetail({
               {selectedStudent.recommendations && (
                 <div className="space-y-2">
                   <Label>Khuyến nghị</Label>
-                  <Textarea 
-                    value={selectedStudent.recommendations} 
-                    disabled 
+                  <Textarea
+                    value={selectedStudent.recommendations}
+                    disabled
                     rows={3}
                   />
                 </div>

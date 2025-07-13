@@ -37,8 +37,7 @@ export default function FeedbackPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { fetchStudentsByParent } =
-    useParentStudentsStore();
+  const { fetchStudentsByParent } = useParentStudentsStore();
 
   useEffect(() => {
     fetchStudentsByParent();
@@ -191,16 +190,16 @@ export default function FeedbackPage() {
                 </div>
 
                 {/* Full-width Tabs Navigation */}
-                <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-2 h-14">
+                <TabsList className="flex w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl h-14">
                   <TabsTrigger
                     value="new-feedback"
-                    className="data-[state=active]:bg-white data-[state=active]:text-sky-600 data-[state=active]:shadow-lg rounded-xl py-3 transition-all duration-300 text-base font-semibold text-white/90 hover:text-white hover:bg-white/5"
+                    className="flex-1 text-center font-semibold rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:text-sky-600 data-[state=active]:shadow-lg data-[state=active]:z-10 transition-all duration-300 text-base text-white/90 hover:text-white hover:bg-white/5"
                   >
                     ✍️ Gửi thắc mắc mới
                   </TabsTrigger>
                   <TabsTrigger
                     value="my-feedback"
-                    className="data-[state=active]:bg-white data-[state=active]:text-sky-600 data-[state=active]:shadow-lg rounded-xl py-3 transition-all duration-300 text-base font-semibold text-white/90 hover:text-white hover:bg-white/5"
+                    className="flex-1 text-center font-semibold rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:text-sky-600 data-[state=active]:shadow-lg data-[state=active]:z-10 transition-all duration-300 text-base text-white/90 hover:text-white hover:bg-white/5"
                   >
                     📋 Thắc mắc của tôi
                   </TabsTrigger>
@@ -370,19 +369,6 @@ export default function FeedbackPage() {
 
               {/* Tab Content for My Feedback */}
               <TabsContent value="my-feedback" className="mt-0">
-                <div className="bg-gradient-to-b from-sky-50 to-white border-b-4 border-sky-500/20">
-                  <div className="px-8 py-6">
-                    <div className="flex items-center justify-center gap-3 mb-6">
-                      <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-lg">📋</span>
-                      </div>
-                      <h2 className="text-2xl font-bold text-sky-800">
-                        Thắc mắc của tôi
-                      </h2>
-                    </div>
-                  </div>
-                </div>
-
                 <CardContent className="p-8 bg-white">
                   {isLoading ? (
                     <div className="text-center py-20">
@@ -411,10 +397,13 @@ export default function FeedbackPage() {
                           </p>
                           <Button
                             onClick={() => {
-                              const tabs = document.querySelector(
-                                '[value="new-feedback"]'
-                              ) as HTMLElement;
-                              tabs?.click();
+                              // Chuyển sang tab 'Gửi thắc mắc mới'
+                              const tabs = document
+                                .querySelector('[data-state="active"]')
+                                ?.parentElement?.querySelector(
+                                  '[value="new-feedback"]'
+                                ) as HTMLElement;
+                              if (tabs) tabs.click();
                             }}
                             className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-xl"
                           >

@@ -18,7 +18,7 @@ export default function ResponsesPage() {
             <MessageSquare className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
-            Dashboard - Phản hồi
+            Phản hồi
           </h1>
           <p className="text-sky-600 text-lg max-w-2xl mx-auto">
             Thống kê và quản lý phản hồi từ phụ huynh và học sinh

@@ -61,12 +61,7 @@ export default function Overall() {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-blue-200">
-                <AvatarFallback className="text-lg bg-blue-100 text-blue-700">
-                  {selectedStudent.student.name?.charAt(0).toUpperCase() ||
-                    "HS"}
-                </AvatarFallback>
-              </Avatar>
+              {/* Avatar removed as requested */}
               <div>
                 <h3 className="text-xl font-semibold text-blue-800">
                   {selectedStudent.student.name || "Chưa có tên"}

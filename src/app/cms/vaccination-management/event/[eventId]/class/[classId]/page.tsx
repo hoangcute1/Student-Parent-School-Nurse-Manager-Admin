@@ -1,7 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { fetchData } from "@/lib/api/api";
 import { toast } from "sonner";
+import { CheckCircle } from "lucide-react";
 
 interface VaccinationRecord {
   studentId: string;
@@ -50,8 +57,11 @@ export default function VaccinationClassDetailPage() {
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [savingVaccination, setSavingVaccination] = useState(false);
   const [vaccinationForm, setVaccinationForm] = useState({
-    vaccinationStatus: "completed",
-    reaction: "normal",
+    vaccinationStatus: "completed" as
+      | "completed"
+      | "contraindication"
+      | "postponed",
+    reaction: "normal" as "normal" | "mild" | "moderate" | "severe",
     postVaccinationMonitoring: "",
     medicalNotes: "",
   });
@@ -119,8 +129,11 @@ export default function VaccinationClassDetailPage() {
   const handleVaccinate = (student: any) => {
     setSelectedStudent(student);
     setVaccinationForm({
-      vaccinationStatus: "completed",
-      reaction: "normal",
+      vaccinationStatus: "completed" as
+        | "completed"
+        | "contraindication"
+        | "postponed",
+      reaction: "normal" as "normal" | "mild" | "moderate" | "severe",
       postVaccinationMonitoring: "",
       medicalNotes: "",
     });
@@ -176,8 +189,15 @@ export default function VaccinationClassDetailPage() {
       const newRecord: VaccinationRecord = {
         studentId: studentId,
         studentName: selectedStudent.student?.name,
-        vaccinationStatus: vaccinationForm.vaccinationStatus,
-        reaction: vaccinationForm.reaction,
+        vaccinationStatus: vaccinationForm.vaccinationStatus as
+          | "completed"
+          | "contraindication"
+          | "postponed",
+        reaction: vaccinationForm.reaction as
+          | "normal"
+          | "mild"
+          | "moderate"
+          | "severe",
         postVaccinationMonitoring: vaccinationForm.postVaccinationMonitoring,
         medicalNotes: vaccinationForm.medicalNotes,
         vaccinatedAt: new Date().toISOString(),
@@ -282,159 +302,128 @@ export default function VaccinationClassDetailPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <Card className="p-6 border mb-4">
-        <div className="font-bold text-xl mb-2">
-          Chi tiết lớp {classDetail.class_name}
+      {/* Nút quay lại danh sách */}
+      <div className="flex justify-start mb-2">
+        <Button
+          variant="secondary"
+          className="flex items-center gap-2 text-blue-800 bg-blue-100 border-none hover:bg-blue-200 font-semibold rounded-full px-5 py-2 shadow-sm"
+          onClick={() =>
+            router.push(`/cms/vaccination-management/event/${eventId}`)
+          }
+        >
+          <span className="text-xl">&larr;</span>
+          <span>Quay lại danh sách</span>
+        </Button>
+      </div>
+      <Card className="p-8 border rounded-xl shadow bg-white mb-4">
+        <div className="text-2xl font-bold mb-4 text-blue-900">
+          Chi tiết lớp{" "}
+          <span className="text-blue-700">{classDetail.class_name}</span>
         </div>
-        <div className="text-sm text-gray-700 mb-2">Sự kiện: {event.title}</div>
-        <div className="text-sm text-gray-700 mb-2">
-          Ngày tiêm:{" "}
-          {event.vaccination_date
-            ? new Date(event.vaccination_date).toLocaleDateString()
-            : "-"}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Giờ tiêm: {event.vaccination_time || "-"}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Địa điểm: {event.location}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Loại vaccine: {event.vaccine_type || "-"}
-        </div>
-        <div className="mt-4">
-          <button
-            className="text-xs text-blue-600 underline"
-            onClick={() =>
-              router.push(`/cms/vaccination-management/event/${eventId}`)
-            }
-          >
-            &larr; Xem chi tiết sự kiện tiêm chủng
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+          <div>
+            <div className="font-semibold">Sự kiện:</div>
+            <div className="mb-2">{event.title}</div>
+            <div className="font-semibold">Giờ tiêm:</div>
+            <div className="mb-2">{event.vaccination_time || "-"}</div>
+            <div className="font-semibold">Loại vaccine:</div>
+            <div className="mb-2 text-blue-700 font-bold">
+              {event.vaccine_type?.name ||
+                event.vaccine_type?.title ||
+                event.vaccine_type ||
+                "-"}
+            </div>
+          </div>
+          <div>
+            <div className="font-semibold">Ngày tiêm:</div>
+            <div className="mb-2">
+              {event.vaccination_date
+                ? new Date(event.vaccination_date).toLocaleDateString()
+                : "-"}
+            </div>
+            <div className="font-semibold">Địa điểm:</div>
+            <div className="mb-2">{event.location}</div>
+          </div>
         </div>
       </Card>
-      <Card className="p-6 border">
-        <div className="font-bold text-lg mb-2">
-          Danh sách học sinh đã đồng ý tiêm chủng
-        </div>
-        <div className="text-sm text-gray-500 mb-4">
-          Hiển thị tất cả học sinh đã được phụ huynh đồng ý tiêm chủng (bao gồm
-          cả học sinh đã tiêm xong)
-        </div>
-        {totalAgreed === 0 ? (
-          <div className="text-center text-gray-600 py-8">
-            <div className="font-semibold mb-2">
-              Chưa có học sinh đồng ý tiêm chủng
-            </div>
-            <div className="text-xs text-gray-500 mb-2">
-              Học sinh sẽ hiển thị ở đây sau khi phụ huynh đồng ý tiêm chủng
-            </div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border rounded-xl overflow-hidden">
-              <thead>
-                <tr className="bg-gray-50 text-gray-700">
-                  <th className="p-2 border">Họ tên</th>
-                  <th className="p-2 border">Lớp</th>
-                  <th className="p-2 border">Trạng thái tiêm</th>
-                  <th className="p-2 border">Phản ứng</th>
-                  <th className="p-2 border">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agreedStudents.map((s: any) => {
-                  const vaccinationRecord = getVaccinationRecord(
-                    s.student?._id || s.student?.student_id
-                  );
-                  return (
-                    <tr
-                      key={s.student?._id || s.student?.student_id}
-                      className="text-center hover:bg-blue-50"
-                    >
-                      <td className="border p-2 font-semibold">
-                        {s.student?.name}
-                      </td>
-                      <td className="border p-2">{classDetail.class_name}</td>
-                      <td className="border p-2">
-                        {vaccinationRecord ? (
-                          getVaccinationStatusBadge(
-                            vaccinationRecord.vaccinationStatus
-                          )
-                        ) : s.status === "COMPLETED" ||
-                          s.status === "Completed" ||
-                          s.status === "completed" ||
-                          s.vaccination_result ? (
-                          <Badge className="bg-green-100 text-green-800">
-                            Đã tiêm
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Chưa tiêm</Badge>
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {vaccinationRecord ? (
-                          getReactionBadge(vaccinationRecord.reaction)
-                        ) : s.vaccination_result ? (
-                          (() => {
-                            try {
-                              const result = JSON.parse(
-                                s.vaccination_result || "{}"
-                              );
-                              const reaction =
-                                result.reaction ||
-                                result.reaction_severity ||
-                                "normal";
-                              return getReactionBadge(reaction);
-                            } catch {
-                              return (
-                                <Badge variant="secondary">
-                                  Không có thông tin
-                                </Badge>
-                              );
-                            }
-                          })()
-                        ) : (
-                          <Badge variant="secondary">Chưa tiêm</Badge>
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                            onClick={() => handleVaccinate(s)}
-                            disabled={
-                              !!s.vaccination_result ||
-                              s.status === "COMPLETED" ||
-                              s.status === "Completed" ||
-                              s.status === "completed" ||
-                              savingVaccination
-                            }
-                          >
-                            {!!s.vaccination_result ||
-                            s.status === "COMPLETED" ||
-                            s.status === "Completed" ||
-                            s.status === "completed"
-                              ? "Đã tiêm"
-                              : "Tiêm"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewDetails(s)}
-                          >
-                            Chi tiết
-                          </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách học sinh đã đồng ý tiêm chủng</CardTitle>
+          <CardDescription>
+            Hiển thị tất cả học sinh đã được phụ huynh đồng ý tiêm chủng (bao
+            gồm cả học sinh đã tiêm xong)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {classDetail?.students
+              ?.filter(
+                (s) => s.status === "Approved" || s.status === "Completed"
+              )
+              .map((student) => (
+                <div
+                  key={
+                    student.student?._id ||
+                    student.student?.student_id ||
+                    student.student?.id
+                  }
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                >
+                  <div className="flex items-center space-x-4">
+                    {/* Icon trạng thái */}
+                    {student.status === "Completed" ? (
+                      <CheckCircle className="h-5 w-5 text-blue-500" />
+                    ) : (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                    <div>
+                      <div className="font-medium">
+                        {student.student?.full_name ||
+                          student.student?.name ||
+                          "Không xác định"}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        MSSV:{" "}
+                        {student.student?.student_id ||
+                          student.student?.id ||
+                          "Không xác định"}
+                      </div>
+                      <div className="text-xs text-blue-600">
+                        Trạng thái:{" "}
+                        {student.status === "Completed"
+                          ? "Đã tiêm"
+                          : "Chờ tiêm"}
+                      </div>
+                      {/* Nếu có phản ứng */}
+                      {student.reaction && (
+                        <div className="text-xs text-gray-500">
+                          Phản ứng: {student.reaction}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge
+                      className={
+                        student.status === "Completed"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
+                      }
+                    >
+                      {student.status === "Completed" ? "Đã tiêm" : "Chờ tiêm"}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewDetails(student)}
+                    >
+                      Chi tiết
+                    </Button>
+                  </div>
+                </div>
+              ))}
           </div>
-        )}
+        </CardContent>
       </Card>
 
       {/* Modal ghi nhận tiêm chủng */}
@@ -456,7 +445,10 @@ export default function VaccinationClassDetailPage() {
                 onValueChange={(value) =>
                   setVaccinationForm((prev) => ({
                     ...prev,
-                    vaccinationStatus: value as any,
+                    vaccinationStatus: value as
+                      | "completed"
+                      | "contraindication"
+                      | "postponed",
                   }))
                 }
               >
@@ -480,7 +472,11 @@ export default function VaccinationClassDetailPage() {
                 onValueChange={(value) =>
                   setVaccinationForm((prev) => ({
                     ...prev,
-                    reaction: value as any,
+                    reaction: value as
+                      | "normal"
+                      | "mild"
+                      | "moderate"
+                      | "severe",
                   }))
                 }
               >
@@ -671,7 +667,33 @@ export default function VaccinationClassDetailPage() {
                         Kết quả tiêm chủng:
                       </Label>
                       <div className="mt-1 p-3 bg-gray-50 rounded-md">
-                        {selectedStudent.vaccination_result || "Không có"}
+                        {(() => {
+                          try {
+                            const result = JSON.parse(
+                              selectedStudent.vaccination_result || "{}"
+                            );
+                            return (
+                              <div className="space-y-1">
+                                <div>
+                                  <span className="font-medium">
+                                    Trạng thái:
+                                  </span>{" "}
+                                  {result.status || "-"}
+                                </div>
+                                <div>
+                                  <span className="font-medium">
+                                    Giám sát sau tiêm:
+                                  </span>{" "}
+                                  {result.postVaccinationMonitoring || "-"}
+                                </div>
+                              </div>
+                            );
+                          } catch {
+                            return (
+                              selectedStudent.vaccination_result || "Không có"
+                            );
+                          }
+                        })()}
                       </div>
                     </div>
 

@@ -274,7 +274,7 @@ export default function StudentsPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
-            Dashboard - Quản lý học sinh
+           Quản lý học sinh
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Theo dõi thông tin học sinh, thống kê sức khỏe và quản lý hồ sơ
