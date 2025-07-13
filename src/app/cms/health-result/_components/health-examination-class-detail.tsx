@@ -357,24 +357,26 @@ export default function HealthExaminationClassDetail({
     // Validation based on examination type
     let validationErrors = [];
 
-    const examType = classDetail.event_details.examination_type;
+    const examType =
+      classDetail.event_details.examination_type?.toLowerCase() || "";
 
     if (
-      examType === "Khám sức khỏe định kỳ" ||
-      examType === "Khám sức khoẻ định kỳ" ||
-      examType === "Kham suc khoe dinh ky" ||
-      !examType ||
-      examType === ""
+      examType.includes("khám sức khỏe định kỳ") ||
+      examType.includes("kham suc khoe dinh ky") ||
+      examType.includes("periodic health") ||
+      examType === "" ||
+      !classDetail.event_details.examination_type
     ) {
       if (!height) validationErrors.push("Chiều cao");
       if (!weight) validationErrors.push("Cân nặng");
       if (!vision) validationErrors.push("Thị lực");
       if (!healthStatus) validationErrors.push("Trạng thái sức khỏe");
     } else if (
-      examType === "Khám răng miệng" ||
-      examType === "Kham rang mieng" ||
-      examType === "Khám răng" ||
-      examType === "Dental examination"
+      examType.includes("khám răng miệng") ||
+      examType.includes("kham rang mieng") ||
+      examType.includes("khám răng") ||
+      examType.includes("dental examination") ||
+      examType.includes("dental")
     ) {
       if (!milkTeeth && milkTeeth !== "0") validationErrors.push("Số răng sữa");
       if (!permanentTeeth && permanentTeeth !== "0")
@@ -382,9 +384,10 @@ export default function HealthExaminationClassDetail({
       if (!cavities && cavities !== "0") validationErrors.push("Số răng sâu");
       if (!dentalStatus) validationErrors.push("Trạng thái răng miệng");
     } else if (
-      examType === "Khám mắt" ||
-      examType === "Kham mat" ||
-      examType === "Eye examination"
+      examType.includes("khám mắt") ||
+      examType.includes("kham mat") ||
+      examType.includes("eye examination") ||
+      examType.includes("eye")
     ) {
       if (!rightEyeVision) validationErrors.push("Thị lực mắt phải");
       if (!leftEyeVision) validationErrors.push("Thị lực mắt trái");
@@ -406,14 +409,15 @@ export default function HealthExaminationClassDetail({
       };
 
       // Add specific fields based on examination type
-      const examType = classDetail.event_details.examination_type;
+      const examType =
+        classDetail.event_details.examination_type?.toLowerCase() || "";
 
       if (
-        examType === "Khám sức khỏe định kỳ" ||
-        examType === "Khám sức khoẻ định kỳ" ||
-        examType === "Kham suc khoe dinh ky" ||
-        !examType ||
-        examType === ""
+        examType.includes("khám sức khỏe định kỳ") ||
+        examType.includes("kham suc khoe dinh ky") ||
+        examType.includes("periodic health") ||
+        examType === "" ||
+        !classDetail.event_details.examination_type
       ) {
         examinationData.health_result = JSON.stringify({
           height,
@@ -424,10 +428,11 @@ export default function HealthExaminationClassDetail({
           type: "Khám sức khỏe định kỳ",
         });
       } else if (
-        examType === "Khám răng miệng" ||
-        examType === "Kham rang mieng" ||
-        examType === "Khám răng" ||
-        examType === "Dental examination"
+        examType.includes("khám răng miệng") ||
+        examType.includes("kham rang mieng") ||
+        examType.includes("khám răng") ||
+        examType.includes("dental examination") ||
+        examType.includes("dental")
       ) {
         examinationData.health_result = JSON.stringify({
           milk_teeth: milkTeeth,
@@ -437,9 +442,10 @@ export default function HealthExaminationClassDetail({
           type: "Khám răng miệng",
         });
       } else if (
-        examType === "Khám mắt" ||
-        examType === "Kham mat" ||
-        examType === "Eye examination"
+        examType.includes("khám mắt") ||
+        examType.includes("kham mat") ||
+        examType.includes("eye examination") ||
+        examType.includes("eye")
       ) {
         examinationData.health_result = JSON.stringify({
           right_eye_vision: rightEyeVision,
@@ -600,7 +606,11 @@ export default function HealthExaminationClassDetail({
               </div>
             ) : (
               classDetail.students
-                .filter((student) => student.status === "Approved" || student.status === "Completed")
+                .filter(
+                  (student) =>
+                    student.status === "Approved" ||
+                    student.status === "Completed"
+                )
                 .map((student) => (
                   <div
                     key={student.examination_id}
@@ -658,12 +668,16 @@ export default function HealthExaminationClassDetail({
                         onClick={() => handleExamination(student)}
                         variant="default"
                         className={`flex items-center space-x-1 ${
-                          student.status === "Completed" ? "opacity-50 cursor-not-allowed" : ""
+                          student.status === "Completed"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                         }`}
                         disabled={student.status === "Completed"}
                       >
                         <Stethoscope className="h-4 w-4" />
-                        <span>{student.status === "Completed" ? "Đã khám" : "Khám"}</span>
+                        <span>
+                          {student.status === "Completed" ? "Đã khám" : "Khám"}
+                        </span>
                       </Button>
 
                       {/* Nút Chuông (Lập lịch hẹn tư vấn) */}
@@ -701,8 +715,14 @@ export default function HealthExaminationClassDetail({
           <DialogHeader>
             <DialogTitle>
               {selectedStudent?.status === "Completed"
-                ? "Kết quả khám sức khỏe"
-                : "Ghi nhận kết quả khám"}
+                ? `Kết quả ${
+                    classDetail.event_details.examination_type ||
+                    "khám sức khỏe"
+                  }`
+                : `Ghi nhận kết quả ${
+                    classDetail.event_details.examination_type ||
+                    "khám sức khỏe"
+                  }`}
             </DialogTitle>
           </DialogHeader>
 
@@ -718,7 +738,7 @@ export default function HealthExaminationClassDetail({
                 (MSSV:{" "}
                 {selectedStudent.student?.student_id ||
                   (selectedStudent.student as any)?.studentId ||
-                  (selectedStudent.student as any)?.id ||
+                  (selectedStudent as any)?.id ||
                   (selectedStudent as any).student_id ||
                   (selectedStudent as any).studentId ||
                   (selectedStudent as any).id ||
@@ -727,14 +747,22 @@ export default function HealthExaminationClassDetail({
               </div>
 
               {/* Form fields based on examination type */}
-              {(classDetail.event_details.examination_type ===
-                "Khám sức khỏe định kỳ" ||
-                classDetail.event_details.examination_type ===
-                  "Khám sức khoẻ định kỳ" ||
-                classDetail.event_details.examination_type ===
-                  "Kham suc khoe dinh ky" ||
-                !classDetail.event_details.examination_type ||
-                classDetail.event_details.examination_type === "") && (
+              {(() => {
+                const examType =
+                  classDetail.event_details.examination_type?.toLowerCase() ||
+                  "";
+                const isPeriodicHealth =
+                  examType.includes("khám sức khỏe định kỳ") ||
+                  examType.includes("kham suc khoe dinh ky") ||
+                  examType.includes("periodic health") ||
+                  examType === "" ||
+                  !classDetail.event_details.examination_type;
+
+                console.log("Debug - examType:", examType);
+                console.log("Debug - isPeriodicHealth:", isPeriodicHealth);
+
+                return isPeriodicHealth;
+              })() && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -826,13 +854,22 @@ export default function HealthExaminationClassDetail({
                 </div>
               )}
 
-              {(classDetail.event_details.examination_type ===
-                "Khám răng miệng" ||
-                classDetail.event_details.examination_type ===
-                  "Kham rang mieng" ||
-                classDetail.event_details.examination_type === "Khám răng" ||
-                classDetail.event_details.examination_type ===
-                  "Dental examination") && (
+              {(() => {
+                const examType =
+                  classDetail.event_details.examination_type?.toLowerCase() ||
+                  "";
+                const isDental =
+                  examType.includes("khám răng miệng") ||
+                  examType.includes("kham rang mieng") ||
+                  examType.includes("khám răng") ||
+                  examType.includes("dental examination") ||
+                  examType.includes("dental");
+
+                console.log("Debug - examType:", examType);
+                console.log("Debug - isDental:", isDental);
+
+                return isDental;
+              })() && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -907,10 +944,21 @@ export default function HealthExaminationClassDetail({
                 </div>
               )}
 
-              {(classDetail.event_details.examination_type === "Khám mắt" ||
-                classDetail.event_details.examination_type === "Kham mat" ||
-                classDetail.event_details.examination_type ===
-                  "Eye examination") && (
+              {(() => {
+                const examType =
+                  classDetail.event_details.examination_type?.toLowerCase() ||
+                  "";
+                const isEye =
+                  examType.includes("khám mắt") ||
+                  examType.includes("kham mat") ||
+                  examType.includes("eye examination") ||
+                  examType.includes("eye");
+
+                console.log("Debug - examType:", examType);
+                console.log("Debug - isEye:", isEye);
+
+                return isEye;
+              })() && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -975,26 +1023,41 @@ export default function HealthExaminationClassDetail({
               )}
 
               {/* Fallback form if examination type doesn't match known types */}
-              {!(
-                classDetail.event_details.examination_type ===
-                  "Khám sức khỏe định kỳ" ||
-                classDetail.event_details.examination_type ===
-                  "Khám sức khoẻ định kỳ" ||
-                classDetail.event_details.examination_type ===
-                  "Kham suc khoe dinh ky" ||
-                !classDetail.event_details.examination_type ||
-                classDetail.event_details.examination_type === "" ||
-                classDetail.event_details.examination_type ===
-                  "Khám răng miệng" ||
-                classDetail.event_details.examination_type ===
-                  "Kham rang mieng" ||
-                classDetail.event_details.examination_type === "Khám răng" ||
-                classDetail.event_details.examination_type ===
-                  "Dental examination" ||
-                classDetail.event_details.examination_type === "Khám mắt" ||
-                classDetail.event_details.examination_type === "Kham mat" ||
-                classDetail.event_details.examination_type === "Eye examination"
-              ) && (
+              {(() => {
+                const examType =
+                  classDetail.event_details.examination_type?.toLowerCase() ||
+                  "";
+                const isPeriodicHealth =
+                  examType.includes("khám sức khỏe định kỳ") ||
+                  examType.includes("kham suc khoe dinh ky") ||
+                  examType.includes("periodic health") ||
+                  examType === "" ||
+                  !classDetail.event_details.examination_type;
+
+                const isDental =
+                  examType.includes("khám răng miệng") ||
+                  examType.includes("kham rang mieng") ||
+                  examType.includes("khám răng") ||
+                  examType.includes("dental examination") ||
+                  examType.includes("dental");
+
+                const isEye =
+                  examType.includes("khám mắt") ||
+                  examType.includes("kham mat") ||
+                  examType.includes("eye examination") ||
+                  examType.includes("eye");
+
+                console.log("Debug - examType:", examType);
+                console.log("Debug - isPeriodicHealth:", isPeriodicHealth);
+                console.log("Debug - isDental:", isDental);
+                console.log("Debug - isEye:", isEye);
+                console.log(
+                  "Debug - showFallback:",
+                  !(isPeriodicHealth || isDental || isEye)
+                );
+
+                return !(isPeriodicHealth || isDental || isEye);
+              })() && (
                 <div className="space-y-4">
                   <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="text-yellow-800">
