@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { fetchData } from "@/lib/api/api";
 
 interface EventDetail {
   event_id: string;
@@ -70,10 +71,10 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
 
   const fetchEventDetail = async () => {
     try {
-      const response = await fetch(
-        `/api/health-examinations/events/${eventId}`
+      const response = await fetchData<any>(
+        `/health-examinations/events/${eventId}`
       );
-      const data = await response.json();
+      const data = response;
       setEventDetail(data);
     } catch (error) {
       console.error("Error fetching event detail:", error);
@@ -293,6 +294,7 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Lớp</TableHead>
+                  <TableHead>Khối</TableHead>
                   <TableHead>Tổng học sinh</TableHead>
                   <TableHead>Đã đồng ý</TableHead>
                   <TableHead>Chờ phản hồi</TableHead>
@@ -318,18 +320,14 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
                       }
                     >
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="w-4 h-4 text-blue-600" />
-                            <span className="font-medium">
-                              {classDetail.class_name}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            Khối {classDetail.grade_level}
-                          </p>
+                        <div className="flex items-center gap-2">
+                          <GraduationCap className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium">
+                            {classDetail.class_name}
+                          </span>
                         </div>
                       </TableCell>
+                      <TableCell>{classDetail.grade_level}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4 text-gray-600" />

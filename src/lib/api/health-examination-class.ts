@@ -1,3 +1,4 @@
+import { fetchData } from "./api";
 import { getAuthToken } from "./auth/token";
 
 export interface Student {
@@ -54,8 +55,10 @@ export const getHealthExaminationClassDetail = async (
     throw new Error("No authentication token found");
   }
 
-  const response = await fetch(
-    `/api/health-examinations/events/${encodeURIComponent(eventId)}/classes/${classId}`,
+  const response = await fetchData<any>(
+    `/health-examinations/events/${encodeURIComponent(
+      eventId
+    )}/classes/${classId}`,
     {
       method: "GET",
       headers: {
@@ -65,11 +68,11 @@ export const getHealthExaminationClassDetail = async (
     }
   );
 
-  if (!response.ok) {
+  if (!response) {
     throw new Error(`Failed to fetch class detail: ${response.status}`);
   }
 
-  return response.json();
+  return response;
 };
 
 export const updateHealthExaminationResult = async (
@@ -111,19 +114,22 @@ export const scheduleConsultation = async (
     throw new Error("No authentication token found");
   }
 
-  const response = await fetch(`/api/health-examinations/schedule-consultation`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      student_id: studentId,
-      consultation_date: consultationDate,
-      consultation_time: consultationTime,
-      notes: notes,
-    }),
-  });
+  const response = await fetch(
+    `/api/health-examinations/schedule-consultation`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        student_id: studentId,
+        consultation_date: consultationDate,
+        consultation_time: consultationTime,
+        notes: notes,
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to schedule consultation: ${response.status}`);

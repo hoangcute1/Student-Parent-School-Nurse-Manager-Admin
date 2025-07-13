@@ -6,13 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import {
   Dialog,
   DialogContent,
@@ -37,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useRouter } from "next/navigation";
+import { fetchData } from "@/lib/api/api";
 
 interface Student {
   examination_id: string;
@@ -106,17 +101,17 @@ export default function HealthExaminationClassDetail({
   const fetchClassDetail = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/health-examinations/events/${encodeURIComponent(
+      const response = await fetchData<any>(
+        `/health-examinations/events/${encodeURIComponent(
           eventId
         )}/classes/${classId}`
       );
 
-      if (!response.ok) {
+      if (!response) {
         throw new Error("Failed to fetch class detail");
       }
 
-      const data = await response.json();
+      const data = response;
       setClassDetail(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
