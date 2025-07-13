@@ -2,7 +2,7 @@ import { Heart, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navLinks, adminNavLinks } from "../_constants/sidebar";
+import { navLinks } from "../_constants/sidebar";
 import { cn } from "@/lib/utils";
 
 import { useAuthStore } from "@/stores/auth-store";
@@ -55,8 +55,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${isActive ? "bg-sky-100" : ""
-                  }`}
+                className={`flex items-center gap-4 rounded-lg px-4 py-3 text-sky-700 transition-all hover:text-sky-900 hover:bg-sky-100 group border border-transparent hover:border-sky-200 ${
+                  isActive ? "bg-sky-100" : ""
+                }`}
               >
                 <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 <div className="flex-1">
