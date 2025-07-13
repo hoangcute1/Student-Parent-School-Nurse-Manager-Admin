@@ -50,8 +50,11 @@ export default function VaccinationClassDetailPage() {
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [savingVaccination, setSavingVaccination] = useState(false);
   const [vaccinationForm, setVaccinationForm] = useState({
-    vaccinationStatus: "completed",
-    reaction: "normal",
+    vaccinationStatus: "completed" as
+      | "completed"
+      | "contraindication"
+      | "postponed",
+    reaction: "normal" as "normal" | "mild" | "moderate" | "severe",
     postVaccinationMonitoring: "",
     medicalNotes: "",
   });
@@ -119,8 +122,11 @@ export default function VaccinationClassDetailPage() {
   const handleVaccinate = (student: any) => {
     setSelectedStudent(student);
     setVaccinationForm({
-      vaccinationStatus: "completed",
-      reaction: "normal",
+      vaccinationStatus: "completed" as
+        | "completed"
+        | "contraindication"
+        | "postponed",
+      reaction: "normal" as "normal" | "mild" | "moderate" | "severe",
       postVaccinationMonitoring: "",
       medicalNotes: "",
     });
@@ -176,8 +182,15 @@ export default function VaccinationClassDetailPage() {
       const newRecord: VaccinationRecord = {
         studentId: studentId,
         studentName: selectedStudent.student?.name,
-        vaccinationStatus: vaccinationForm.vaccinationStatus,
-        reaction: vaccinationForm.reaction,
+        vaccinationStatus: vaccinationForm.vaccinationStatus as
+          | "completed"
+          | "contraindication"
+          | "postponed",
+        reaction: vaccinationForm.reaction as
+          | "normal"
+          | "mild"
+          | "moderate"
+          | "severe",
         postVaccinationMonitoring: vaccinationForm.postVaccinationMonitoring,
         medicalNotes: vaccinationForm.medicalNotes,
         vaccinatedAt: new Date().toISOString(),
@@ -456,7 +469,10 @@ export default function VaccinationClassDetailPage() {
                 onValueChange={(value) =>
                   setVaccinationForm((prev) => ({
                     ...prev,
-                    vaccinationStatus: value as any,
+                    vaccinationStatus: value as
+                      | "completed"
+                      | "contraindication"
+                      | "postponed",
                   }))
                 }
               >
@@ -480,7 +496,11 @@ export default function VaccinationClassDetailPage() {
                 onValueChange={(value) =>
                   setVaccinationForm((prev) => ({
                     ...prev,
-                    reaction: value as any,
+                    reaction: value as
+                      | "normal"
+                      | "mild"
+                      | "moderate"
+                      | "severe",
                   }))
                 }
               >

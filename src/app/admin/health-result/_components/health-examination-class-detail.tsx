@@ -102,15 +102,15 @@ export default function HealthExaminationClassDetail({
   const [healthResult, setHealthResult] = useState("");
   const [examinationNotes, setExaminationNotes] = useState("");
   const [recommendations, setRecommendations] = useState("");
-  const [followUpRequired, setFollowUpRequired] = useState(false);
-  const [followUpDate, setFollowUpDate] = useState<Date | undefined>(undefined);
   const [updating, setUpdating] = useState(false);
 
   // Form state for consultation scheduling
+  const [consultationTitle, setConsultationTitle] = useState("");
   const [consultationDate, setConsultationDate] = useState<Date | undefined>(
     undefined
   );
   const [consultationTime, setConsultationTime] = useState("");
+  const [consultationDoctor, setConsultationDoctor] = useState("");
   const [consultationNotes, setConsultationNotes] = useState("");
   const [schedulingConsultation, setSchedulingConsultation] = useState(false);
 
@@ -208,8 +208,6 @@ export default function HealthExaminationClassDetail({
     setHealthResult(student.health_result || "");
     setExaminationNotes(student.examination_notes || "");
     setRecommendations(student.recommendations || "");
-    setFollowUpRequired(student.follow_up_required || false);
-    setFollowUpDate(undefined);
 
     // Reset all examination form fields
     setHeight("");
@@ -278,8 +276,6 @@ export default function HealthExaminationClassDetail({
     setHealthResult("");
     setExaminationNotes("");
     setRecommendations("");
-    setFollowUpRequired(false);
-    setFollowUpDate(undefined);
 
     // Reset all examination form fields
     setHeight("");
@@ -302,13 +298,21 @@ export default function HealthExaminationClassDetail({
   const closeConsultationDialog = () => {
     setIsConsultationDialogOpen(false);
     setSelectedStudent(null);
+    setConsultationTitle("");
     setConsultationDate(undefined);
     setConsultationTime("");
+    setConsultationDoctor("");
     setConsultationNotes("");
   };
 
   const handleScheduleConsultation = async () => {
-    if (!selectedStudent || !consultationDate || !consultationTime) {
+    if (
+      !selectedStudent ||
+      !consultationTitle ||
+      !consultationDate ||
+      !consultationTime ||
+      !consultationDoctor
+    ) {
       alert("Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -324,8 +328,10 @@ export default function HealthExaminationClassDetail({
           },
           body: JSON.stringify({
             student_id: selectedStudent.student._id,
+            title: consultationTitle,
             consultation_date: consultationDate.toISOString(),
             consultation_time: consultationTime,
+            doctor: consultationDoctor,
             notes: consultationNotes,
           }),
         }
@@ -350,20 +356,36 @@ export default function HealthExaminationClassDetail({
 
     // Validation based on examination type
     let validationErrors = [];
-    
+
     const examType = classDetail.event_details.examination_type;
-    
-    if (examType === "Khám sức khỏe định kỳ" || examType === "Khám sức khoẻ định kỳ" || examType === "Kham suc khoe dinh ky" || !examType || examType === "") {
+
+    if (
+      examType === "Khám sức khỏe định kỳ" ||
+      examType === "Khám sức khoẻ định kỳ" ||
+      examType === "Kham suc khoe dinh ky" ||
+      !examType ||
+      examType === ""
+    ) {
       if (!height) validationErrors.push("Chiều cao");
       if (!weight) validationErrors.push("Cân nặng");
       if (!vision) validationErrors.push("Thị lực");
       if (!healthStatus) validationErrors.push("Trạng thái sức khỏe");
-    } else if (examType === "Khám răng miệng" || examType === "Kham rang mieng" || examType === "Khám răng" || examType === "Dental examination") {
+    } else if (
+      examType === "Khám răng miệng" ||
+      examType === "Kham rang mieng" ||
+      examType === "Khám răng" ||
+      examType === "Dental examination"
+    ) {
       if (!milkTeeth && milkTeeth !== "0") validationErrors.push("Số răng sữa");
-      if (!permanentTeeth && permanentTeeth !== "0") validationErrors.push("Số răng vĩnh viễn");
+      if (!permanentTeeth && permanentTeeth !== "0")
+        validationErrors.push("Số răng vĩnh viễn");
       if (!cavities && cavities !== "0") validationErrors.push("Số răng sâu");
       if (!dentalStatus) validationErrors.push("Trạng thái răng miệng");
-    } else if (examType === "Khám mắt" || examType === "Kham mat" || examType === "Eye examination") {
+    } else if (
+      examType === "Khám mắt" ||
+      examType === "Kham mat" ||
+      examType === "Eye examination"
+    ) {
       if (!rightEyeVision) validationErrors.push("Thị lực mắt phải");
       if (!leftEyeVision) validationErrors.push("Thị lực mắt trái");
       if (!eyeStatus) validationErrors.push("Trạng thái mắt");
@@ -381,14 +403,18 @@ export default function HealthExaminationClassDetail({
       let examinationData: any = {
         examination_notes: examinationNotes,
         recommendations: recommendations,
-        follow_up_required: followUpRequired,
-        follow_up_date: followUpDate?.toISOString(),
       };
 
       // Add specific fields based on examination type
       const examType = classDetail.event_details.examination_type;
-      
-      if (examType === "Khám sức khỏe định kỳ" || examType === "Khám sức khoẻ định kỳ" || examType === "Kham suc khoe dinh ky" || !examType || examType === "") {
+
+      if (
+        examType === "Khám sức khỏe định kỳ" ||
+        examType === "Khám sức khoẻ định kỳ" ||
+        examType === "Kham suc khoe dinh ky" ||
+        !examType ||
+        examType === ""
+      ) {
         examinationData.health_result = JSON.stringify({
           height,
           weight,
@@ -397,7 +423,12 @@ export default function HealthExaminationClassDetail({
           status: healthStatus,
           type: "Khám sức khỏe định kỳ",
         });
-      } else if (examType === "Khám răng miệng" || examType === "Kham rang mieng" || examType === "Khám răng" || examType === "Dental examination") {
+      } else if (
+        examType === "Khám răng miệng" ||
+        examType === "Kham rang mieng" ||
+        examType === "Khám răng" ||
+        examType === "Dental examination"
+      ) {
         examinationData.health_result = JSON.stringify({
           milk_teeth: milkTeeth,
           permanent_teeth: permanentTeeth,
@@ -405,7 +436,11 @@ export default function HealthExaminationClassDetail({
           status: dentalStatus,
           type: "Khám răng miệng",
         });
-      } else if (examType === "Khám mắt" || examType === "Kham mat" || examType === "Eye examination") {
+      } else if (
+        examType === "Khám mắt" ||
+        examType === "Kham mat" ||
+        examType === "Eye examination"
+      ) {
         examinationData.health_result = JSON.stringify({
           right_eye_vision: rightEyeVision,
           left_eye_vision: leftEyeVision,
@@ -527,13 +562,15 @@ export default function HealthExaminationClassDetail({
         <CardHeader>
           <CardTitle>Danh sách học sinh đã đồng ý khám</CardTitle>
           <div className="text-sm text-gray-600">
-            Chỉ hiển thị học sinh đã được phụ huynh đồng ý khám sức khỏe
+            Hiển thị học sinh đã được phụ huynh đồng ý khám sức khỏe (bao gồm cả
+            đã khám xong)
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {classDetail.students.filter(
-              (student) => student.status === "Approved"
+              (student) =>
+                student.status === "Approved" || student.status === "Completed"
             ).length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <div className="text-lg font-medium">
@@ -550,6 +587,9 @@ export default function HealthExaminationClassDetail({
                       Đã đồng ý: {classDetail.statistics.approved}
                     </span>
                     <span className="inline-block mx-2">
+                      Đã hoàn thành: {classDetail.statistics.completed}
+                    </span>
+                    <span className="inline-block mx-2">
                       Chờ phản hồi: {classDetail.statistics.pending}
                     </span>
                     <span className="inline-block mx-2">
@@ -560,7 +600,11 @@ export default function HealthExaminationClassDetail({
               </div>
             ) : (
               classDetail.students
-                .filter((student) => student.status === "Approved")
+                .filter(
+                  (student) =>
+                    student.status === "Approved" ||
+                    student.status === "Completed"
+                )
                 .map((student) => (
                   <div
                     key={student.examination_id}
@@ -570,29 +614,39 @@ export default function HealthExaminationClassDetail({
                       {getStatusIcon(student.status)}
                       <div>
                         <div className="font-medium">
-                          {student.student?.full_name || 
-                           (student.student as any)?.name ||
-                           (student as any).full_name ||
-                           (student as any).name ||
-                           "Không xác định"}
+                          {student.student?.full_name ||
+                            (student.student as any)?.name ||
+                            (student as any).full_name ||
+                            (student as any).name ||
+                            "Không xác định"}
                         </div>
                         <div className="text-sm text-gray-600">
-                          MSSV: {student.student?.student_id || 
-                                 (student.student as any)?.studentId ||
-                                 (student.student as any)?.id ||
-                                 (student as any).student_id ||
-                                 (student as any).studentId ||
-                                 (student as any).id ||
-                                 "Không xác định"}
+                          MSSV:{" "}
+                          {student.student?.student_id ||
+                            (student.student as any)?.studentId ||
+                            (student.student as any)?.id ||
+                            (student as any).student_id ||
+                            (student as any).studentId ||
+                            (student as any).id ||
+                            "Không xác định"}
                         </div>
                         {student.health_result && (
                           <div className="text-sm text-blue-600">
                             {(() => {
                               try {
-                                const parsedResult = JSON.parse(student.health_result);
-                                return `Trạng thái: ${parsedResult.status || "Đã khám"}`;
+                                const parsedResult = JSON.parse(
+                                  student.health_result
+                                );
+                                return `Trạng thái: ${
+                                  parsedResult.status || "Đã khám"
+                                }`;
                               } catch {
-                                return `Kết quả: ${student.health_result.length > 50 ? student.health_result.substring(0, 50) + "..." : student.health_result}`;
+                                return `Kết quả: ${
+                                  student.health_result.length > 50
+                                    ? student.health_result.substring(0, 50) +
+                                      "..."
+                                    : student.health_result
+                                }`;
                               }
                             })()}
                           </div>
@@ -607,10 +661,17 @@ export default function HealthExaminationClassDetail({
                         size="sm"
                         onClick={() => handleExamination(student)}
                         variant="default"
-                        className="flex items-center space-x-1"
+                        className={`flex items-center space-x-1 ${
+                          student.status === "Completed"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={student.status === "Completed"}
                       >
                         <Stethoscope className="h-4 w-4" />
-                        <span>Khám</span>
+                        <span>
+                          {student.status === "Completed" ? "Đã khám" : "Khám"}
+                        </span>
                       </Button>
 
                       {/* Nút Chuông (Lập lịch hẹn tư vấn) */}
@@ -656,28 +717,30 @@ export default function HealthExaminationClassDetail({
           {selectedStudent && classDetail && (
             <div className="space-y-4">
               <div>
-                <strong>Học sinh:</strong> {
-                  selectedStudent.student?.full_name || 
+                <strong>Học sinh:</strong>{" "}
+                {selectedStudent.student?.full_name ||
                   (selectedStudent.student as any)?.name ||
                   (selectedStudent as any).full_name ||
                   (selectedStudent as any).name ||
-                  "Không xác định"
-                }{" "}
-                (MSSV: {
-                  selectedStudent.student?.student_id || 
+                  "Không xác định"}{" "}
+                (MSSV:{" "}
+                {selectedStudent.student?.student_id ||
                   (selectedStudent.student as any)?.studentId ||
                   (selectedStudent.student as any)?.id ||
                   (selectedStudent as any).student_id ||
                   (selectedStudent as any).studentId ||
                   (selectedStudent as any).id ||
-                  "Không xác định"
-                })
+                  "Không xác định"}
+                )
               </div>
 
               {/* Form fields based on examination type */}
-              {(classDetail.event_details.examination_type === "Khám sức khỏe định kỳ" ||
-                classDetail.event_details.examination_type === "Khám sức khoẻ định kỳ" ||
-                classDetail.event_details.examination_type === "Kham suc khoe dinh ky" ||
+              {(classDetail.event_details.examination_type ===
+                "Khám sức khỏe định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Khám sức khoẻ định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Kham suc khoe dinh ky" ||
                 !classDetail.event_details.examination_type ||
                 classDetail.event_details.examination_type === "") && (
                 <div className="space-y-4">
@@ -719,8 +782,12 @@ export default function HealthExaminationClassDetail({
                       {bmi && (
                         <div className="text-xs text-gray-600">
                           {parseFloat(bmi) < 18.5 && "Dưới mức tiêu chuẩn"}
-                          {parseFloat(bmi) >= 18.5 && parseFloat(bmi) < 24.9 && "Bình thường"}
-                          {parseFloat(bmi) >= 25 && parseFloat(bmi) < 29.9 && "Thừa cân"}
+                          {parseFloat(bmi) >= 18.5 &&
+                            parseFloat(bmi) < 24.9 &&
+                            "Bình thường"}
+                          {parseFloat(bmi) >= 25 &&
+                            parseFloat(bmi) < 29.9 &&
+                            "Thừa cân"}
                           {parseFloat(bmi) >= 30 && "Béo phì"}
                         </div>
                       )}
@@ -767,10 +834,13 @@ export default function HealthExaminationClassDetail({
                 </div>
               )}
 
-              {(classDetail.event_details.examination_type === "Khám răng miệng" ||
-                classDetail.event_details.examination_type === "Kham rang mieng" ||
+              {(classDetail.event_details.examination_type ===
+                "Khám răng miệng" ||
+                classDetail.event_details.examination_type ===
+                  "Kham rang mieng" ||
                 classDetail.event_details.examination_type === "Khám răng" ||
-                classDetail.event_details.examination_type === "Dental examination") && (
+                classDetail.event_details.examination_type ===
+                  "Dental examination") && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -820,9 +890,15 @@ export default function HealthExaminationClassDetail({
                       <option value="">Chọn trạng thái</option>
                       <option value="Bình thường">Bình thường</option>
                       <option value="Cần theo dõi">Cần theo dõi</option>
-                      <option value="Cần điều trị sâu răng">Cần điều trị sâu răng</option>
-                      <option value="Cần vệ sinh răng miệng">Cần vệ sinh răng miệng</option>
-                      <option value="Cần tư vấn nha khoa">Cần tư vấn nha khoa</option>
+                      <option value="Cần điều trị sâu răng">
+                        Cần điều trị sâu răng
+                      </option>
+                      <option value="Cần vệ sinh răng miệng">
+                        Cần vệ sinh răng miệng
+                      </option>
+                      <option value="Cần tư vấn nha khoa">
+                        Cần tư vấn nha khoa
+                      </option>
                     </select>
                   </div>
 
@@ -841,11 +917,14 @@ export default function HealthExaminationClassDetail({
 
               {(classDetail.event_details.examination_type === "Khám mắt" ||
                 classDetail.event_details.examination_type === "Kham mat" ||
-                classDetail.event_details.examination_type === "Eye examination") && (
+                classDetail.event_details.examination_type ===
+                  "Eye examination") && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="right_eye_vision">Thị lực mắt phải (.../10)</Label>
+                      <Label htmlFor="right_eye_vision">
+                        Thị lực mắt phải (.../10)
+                      </Label>
                       <Input
                         id="right_eye_vision"
                         placeholder="VD: 10/10 hoặc 8/10"
@@ -855,7 +934,9 @@ export default function HealthExaminationClassDetail({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="left_eye_vision">Thị lực mắt trái (.../10)</Label>
+                      <Label htmlFor="left_eye_vision">
+                        Thị lực mắt trái (.../10)
+                      </Label>
                       <Input
                         id="left_eye_vision"
                         placeholder="VD: 10/10 hoặc 9/10"
@@ -882,7 +963,9 @@ export default function HealthExaminationClassDetail({
                       <option value="Cận thị nặng">Cận thị nặng</option>
                       <option value="Viễn thị">Viễn thị</option>
                       <option value="Loạn thị">Loạn thị</option>
-                      <option value="Cần khám chuyên khoa">Cần khám chuyên khoa</option>
+                      <option value="Cần khám chuyên khoa">
+                        Cần khám chuyên khoa
+                      </option>
                     </select>
                   </div>
 
@@ -900,22 +983,31 @@ export default function HealthExaminationClassDetail({
               )}
 
               {/* Fallback form if examination type doesn't match known types */}
-              {!(classDetail.event_details.examination_type === "Khám sức khỏe định kỳ" ||
-                 classDetail.event_details.examination_type === "Khám sức khoẻ định kỳ" ||
-                 classDetail.event_details.examination_type === "Kham suc khoe dinh ky" ||
-                 !classDetail.event_details.examination_type ||
-                 classDetail.event_details.examination_type === "" ||
-                 classDetail.event_details.examination_type === "Khám răng miệng" ||
-                 classDetail.event_details.examination_type === "Kham rang mieng" ||
-                 classDetail.event_details.examination_type === "Khám răng" ||
-                 classDetail.event_details.examination_type === "Dental examination" ||
-                 classDetail.event_details.examination_type === "Khám mắt" ||
-                 classDetail.event_details.examination_type === "Kham mat" ||
-                 classDetail.event_details.examination_type === "Eye examination") && (
+              {!(
+                classDetail.event_details.examination_type ===
+                  "Khám sức khỏe định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Khám sức khoẻ định kỳ" ||
+                classDetail.event_details.examination_type ===
+                  "Kham suc khoe dinh ky" ||
+                !classDetail.event_details.examination_type ||
+                classDetail.event_details.examination_type === "" ||
+                classDetail.event_details.examination_type ===
+                  "Khám răng miệng" ||
+                classDetail.event_details.examination_type ===
+                  "Kham rang mieng" ||
+                classDetail.event_details.examination_type === "Khám răng" ||
+                classDetail.event_details.examination_type ===
+                  "Dental examination" ||
+                classDetail.event_details.examination_type === "Khám mắt" ||
+                classDetail.event_details.examination_type === "Kham mat" ||
+                classDetail.event_details.examination_type === "Eye examination"
+              ) && (
                 <div className="space-y-4">
                   <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="text-yellow-800">
-                      <strong>Loại khám không được hỗ trợ:</strong> "{classDetail.event_details.examination_type}"
+                      <strong>Loại khám không được hỗ trợ:</strong> "
+                      {classDetail.event_details.examination_type}"
                     </div>
                     <div className="text-sm mt-2">
                       Vui lòng liên hệ admin để cập nhật form cho loại khám này.
@@ -935,61 +1027,6 @@ export default function HealthExaminationClassDetail({
                   disabled={selectedStudent.status === "Completed"}
                 />
               </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="follow_up_required"
-                  checked={followUpRequired}
-                  onCheckedChange={(checked) =>
-                    setFollowUpRequired(checked as boolean)
-                  }
-                  disabled={selectedStudent.status === "Completed"}
-                />
-                <Label htmlFor="follow_up_required">Cần tư vấn thêm</Label>
-              </div>
-
-              {followUpRequired && selectedStudent.status !== "Completed" && (
-                <div className="space-y-2">
-                  <Label>Ngày hẹn tư vấn</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !followUpDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {followUpDate
-                          ? format(followUpDate, "dd/MM/yyyy", { locale: vi })
-                          : "Chọn ngày"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={followUpDate}
-                        onSelect={setFollowUpDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
-
-              {selectedStudent.status === "Completed" &&
-                selectedStudent.follow_up_required && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="text-yellow-800">
-                      <strong>Cần tư vấn thêm</strong>
-                      <div className="text-sm mt-1">
-                        Học sinh này cần được tư vấn thêm. Thông báo đã được gửi
-                        cho phụ huynh.
-                      </div>
-                    </div>
-                  </div>
-                )}
             </div>
           )}
 
@@ -1018,61 +1055,87 @@ export default function HealthExaminationClassDetail({
 
           {selectedStudent && (
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="consultation_title">Tiêu đề *</Label>
+                <Input
+                  id="consultation_title"
+                  value={consultationTitle}
+                  onChange={(e) => setConsultationTitle(e.target.value)}
+                  placeholder="Ví dụ: Tư vấn về vấn đề sức khỏe"
+                  required
+                />
+              </div>
+
               <div>
-                <strong>Học sinh:</strong> {
-                  selectedStudent.student?.full_name || 
+                <strong>Học sinh:</strong>{" "}
+                {selectedStudent.student?.full_name ||
                   (selectedStudent.student as any)?.name ||
                   (selectedStudent as any).full_name ||
                   (selectedStudent as any).name ||
-                  "Không xác định"
-                }{" "}
-                (MSSV: {
-                  selectedStudent.student?.student_id || 
+                  "Không xác định"}{" "}
+                (MSSV:{" "}
+                {selectedStudent.student?.student_id ||
                   (selectedStudent.student as any)?.studentId ||
                   (selectedStudent.student as any)?.id ||
                   (selectedStudent as any).student_id ||
                   (selectedStudent as any).studentId ||
                   (selectedStudent as any).id ||
-                  "Không xác định"
-                })
+                  "Không xác định"}
+                )
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Ngày hẹn tư vấn *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !consultationDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {consultationDate
+                          ? format(consultationDate, "dd/MM/yyyy", {
+                              locale: vi,
+                            })
+                          : "Chọn ngày"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={consultationDate}
+                        onSelect={setConsultationDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="consultation_time">Giờ hẹn *</Label>
+                  <Input
+                    id="consultation_time"
+                    type="time"
+                    value={consultationTime}
+                    onChange={(e) => setConsultationTime(e.target.value)}
+                    placeholder="Chọn giờ hẹn"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Ngày hẹn tư vấn</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !consultationDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {consultationDate
-                        ? format(consultationDate, "dd/MM/yyyy", { locale: vi })
-                        : "Chọn ngày"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={consultationDate}
-                      onSelect={setConsultationDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="consultation_time">Giờ hẹn</Label>
+                <Label htmlFor="consultation_doctor">Bác sĩ hẹn *</Label>
                 <Input
-                  id="consultation_time"
-                  type="time"
-                  value={consultationTime}
-                  onChange={(e) => setConsultationTime(e.target.value)}
-                  placeholder="Chọn giờ hẹn"
+                  id="consultation_doctor"
+                  value={consultationDoctor}
+                  onChange={(e) => setConsultationDoctor(e.target.value)}
+                  placeholder="Tên bác sĩ sẽ tư vấn"
+                  required
                 />
               </div>
 
