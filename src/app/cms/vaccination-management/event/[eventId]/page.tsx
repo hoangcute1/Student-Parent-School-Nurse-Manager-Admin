@@ -125,11 +125,12 @@ export default function VaccinationEventDetailPage() {
       <div className="flex items-center justify-between">
         <div>
           <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-2"
+            variant="secondary"
+            className="flex items-center gap-2 text-blue-800 bg-blue-100 border-none hover:bg-blue-200 font-semibold rounded-full px-5 py-2 shadow-sm mb-2"
+            onClick={() => router.push("/cms/vaccination-management")}
           >
-            <span className="inline-block mr-2">&larr;</span> Quay lại danh sách
+            <span className="text-xl">&larr;</span>
+            <span>Quay lại</span>
           </Button>
           <h1 className="text-2xl font-bold text-gray-900">
             Chi tiết sự kiện tiêm chủng

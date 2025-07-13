@@ -302,35 +302,48 @@ export default function VaccinationClassDetailPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <Card className="p-6 border mb-4">
-        <div className="font-bold text-xl mb-2">
-          Chi tiết lớp {classDetail.class_name}
+      {/* Nút quay lại danh sách */}
+      <div className="flex justify-start mb-2">
+        <Button
+          variant="secondary"
+          className="flex items-center gap-2 text-blue-800 bg-blue-100 border-none hover:bg-blue-200 font-semibold rounded-full px-5 py-2 shadow-sm"
+          onClick={() =>
+            router.push(`/cms/vaccination-management/event/${eventId}`)
+          }
+        >
+          <span className="text-xl">&larr;</span>
+          <span>Quay lại danh sách</span>
+        </Button>
+      </div>
+      <Card className="p-8 border rounded-xl shadow bg-white mb-4">
+        <div className="text-2xl font-bold mb-4 text-blue-900">
+          Chi tiết lớp{" "}
+          <span className="text-blue-700">{classDetail.class_name}</span>
         </div>
-        <div className="text-sm text-gray-700 mb-2">Sự kiện: {event.title}</div>
-        <div className="text-sm text-gray-700 mb-2">
-          Ngày tiêm:{" "}
-          {event.vaccination_date
-            ? new Date(event.vaccination_date).toLocaleDateString()
-            : "-"}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Giờ tiêm: {event.vaccination_time || "-"}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Địa điểm: {event.location}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Loại vaccine: {event.vaccine_type || "-"}
-        </div>
-        <div className="mt-4">
-          <button
-            className="text-xs text-blue-600 underline"
-            onClick={() =>
-              router.push(`/cms/vaccination-management/event/${eventId}`)
-            }
-          >
-            &larr; Xem chi tiết sự kiện tiêm chủng
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+          <div>
+            <div className="font-semibold">Sự kiện:</div>
+            <div className="mb-2">{event.title}</div>
+            <div className="font-semibold">Giờ tiêm:</div>
+            <div className="mb-2">{event.vaccination_time || "-"}</div>
+            <div className="font-semibold">Loại vaccine:</div>
+            <div className="mb-2 text-blue-700 font-bold">
+              {event.vaccine_type?.name ||
+                event.vaccine_type?.title ||
+                event.vaccine_type ||
+                "-"}
+            </div>
+          </div>
+          <div>
+            <div className="font-semibold">Ngày tiêm:</div>
+            <div className="mb-2">
+              {event.vaccination_date
+                ? new Date(event.vaccination_date).toLocaleDateString()
+                : "-"}
+            </div>
+            <div className="font-semibold">Địa điểm:</div>
+            <div className="mb-2">{event.location}</div>
+          </div>
         </div>
       </Card>
       <Card>
