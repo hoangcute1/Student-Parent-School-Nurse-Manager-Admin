@@ -71,10 +71,16 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
 
   const fetchEventDetail = async () => {
     try {
-      const response = await fetchData<any>(
+      const data = await fetchData<any>(
         `/health-examinations/events/${eventId}`
       );
-      const data = response;
+
+      // Ensure classes is an array
+      if (data && !Array.isArray(data.classes)) {
+        console.warn("Event detail classes is not an array:", data.classes);
+        data.classes = [];
+      }
+
       setEventDetail(data);
     } catch (error) {
       console.error("Error fetching event detail:", error);
@@ -174,18 +180,16 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
     );
   }
 
-  const totalStats = Array.isArray(eventDetail.classes)
-    ? eventDetail.classes.reduce(
-        (acc, cls) => ({
-          total: acc.total + cls.total_students,
-          approved: acc.approved + cls.approved_count,
-          pending: acc.pending + cls.pending_count,
-          rejected: acc.rejected + cls.rejected_count,
-          completed: acc.completed + cls.completed_count,
-        }),
-        { total: 0, approved: 0, pending: 0, rejected: 0, completed: 0 }
-      )
-    : { total: 0, approved: 0, pending: 0, rejected: 0, completed: 0 };
+  const totalStats = (eventDetail.classes || []).reduce(
+    (acc, cls) => ({
+      total: acc.total + (cls.total_students || 0),
+      approved: acc.approved + (cls.approved_count || 0),
+      pending: acc.pending + (cls.pending_count || 0),
+      rejected: acc.rejected + (cls.rejected_count || 0),
+      completed: acc.completed + (cls.completed_count || 0),
+    }),
+    { total: 0, approved: 0, pending: 0, rejected: 0, completed: 0 }
+  );
 
   return (
     <div className="space-y-6">

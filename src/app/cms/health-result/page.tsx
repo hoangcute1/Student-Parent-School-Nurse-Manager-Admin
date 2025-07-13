@@ -38,15 +38,24 @@ export default function HealthResultPage() {
     const fetchStats = async () => {
       try {
         const events = await fetchData<any[]>("/health-examinations/events");
+
+        // Ensure events is an array
+        if (!Array.isArray(events)) {
+          console.warn("Events is not an array:", events);
+          return;
+        }
+
         let total = events.length;
         let completed = 0;
         let pending = 0;
         let students = 0;
+
         events.forEach((event) => {
           completed += event.completed_count || 0;
           pending += event.pending_count || 0;
           students += event.total_students || 0;
         });
+
         setStats({
           total,
           completed,
@@ -54,6 +63,7 @@ export default function HealthResultPage() {
           students,
         });
       } catch (err) {
+        console.error("Error fetching stats:", err);
         // fallback giữ nguyên stats cũ
       }
     };
