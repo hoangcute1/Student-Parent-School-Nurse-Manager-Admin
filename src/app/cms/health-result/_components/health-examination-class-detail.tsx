@@ -36,7 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface Student {
   examination_id: string;
