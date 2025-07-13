@@ -60,7 +60,7 @@ const navLinks = [
     description: "Xử lý y tế khẩn cấp",
   },
   {
-    href: "/admin/vaccinations",
+    href: "/admin/vaccination-management",
     icon: Syringe,
     label: "Quản lý tiêm chủng ",
     description: "Giám sát tiêm chủng",

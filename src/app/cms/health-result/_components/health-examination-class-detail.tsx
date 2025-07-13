@@ -31,10 +31,12 @@ import {
   Stethoscope,
   Bell,
   Eye,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useRouter } from "next/router";
 
 interface Student {
   examination_id: string;
@@ -103,7 +105,7 @@ export default function HealthExaminationClassDetail({
   const [examinationNotes, setExaminationNotes] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [updating, setUpdating] = useState(false);
-
+  const router = useRouter();
   // Form state for consultation scheduling
   const [consultationTitle, setConsultationTitle] = useState("");
   const [consultationDate, setConsultationDate] = useState<Date | undefined>(
@@ -304,7 +306,9 @@ export default function HealthExaminationClassDetail({
     setConsultationDoctor("");
     setConsultationNotes("");
   };
-
+  const handleGoBack = () => {
+    router.back();
+  };
   const handleScheduleConsultation = async () => {
     if (
       !selectedStudent ||
@@ -513,6 +517,15 @@ export default function HealthExaminationClassDetail({
   return (
     <div className="space-y-6">
       {/* Header */}
+      <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGoBack}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Quay lại
+              </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">

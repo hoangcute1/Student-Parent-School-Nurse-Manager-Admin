@@ -97,14 +97,6 @@ export default function HealthExaminationClassDetail({
   const [error, setError] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [consultationTitle, setConsultationTitle] = useState("");
-  const [consultationDate, setConsultationDate] = useState<Date | undefined>(
-    undefined
-  );
-  const [consultationTime, setConsultationTime] = useState("");
-  const [consultationDoctor, setConsultationDoctor] = useState("");
-  const [schedulingConsultation, setSchedulingConsultation] = useState(false);
-  const [consultationNotes, setConsultationNotes] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -171,15 +163,6 @@ export default function HealthExaminationClassDetail({
   const closeResultDialog = () => {
     setSelectedStudent(null);
     setIsDialogOpen(false);
-  };
-
-  // Placeholder for closeConsultationDialog if not defined
-  const closeConsultationDialog = () => {
-    setIsDialogOpen(false);
-  };
-  // Placeholder for handleScheduleConsultation if not defined
-  const handleScheduleConsultation = () => {
-    // Implement scheduling logic here if needed
   };
 
   const handleGoBack = () => {
@@ -366,35 +349,6 @@ export default function HealthExaminationClassDetail({
                     </div>
                     <div className="flex items-center space-x-2">
                       {getStatusBadge(student.status)}
-
-                      {/* Nút Khám */}
-                      <Button
-                        size="sm"
-                        onClick={() => openResultDialog(student)}
-                        variant="default"
-                        className={`flex items-center space-x-1 ${
-                          student.status === "Completed"
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                        disabled={student.status === "Completed"}
-                      >
-                        <Stethoscope className="h-4 w-4" />
-                        <span>
-                          {student.status === "Completed" ? "Đã khám" : "Khám"}
-                        </span>
-                      </Button>
-
-                      {/* Nút Chuông (Lập lịch hẹn tư vấn) */}
-                      <Button
-                        size="sm"
-                        onClick={() => openResultDialog(student)}
-                        variant="outline"
-                        className="flex items-center space-x-1"
-                      >
-                        <Bell className="h-4 w-4" />
-                        <span>Chuông</span>
-                      </Button>
 
                       {/* Nút Xem kết quả */}
                       <Button
@@ -615,125 +569,6 @@ export default function HealthExaminationClassDetail({
           <DialogFooter>
             <Button variant="outline" onClick={closeResultDialog}>
               Đóng
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Consultation Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Lập lịch hẹn tư vấn</DialogTitle>
-          </DialogHeader>
-
-          {selectedStudent && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="consultation_title">Tiêu đề *</Label>
-                <Input
-                  id="consultation_title"
-                  value={consultationTitle}
-                  onChange={(e) => setConsultationTitle(e.target.value)}
-                  placeholder="Ví dụ: Tư vấn về vấn đề sức khỏe"
-                  required
-                />
-              </div>
-
-              <div>
-                <strong>Học sinh:</strong>{" "}
-                {selectedStudent.student?.full_name ||
-                  (selectedStudent.student as any)?.name ||
-                  (selectedStudent as any).full_name ||
-                  (selectedStudent as any).name ||
-                  "Không xác định"}{" "}
-                (MSSV:{" "}
-                {selectedStudent.student?.student_id ||
-                  (selectedStudent.student as any)?.studentId ||
-                  (selectedStudent.student as any)?.id ||
-                  (selectedStudent as any).student_id ||
-                  (selectedStudent as any).studentId ||
-                  (selectedStudent as any).id ||
-                  "Không xác định"}
-                )
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Ngày hẹn tư vấn *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !consultationDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {consultationDate
-                          ? format(consultationDate, "dd/MM/yyyy", {
-                              locale: vi,
-                            })
-                          : "Chọn ngày"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={consultationDate}
-                        onSelect={setConsultationDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="consultation_time">Giờ hẹn *</Label>
-                  <Input
-                    id="consultation_time"
-                    type="time"
-                    value={consultationTime}
-                    onChange={(e) => setConsultationTime(e.target.value)}
-                    placeholder="Chọn giờ hẹn"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="consultation_doctor">Bác sĩ hẹn *</Label>
-                <Input
-                  id="consultation_doctor"
-                  value={consultationDoctor}
-                  onChange={(e) => setConsultationDoctor(e.target.value)}
-                  placeholder="Tên bác sĩ sẽ tư vấn"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="consultation_notes">Ghi chú</Label>
-                <Textarea
-                  id="consultation_notes"
-                  placeholder="Nhập ghi chú cho buổi tư vấn..."
-                  value={consultationNotes}
-                  onChange={(e) => setConsultationNotes(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={closeConsultationDialog}>
-              Hủy
-            </Button>
-            <Button
-              onClick={handleScheduleConsultation}
-              disabled={schedulingConsultation}
-            >
-              {schedulingConsultation ? "Đang lưu..." : "Lập lịch hẹn"}
             </Button>
           </DialogFooter>
         </DialogContent>
