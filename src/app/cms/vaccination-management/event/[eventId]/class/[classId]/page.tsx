@@ -406,7 +406,7 @@ export default function VaccinationClassDetailPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Badge
                       className={
                         student.status === "Completed"
@@ -418,8 +418,30 @@ export default function VaccinationClassDetailPage() {
                     </Badge>
                     <Button
                       size="sm"
+                      variant="default"
+                      onClick={() => {
+                        setSelectedStudent(student);
+                        setIsVaccinationModalOpen(true);
+                      }}
+                      className={`flex items-center gap-1 ${
+                        student.status === "Completed"
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={student.status === "Completed"}
+                    >
+                      <span className="flex items-center gap-1">
+                        <span role="img" aria-label="Tiêm">
+                          💉
+                        </span>
+                        {student.status === "Completed" ? "Đã tiêm" : "Tiêm"}
+                      </span>
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => handleViewDetails(student)}
+                      className="flex items-center gap-1"
                     >
                       Chi tiết
                     </Button>

@@ -486,6 +486,12 @@ export default function HealthExaminationClassDetail({
     }
   };
 
+  const handleVaccinate = (student: Student) => {
+    alert(
+      `Tiêm cho học sinh: ${student.student?.full_name || student.student?._id}`
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -518,14 +524,14 @@ export default function HealthExaminationClassDetail({
     <div className="space-y-6">
       {/* Header */}
       <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGoBack}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
+        variant="outline"
+        size="sm"
+        onClick={handleGoBack}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Quay lại
+      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">
@@ -674,6 +680,24 @@ export default function HealthExaminationClassDetail({
                     </div>
                     <div className="flex items-center space-x-2">
                       {getStatusBadge(student.status)}
+
+                      {/* Nút Tiêm */}
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleVaccinate(student)}
+                        className={`flex items-center space-x-1 ${
+                          student.status === "Completed"
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={student.status === "Completed"}
+                      >
+                        💉
+                        <span>
+                          {student.status === "Completed" ? "Đã tiêm" : "Tiêm"}
+                        </span>
+                      </Button>
 
                       {/* Nút Khám */}
                       <Button
