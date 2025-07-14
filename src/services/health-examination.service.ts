@@ -728,4 +728,42 @@ export class HealthExaminationService {
       throw error;
     }
   }
+
+  /**
+   * Lấy danh sách lịch hẹn tư vấn (có thể lọc theo studentId)
+   */
+  async getConsultationAppointments(studentId?: string) {
+    const filter: any = { consultation_date: { $exists: true } };
+    if (studentId) {
+      filter.student_id = studentId;
+    }
+    return this.healthExaminationModel
+      .find(filter)
+      .populate(['student_id', 'created_by'])
+      .sort({ consultation_date: -1, consultation_time: -1 });
+  }
+
+  /**
+   * Lập lịch hẹn tư vấn cho học sinh
+   */
+  async scheduleConsultation(dto: {
+    consultation_date: Date;
+    consultation_time: string;
+    notes?: string;
+    student_id: string;
+    created_by?: string;
+  }) {
+    // Tạo mới lịch hẹn tư vấn
+    const consultation = new this.healthExaminationModel({
+      consultation_date: dto.consultation_date,
+      consultation_time: dto.consultation_time,
+      notes: dto.notes,
+      student_id: dto.student_id,
+      created_by: dto.created_by,
+      status: ExaminationStatus.PENDING,
+      is_consultation: true,
+    });
+    const saved = await consultation.save();
+    return saved.populate(['student_id', 'created_by']);
+  }
 }
