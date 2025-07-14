@@ -72,6 +72,10 @@ export class ParentStudentService {
     return deletedParentStudent;
   }
 
+  async removeByStudentId(studentId: string): Promise<void> {
+    await this.parentStudentModel.deleteMany({ student: studentId });
+  }
+
   /**
    * Find all students for a parent including their health records
    */
@@ -89,7 +93,7 @@ export class ParentStudentService {
           path: 'class',
           select: 'name',
         },
-  })
+      })
       .populate('parent')
       .lean() // <-- Add lean() to get plain JS objects
       .exec();

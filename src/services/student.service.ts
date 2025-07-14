@@ -16,6 +16,7 @@ import { ParentService } from '@/services/parent.service';
 import { HealthRecordService } from './health-record.service';
 import { ClassService } from './class.service';
 import { UserDocument } from '@/schemas/user.schema';
+import { ParentStudentService } from './parent-student.service';
 
 @Injectable()
 export class StudentService {
@@ -25,6 +26,7 @@ export class StudentService {
     private healthRecordService: HealthRecordService,
     private classService: ClassService,
     @InjectModel('User') private userModel: Model<UserDocument>,
+    private parentStudentService: ParentStudentService,
   ) {}
   async create(createStudentDto: CreateStudentDto): Promise<Student> {
     try {
@@ -94,6 +96,36 @@ export class StudentService {
 
       if (!student) {
         throw new InternalServerErrorException('Không tìm thấy học sinh sau khi tạo');
+      }
+
+      const studentIdStr = savedStudent._id?.toString();
+      if (!studentIdStr) {
+        throw new InternalServerErrorException('Không lấy được studentId sau khi tạo student');
+      }
+      // Tạo liên kết parent-student
+      try {
+        await this.parentStudentService.create({
+          parent: parent._id.toString(),
+          student: studentIdStr,
+        });
+      } catch (err) {
+        // Nếu lỗi, rollback student
+        await this.studentModel.findByIdAndDelete(savedStudent._id);
+        throw new InternalServerErrorException(
+          'Lỗi khi tạo liên kết parent-student: ' + err.message,
+        );
+      }
+
+      // Tạo healthRecord cho student
+      try {
+        await this.healthRecordService.create({
+          student_id: studentIdStr,
+        });
+      } catch (err) {
+        // Nếu lỗi, rollback parent-student và student
+        await this.parentStudentService.removeByStudentId(studentIdStr);
+        await this.studentModel.findByIdAndDelete(savedStudent._id);
+        throw new InternalServerErrorException('Lỗi khi tạo health record: ' + err.message);
       }
 
       return student;
@@ -290,6 +322,9 @@ export class StudentService {
     return updatedStudent;
   }
   async delete(id: string): Promise<Student> {
+    // Xóa parent-student và healthRecord trước khi xóa student
+    await this.parentStudentService.removeByStudentId(id);
+    await this.healthRecordService.removeByStudentId(id);
     const deletedStudent = await this.studentModel.findByIdAndDelete(id).exec();
 
     if (!deletedStudent) {
@@ -313,6 +348,9 @@ export class StudentService {
     // Process each ID
     for (const id of ids) {
       try {
+        // Xóa parent-student và healthRecord trước khi xóa student
+        await this.parentStudentService.removeByStudentId(id);
+        await this.healthRecordService.removeByStudentId(id);
         const deletedStudent = await this.studentModel.findByIdAndDelete(id).exec();
 
         if (!deletedStudent) {

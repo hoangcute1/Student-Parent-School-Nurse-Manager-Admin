@@ -242,4 +242,8 @@ export class HealthRecordService {
       throw new NotFoundException(`Health records for student ID "${studentId}" not found`);
     }
   }
+
+  async removeByStudentId(studentId: string): Promise<void> {
+    await this.healthRecordModel.deleteMany({ student_id: studentId });
+  }
 }

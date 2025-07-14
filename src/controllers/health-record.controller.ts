@@ -87,7 +87,6 @@ export class HealthRecordController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE)
   @ApiOperation({
     summary: 'Create new health record',
     description: 'Creates a new health record for a student.',
@@ -169,7 +168,6 @@ async updatebyStudentId(
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'Delete health record',
     description: 'Deletes a health record by its ID. Admin only.',
