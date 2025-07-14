@@ -191,7 +191,7 @@ export default function MedicationsPage() {
                       className="hover:bg-sky-50 transition-colors border-sky-100"
                     >
                       <TableCell className="font-medium text-sky-900">
-                        {delivery.student.name || "N/A"}
+                        {delivery.student?.name || "N/A"}
                       </TableCell>
                       <TableCell className="text-sky-800">
                         {typeof delivery.medicine === "object" &&

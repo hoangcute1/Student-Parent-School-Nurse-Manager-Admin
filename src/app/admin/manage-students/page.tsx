@@ -24,6 +24,7 @@ import type { AddStudentFormValues } from "./_components/add-student-dialog";
 import { Student, ViewStudent } from "@/lib/type/students";
 import { AddStudentDialog } from "./_components/add-student-dialog";
 import { Users } from "lucide-react";
+import { createParentStudentByEmail } from "@/lib/api/parent-students/parent-students";
 
 const mapStudentForDisplay = (students: Student): Student => {
   return {
@@ -100,14 +101,40 @@ export default function StudentsPage() {
       //   return;
       // }
 
-      await createStudent({
+      // Chỉ truyền parentEmail nếu có giá trị hợp lệ
+      const payload: any = {
         name: data.name,
         studentId: data.studentId,
         birth: data.birth,
         gender: data.gender,
         class: data.class,
-        parentEmail: data.parentEmail || undefined,
-      });
+      };
+      if (
+        data.parentEmail &&
+        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.parentEmail)
+      ) {
+        payload.parentEmail = data.parentEmail;
+      }
+      // Đảm bảo nhận về student object từ store
+      const student = await createStudent(payload);
+      if (data.parentEmail) {
+        if (!student || !(student as any)._id) {
+          alert("Không thể tạo học sinh hoặc dữ liệu trả về không hợp lệ!");
+          return;
+        }
+        try {
+          await createParentStudentByEmail(
+            data.parentEmail,
+            (student as any)._id
+          );
+        } catch (err: any) {
+          console.error("Không thể tạo liên kết parent-student:", err);
+          alert(
+            "Tạo học sinh thành công nhưng không thể liên kết với phụ huynh: " +
+              (err?.message || "Lỗi không xác định")
+          );
+        }
+      }
       setIsAddDialogOpen(false);
       alert("Thêm học sinh thành công");
     } catch (error: any) {

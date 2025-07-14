@@ -12,14 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Calendar,
-  MapPin,
-  Users,
-  CheckCircle,
-  Clock,
-} from "lucide-react";
+import { Calendar, MapPin, Users, CheckCircle, Clock } from "lucide-react";
 import { useVaccinationStore } from "@/stores/vaccination-store";
+import { useRouter } from "next/navigation";
 
 interface VaccinationEvent {
   _id: string;
@@ -39,14 +34,43 @@ interface VaccinationEvent {
   classes: any[];
 }
 
-export function VaccinationList() {
+interface VaccinationListProps {
+  onViewDetail?: (id: string) => void;
+  onViewClasses?: (id: string) => void; // Thêm prop mới cho việc xem danh sách lớp
+  onDelete?: (event: VaccinationEvent) => void;
+  filter?: "today" | "all"; // thêm prop filter
+}
+
+export function VaccinationList({
+  onViewDetail,
+  onViewClasses, // không dùng nữa
+  onDelete,
+  filter = "all", // mặc định là all
+}: VaccinationListProps) {
   const { events, loading, error, fetchEvents } = useVaccinationStore();
+  const router = useRouter();
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
-  const filteredEvents = events;
+  // Helper để kiểm tra ngày hôm nay
+  function isToday(dateString: string) {
+    if (!dateString) return false;
+    const d = new Date(dateString);
+    const today = new Date();
+    return (
+      d.getDate() === today.getDate() &&
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear()
+    );
+  }
+
+  // Lọc sự kiện theo filter
+  const filteredEvents =
+    filter === "today"
+      ? events.filter((event) => isToday(event.vaccination_date))
+      : events;
 
   return (
     <div className="space-y-6">
@@ -147,7 +171,18 @@ export function VaccinationList() {
                 </TableHeader>
                 <TableBody>
                   {filteredEvents.map((event) => (
-                    <TableRow key={event._id}>
+                    <TableRow
+                      key={event._id}
+                      className="hover:bg-blue-50 cursor-pointer"
+                      onClick={(e) => {
+                        // Chỉ xử lý click khi không click vào button
+                        if (!(e.target as HTMLElement).closest("button")) {
+                          router.push(
+                            `/cms/vaccination-management/event/${event._id}`
+                          );
+                        }
+                      }}
+                    >
                       <TableCell>
                         <div>
                           <p className="font-medium">{event.title}</p>
@@ -206,6 +241,36 @@ export function VaccinationList() {
                         <span className="text-sm">
                           {event.total_students} học sinh
                         </span>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Ngăn event bubble lên TableRow
+                              onViewDetail && onViewDetail(event._id);
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                          {onDelete && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={(e) => {
+                                e.stopPropagation(); // Ngăn event bubble lên TableRow
+                                if (
+                                  window.confirm(
+                                    "Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"
+                                  )
+                                ) {
+                                  onDelete(event);
+                                }
+                              }}
+                            >
+                              Xoá
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

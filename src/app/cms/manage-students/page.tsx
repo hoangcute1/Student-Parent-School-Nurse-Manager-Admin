@@ -26,6 +26,7 @@ import { Student, ViewStudent } from "@/lib/type/students";
 import { AddStudentDialog } from "./_components/add-student-dialog";
 import { UpdateStudentDialog } from "./_components/update-student-dialog";
 import { Users } from "lucide-react";
+import { createParentStudentByEmail } from "@/lib/api/parent-students/parent-students";
 
 const mapStudentForDisplay = (students: Student): Student => {
   return {
@@ -157,26 +158,36 @@ export default function StudentsPage() {
   }, []); // Chỉ chạy một lần khi component mount
 
   const handleAddStudent = async (data: AddStudentFormValues) => {
-    // if (!user || user.role !== "admin") {
-    //   alert("Bạn không có quyền thêm học sinh");
-    //   return;
-    // }
     try {
-      // Validate classId exists in classes
-      // const selectedClass = classes.find((cls) => cls._id === data.class);
-      // if (!selectedClass) {
-      //   alert("Lớp không tồn tại");
-      //   return;
-      // }
-
-      await createStudent({
+      // Chỉ truyền parentEmail nếu có giá trị hợp lệ
+      const payload: any = {
         name: data.name,
         studentId: data.studentId,
         birth: data.birth,
         gender: data.gender,
         class: data.class,
-        parentEmail: data.parentEmail || undefined,
-      });
+      };
+      if (
+        data.parentEmail &&
+        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.parentEmail)
+      ) {
+        payload.parentEmail = data.parentEmail;
+      }
+      const student = await createStudent(payload);
+      if (data.parentEmail && student && (student as any)._id) {
+        try {
+          await createParentStudentByEmail(
+            data.parentEmail,
+            (student as any)._id
+          );
+        } catch (err: any) {
+          console.error("Không thể tạo liên kết parent-student:", err);
+          alert(
+            "Tạo học sinh thành công nhưng không thể liên kết với phụ huynh: " +
+              (err?.message || "Lỗi không xác định")
+          );
+        }
+      }
       setIsAddDialogOpen(false);
       alert("Thêm học sinh thành công");
     } catch (error: any) {
@@ -205,14 +216,19 @@ export default function StudentsPage() {
     ) {
       try {
         await deleteStudent(studentData.student._id);
-        alert(`Đã xoá học sinh ${studentData.student.name}`);
+        // Không cần reload trang vì store sẽ tự động cập nhật UI
+        console.log(`Đã xoá học sinh ${studentData.student.name} thành công`);
+        // Thay alert bằng console.log để tránh potential browser reload issues
+        // alert(`Đã xoá học sinh ${studentData.student.name}`);
       } catch (error: any) {
         console.error("Error deleting student:", error.message, error);
         alert(
           `Không thể xoá học sinh: ${error.message || "Lỗi không xác định"}`
         );
+      } finally {
+        // Reset delete state regardless of success or failure
+        setDeleteStudentId(null);
       }
-      setDeleteStudentId(null);
     }
   };
 
@@ -274,7 +290,7 @@ export default function StudentsPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
-            Dashboard - Quản lý học sinh
+            Quản lý học sinh
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Theo dõi thông tin học sinh, thống kê sức khỏe và quản lý hồ sơ

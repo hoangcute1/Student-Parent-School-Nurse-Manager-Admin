@@ -48,6 +48,8 @@ import {
   getHealthExaminationsCompleted,
   HealthExaminationCompleted,
 } from "@/lib/api/health-examination";
+import VaccinationResults from "./vaccination-results";
+import { fetchData } from "@/lib/api/api";
 
 // Component hiển thị thông tin chi tiết của lần khám
 interface ExaminationDetailsProps {
@@ -195,8 +197,10 @@ export default function RegularResultsPage() {
   const [healthExaminations, setHealthExaminations] = useState<
     HealthExaminationCompleted[]
   >([]);
+  const [vaccinationResults, setVaccinationResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("recent");
 
   const handleOpenDialog = (exam: ExaminationHistoryItem) => {
     setSelectedExam(exam);
@@ -211,6 +215,7 @@ export default function RegularResultsPage() {
   useEffect(() => {
     if (selectedStudent) {
       fetchHealthExaminations();
+      fetchVaccinationResults();
     }
   }, [selectedStudent]);
 
@@ -227,6 +232,23 @@ export default function RegularResultsPage() {
     } catch (err) {
       console.error("Error fetching health examinations:", err);
       setError("Không thể tải kết quả khám sức khỏe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVaccinationResults = async () => {
+    if (!selectedStudent) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const results = await fetchData<any[]>(
+        `/vaccination-schedules/results/student/${selectedStudent.student._id}`
+      );
+      setVaccinationResults(results);
+    } catch (err) {
+      console.error("Error fetching vaccination results:", err);
+      setError("Không thể tải kết quả tiêm chủng");
     } finally {
       setLoading(false);
     }
@@ -300,12 +322,13 @@ export default function RegularResultsPage() {
 
   // Use real data if available, otherwise fall back to mock data
   const displayRecentResults =
-    recentResultsFromAPI.length > 0 ? recentResultsFromAPI : recentResults;
+    recentResultsFromAPI.length > 0 ? recentResultsFromAPI : [];
 
-  // Convert health examinations to history format
-  const examinationHistoryFromAPI = healthExaminations.map((exam) => ({
+  // Transform health examination to unified format
+  const transformHealthExamToHistory = (exam: HealthExaminationCompleted) => ({
     date: new Date(exam.examination_date).toLocaleDateString("vi-VN"),
-    type: exam.examination_type,
+    type: "Khám sức khỏe",
+    subtype: exam.examination_type,
     doctor: exam.created_by?.full_name || exam.doctor_name || "Không xác định",
     result: exam.recommendations
       ? exam.recommendations.includes("bình thường") ||
@@ -315,16 +338,40 @@ export default function RegularResultsPage() {
       : "Bình thường",
     notes: exam.examination_notes || "Không có ghi chú",
     location: exam.location || "Không xác định",
-    measurements: transformHealthExamToResult(exam).measurements,
-    recommendations: exam.recommendations || "",
-    nextAppointment: exam.follow_up_required ? "Cần tư vấn thêm" : "",
-  }));
+  });
 
-  // Use real data if available, otherwise fall back to mock data
-  const displayExaminationHistory =
-    examinationHistoryFromAPI.length > 0
-      ? examinationHistoryFromAPI
-      : examinationHistory;
+  // Transform vaccination result to unified format
+  const transformVaccinationToHistory = (v: any) => {
+    let doctor = v.doctor_name || "Bác sĩ phụ trách sự kiện";
+    if (v.vaccination_result) {
+      try {
+        const parsed = JSON.parse(v.vaccination_result);
+        if (parsed.doctor_name) doctor = parsed.doctor_name;
+      } catch {}
+    }
+    return {
+      date: new Date(v.vaccination_date).toLocaleDateString("vi-VN"),
+      type: "Tiêm chủng",
+      subtype: v.title || v.vaccine_type || "",
+      doctor,
+      result: "Hoàn thành",
+      notes: v.recommendations || v.vaccination_notes || "Không có ghi chú",
+      location: v.location || "Không xác định",
+    };
+  };
+
+  // Merge and sort all events by date descending
+  const mergedHistory = [
+    ...healthExaminations.map(transformHealthExamToHistory),
+    ...vaccinationResults.map(transformVaccinationToHistory),
+  ].sort((a, b) => {
+    // Sort by date descending (dd/mm/yyyy)
+    const [da, ma, ya] = a.date.split("/").map(Number);
+    const [db, mb, yb] = b.date.split("/").map(Number);
+    const dateA = new Date(ya, ma - 1, da).getTime();
+    const dateB = new Date(yb, mb - 1, db).getTime();
+    return dateB - dateA;
+  });
 
   // Hiển thị thông báo nếu không có học sinh nào được chọn
   if (!selectedStudent) {
@@ -355,7 +402,7 @@ export default function RegularResultsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Kết quả khám - {selectedStudent.student.name}
+            Kết quả sức khoẻ - {selectedStudent.student.name}
           </h1>
           <p className="text-blue-600">
             Xem kết quả kiểm tra sức khỏe định kỳ và theo dõi sự phát triển của
@@ -376,278 +423,114 @@ export default function RegularResultsPage() {
         />
       </div>
 
-      <Tabs defaultValue="recent" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 bg-blue-50">
           <TabsTrigger
             value="recent"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Kết quả gần đây
+            Kết quả khám sức khoẻ
           </TabsTrigger>
           <TabsTrigger
             value="vaccination"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Kết quả tiêm
+            Kết quả tiêm chủng
           </TabsTrigger>
           <TabsTrigger
             value="history"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Lịch sử khám
+            Lịch sử khám và tiêm chủng
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="recent" className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
-                <Input
-                  type="search"
-                  placeholder="Tìm kiếm kết quả..."
-                  className="w-[300px] pl-8 border-blue-200 focus:border-blue-500"
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="border-blue-200 text-blue-700 hover:bg-blue-50"
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
+          {/* Hiển thị kết quả khám sức khỏe gần đây */}
           {loading ? (
             <div className="flex justify-center items-center py-8">
-              <div className="text-blue-600">Đang tải kết quả khám...</div>
+              <div className="text-blue-600">Đang tải kết quả...</div>
             </div>
           ) : error ? (
             <Card className="border-red-200 bg-red-50/30">
               <CardContent className="p-6">
-                <div className="text-center text-red-600">
-                  {error}. Hiển thị dữ liệu mẫu.
-                </div>
+                <div className="text-center text-red-600">{error}</div>
               </CardContent>
             </Card>
           ) : displayRecentResults.length === 0 ? (
             <Card className="border-blue-100 bg-blue-50/30">
               <CardContent className="p-6">
                 <div className="text-center text-blue-600">
-                  Chưa có kết quả khám nào cho học sinh này.
+                  Chưa có kết quả khám sức khỏe nào cho học sinh này.
                 </div>
               </CardContent>
             </Card>
-          ) : null}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayRecentResults.map((result, index) => (
-              <Card
-                key={index}
-                className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-blue-600" />
-                      <CardTitle className="text-lg text-blue-800">
-                        {result.type}
-                      </CardTitle>
-                    </div>
-                    <Badge
-                      variant={
-                        result.status === "Bình thường"
-                          ? "default"
-                          : "secondary"
-                      }
-                      className={
-                        result.status === "Bình thường"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }
-                    >
-                      {result.status === "Bình thường" ? (
-                        <CheckCircle className="mr-1 h-3 w-3" />
-                      ) : (
-                        <AlertCircle className="mr-1 h-3 w-3" />
-                      )}
-                      {result.status}
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-blue-600">
-                    Ngày khám: {result.date}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    {result.measurements.map((measurement, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center"
-                      >
-                        <span className="text-sm font-medium text-blue-700">
-                          {measurement.name}:
-                        </span>
-                        <span className="text-sm text-blue-800 font-semibold">
-                          {measurement.value}
-                        </span>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayRecentResults.map((result, index) => (
+                <Card
+                  key={index}
+                  className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-blue-600" />
+                        <CardTitle className="text-lg text-blue-800">
+                          {result.type}
+                        </CardTitle>
                       </div>
-                    ))}
-                  </div>
-                  {result.notes && (
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-sm text-blue-700">
-                        <span className="font-medium">Ghi chú:</span>{" "}
-                        {result.notes}
-                      </p>
+                      <Badge
+                        variant={
+                          result.status === "Bình thường"
+                            ? "default"
+                            : "secondary"
+                        }
+                        className={
+                          result.status === "Bình thường"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }
+                      >
+                        {result.status === "Bình thường" ? (
+                          <CheckCircle className="mr-1 h-3 w-3" />
+                        ) : (
+                          <AlertCircle className="mr-1 h-3 w-3" />
+                        )}
+                        {result.status}
+                      </Badge>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <CardDescription className="text-blue-600">
+                      Ngày khám: {result.date}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {result.measurements.map((m, i) => (
+                        <div key={i} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{m.name}</span>
+                          <span className="font-semibold text-blue-800">
+                            {m.value}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="text-xs text-gray-500 mt-2">
+                        {result.notes}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
+
         <TabsContent value="vaccination" className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-blue-500" />
-                <Input
-                  type="search"
-                  placeholder="Tìm kiếm kết quả..."
-                  className="w-[300px] pl-8 border-blue-200 focus:border-blue-500"
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="border-blue-200 text-blue-700 hover:bg-blue-50"
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-blue-600">Đang tải kết quả tiêm...</div>
-            </div>
-          ) : error ? (
-            <Card className="border-red-200 bg-red-50/30">
-              <CardContent className="p-6">
-                <div className="text-center text-red-600">
-                  {error}. Hiển thị dữ liệu mẫu.
-                </div>
-              </CardContent>
-            </Card>
-          ) : displayRecentResults.length === 0 ? (
-            <Card className="border-blue-100 bg-blue-50/30">
-              <CardContent className="p-6">
-                <div className="text-center text-blue-600">
-                  Chưa có kết quả tiêm nào cho học sinh này.
-                </div>
-              </CardContent>
-            </Card>
-          ) : null}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayRecentResults.map((result, index) => (
-              <Card
-                key={index}
-                className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-blue-600" />
-                      <CardTitle className="text-lg text-blue-800">
-                        {result.type}
-                      </CardTitle>
-                    </div>
-                    <Badge
-                      variant={
-                        result.status === "Bình thường"
-                          ? "default"
-                          : "secondary"
-                      }
-                      className={
-                        result.status === "Bình thường"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }
-                    >
-                      {result.status === "Bình thường" ? (
-                        <CheckCircle className="mr-1 h-3 w-3" />
-                      ) : (
-                        <AlertCircle className="mr-1 h-3 w-3" />
-                      )}
-                      {result.status}
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-blue-600">
-                    Ngày khám: {result.date}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-2">
-                    {result.measurements.map((measurement, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center"
-                      >
-                        <span className="text-sm font-medium text-blue-700">
-                          {measurement.name}:
-                        </span>
-                        <span className="text-sm text-blue-800 font-semibold">
-                          {measurement.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  {result.notes && (
-                    <div className="bg-blue-50 rounded-lg p-3">
-                      <p className="text-sm text-blue-700">
-                        <span className="font-medium">Ghi chú:</span>{" "}
-                        {result.notes}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="growth" className="mt-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-blue-100">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-blue-800">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                  Biểu đồ chiều cao
-                </CardTitle>
-                <CardDescription className="text-blue-600">
-                  Theo dõi sự phát triển chiều cao theo thời gian
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-blue-100">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-blue-800">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                  Biểu đồ cân nặng
-                </CardTitle>
-                <CardDescription className="text-blue-600">
-                  Theo dõi sự phát triển cân nặng theo thời gian
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
+          <VaccinationResults />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6 space-y-4">
+          {/* Hiển thị lịch sử khám sức khỏe */}
           {loading ? (
             <div className="flex justify-center items-center py-8">
               <div className="text-blue-600">Đang tải lịch sử khám...</div>
@@ -655,83 +538,56 @@ export default function RegularResultsPage() {
           ) : error ? (
             <Card className="border-red-200 bg-red-50/30">
               <CardContent className="p-6">
-                <div className="text-center text-red-600">
-                  {error}. Hiển thị dữ liệu mẫu.
-                </div>
+                <div className="text-center text-red-600">{error}</div>
               </CardContent>
             </Card>
-          ) : displayExaminationHistory.length === 0 ? (
+          ) : mergedHistory.length === 0 ? (
             <Card className="border-blue-100 bg-blue-50/30">
               <CardContent className="p-6">
                 <div className="text-center text-blue-600">
-                  Chưa có lịch sử khám nào cho học sinh này.
+                  Chưa có lịch sử khám hoặc tiêm chủng nào cho học sinh này.
                 </div>
               </CardContent>
             </Card>
-          ) : null}
-
-          <div className="rounded-md border border-blue-200">
+          ) : (
             <Table>
-              <TableHeader className="bg-blue-50">
+              <TableHeader>
                 <TableRow>
-                  <TableHead className="text-blue-800">Ngày khám</TableHead>
-                  <TableHead className="text-blue-800">Loại khám</TableHead>
-                  <TableHead className="text-blue-800">Bác sĩ khám</TableHead>
-                  <TableHead className="text-blue-800">Kết quả</TableHead>
-                  <TableHead className="text-blue-800">Ghi chú</TableHead>
-                  <TableHead className="text-right text-blue-800">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>Ngày</TableHead>
+                  <TableHead>Loại sự kiện</TableHead>
+                  <TableHead>Chi tiết</TableHead>
+                  <TableHead>Bác sĩ</TableHead>
+                  <TableHead>Kết quả</TableHead>
+                  <TableHead>Ghi chú</TableHead>
+                  <TableHead>Địa điểm</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayExaminationHistory.map((exam, index) => (
-                  <TableRow
-                    key={index}
-                    className="hover:bg-blue-50 cursor-pointer"
-                    onClick={() => handleOpenDialog(exam)}
-                  >
-                    <TableCell className="font-medium text-blue-800">
-                      {exam.date}
-                    </TableCell>
-                    <TableCell className="text-blue-700">{exam.type}</TableCell>
-                    <TableCell className="text-blue-700">
-                      {exam.doctor}
-                    </TableCell>
+                {mergedHistory.map((item, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{item.date}</TableCell>
+                    <TableCell>{item.type}</TableCell>
+                    <TableCell>{item.subtype}</TableCell>
+                    <TableCell>{item.doctor}</TableCell>
                     <TableCell>
                       <Badge
-                        variant={
-                          exam.result === "Bình thường"
-                            ? "default"
-                            : "secondary"
-                        }
                         className={
-                          exam.result === "Bình thường"
+                          item.result === "Bình thường" ||
+                          item.result === "Hoàn thành"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
                         }
                       >
-                        {exam.result}
+                        {item.result}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-blue-700">
-                      {exam.notes}
-                    </TableCell>{" "}
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-700 hover:bg-blue-100"
-                        onClick={() => handleOpenDialog(exam)}
-                      >
-                        Xem chi tiết
-                      </Button>
-                    </TableCell>
+                    <TableCell>{item.notes}</TableCell>
+                    <TableCell>{item.location}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
+          )}
         </TabsContent>
       </Tabs>
 

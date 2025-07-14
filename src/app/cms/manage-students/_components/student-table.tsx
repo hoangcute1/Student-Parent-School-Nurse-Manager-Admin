@@ -75,16 +75,7 @@ export function StudentTable({
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 border border-sky-200">
-                      <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32&text=${
-                          eachStudent.student.name?.charAt(0) || "S"
-                        }`}
-                      />
-                      <AvatarFallback className="bg-sky-100 text-sky-700 text-xs">
-                        {eachStudent.student.name?.charAt(0) || "S"}
-                      </AvatarFallback>
-                    </Avatar>
+                    {/* Avatar removed as requested */}
                     <div>
                       <div className="font-medium text-sky-800">
                         {eachStudent.student.name || "Chưa có tên"}

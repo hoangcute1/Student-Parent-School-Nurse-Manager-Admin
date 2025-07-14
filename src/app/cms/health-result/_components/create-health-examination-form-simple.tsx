@@ -208,134 +208,195 @@ export default function CreateHealthExaminationForm({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 py-3">
+          <Plus className="w-5 h-5 mr-2" />
           Tạo lịch khám mới
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-blue-800">
-            <Calendar className="w-5 h-5" />
-            Tạo lịch khám sức khỏe
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-gradient-to-br from-white to-sky-50 border border-sky-100">
+        <DialogHeader className="pb-4 border-b border-sky-100">
+          <DialogTitle className="flex items-center gap-3 text-2xl font-bold bg-gradient-to-r from-sky-700 to-sky-600 bg-clip-text text-transparent">
+            <div className="p-2 bg-sky-100 rounded-lg">
+              <Calendar className="w-6 h-6 text-sky-600" />
+            </div>
+            Tạo lịch khám sức khỏe mới
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Tiêu đề lịch khám *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Ví dụ: Khám sức khỏe định kỳ học kỳ 1"
-                required
-              />
+        <form onSubmit={handleSubmit} className="space-y-8 mt-6">
+          {/* Basic Information Section */}
+          <div className="bg-white p-6 rounded-lg border border-sky-100 shadow-sm">
+            <h3 className="text-lg font-semibold text-sky-800 mb-4 flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Thông tin cơ bản
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-sky-700 font-medium">
+                  Tiêu đề lịch khám *
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  placeholder="Ví dụ: Khám sức khỏe định kỳ học kỳ 1"
+                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="examination_type"
+                  className="text-sky-700 font-medium"
+                >
+                  Loại khám *
+                </Label>
+                <Select
+                  onValueChange={(value) =>
+                    handleInputChange("examination_type", value)
+                  }
+                >
+                  <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-500">
+                    <SelectValue placeholder="Chọn loại khám" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Khám sức khỏe định kỳ">
+                      Khám sức khỏe định kỳ
+                    </SelectItem>
+                    <SelectItem value="Khám răng miệng">
+                      Khám răng miệng
+                    </SelectItem>
+                    <SelectItem value="Khám mắt">Khám mắt</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="examination_type">Loại khám *</Label>
-              <Select
-                onValueChange={(value) =>
-                  handleInputChange("examination_type", value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn loại khám" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Khám sức khỏe định kỳ">
-                    Khám sức khỏe định kỳ
-                  </SelectItem>
-                  <SelectItem value="Khám răng miệng">
-                    Khám răng miệng
-                  </SelectItem>
-                  <SelectItem value="Khám mắt">Khám mắt</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Mô tả chi tiết *</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Mô tả chi tiết về buổi khám sức khỏe..."
-              rows={3}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="examination_date">Ngày khám *</Label>
-              <Input
-                id="examination_date"
-                type="date"
-                value={formData.examination_date}
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="description" className="text-sky-700 font-medium">
+                Mô tả chi tiết *
+              </Label>
+              <Textarea
+                id="description"
+                value={formData.description}
                 onChange={(e) =>
-                  handleInputChange("examination_date", e.target.value)
+                  handleInputChange("description", e.target.value)
                 }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="examination_time">Giờ khám *</Label>
-              <Input
-                id="examination_time"
-                type="time"
-                value={formData.examination_time}
-                onChange={(e) =>
-                  handleInputChange("examination_time", e.target.value)
-                }
+                placeholder="Mô tả chi tiết về buổi khám sức khỏe..."
+                rows={3}
+                className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
                 required
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Địa điểm *</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => handleInputChange("location", e.target.value)}
-              placeholder="Ví dụ: Phòng y tế trường, Bệnh viện..."
-              required
-            />
+          {/* Schedule Information Section */}
+          <div className="bg-white p-6 rounded-lg border border-sky-100 shadow-sm">
+            <h3 className="text-lg font-semibold text-sky-800 mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Thời gian & Địa điểm
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="examination_date"
+                  className="text-sky-700 font-medium"
+                >
+                  Ngày khám *
+                </Label>
+                <Input
+                  id="examination_date"
+                  type="date"
+                  value={formData.examination_date}
+                  onChange={(e) =>
+                    handleInputChange("examination_date", e.target.value)
+                  }
+                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="examination_time"
+                  className="text-sky-700 font-medium"
+                >
+                  Giờ khám *
+                </Label>
+                <Input
+                  id="examination_time"
+                  type="time"
+                  value={formData.examination_time}
+                  onChange={(e) =>
+                    handleInputChange("examination_time", e.target.value)
+                  }
+                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sky-700 font-medium">
+                  Địa điểm *
+                </Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) =>
+                    handleInputChange("location", e.target.value)
+                  }
+                  placeholder="Ví dụ: Phòng y tế trường"
+                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="doctor_name"
+                  className="text-sky-700 font-medium"
+                >
+                  Bác sĩ phụ trách *
+                </Label>
+                <Input
+                  id="doctor_name"
+                  value={formData.doctor_name}
+                  onChange={(e) =>
+                    handleInputChange("doctor_name", e.target.value)
+                  }
+                  placeholder="Tên bác sĩ hoặc nhân viên y tế"
+                  className="border-sky-200 focus:border-sky-500 focus:ring-sky-500"
+                  required
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="doctor_name">Bác sĩ phụ trách *</Label>
-            <Input
-              id="doctor_name"
-              value={formData.doctor_name}
-              onChange={(e) => handleInputChange("doctor_name", e.target.value)}
-              placeholder="Tên bác sĩ hoặc nhân viên y tế"
-              required
-            />
-          </div>
-
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4" />
-              Chọn khối học (chọn nhiều khối) *
-            </Label>
+          {/* Grade Selection Section */}
+          <div className="bg-white p-6 rounded-lg border border-sky-100 shadow-sm">
+            <h3 className="text-lg font-semibold text-sky-800 mb-4 flex items-center gap-2">
+              <GraduationCap className="w-5 h-5" />
+              Chọn khối học
+            </h3>
 
             <div className="grid grid-cols-2 gap-3">
               {gradeLevels.map((grade) => (
-                <div key={grade.id} className="flex items-center space-x-2">
+                <div
+                  key={grade.id}
+                  className="flex items-center space-x-3 p-3 rounded-lg border border-sky-100 hover:bg-sky-50 transition-colors"
+                >
                   <Checkbox
                     id={`grade-${grade.id}`}
                     checked={selectedGrades.includes(grade.id)}
                     onCheckedChange={() => handleGradeToggle(grade.id)}
+                    className="border-sky-300 data-[state=checked]:bg-sky-600 data-[state=checked]:border-sky-600"
                   />
                   <Label
                     htmlFor={`grade-${grade.id}`}
-                    className="text-sm cursor-pointer"
+                    className="text-sm cursor-pointer font-medium text-sky-700"
                   >
                     {grade.name}
                   </Label>
@@ -344,29 +405,46 @@ export default function CreateHealthExaminationForm({
             </div>
 
             {selectedGrades.length > 0 && (
-              <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
-                Đã chọn:{" "}
-                {selectedGrades
-                  .map((id) => gradeLevels.find((g) => g.id === id)?.name)
-                  .join(", ")}
+              <div className="mt-4 p-3 bg-sky-50 border border-sky-200 rounded-lg">
+                <p className="text-sm font-medium text-sky-800">
+                  Đã chọn:{" "}
+                  <span className="text-sky-600">
+                    {selectedGrades
+                      .map((id) => gradeLevels.find((g) => g.id === id)?.name)
+                      .join(", ")}
+                  </span>
+                </p>
               </div>
             )}
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-3 pt-6 border-t border-sky-100">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              className="px-6 border-sky-200 text-sky-700 hover:bg-sky-50"
+              disabled={loading}
             >
               Hủy
             </Button>
             <Button
               type="submit"
               disabled={!isFormValid() || loading}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="px-6 bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 disabled:opacity-50"
             >
-              {loading ? "Đang tạo..." : "Tạo lịch khám"}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Đang tạo...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Tạo lịch khám
+                </div>
+              )}
             </Button>
           </div>
         </form>

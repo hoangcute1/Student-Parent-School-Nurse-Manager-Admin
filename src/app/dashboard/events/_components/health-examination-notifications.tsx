@@ -33,18 +33,20 @@ import {
 import { toast } from "sonner";
 import { getAuthToken } from "@/lib/auth";
 import { fetchData } from "@/lib/api/api";
+import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 interface HealthExaminationNotification {
   _id: string;
-  noti_campaign: string;
-  content: string;
-  notes: string;
-  date: string;
-  confirmation_status: "Pending" | "Agree" | "Disagree";
+  noti_campaign?: string;
+  content?: string;
+  notes?: string;
+  date?: string;
+  confirmation_status?: "Pending" | "Agree" | "Disagree";
   student: {
     _id: string;
     name: string;
     class_name?: string;
+    class?: { name?: string };
   };
   // Data từ examination
   examination_date?: string;
@@ -52,9 +54,13 @@ interface HealthExaminationNotification {
   location?: string;
   doctor_name?: string;
   examination_type?: string;
+  title?: string;
+  description?: string;
 }
 
-export default function HealthExaminationNotifications() {
+export default function HealthExaminationNotifications({
+  pendingExaminations: propPendingExaminations,
+}: { pendingExaminations?: HealthExaminationNotification[] } = {}) {
   const [notifications, setNotifications] = useState<
     HealthExaminationNotification[]
   >([]);
@@ -75,30 +81,39 @@ export default function HealthExaminationNotifications() {
   };
 
   const parentId = getParentId();
+  // Nếu có props, ưu tiên dùng props, nếu không thì lấy từ store hoặc API như cũ
+  const { studentsData, fetchHealthExaminationsPending } =
+    useParentStudentsStore();
+
   useEffect(() => {
-    fetchNotifications();
-  }, [parentId]);
-
-  const fetchNotifications = async () => {
-    try {
-      console.log(
-        "Fetching health examination notifications for parent:",
-        parentId
-      );
-      const response = await fetchData<any>(
-        `/notifications/parent/${parentId}/health-examinations`
-      );
-      console.log("Fetched health examination notifications:", response);
-      const data = response;
-
-      setNotifications(data);
-    } catch (error) {
-      console.error("Error fetching health examination notifications:", error);
-      toast.error("Không thể tải thông báo khám sức khỏe");
-    } finally {
+    if (propPendingExaminations && propPendingExaminations.length > 0) {
+      setNotifications(propPendingExaminations);
       setLoading(false);
+      return;
     }
-  };
+    // Nếu không có props, lấy tất cả lịch khám pending của các học sinh
+    const fetchAll = async () => {
+      if (!studentsData || studentsData.length === 0) {
+        setNotifications([]);
+        setLoading(false);
+        return;
+      }
+      const allExams = await Promise.all(
+        studentsData.map((student: any) =>
+          fetchHealthExaminationsPending(student.student._id).then((res: any) =>
+            (res || []).map((item: any) => ({
+              ...item,
+              student: student.student,
+              date: item.examination_date || item.date || "",
+            }))
+          )
+        )
+      );
+      setNotifications(allExams.flat());
+      setLoading(false);
+    };
+    fetchAll();
+  }, [propPendingExaminations, studentsData, fetchHealthExaminationsPending]);
 
   const handleResponse = async (
     notificationId: string,
@@ -232,203 +247,437 @@ export default function HealthExaminationNotifications() {
     );
   }
 
+  // Phân loại thông báo quan trọng và sự kiện sắp tới
+  const importantNotifications = notifications.filter((noti) => {
+    const d = noti.examination_date || noti.date;
+    if (!d) return false;
+    const days = (() => {
+      const examDate = new Date(d);
+      const today = new Date();
+      return Math.ceil(
+        (examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+    })();
+    return days <= 14;
+  });
+  const upcomingNotifications = notifications.filter((noti) => {
+    const d = noti.examination_date || noti.date;
+    if (!d) return false;
+    const days = (() => {
+      const examDate = new Date(d);
+      const today = new Date();
+      return Math.ceil(
+        (examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+    })();
+    return days > 14;
+  });
+
   return (
-    <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl space-y-6">
-      <div className="flex items-center justify-between bg-white/70 rounded-xl p-4 border border-sky-200 shadow-sm">
-        <div>
-          <h2 className="text-xl font-bold text-sky-800">
-            📋 Thông báo lịch khám sức khỏe
-          </h2>
-          <p className="text-sky-600 text-sm mt-1">Quản lý lịch khám sức khỏe của con em</p>
-        </div>
-        <Badge className="bg-gradient-to-r from-amber-100 to-yellow-200 text-amber-800 border border-amber-300 font-semibold px-4 py-2 rounded-xl shadow-sm">
-          {
-            notifications.filter((n) => n.confirmation_status === "Pending")
-              .length
-          }{" "}
-          chờ phản hồi
-        </Badge>
-      </div>
-
-      {notifications.map((notification) => {
-        const { description, date, time } = parseNotesForExaminationDetails(
-          notification.notes
-        );
-
-        return (
-          <Card key={notification._id} className="bg-white border border-sky-200 hover:bg-sky-50 transition-colors rounded-xl shadow-sm hover:shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-2 h-2 bg-sky-500 rounded-full"></div>
-                    <h3 className="text-sky-800 font-semibold text-lg">
-                      {notification.content}
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2 text-sky-600 mb-3">
-                    <User className="w-4 h-4" />
-                    <span className="font-medium">
-                      {notification.student.name}
-                      {notification.student.class_name && ` - Lớp ${notification.student.class_name}`}
-                    </span>
-                  </div>
-                </div>
-                {getStatusBadge(notification.confirmation_status)}
-              </div>
-
-              {/* Compact Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-sky-600" />
-                  <div>
-                    <span className="text-xs text-gray-500 block">Ngày khám</span>
-                    <span className="text-sky-800 font-medium">{date}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-sky-600" />
-                  <div>
-                    <span className="text-xs text-gray-500 block">Giờ khám</span>
-                    <span className="text-sky-800 font-medium">{time}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-sky-600" />
-                  <div>
-                    <span className="text-xs text-gray-500 block">Trạng thái</span>
-                    <span className="text-sky-800 font-medium">
-                      {notification.confirmation_status === "Pending" ? "Chờ phản hồi" :
-                       notification.confirmation_status === "Agree" ? "Đã đồng ý" : "Từ chối"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="bg-sky-50 rounded-lg p-3 border border-sky-100 mb-4">
-                <p className="text-sky-700 text-sm leading-relaxed">{description}</p>
-              </div>
-
-              {/* Action Buttons */}
-              {notification.confirmation_status === "Pending" && (
-                <div className="flex gap-2 pt-2 border-t border-sky-100">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Đồng ý
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="border-sky-200 bg-white/95 backdrop-blur-sm rounded-2xl">
-                      <DialogHeader className="border-b border-sky-100 pb-4">
-                        <DialogTitle className="text-sky-800 text-lg font-semibold">
-                          Xác nhận tham gia lịch khám
-                        </DialogTitle>
-                        <DialogDescription className="text-sky-600">
-                          Bạn có muốn cho con tham gia lịch khám này không?
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <label className="block text-sky-800 font-semibold text-sm">
-                            💬 Ghi chú (tùy chọn)
-                          </label>
-                          <Textarea
-                            placeholder="Nhập ghi chú của bạn..."
-                            value={responseNotes}
-                            onChange={(e) => setResponseNotes(e.target.value)}
-                            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter className="border-t border-sky-100 pt-4">
-                        <Button
-                          onClick={() =>
-                            handleResponse(notification._id, "Agree")
-                          }
-                          disabled={responding === notification._id}
-                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
-                        >
-                          {responding === notification._id
-                            ? "Đang xử lý..."
-                            : "✅ Xác nhận đồng ý"}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Từ chối
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="border-sky-200 bg-white/95 backdrop-blur-sm rounded-2xl">
-                      <DialogHeader className="border-b border-sky-100 pb-4">
-                        <DialogTitle className="text-sky-800 text-lg font-semibold">
-                          Từ chối lịch khám
-                        </DialogTitle>
-                        <DialogDescription className="text-sky-600">
-                          Vui lòng cho biết lý do từ chối để chúng tôi có thể hỗ
-                          trợ tốt hơn.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <label className="block text-sky-800 font-semibold text-sm">
-                            📝 Lý do từ chối <span className="text-red-500">*</span>
-                          </label>
-                          <Textarea
-                            placeholder="Nhập lý do từ chối..."
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            required
-                            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter className="border-t border-sky-100 pt-4">
-                        <Button
-                          onClick={() =>
-                            handleResponse(notification._id, "Disagree")
-                          }
-                          disabled={
-                            responding === notification._id ||
-                            !rejectionReason.trim()
-                          }
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {responding === notification._id
-                            ? "Đang xử lý..."
-                            : "❌ Xác nhận từ chối"}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              )}
-
-              {notification.confirmation_status !== "Pending" && (
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-gray-600">
-                    Đã phản hồi vào{" "}
-                    {new Date(notification.date).toLocaleDateString("vi-VN")}
-                  </p>
-                </div>
-              )}
+    <div className="space-y-8">
+      {/* Thông báo quan trọng */}
+      <div>
+        <h2 className="text-lg font-semibold text-red-700 mb-2">
+          Thông báo quan trọng
+        </h2>
+        {importantNotifications.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8 text-gray-500">
+              Không có thông báo quan trọng nào
             </CardContent>
           </Card>
-        );
-      })}
+        ) : (
+          importantNotifications.map((notification) => {
+            const { description, date, time } = parseNotesForExaminationDetails(
+              notification.notes || ""
+            );
+            return (
+              <Card
+                key={notification._id}
+                className="border-l-4 border-l-blue-500 mb-4"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                        {/* Cột trái */}
+                        <div className="space-y-1">
+                          <CardTitle className="text-blue-800 flex items-center gap-2">
+                            {notification.content ||
+                              notification.title ||
+                              "Lịch khám sức khỏe"}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm">
+                            <User className="w-4 h-4" />
+                            <span>
+                              Học sinh: {notification.student?.name || "-"}
+                              {notification.student?.class_name &&
+                                ` - Lớp ${notification.student.class_name}`}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm">
+                            <Calendar className="w-4 h-4" />
+                            <span>
+                              Thời gian:{" "}
+                              {notification.examination_date
+                                ? new Date(
+                                    notification.examination_date
+                                  ).toLocaleDateString("vi-VN")
+                                : date}
+                              {notification.examination_time
+                                ? ` lúc ${notification.examination_time}`
+                                : time
+                                ? ` lúc ${time}`
+                                : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm">
+                            <User className="w-4 h-4" />
+                            <span>
+                              Bác sĩ phụ trách:{" "}
+                              {notification.doctor_name || "-"}
+                            </span>
+                          </div>
+                          {(notification.description || description) && (
+                            <div className="flex items-center gap-2 text-blue-700 text-sm">
+                              <span className="font-medium">Ghi chú:</span>{" "}
+                              {notification.description || description}
+                            </div>
+                          )}
+                        </div>
+                        {/* Cột phải */}
+                        <div className="space-y-1 md:text-right">
+                          <div className="flex items-center gap-2 text-blue-700 text-sm md:justify-end">
+                            <span className="font-medium">Loại khám:</span>{" "}
+                            {notification.examination_type || "-"}
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm md:justify-end">
+                            <MapPin className="w-4 h-4" />
+                            <span>
+                              Địa điểm: {notification.location || "-"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          <Clock className="mr-1 h-3 w-3" />
+                          {(() => {
+                            const d =
+                              notification.examination_date ||
+                              notification.date;
+                            if (!d) return "-";
+                            const days = (() => {
+                              const examDate = new Date(d);
+                              const today = new Date();
+                              return Math.ceil(
+                                (examDate.getTime() - today.getTime()) /
+                                  (1000 * 60 * 60 * 24)
+                              );
+                            })();
+                            return days > 0
+                              ? `Còn ${days} ngày nữa`
+                              : days === 0
+                              ? "Hôm nay"
+                              : `Quá hạn ${Math.abs(days)} ngày`;
+                          })()}
+                        </Badge>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs text-blue-800 border-blue-200 bg-blue-50"
+                        >
+                          Chờ xác nhận khám
+                        </Badge>
+                      </div>
+                    </div>
+                    {getStatusBadge(
+                      notification.confirmation_status || "Pending"
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Luôn hiển thị nút Đồng ý và Không đồng ý nếu trạng thái Pending */}
+                  {(!notification.confirmation_status ||
+                    notification.confirmation_status === "Pending") && (
+                    <div className="flex gap-2 pt-4 border-t">
+                      {/* Nút Đồng ý: xác nhận ngay, không mở dialog */}
+                      <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() =>
+                          handleResponse(notification._id, "Agree")
+                        }
+                        disabled={responding === notification._id}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Đồng ý
+                      </Button>
+                      {/* Nút Từ chối: xác nhận ngay, không mở dialog */}
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          handleResponse(notification._id, "Disagree")
+                        }
+                        disabled={responding === notification._id}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Từ chối
+                      </Button>
+                    </div>
+                  )}
+                  {/* Chỉ hiển thị khi đã phản hồi */}
+                  {notification.confirmation_status &&
+                    notification.confirmation_status !== "Pending" && (
+                      <div className="pt-4 border-t">
+                        <p className="text-sm text-gray-600">
+                          Đã phản hồi vào{" "}
+                          {new Date(
+                            notification.date ||
+                              notification.examination_date ||
+                              ""
+                          ).toLocaleDateString("vi-VN")}
+                        </p>
+                      </div>
+                    )}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+      </div>
+      {/* Sự kiện sắp tới */}
+      <div>
+        <h2 className="text-lg font-semibold text-blue-700 mb-2">
+          Sự kiện sắp tới
+        </h2>
+        {upcomingNotifications.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8 text-gray-500">
+              Không có sự kiện sắp tới
+            </CardContent>
+          </Card>
+        ) : (
+          upcomingNotifications.map((notification) => {
+            const { description, date, time } = parseNotesForExaminationDetails(
+              notification.notes || ""
+            );
+            return (
+              <Card
+                key={notification._id}
+                className="border-l-4 border-l-blue-500 mb-4"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                        {/* Cột trái */}
+                        <div className="space-y-1">
+                          <CardTitle className="text-blue-800 flex items-center gap-2">
+                            {notification.content ||
+                              notification.title ||
+                              "Lịch khám sức khỏe"}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm">
+                            <User className="w-4 h-4" />
+                            <span>
+                              Học sinh: {notification.student?.name || "-"}
+                              {notification.student?.class_name &&
+                                ` - Lớp ${notification.student.class_name}`}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm">
+                            <Calendar className="w-4 h-4" />
+                            <span>
+                              Thời gian:{" "}
+                              {notification.examination_date
+                                ? new Date(
+                                    notification.examination_date
+                                  ).toLocaleDateString("vi-VN")
+                                : date}
+                              {notification.examination_time
+                                ? ` lúc ${notification.examination_time}`
+                                : time
+                                ? ` lúc ${time}`
+                                : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm">
+                            <User className="w-4 h-4" />
+                            <span>
+                              Bác sĩ phụ trách:{" "}
+                              {notification.doctor_name || "-"}
+                            </span>
+                          </div>
+                          {(notification.description || description) && (
+                            <div className="flex items-center gap-2 text-blue-700 text-sm">
+                              <span className="font-medium">Ghi chú:</span>{" "}
+                              {notification.description || description}
+                            </div>
+                          )}
+                        </div>
+                        {/* Cột phải */}
+                        <div className="space-y-1 md:text-right">
+                          <div className="flex items-center gap-2 text-blue-700 text-sm md:justify-end">
+                            <span className="font-medium">Loại khám:</span>{" "}
+                            {notification.examination_type || "-"}
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-700 text-sm md:justify-end">
+                            <MapPin className="w-4 h-4" />
+                            <span>
+                              Địa điểm: {notification.location || "-"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          <Clock className="mr-1 h-3 w-3" />
+                          {(() => {
+                            const d =
+                              notification.examination_date ||
+                              notification.date;
+                            if (!d) return "-";
+                            const days = (() => {
+                              const examDate = new Date(d);
+                              const today = new Date();
+                              return Math.ceil(
+                                (examDate.getTime() - today.getTime()) /
+                                  (1000 * 60 * 60 * 24)
+                              );
+                            })();
+                            return days > 0
+                              ? `Còn ${days} ngày nữa`
+                              : days === 0
+                              ? "Hôm nay"
+                              : `Quá hạn ${Math.abs(days)} ngày`;
+                          })()}
+                        </Badge>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs text-blue-800 border-blue-200 bg-blue-50"
+                        >
+                          Chờ xác nhận khám
+                        </Badge>
+                      </div>
+                    </div>
+                    {getStatusBadge(
+                      notification.confirmation_status || "Pending"
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Luôn hiển thị nút Đồng ý và Không đồng ý nếu trạng thái Pending */}
+                  {(!notification.confirmation_status ||
+                    notification.confirmation_status === "Pending") && (
+                    <div className="flex gap-2 pt-4 border-t">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="bg-green-600 hover:bg-green-700">
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Đồng ý
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Xác nhận tham gia lịch khám
+                            </DialogTitle>
+                            <DialogDescription>
+                              Bạn có muốn cho con tham gia lịch khám này không?
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <Textarea
+                              placeholder="Ghi chú (tùy chọn)..."
+                              value={responseNotes}
+                              onChange={(e) => setResponseNotes(e.target.value)}
+                            />
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              onClick={() =>
+                                handleResponse(notification._id, "Agree")
+                              }
+                              disabled={responding === notification._id}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              {responding === notification._id
+                                ? "Đang xử lý..."
+                                : "Xác nhận đồng ý"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive">
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Từ chối
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Từ chối lịch khám</DialogTitle>
+                            <DialogDescription>
+                              Vui lòng cho biết lý do từ chối để chúng tôi có
+                              thể hỗ trợ tốt hơn.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <Textarea
+                              placeholder="Lý do từ chối..."
+                              value={rejectionReason}
+                              onChange={(e) =>
+                                setRejectionReason(e.target.value)
+                              }
+                              required
+                            />
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              variant="destructive"
+                              onClick={() =>
+                                handleResponse(notification._id, "Disagree")
+                              }
+                              disabled={
+                                responding === notification._id ||
+                                !rejectionReason.trim()
+                              }
+                            >
+                              {responding === notification._id
+                                ? "Đang xử lý..."
+                                : "Xác nhận từ chối"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  )}
+                  {/* Chỉ hiển thị khi đã phản hồi */}
+                  {notification.confirmation_status &&
+                    notification.confirmation_status !== "Pending" && (
+                      <div className="pt-4 border-t">
+                        <p className="text-sm text-gray-600">
+                          Đã phản hồi vào{" "}
+                          {new Date(
+                            notification.date ||
+                              notification.examination_date ||
+                              ""
+                          ).toLocaleDateString("vi-VN")}
+                        </p>
+                      </div>
+                    )}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }

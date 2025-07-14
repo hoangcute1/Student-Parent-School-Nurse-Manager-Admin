@@ -273,7 +273,7 @@ function SentMedicinesPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
-            Dashboard - Đơn thuốc từ phụ huynh
+            Đơn thuốc từ phụ huynh
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Theo dõi và quản lý các đơn thuốc được gửi từ phụ huynh

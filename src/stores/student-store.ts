@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { CreateStudentData, Student, StudentStore, UpdateStudentData } from "@/lib/type/students";
+import {
+  CreateStudentData,
+  Student,
+  StudentStore,
+  UpdateStudentData,
+} from "@/lib/type/students";
 import {
   createStudent,
   deleteStudent,
@@ -73,56 +78,68 @@ export const useStudentStore = create<StudentStore>((set) => ({
 
   deleteStudent: async (id: string) => {
     try {
-      set({ isLoading: true, error: null });  
+      set({ isLoading: true, error: null });
       await deleteStudent(id);
-      set((state) => ({ students: state.students.filter((student) => student.student._id !== id) }));
+      set((state) => ({
+        students: state.students.filter(
+          (student) => student.student._id !== id
+        ),
+      }));
       console.log(`Student with ID ${id} deleted successfully`);
     } catch (err: any) {
-      const errorMessage = err.message || `Failed to delete student with ID ${id}`;
+      const errorMessage =
+        err.message || `Failed to delete student with ID ${id}`;
       console.error(`Failed to delete student with ID ${id}:`, err);
       set({ error: errorMessage });
+      throw err; // Re-throw error to handle in component
+    } finally {
+      set({ isLoading: false });
     }
   },
 
-  updateStudent: async (id: string, studentData: Partial<UpdateStudentData>) => {
+  updateStudent: async (
+    id: string,
+    studentData: Partial<UpdateStudentData>
+  ) => {
     try {
       set({ isLoading: true, error: null });
       const updatedStudent = await updateStudent(id, studentData);
       set((state) => ({
         students: state.students.map((student) =>
-          student.student._id === id ? { ...student, ...updatedStudent } : student
+          student.student._id === id
+            ? { ...student, ...updatedStudent }
+            : student
         ),
       }));
       console.log(`Student with ID ${id} updated successfully`);
-    }
-    catch (err: any) {
-      const errorMessage = err.message || `Failed to update student with ID ${id}`;
+    } catch (err: any) {
+      const errorMessage =
+        err.message || `Failed to update student with ID ${id}`;
       console.error(`Failed to update student with ID ${id}:`, err);
       set({ error: errorMessage });
-    }
-    finally {
+    } finally {
       set({ isLoading: false });
     }
   },
 
-
   fetchStudentById: async (id: string) => {
-  try {
-    set({ isLoading: true, error: null });
-    console.log(`Fetching student with ID ${id}`);
-    const student = await getStudentById(id);
-    set({
-      selectedStudentId: student,
-      error: null,
-    });
-  } catch (err: any) {
-    const errorMessage = err.message || `Failed to fetch student with ID ${id}`;
-    console.error(`Failed to fetch student with ID ${id}:`, err);
-    set({ error: errorMessage });
-  } finally {
-    set({ isLoading: false });
-  }
-},
+    try {
+      set({ isLoading: true, error: null });
+      console.log(`Fetching student with ID ${id}`);
+      const student = await getStudentById(id);
+      set({
+        selectedStudentId: student,
+        error: null,
+      });
+    } catch (err: any) {
+      const errorMessage =
+        err.message || `Failed to fetch student with ID ${id}`;
+      console.error(`Failed to fetch student with ID ${id}:`, err);
+      set({ error: errorMessage });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
   createStudent: async (studentData: Partial<CreateStudentData>) => {
     try {
       set({ isLoading: true, error: null });
@@ -131,15 +148,14 @@ export const useStudentStore = create<StudentStore>((set) => ({
         students: [...state.students, newStudent],
       }));
       console.log("New student created successfully:", newStudent);
+      return newStudent; // Trả về object student vừa tạo
     } catch (err: any) {
       const errorMessage = err.message || "Failed to create student";
       console.error("Failed to create student:", err);
       set({ error: errorMessage });
+      return null; // Trả về null nếu lỗi
+    } finally {
+      set({ isLoading: false });
     }
-  finally {
-    set({ isLoading: false });
-  }
   },
-
-
 }));

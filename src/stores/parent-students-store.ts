@@ -39,25 +39,17 @@ export const useParentStudentsStore = create<ParentStudentsStore>(
         }
 
         const user = parseJwt(token);
-        console.log(user);
+        console.log("User from token:", user);
 
-        if (!user || user.role !== "parent") {
-          console.warn("User not authenticated or not a parent");
-          set({
-            isLoading: false,
-            error: "User not authenticated or not a parent",
-          });
+        // Đảm bảo lấy đúng userId (sub)
+        const userId = user?.sub;
+        if (!userId) {
+          console.warn("User ID not found in token");
+          set({ isLoading: false, error: "User ID not found in token" });
           return;
         }
 
-        const parentId = user.sub;
-        if (!parentId) {
-          console.warn("Parent ID not found in token");
-          set({ isLoading: false, error: "Parent ID not found in token" });
-          return;
-        }
-
-        const studentParentList = await getStudentsByParentId(parentId);
+        const studentParentList = await getStudentsByParentId(userId);
         console.log("Students fetched:", studentParentList);
 
         set({

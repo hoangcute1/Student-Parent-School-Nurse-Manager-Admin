@@ -61,7 +61,7 @@ export default function User() {
 
   return (
     <div className="flex">
-      <Notification />
+      {role === "parent" && <Notification />}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -125,23 +125,23 @@ export default function User() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />{" "}
-          {(role === "admin" || role === "staff") && (
+          {(role === "admin" || role === "staff" || role === "parent") && (
             <>
               <DropdownMenuItem asChild>
-                <Link href="/cms" className="flex w-full items-center">
+                <Link 
+                  href={
+                    role === "parent"
+                      ? "/dashboard"
+                      : role === "staff"
+                        ? "/cms"
+                        : role === "admin"
+                          ? "/admin"
+                          : "/"
+                  }
+                  className="flex w-full items-center"
+                >
                   <Settings2 className="mr-2 h-4 w-4" />
                   <span>Bảng quản lý</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          {role === "parent" && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard" className="flex w-full items-center">
-                  <Settings2 className="mr-2 h-4 w-4" />
-                  <span>Bảng điều khiển</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { fetchData } from "@/lib/api/api";
 
 interface EventDetail {
   event_id: string;
@@ -70,10 +71,16 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
 
   const fetchEventDetail = async () => {
     try {
-      const response = await fetch(
-        `/api/health-examinations/events/${eventId}`
+      const data = await fetchData<any>(
+        `/health-examinations/events/${eventId}`
       );
-      const data = await response.json();
+
+      // Ensure classes is an array
+      if (data && !Array.isArray(data.classes)) {
+        console.warn("Event detail classes is not an array:", data.classes);
+        data.classes = [];
+      }
+
       setEventDetail(data);
     } catch (error) {
       console.error("Error fetching event detail:", error);
@@ -173,13 +180,13 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
     );
   }
 
-  const totalStats = eventDetail.classes.reduce(
+  const totalStats = (eventDetail.classes || []).reduce(
     (acc, cls) => ({
-      total: acc.total + cls.total_students,
-      approved: acc.approved + cls.approved_count,
-      pending: acc.pending + cls.pending_count,
-      rejected: acc.rejected + cls.rejected_count,
-      completed: acc.completed + cls.completed_count,
+      total: acc.total + (cls.total_students || 0),
+      approved: acc.approved + (cls.approved_count || 0),
+      pending: acc.pending + (cls.pending_count || 0),
+      rejected: acc.rejected + (cls.rejected_count || 0),
+      completed: acc.completed + (cls.completed_count || 0),
     }),
     { total: 0, approved: 0, pending: 0, rejected: 0, completed: 0 }
   );
@@ -281,99 +288,105 @@ export default function HealthExaminationEventDetail({ eventId }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {eventDetail.classes.length === 0 ? (
-            <div className="text-center py-8">
-              <GraduationCap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-500">
-                Không có lớp nào trong sự kiện này
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Lớp</TableHead>
-                  <TableHead>Tổng học sinh</TableHead>
-                  <TableHead>Đã đồng ý</TableHead>
-                  <TableHead>Chờ phản hồi</TableHead>
-                  <TableHead>Từ chối</TableHead>
-                  <TableHead>Hoàn thành</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {eventDetail.classes
-                  .sort(
-                    (a, b) =>
-                      a.grade_level - b.grade_level ||
-                      a.class_name.localeCompare(b.class_name)
-                  )
-                  .map((classDetail) => (
-                    <TableRow
-                      key={classDetail.class_id}
-                      className="cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() =>
-                        handleViewClassDetail(classDetail.class_id)
-                      }
-                    >
-                      <TableCell>
-                        <div className="space-y-1">
+          {Array.isArray(eventDetail.classes) ? (
+            eventDetail.classes.length === 0 ? (
+              <div className="text-center py-8">
+                <GraduationCap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-gray-500">
+                  Không có lớp nào trong sự kiện này
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Lớp</TableHead>
+                    <TableHead>Khối</TableHead>
+                    <TableHead>Tổng học sinh</TableHead>
+                    <TableHead>Đã đồng ý</TableHead>
+                    <TableHead>Chờ phản hồi</TableHead>
+                    <TableHead>Từ chối</TableHead>
+                    <TableHead>Hoàn thành</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {eventDetail.classes
+                    .sort(
+                      (a, b) =>
+                        a.grade_level - b.grade_level ||
+                        a.class_name.localeCompare(b.class_name)
+                    )
+                    .map((classDetail) => (
+                      <TableRow
+                        key={classDetail.class_id}
+                        className="cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() =>
+                          handleViewClassDetail(classDetail.class_id)
+                        }
+                      >
+                        <TableCell>
                           <div className="flex items-center gap-2">
                             <GraduationCap className="w-4 h-4 text-blue-600" />
                             <span className="font-medium">
                               {classDetail.class_name}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-600">
-                            Khối {classDetail.grade_level}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4 text-gray-600" />
-                          <span className="font-medium">
-                            {classDetail.total_students}
+                        </TableCell>
+                        <TableCell>{classDetail.grade_level}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4 text-gray-600" />
+                            <span className="font-medium">
+                              {classDetail.total_students}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-green-600 font-medium">
+                            {classDetail.approved_count}
                           </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-green-600 font-medium">
-                          {classDetail.approved_count}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-yellow-600 font-medium">
-                          {classDetail.pending_count}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-red-600 font-medium">
-                          {classDetail.rejected_count}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-purple-600 font-medium">
-                          {classDetail.completed_count}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {getClassStatusBadge(
-                          classDetail.approved_count,
-                          classDetail.pending_count,
-                          classDetail.rejected_count,
-                          classDetail.completed_count,
-                          classDetail.total_students
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-yellow-600 font-medium">
+                            {classDetail.pending_count}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-red-600 font-medium">
+                            {classDetail.rejected_count}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-purple-600 font-medium">
+                            {classDetail.completed_count}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {getClassStatusBadge(
+                            classDetail.approved_count,
+                            classDetail.pending_count,
+                            classDetail.rejected_count,
+                            classDetail.completed_count,
+                            classDetail.total_students
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            )
+          ) : (
+            <div className="text-center py-8">
+              <GraduationCap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-gray-500">
+                Dữ liệu lớp học không hợp lệ hoặc không thể tải danh sách lớp.
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -20,17 +20,22 @@ import {
   User,
   MapPin,
   Calendar,
+  Edit,
 } from "lucide-react";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
 
 interface EventTableProps {
   events: TreatmentHistory[];
   onView: (event: TreatmentHistory) => void;
+  onEdit?: (event: TreatmentHistory) => void;
+  onProcess?: (event: TreatmentHistory) => void;
 }
 
 export function EventTable({
   events,
   onView,
+  onEdit,
+  onProcess,
 }: EventTableProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -252,6 +257,26 @@ export function EventTable({
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
+                      {onEdit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(event)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {onProcess && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onProcess(event)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Activity className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -8,7 +8,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 export const AUTH_SECRET = process.env.AUTH_SECRET || "";
 export const JWT_EXPIRATION = process.env.JWT_EXPIRATION || "1h";
 export const LOCAL_STORAGE_TOKEN_KEY =
-  process.env.LOCAL_STORAGE_TOKEN_KEY || "";
+  process.env.LOCAL_STORAGE_TOKEN_KEY || "authToken";
 
 // Application environment
 export const NODE_ENV = process.env.NODE_ENV || "development";
