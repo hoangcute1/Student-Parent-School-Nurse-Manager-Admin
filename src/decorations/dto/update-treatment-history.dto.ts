@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsDate } from 'class-validator';
+import { IsOptional, IsString, IsDate, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateTreatmentHistoryDto {
@@ -57,4 +57,68 @@ export class UpdateTreatmentHistoryDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  // Additional fields from frontend
+  @ApiProperty({
+    description: 'Title of the medical incident',
+    example: 'Student fell in playground',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({
+    description: 'Class name',
+    example: 'Lớp 1A',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  class?: string;
+
+  @ApiProperty({
+    description: 'Location of incident',
+    example: 'Playground',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @ApiProperty({
+    description: 'Priority level',
+    example: 'High',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  priority?: string;
+
+  @ApiProperty({
+    description: 'Contact status with parent',
+    example: 'Đã liên hệ',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  contactStatus?: string;
+
+  @ApiProperty({
+    description: 'Whether parent has been contacted',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  contactParent?: boolean;
+
+  @ApiProperty({
+    description: 'Action taken',
+    example: 'Called ambulance',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  actionTaken?: string;
 }
