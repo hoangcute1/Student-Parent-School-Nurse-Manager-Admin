@@ -724,23 +724,8 @@ export default function HealthExaminationClassDetail({
                     <div className="flex items-center space-x-2">
                       {getStatusBadge(student.status)}
 
-                      {/* Nút Tiêm */}
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => handleVaccinate(student)}
-                        className={`flex items-center space-x-1 ${
-                          student.status === "Completed"
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                        disabled={student.status === "Completed"}
-                      >
-                        💉
-                        <span>
-                          {student.status === "Completed" ? "Đã tiêm" : "Tiêm"}
-                        </span>
-                      </Button>
+                      
+                      
 
                       {/* Nút Khám */}
                       <Button
