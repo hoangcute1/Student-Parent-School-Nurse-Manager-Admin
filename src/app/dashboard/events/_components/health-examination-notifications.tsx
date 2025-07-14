@@ -28,6 +28,7 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAuthToken } from "@/lib/auth";
@@ -156,21 +157,21 @@ export default function HealthExaminationNotifications() {
     switch (status) {
       case "Agree":
         return (
-          <Badge className="bg-green-100 text-green-800">
+          <Badge className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300 font-semibold px-3 py-1 rounded-xl shadow-sm">
             <CheckCircle className="w-3 h-3 mr-1" />
             Đã đồng ý
           </Badge>
         );
       case "Disagree":
         return (
-          <Badge className="bg-red-100 text-red-800">
+          <Badge className="bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300 font-semibold px-3 py-1 rounded-xl shadow-sm">
             <XCircle className="w-3 h-3 mr-1" />
             Đã từ chối
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-yellow-100 text-yellow-800">
+          <Badge className="bg-gradient-to-r from-amber-100 to-yellow-200 text-amber-800 border border-amber-300 font-semibold px-3 py-1 rounded-xl shadow-sm">
             <Clock className="w-3 h-3 mr-1" />
             Chờ phản hồi
           </Badge>
@@ -198,16 +199,20 @@ export default function HealthExaminationNotifications() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl space-y-6">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          <Card key={i} className="animate-pulse bg-white/70 border-sky-200 shadow-lg rounded-2xl">
+            <CardHeader className="pb-4">
+              <div className="h-5 bg-sky-200 rounded-lg w-3/4"></div>
+              <div className="h-4 bg-sky-100 rounded-lg w-1/2 mt-2"></div>
             </CardHeader>
             <CardContent>
-              <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-4 bg-sky-100 rounded-lg w-full mb-3"></div>
+              <div className="h-4 bg-sky-100 rounded-lg w-2/3 mb-3"></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="h-12 bg-sky-100 rounded-lg"></div>
+                <div className="h-12 bg-sky-100 rounded-lg"></div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -217,22 +222,26 @@ export default function HealthExaminationNotifications() {
 
   if (notifications.length === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <p className="text-gray-500">Không có thông báo lịch khám nào</p>
+      <Card className="bg-gradient-to-br from-sky-50 to-blue-50 border-sky-200 shadow-lg rounded-2xl">
+        <CardContent className="text-center py-12">
+          <Calendar className="mx-auto h-16 w-16 text-sky-400 mb-6" />
+          <p className="text-sky-600 font-medium text-lg">Không có thông báo lịch khám nào</p>
+          <p className="text-sky-500 text-sm mt-2">Các thông báo mới sẽ hiển thị tại đây</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-blue-800">
-          Thông báo lịch khám sức khỏe
-        </h2>
-        <Badge variant="outline" className="text-blue-600">
+    <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl space-y-6">
+      <div className="flex items-center justify-between bg-white/70 rounded-xl p-4 border border-sky-200 shadow-sm">
+        <div>
+          <h2 className="text-xl font-bold text-sky-800">
+            📋 Thông báo lịch khám sức khỏe
+          </h2>
+          <p className="text-sky-600 text-sm mt-1">Quản lý lịch khám sức khỏe của con em</p>
+        </div>
+        <Badge className="bg-gradient-to-r from-amber-100 to-yellow-200 text-amber-800 border border-amber-300 font-semibold px-4 py-2 rounded-xl shadow-sm">
           {
             notifications.filter((n) => n.confirmation_status === "Pending")
               .length
@@ -247,72 +256,106 @@ export default function HealthExaminationNotifications() {
         );
 
         return (
-          <Card key={notification._id} className="border-l-4 border-l-blue-500">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-blue-800">
-                    {notification.content}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-2">
+          <Card key={notification._id} className="bg-white border border-sky-200 hover:bg-sky-50 transition-colors rounded-xl shadow-sm hover:shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-2 h-2 bg-sky-500 rounded-full"></div>
+                    <h3 className="text-sky-800 font-semibold text-lg">
+                      {notification.content}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-sky-600 mb-3">
                     <User className="w-4 h-4" />
-                    Học sinh: {notification.student.name}
-                    {notification.student.class_name &&
-                      ` - Lớp ${notification.student.class_name}`}
-                  </CardDescription>
+                    <span className="font-medium">
+                      {notification.student.name}
+                      {notification.student.class_name && ` - Lớp ${notification.student.class_name}`}
+                    </span>
+                  </div>
                 </div>
                 {getStatusBadge(notification.confirmation_status)}
               </div>
-            </CardHeader>
 
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">{description}</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2 text-blue-600">
-                  <Calendar className="w-4 h-4" />
-                  <span>Ngày khám: {date}</span>
+              {/* Compact Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-sky-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Ngày khám</span>
+                    <span className="text-sky-800 font-medium">{date}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-blue-600">
-                  <Clock className="w-4 h-4" />
-                  <span>Giờ khám: {time}</span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-sky-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Giờ khám</span>
+                    <span className="text-sky-800 font-medium">{time}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-sky-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Trạng thái</span>
+                    <span className="text-sky-800 font-medium">
+                      {notification.confirmation_status === "Pending" ? "Chờ phản hồi" :
+                       notification.confirmation_status === "Agree" ? "Đã đồng ý" : "Từ chối"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
+              {/* Description */}
+              <div className="bg-sky-50 rounded-lg p-3 border border-sky-100 mb-4">
+                <p className="text-sky-700 text-sm leading-relaxed">{description}</p>
+              </div>
+
+              {/* Action Buttons */}
               {notification.confirmation_status === "Pending" && (
-                <div className="flex gap-2 pt-4 border-t">
+                <div className="flex gap-2 pt-2 border-t border-sky-100">
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button className="bg-green-600 hover:bg-green-700">
-                        <CheckCircle className="w-4 h-4 mr-2" />
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
                         Đồng ý
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Xác nhận tham gia lịch khám</DialogTitle>
-                        <DialogDescription>
+                    <DialogContent className="border-sky-200 bg-white/95 backdrop-blur-sm rounded-2xl">
+                      <DialogHeader className="border-b border-sky-100 pb-4">
+                        <DialogTitle className="text-sky-800 text-lg font-semibold">
+                          Xác nhận tham gia lịch khám
+                        </DialogTitle>
+                        <DialogDescription className="text-sky-600">
                           Bạn có muốn cho con tham gia lịch khám này không?
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-4">
-                        <Textarea
-                          placeholder="Ghi chú (tùy chọn)..."
-                          value={responseNotes}
-                          onChange={(e) => setResponseNotes(e.target.value)}
-                        />
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label className="block text-sky-800 font-semibold text-sm">
+                            💬 Ghi chú (tùy chọn)
+                          </label>
+                          <Textarea
+                            placeholder="Nhập ghi chú của bạn..."
+                            value={responseNotes}
+                            onChange={(e) => setResponseNotes(e.target.value)}
+                            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
+                          />
+                        </div>
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="border-t border-sky-100 pt-4">
                         <Button
                           onClick={() =>
                             handleResponse(notification._id, "Agree")
                           }
                           disabled={responding === notification._id}
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl"
                         >
                           {responding === notification._id
                             ? "Đang xử lý..."
-                            : "Xác nhận đồng ý"}
+                            : "✅ Xác nhận đồng ý"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -320,30 +363,41 @@ export default function HealthExaminationNotifications() {
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="destructive">
-                        <XCircle className="w-4 h-4 mr-2" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
                         Từ chối
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Từ chối lịch khám</DialogTitle>
-                        <DialogDescription>
+                    <DialogContent className="border-sky-200 bg-white/95 backdrop-blur-sm rounded-2xl">
+                      <DialogHeader className="border-b border-sky-100 pb-4">
+                        <DialogTitle className="text-sky-800 text-lg font-semibold">
+                          Từ chối lịch khám
+                        </DialogTitle>
+                        <DialogDescription className="text-sky-600">
                           Vui lòng cho biết lý do từ chối để chúng tôi có thể hỗ
                           trợ tốt hơn.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-4">
-                        <Textarea
-                          placeholder="Lý do từ chối..."
-                          value={rejectionReason}
-                          onChange={(e) => setRejectionReason(e.target.value)}
-                          required
-                        />
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label className="block text-sky-800 font-semibold text-sm">
+                            📝 Lý do từ chối <span className="text-red-500">*</span>
+                          </label>
+                          <Textarea
+                            placeholder="Nhập lý do từ chối..."
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            required
+                            className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
+                          />
+                        </div>
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="border-t border-sky-100 pt-4">
                         <Button
-                          variant="destructive"
                           onClick={() =>
                             handleResponse(notification._id, "Disagree")
                           }
@@ -351,10 +405,11 @@ export default function HealthExaminationNotifications() {
                             responding === notification._id ||
                             !rejectionReason.trim()
                           }
+                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {responding === notification._id
                             ? "Đang xử lý..."
-                            : "Xác nhận từ chối"}
+                            : "❌ Xác nhận từ chối"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>

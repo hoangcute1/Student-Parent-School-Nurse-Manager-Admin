@@ -193,63 +193,79 @@ export default function VaccinationNotifications() {
           parseNotesForVaccinationDetails(notification.notes);
 
         return (
-          <Card key={notification._id} className="border-l-4 border-l-blue-500">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-blue-800">
-                    {notification.content}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-2">
+          <Card key={notification._id} className="bg-white border border-blue-200 hover:bg-blue-50 transition-colors rounded-xl shadow-sm hover:shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <h3 className="text-blue-800 font-semibold text-lg">
+                      {notification.content}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-600 mb-3">
                     <User className="w-4 h-4" />
-                    Học sinh: {notification.student.name}
-                    {notification.student.class_name &&
-                      ` - Lớp ${notification.student.class_name}`}
-                  </CardDescription>
+                    <span className="font-medium">
+                      {notification.student.name}
+                      {notification.student.class_name && ` - Lớp ${notification.student.class_name}`}
+                    </span>
+                  </div>
                 </div>
                 {getStatusBadge(notification.confirmation_status)}
               </div>
-            </CardHeader>
 
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">{description}</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2 text-blue-600">
-                  <Calendar className="w-4 h-4" />
-                  <span>Ngày tiêm: {date}</span>
-                </div>
-                <div className="flex items-center gap-2 text-blue-600">
-                  <Clock className="w-4 h-4" />
-                  <span>Giờ tiêm: {time}</span>
-                </div>
-                {location && (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <MapPin className="w-4 h-4" />
-                    <span>Địa điểm: {location}</span>
+              {/* Compact Info Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Ngày tiêm</span>
+                    <span className="text-blue-800 font-medium text-sm">{date}</span>
                   </div>
-                )}
-                {vaccineType && (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <Syringe className="w-4 h-4" />
-                    <span>Loại vắc-xin: {vaccineType}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Giờ tiêm</span>
+                    <span className="text-blue-800 font-medium text-sm">{time}</span>
                   </div>
-                )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Địa điểm</span>
+                    <span className="text-blue-800 font-medium text-sm">{location || "Chưa xác định"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Syringe className="w-4 h-4 text-blue-600" />
+                  <div>
+                    <span className="text-xs text-gray-500 block">Loại vắc-xin</span>
+                    <span className="text-blue-800 font-medium text-sm">{vaccineType || "Chưa xác định"}</span>
+                  </div>
+                </div>
               </div>
 
+              {/* Description */}
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 mb-4">
+                <p className="text-blue-700 text-sm leading-relaxed">{description}</p>
+              </div>
+
+              {/* Action Buttons */}
               {notification.confirmation_status === "Pending" && (
-                <div className="flex gap-2 pt-4 border-t">
+                <div className="flex gap-2 pt-2 border-t border-blue-100">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
-                        className="bg-green-600 hover:bg-green-700"
+                        size="sm"
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                         onClick={() => {
                           setSelectedNotification(notification);
                           setResponseNotes("");
                           setRejectionReason("");
                         }}
                       >
-                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <CheckCircle className="w-4 h-4 mr-1" />
                         Đồng ý
                       </Button>
                     </DialogTrigger>
@@ -304,14 +320,15 @@ export default function VaccinationNotifications() {
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        className="text-red-600 border-red-600 hover:bg-red-50"
+                        size="sm"
+                        className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
                         onClick={() => {
                           setSelectedNotification(notification);
                           setResponseNotes("");
                           setRejectionReason("");
                         }}
                       >
-                        <XCircle className="w-4 h-4 mr-2" />
+                        <XCircle className="w-4 h-4 mr-1" />
                         Từ chối
                       </Button>
                     </DialogTrigger>

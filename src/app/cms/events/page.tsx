@@ -43,12 +43,14 @@ import {
   getAllTreatmentHistories,
   updateTreatmentHistory,
 } from "@/lib/api/treatment-history";
+import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
 import { EventStats } from "./components/stats-cards";
 import { FilterBar } from "./_components/filter-bar";
 import { EventTable } from "./components/event-table";
+import { AlertTriangle, User, Users, MapPin, FileText, PhoneCall, UserCheck, Flag } from "lucide-react";
 
 export default function MedicalEvents() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,9 +73,16 @@ export default function MedicalEvents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [studentsError, setStudentsError] = useState<string | null>(null);
   const [staffs, setStaffs] = useState<Staff[]>([]);
-  const [eventList, setEventList] = useState<any[]>([]);
-  const [eventLoading, setEventLoading] = useState(false);
   const [eventError, setEventError] = useState<string | null>(null);
+
+  // Sử dụng store cho treatment history
+  const { 
+    treatmentHistories: eventList, 
+    isLoading: eventLoading, 
+    error: storeError,
+    fetchAllTreatmentHistories,
+    updateTreatmentHistoryItem 
+  } = useTreatmentHistoryStore();
 
   // Form schema for adding/updating event
 
@@ -118,14 +127,9 @@ export default function MedicalEvents() {
       .finally(() => {
         setIsInitialLoading(false);
       });
-    getAllTreatmentHistories()
-      .then((data) => {
-        console.log("Fetched treatment histories:", data);
-        setEventList(data);
-      })
-      .catch(() => setEventError("Không thể tải danh sách sự kiện"))
-      .finally(() => setEventLoading(false));
-  }, []);
+    // Fetch treatment histories using store
+    fetchAllTreatmentHistories();
+  }, [fetchAllTreatmentHistories]);
 
   // Form for updating event
   const updateEventForm = useForm<z.infer<typeof eventFormSchema>>({
@@ -186,20 +190,23 @@ export default function MedicalEvents() {
   const onAddEvent = async (data: z.infer<typeof eventFormSchema>) => {
     try {
       console.log("Add event data:", data);
-      // Gửi theo đúng backend schema
+      // Gửi đúng schema backend yêu cầu
       await createTreatmentHistory({
+        title: data.title,
         student: data.student,
-        staff: data.reporter || "Unknown Staff", // Required field
-        record: "507f1f77bcf86cd799439011", // Required field - ObjectId giả (24 ký tự hex)
-        date: new Date().toISOString(),
+        class: data.class,
+        staff: data.reporter, // Changed from reporter to staff
+        location: data.location,
+        priority: data.priority,
+        contactStatus: data.contactStatus,
         description: data.description,
+        record: "507f1f77bcf86cd799439011", // ObjectId giả cho health record
+        date: new Date().toISOString(), // Ngày hiện tại
         notes: `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`,
       });
 
       // Refresh danh sách events ngay sau khi tạo thành công
-      const updatedEvents = await getAllTreatmentHistories();
-      const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
+      await fetchAllTreatmentHistories();
 
       setAddEventOpen(false);
       addEventForm.reset();
@@ -220,19 +227,14 @@ export default function MedicalEvents() {
       }
 
       // Gọi API cập nhật theo backend schema
-      await updateTreatmentHistory(selectedEvent._id, {
+      await updateTreatmentHistoryItem(selectedEvent._id, {
         student: data.student,
-        staff: data.reporter || selectedEvent.staff || "Unknown Staff",
+        staff: data.reporter || selectedEvent.staff || "Unknown Staff", // Changed from reporter to staff
         record: selectedEvent.record || "507f1f77bcf86cd799439011", // ObjectId giả
         date: selectedEvent.date || new Date().toISOString(),
         description: data.description,
         notes: `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`,
       });
-
-      // Refresh danh sách
-      const updatedEvents = await getAllTreatmentHistories();
-      const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
 
       setUpdateEventOpen(false);
       updateEventForm.reset();
@@ -253,15 +255,10 @@ export default function MedicalEvents() {
       const currentNotes = existingEvent?.notes || "";
       const processInfo = `Contact Parent: ${data.contactParent} | Action: ${data.actionTaken} | Process Notes: ${data.notes}`;
 
-      await updateTreatmentHistory(data._id, {
+      await updateTreatmentHistoryItem(data._id, {
         status: data.status, // Cập nhật trường status thực tế
         notes: currentNotes ? `${currentNotes} | ${processInfo}` : processInfo,
       });
-
-      // Refresh danh sách events sau khi cập nhật
-      const updatedEvents = await getAllTreatmentHistories();
-      const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
 
       setProcessEventOpen(false);
       processEventForm.reset();
@@ -299,7 +296,7 @@ export default function MedicalEvents() {
       // Refresh danh sách events sau khi cập nhật
       const updatedEvents = await getAllTreatmentHistories();
       const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
+      // setEventList(processedData); // This line was removed as per the edit hint
 
       setEmergencyProcessOpen(false);
       emergencyProcessForm.reset();
@@ -463,20 +460,19 @@ export default function MedicalEvents() {
   };
 
   useEffect(() => {
-    setEventLoading(true);
     getAllTreatmentHistories()
       .then((data) => {
         console.log("Fetched treatment histories:", data);
         // Đảm bảo mỗi sự kiện có ngày tạo
         const processedData = ensureCreatedAt(data);
         console.log("Processed data with ensured createdAt:", processedData);
-        setEventList(processedData);
       })
       .catch((error) => {
         console.error("Error fetching treatment histories:", error);
         setEventError("Không thể tải danh sách sự kiện");
       })
-      .finally(() => setEventLoading(false));
+      .finally(() => {
+      });
   }, []);
 
   // Hàm đảm bảo mỗi sự kiện có createdAt
@@ -498,10 +494,10 @@ export default function MedicalEvents() {
       <div className="space-y-8">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-sky-800">
-            Quản lý sự kiện y tế
+            Quản lý sự cố y tế
           </h1>
           <p className="text-sky-600">
-            Theo dõi và xử lý các sự kiện y tế trong trường học
+            Theo dõi và xử lý các sự cố y tế trong trường học
           </p>
         </div>
         <div className="flex justify-center items-center py-8">
@@ -516,10 +512,10 @@ export default function MedicalEvents() {
       <div className="space-y-8">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-sky-800">
-            Quản lý sự kiện y tế
+            Quản lý sự cố y tế
           </h1>
           <p className="text-sky-600">
-            Theo dõi và xử lý các sự kiện y tế trong trường học
+            Theo dõi và xử lý các sự cố y tế trong trường học
           </p>
         </div>
         <div className="flex justify-center items-center py-8">
@@ -534,10 +530,10 @@ export default function MedicalEvents() {
       {/* Header */}
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-sky-800">
-          Quản lý sự kiện y tế
+          Quản lý sự cố y tế
         </h1>
         <p className="text-sky-600">
-          Theo dõi và xử lý các sự kiện y tế trong trường học
+          Theo dõi và xử lý các sự cố y tế trong trường học
         </p>
       </div>
 
@@ -565,18 +561,17 @@ export default function MedicalEvents() {
         </div>
         <Button
           onClick={() => {
-            setEventLoading(true);
             getAllTreatmentHistories()
               .then((data) => {
                 // Đảm bảo mỗi sự kiện có ngày tạo
                 const processedData = ensureCreatedAt(data);
-                setEventList(processedData);
               })
               .catch((error) => {
                 console.error("Error refreshing treatment histories:", error);
                 setEventError("Không thể tải danh sách sự kiện");
               })
-              .finally(() => setEventLoading(false));
+              .finally(() => {
+              });
           }}
           variant="outline"
           className="border-sky-200 text-sky-700 hover:bg-sky-50"
@@ -598,7 +593,6 @@ export default function MedicalEvents() {
       <EventTable
         events={filteredEvents}
         onView={handleViewDetails}
-        onEdit={handleUpdateEvent}
         onProcess={handleProcessEvent}
       />
 
@@ -1218,125 +1212,129 @@ export default function MedicalEvents() {
         open={viewEventDetailsOpen}
         onOpenChange={setViewEventDetailsOpen}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-teal-800">
-              Chi tiết sự cố y tế
+            <DialogTitle className="text-teal-800 text-2xl font-bold flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-orange-500" />
+              {selectedEvent ? selectedEvent.title : ""}
             </DialogTitle>
+            <DialogDescription className="text-teal-600">
+              Thông tin chi tiết về sự cố y tế
+            </DialogDescription>
           </DialogHeader>
 
           {selectedEvent && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-teal-800">
-                    {selectedEvent.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-2 text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span>
-                      {selectedEvent.createdAt
-                        ? new Date(selectedEvent.createdAt).toLocaleString(
-                            "vi-VN",
-                            {
-                              dateStyle: "full",
-                              timeStyle: "medium",
-                            }
-                          )
-                        : "Không rõ thời gian tạo"}
-                    </span>
+            <div className="space-y-6">
+              {/* Thông tin tổng quan */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-sky-50 rounded-lg p-4 border">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-sky-700" />
+                    <span className="font-medium text-gray-700">Học sinh:</span>
+                    <span className="text-gray-800">{typeof selectedEvent.student === "object" ? selectedEvent.student.name : selectedEvent.student || "Không rõ"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-sky-700" />
+                    <span className="font-medium text-gray-700">Lớp:</span>
+                    <span className="text-gray-800">{selectedEvent.class || "Không rõ"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-sky-700" />
+                    <span className="font-medium text-gray-700">Địa điểm:</span>
+                    <span className="text-gray-800">{selectedEvent.location || "Không rõ"}</span>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">Học sinh:</span>{" "}
-                    <span className="text-gray-600">
-                      {typeof selectedEvent.student === "object" &&
-                      selectedEvent.student !== null
-                        ? selectedEvent.student.name
-                        : selectedEvent.student || "Không rõ"}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-sky-700" />
+                    <span className="font-medium text-gray-700">Người báo cáo:</span>
+                    {(() => {
+                      const reporterName = staffs.find(
+                        staff =>
+                          String(staff._id) === String(selectedEvent.staff) ||
+                          String(staff.user?._id) === String(selectedEvent.staff)
+                      )?.profile?.name;
+                      return <span className="text-gray-800">{reporterName || selectedEvent.reporter || "---"}</span>;
+                    })()}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Flag className="w-4 h-4 text-sky-700" />
+                    <span className="font-medium text-gray-700">Mức độ ưu tiên:</span>
+                    <span className="text-gray-800">{selectedEvent.priority || "Không rõ"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-sky-700" />
+                    <span className="font-medium text-gray-700">Thời gian:</span>
+                    <span className="text-gray-800">
+                      {selectedEvent.createdAt
+                        ? new Date(selectedEvent.createdAt).toLocaleString("vi-VN", {
+                            dateStyle: "full",
+                            timeStyle: "medium",
+                          })
+                        : "Không rõ"}
                     </span>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Lớp:</span>{" "}
-                    <span className="text-gray-600">{selectedEvent.class}</span>
-                  </div>
-                  {selectedEvent.location && (
-                    <div>
-                      <span className="font-medium text-gray-700">
-                        Địa điểm:
-                      </span>{" "}
-                      <span className="text-gray-600">
-                        {selectedEvent.location}
-                      </span>
-                    </div>
-                  )}
-                  {selectedEvent.reporter && (
-                    <div>
-                      <span className="font-medium text-gray-700">
-                        Người báo cáo:
-                      </span>{" "}
-                      <span className="text-gray-600">
-                        {selectedEvent.reporter}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {selectedEvent.description && (
-                <div>
-                  <h4 className="font-medium text-gray-700">Mô tả</h4>
-                  <p className="mt-1 text-gray-600">
-                    {selectedEvent.description}
-                  </p>
-                </div>
-              )}
+              {/* Mô tả */}
+              <div className="bg-white rounded-lg border p-4">
+                <h4 className="font-semibold text-gray-700 mb-1 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-sky-700" />
+                  Mô tả chi tiết
+                </h4>
+                <p className="text-gray-800">{selectedEvent.description || "Không có mô tả"}</p>
+              </div>
 
-              {selectedEvent.contactStatus && (
+              {/* Trạng thái liên hệ phụ huynh */}
+              <div className="bg-sky-50 rounded-lg border p-4 flex items-center gap-3">
+                <PhoneCall className="w-5 h-5 text-teal-700" />
                 <div>
-                  <h4 className="font-medium text-gray-700">
-                    Trạng thái liên hệ
-                  </h4>
-                  <p className="mt-1 text-gray-600">
-                    {selectedEvent.contactStatus}
-                  </p>
+                  <div className="font-semibold text-gray-700">Trạng thái liên hệ phụ huynh</div>
+                  <div className="text-gray-800">
+                    {(() => {
+                      let contactStatus;
+                      const validContactStatus = [
+                        "Chưa liên hệ",
+                        "Đang gọi",
+                        "Đã liên hệ",
+                        "Phụ huynh đang đến"
+                      ];
+                      if (
+                        selectedEvent.contactStatus &&
+                        validContactStatus.includes(selectedEvent.contactStatus)
+                      ) {
+                        contactStatus = selectedEvent.contactStatus;
+                      } else if (selectedEvent.notes) {
+                        const match = selectedEvent.notes.match(/Contact Status: ([^|]+)/);
+                        if (match && validContactStatus.includes(match[1].trim())) {
+                          contactStatus = match[1].trim();
+                        }
+                      }
+                      return contactStatus || "Không rõ";
+                    })()}
+                  </div>
                 </div>
-              )}
-
-              {selectedEvent.parentContact && (
-                <div>
-                  <h4 className="font-medium text-gray-700">
-                    Thông tin phụ huynh
-                  </h4>
-                  <p className="mt-1 text-gray-600">
-                    {selectedEvent.parentContact}
-                  </p>
-                </div>
-              )}
-
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setViewEventDetailsOpen(false)}
-                >
-                  Đóng
-                </Button>
-                {!selectedEvent.status && (
-                  <Button
-                    onClick={() => {
-                      setViewEventDetailsOpen(false);
-                      handleProcessEvent(selectedEvent);
-                    }}
-                    className="bg-teal-600 hover:bg-teal-700"
-                  >
-                    Xử lý sự kiện
-                  </Button>
-                )}
-              </DialogFooter>
+              </div>
             </div>
           )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewEventDetailsOpen(false)}>
+              Đóng
+            </Button>
+            {!selectedEvent?.status && selectedEvent && (
+              <Button
+                onClick={() => {
+                  setViewEventDetailsOpen(false);
+                  handleProcessEvent(selectedEvent);
+                }}
+                className="bg-teal-600 hover:bg-teal-700"
+              >
+                Xử lý sự kiện
+              </Button>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

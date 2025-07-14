@@ -48,7 +48,13 @@ export default function EventsPage() {
             value="vaccinations"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Thông báo khác
+            Thông báo tiêm chủng
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+          >
+            Lịch sử sự cố y tế
           </TabsTrigger>
         </TabsList>
 

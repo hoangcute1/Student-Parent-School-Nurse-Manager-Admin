@@ -17,7 +17,6 @@ import {
   Activity,
   CheckCircle,
   Eye,
-  Edit,
   Trash2,
   User,
   MapPin,
@@ -28,7 +27,6 @@ import { TreatmentHistory } from "@/lib/type/treatment-history";
 interface EventTableProps {
   events: TreatmentHistory[];
   onView: (event: TreatmentHistory) => void;
-  onEdit: (event: TreatmentHistory) => void;
   onProcess: (event: TreatmentHistory) => void;
   onDelete?: (event: TreatmentHistory) => void;
 }
@@ -36,7 +34,6 @@ interface EventTableProps {
 export function EventTable({
   events,
   onView,
-  onEdit,
   onProcess,
   onDelete,
 }: EventTableProps) {
@@ -140,22 +137,22 @@ export function EventTable({
   // Parse thông tin từ notes field hoặc fallback về description
   const parseFromNotes = (notes: string | undefined, description: string | undefined, actualStatus?: string) => {
     const defaultData = {
-      title: description || "Sự kiện y tế",
-      location: "N/A", 
+      title: description || "Sự cố y tế",
+      location: "N/A",
       priority: "Thấp",
       contactStatus: actualStatus || "pending"
     };
 
     if (!notes) return defaultData;
-    
+
     const titleMatch = notes.match(/Title: ([^|]+)/);
     const locationMatch = notes.match(/Location: ([^|]+)/);
     const priorityMatch = notes.match(/Priority: ([^|]+)/);
     const contactStatusMatch = notes.match(/Contact Status: ([^|]+)/);
-    
+
     return {
-      title: titleMatch ? titleMatch[1].trim() : (description || "Sự kiện y tế"),
-      location: locationMatch ? locationMatch[1].trim() : "N/A", 
+      title: titleMatch ? titleMatch[1].trim() : (description || "Sự cố y tế"),
+      location: locationMatch ? locationMatch[1].trim() : "N/A",
       priority: priorityMatch ? priorityMatch[1].trim() : "Thấp",
       contactStatus: actualStatus || (contactStatusMatch ? contactStatusMatch[1].trim() : "pending")
     };
@@ -250,14 +247,7 @@ export function EventTable({
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit({...event, ...parsedData})}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
+
                         <Button
                           variant="ghost"
                           size="sm"

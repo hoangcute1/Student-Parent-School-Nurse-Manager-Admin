@@ -5,7 +5,7 @@ import { createNotification } from "./notification";
 import { getStudentWithParent } from "./student/index";
 
 /**
- * Gửi yêu cầu tạo mới một treatment history (sự kiện y tế)
+ * Gửi yêu cầu tạo mới một treatment history (sự cố y tế)
  * @param data - Dữ liệu sự cố y tế cần tạo
  * @returns Promise<TreatmentHistory>
  */
@@ -26,8 +26,10 @@ export const createTreatmentHistory = async (
   });
 
   if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `HTTP ${res.status}`);
+    const errorText = await res.text();
+    console.error("Backend error response:", errorText);
+    console.error("Request data that caused error:", data);
+    throw new Error(errorText || `HTTP ${res.status}`);
   }
 
   const createdEvent = await res.json();
@@ -51,8 +53,8 @@ export const createTreatmentHistory = async (
         await createNotification({
           parent: parentId,
           student: studentId,
-          content: `Sự kiện y tế mới: ${data.title}`,
-          notes: `Đã tạo sự kiện y tế mới cho học sinh. Mức độ ưu tiên: ${data.priority}. Vị trí: ${data.location}. Mô tả: ${data.description}`,
+          content: `Sự cố y tế mới: ${data.title}`,
+          notes: `Đã tạo sự cố y tế mới cho học sinh. Mức độ ưu tiên: ${data.priority}. Vị trí: ${data.location}. Mô tả: ${data.description}`,
           type: "MEDICAL_EVENT",
           relatedId: createdEvent._id,
         });

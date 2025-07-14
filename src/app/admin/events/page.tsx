@@ -43,6 +43,7 @@ import {
   getAllTreatmentHistories,
   updateTreatmentHistory,
 } from "@/lib/api/treatment-history";
+import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
@@ -57,7 +58,6 @@ export default function MedicalEvents() {
   const [selectedDate, setSelectedDate] = useState("all");
 
   // State for modals
-  const [addEventOpen, setAddEventOpen] = useState(false);
   const [updateEventOpen, setUpdateEventOpen] = useState(false);
   const [processEventOpen, setProcessEventOpen] = useState(false);
   const [viewEventDetailsOpen, setViewEventDetailsOpen] = useState(false);
@@ -71,9 +71,16 @@ export default function MedicalEvents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [studentsError, setStudentsError] = useState<string | null>(null);
   const [staffs, setStaffs] = useState<Staff[]>([]);
-  const [eventList, setEventList] = useState<any[]>([]);
-  const [eventLoading, setEventLoading] = useState(false);
   const [eventError, setEventError] = useState<string | null>(null);
+
+  // Sử dụng store cho treatment history
+  const { 
+    treatmentHistories: eventList, 
+    isLoading: eventLoading, 
+    error: storeError,
+    fetchAllTreatmentHistories,
+    updateTreatmentHistoryItem 
+  } = useTreatmentHistoryStore();
 
   // Form schema for adding/updating event
 
@@ -118,14 +125,10 @@ export default function MedicalEvents() {
       .finally(() => {
         setIsInitialLoading(false);
       });
-    getAllTreatmentHistories()
-      .then((data) => {
-        console.log("Fetched treatment histories:", data);
-        setEventList(data);
-      })
-      .catch(() => setEventError("Không thể tải danh sách sự cố"))
-      .finally(() => setEventLoading(false));
-  }, []);
+
+    // Fetch treatment histories using store
+    fetchAllTreatmentHistories();
+  }, [fetchAllTreatmentHistories]);
 
   // Form for updating event
   const updateEventForm = useForm<z.infer<typeof eventFormSchema>>({
@@ -187,7 +190,6 @@ export default function MedicalEvents() {
     try {
       console.log("Add event data:", data);
       // Gửi dữ liệu tới API treatment-history
-      // Gửi dữ liệu tới API treatment-history
       await createTreatmentHistory({
         title: data.title,
         student: data.student,
@@ -200,15 +202,8 @@ export default function MedicalEvents() {
       });
 
       // Refresh danh sách events ngay sau khi tạo thành công
-      const updatedEvents = await getAllTreatmentHistories();
-      const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
-
-      setAddEventOpen(false);
-      addEventForm.reset();
-      alert("Thêm sự cố y tế thành công!");
+      await fetchAllTreatmentHistories();
     } catch (error) {
-      alert("Không thể thêm sự cố mới!");
       console.error(error);
     }
   };
@@ -225,17 +220,12 @@ export default function MedicalEvents() {
       console.log("Event ID being processed:", data._id);
 
       // Cập nhật treatment history với thông tin xử lý
-      await updateTreatmentHistory(data._id, {
+      await updateTreatmentHistoryItem(data._id, {
         status: data.status,
         notes: data.notes,
         contactParent: data.contactParent,
         actionTaken: data.actionTaken,
       });
-
-      // Refresh danh sách events sau khi cập nhật
-      const updatedEvents = await getAllTreatmentHistories();
-      const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
 
       setProcessEventOpen(false);
       processEventForm.reset();
@@ -258,7 +248,7 @@ export default function MedicalEvents() {
       }
 
       // Cập nhật treatment history với thông tin xử lý khẩn cấp
-      await updateTreatmentHistory(selectedEvent._id, {
+      await updateTreatmentHistoryItem(selectedEvent._id, {
         status: "processing", // Sử dụng trạng thái được định nghĩa trong schema
         actionTaken:
           data.immediateAction +
@@ -269,11 +259,6 @@ export default function MedicalEvents() {
         contactParent: data.notifyParent,
         priority: "Cao", // Tự động nâng mức độ ưu tiên lên cao
       });
-
-      // Refresh danh sách events sau khi cập nhật
-      const updatedEvents = await getAllTreatmentHistories();
-      const processedData = ensureCreatedAt(updatedEvents);
-      setEventList(processedData);
 
       setEmergencyProcessOpen(false);
       emergencyProcessForm.reset();
@@ -437,20 +422,21 @@ export default function MedicalEvents() {
   };
 
   useEffect(() => {
-    setEventLoading(true);
     getAllTreatmentHistories()
       .then((data) => {
         console.log("Fetched treatment histories:", data);
         // Đảm bảo mỗi sự kiện có ngày tạo
         const processedData = ensureCreatedAt(data);
         console.log("Processed data with ensured createdAt:", processedData);
-        setEventList(processedData);
+        // setEventList(processedData); // This line is removed as per the edit hint
       })
       .catch((error) => {
         console.error("Error fetching treatment histories:", error);
         setEventError("Không thể tải danh sách sự cố y tế");
       })
-      .finally(() => setEventLoading(false));
+      .finally(() => {
+        // setEventLoading(false); // This line is removed as per the edit hint
+      });
   }, []);
 
   // Hàm đảm bảo mỗi sự kiện có createdAt
@@ -521,13 +507,7 @@ export default function MedicalEvents() {
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div className="flex gap-2">
-          <Button
-            onClick={() => setAddEventOpen(true)}
-            className="bg-sky-600 hover:bg-sky-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm sự cố
-          </Button>
+        
           <Button
             onClick={handleExportExcel}
             variant="outline"
@@ -539,18 +519,20 @@ export default function MedicalEvents() {
         </div>
         <Button
           onClick={() => {
-            setEventLoading(true);
+            // setEventLoading(true); // This line is removed as per the edit hint
             getAllTreatmentHistories()
               .then((data) => {
                 // Đảm bảo mỗi sự kiện có ngày tạo
                 const processedData = ensureCreatedAt(data);
-                setEventList(processedData);
+                // setEventList(processedData); // This line is removed as per the edit hint
               })
               .catch((error) => {
                 console.error("Error refreshing treatment histories:", error);
-                setEventError("Không thể tải danh sách sự kiện");
+                setEventError("Không thể tải danh sách sự cố");
               })
-              .finally(() => setEventLoading(false));
+              .finally(() => {
+                // setEventLoading(false); // This line is removed as per the edit hint
+              });
           }}
           variant="outline"
           className="border-sky-200 text-sky-700 hover:bg-sky-50"
@@ -572,246 +554,7 @@ export default function MedicalEvents() {
       <EventTable
         events={filteredEvents}
         onView={handleViewDetails}
-        onEdit={handleUpdateEvent}
-        onProcess={handleProcessEvent}
       />
-
-      {/* Add Event Dialog */}
-      <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-teal-800">Thêm sự cố y tế</DialogTitle>
-            <DialogDescription className="text-teal-600">
-              Nhập thông tin về sự cố y tế mới
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...addEventForm}>
-            <form
-              onSubmit={addEventForm.handleSubmit(onAddEvent)}
-              className="space-y-4"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={addEventForm.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tiêu đề sự cố</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Nhập tiêu đề" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addEventForm.control}
-                  name="student"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Học sinh</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn học sinh" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {students.length === 0 ? (
-                              <div className="p-2 text-gray-500 text-sm">
-                                Không có học sinh
-                              </div>
-                            ) : (
-                              students.map((student) => (
-                                <SelectItem
-                                  key={student.student._id}
-                                  value={student.student._id}
-                                >
-                                  {student.student.name} ({student.student._id})
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addEventForm.control}
-                  name="class"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Lớp</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn lớp" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Lớp 1A">Lớp 1A</SelectItem>
-                          <SelectItem value="Lớp 1B">Lớp 1B</SelectItem>
-                          <SelectItem value="Lớp 2A">Lớp 2A</SelectItem>
-                          <SelectItem value="Lớp 2B">Lớp 2B</SelectItem>
-                          <SelectItem value="Lớp 3A">Lớp 3A</SelectItem>
-                          <SelectItem value="Lớp 3B">Lớp 3B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addEventForm.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Địa điểm</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Địa điểm xảy ra" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addEventForm.control}
-                  name="reporter"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Người báo cáo</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn người báo cáo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {staffs.length === 0 ? (
-                              <div className="p-2 text-gray-500 text-sm">
-                                Không có nhân viên
-                              </div>
-                            ) : (
-                              staffs.map((staff) => (
-                                <SelectItem key={staff._id} value={staff._id}>
-                                  {staff.profile?.name} - {staff.user.role}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={addEventForm.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mức độ ưu tiên</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn mức độ" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Cao">Cao</SelectItem>
-                          <SelectItem value="Trung bình">Trung bình</SelectItem>
-                          <SelectItem value="Thấp">Thấp</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={addEventForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mô tả chi tiết</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Mô tả chi tiết về sự cố y tế"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={addEventForm.control}
-                name="contactStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Trạng thái liên hệ phụ huynh</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Trạng thái liên hệ" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Chưa liên hệ">
-                          Chưa liên hệ
-                        </SelectItem>
-                        <SelectItem value="Đang gọi">Đang gọi</SelectItem>
-                        <SelectItem value="Đã liên hệ">Đã liên hệ</SelectItem>
-                        <SelectItem value="Phụ huynh">
-                          Phụ huynh đang đến
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setAddEventOpen(false)}
-                >
-                  Hủy
-                </Button>
-                <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
-                  Lưu sự cố
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
 
       {/* Update Event Dialog */}
       <Dialog open={updateEventOpen} onOpenChange={setUpdateEventOpen}>

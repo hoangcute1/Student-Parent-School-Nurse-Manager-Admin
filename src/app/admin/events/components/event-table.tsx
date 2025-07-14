@@ -139,6 +139,30 @@ export function EventTable({
     return "N/A";
   };
 
+  // Parse thông tin từ notes field hoặc fallback về description
+  const parseFromNotes = (notes: string | undefined, description: string | undefined, actualStatus?: string) => {
+    const defaultData = {
+      title: description || "Sự cố y tế",
+      location: "N/A",
+      priority: "Thấp",
+      contactStatus: actualStatus || "pending"
+    };
+
+    if (!notes) return defaultData;
+
+    const titleMatch = notes.match(/Title: ([^|]+)/);
+    const locationMatch = notes.match(/Location: ([^|]+)/);
+    const priorityMatch = notes.match(/Priority: ([^|]+)/);
+    const contactStatusMatch = notes.match(/Contact Status: ([^|]+)/);
+
+    return {
+      title: titleMatch ? titleMatch[1].trim() : (description || "Sự cố y tế"),
+      location: locationMatch ? locationMatch[1].trim() : "N/A",
+      priority: priorityMatch ? priorityMatch[1].trim() : "Thấp",
+      contactStatus: actualStatus || (contactStatusMatch ? contactStatusMatch[1].trim() : "pending")
+    };
+  };
+
   return (
     <div className="bg-white rounded-lg border border-sky-100 overflow-hidden">
       <div className="overflow-x-auto">
@@ -179,7 +203,9 @@ export function EventTable({
                 </TableCell>
               </TableRow>
             ) : (
-              events.map((event) => (
+              events.map((event) => {
+                const parsedData = parseFromNotes(event.notes, event.description, event.status);
+                return (
                 <TableRow
                   key={event._id}
                   className="hover:bg-sky-50/30 transition-colors duration-200 border-b border-sky-50"
@@ -187,7 +213,7 @@ export function EventTable({
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-sky-600" />
-                      <span className="text-gray-900">{event.title}</span>
+                      <span className="text-gray-900">{parsedData.title}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -201,18 +227,18 @@ export function EventTable({
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{event.location}</span>
+                      <span className="text-gray-700">{parsedData.location}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{getPriorityBadge(event.priority)}</TableCell>
+                  <TableCell>{getPriorityBadge(parsedData.priority)}</TableCell>
                   <TableCell>
-                    {getStatusBadge(event.status || "pending")}
+                    {getStatusBadge(parsedData.contactStatus)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-700">
-                        {formatDate(event.createdAt)}
+                        {formatDate(event.date)}
                       </span>
                     </div>
                   </TableCell>
@@ -221,7 +247,7 @@ export function EventTable({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onView(event)}
+                        onClick={() => onView({...event, ...parsedData})}
                         className="text-sky-600 hover:text-sky-700 hover:bg-sky-50"
                       >
                         <Eye className="w-4 h-4" />
@@ -229,7 +255,8 @@ export function EventTable({
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>

@@ -1,20 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, MapPin, User, Clock, FileText, Phone, AlertCircle } from "lucide-react";
-import { getTreatmentHistoryByParentId } from "@/lib/api/treatment-history";
+import { Calendar, MapPin, User, Clock, FileText, Phone, AlertCircle, Eye, RefreshCw } from "lucide-react";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
 import { useParentId, useIsParent } from "@/lib/utils/parent-utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
+import { useTreatmentHistorySync } from "@/hooks/use-treatment-history-sync";
+import { TreatmentHistoryUpdateNotifier } from "@/components/treatment-history-update-notifier";
 
 export default function TreatmentHistoryComponent() {
-  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<TreatmentHistory | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -22,49 +21,62 @@ export default function TreatmentHistoryComponent() {
   const { parentId, loading: parentIdLoading } = useParentId();
   const isParent = useIsParent();
 
+  // Sử dụng store
+  const { 
+    treatmentHistories, 
+    isLoading, 
+    error, 
+    lastUpdated,
+    fetchTreatmentHistoryByParentId, 
+    clearError 
+  } = useTreatmentHistoryStore();
+
+  // Sử dụng sync hook
+  const { manualRefresh } = useTreatmentHistorySync();
+
+  // Hàm fetch data
+  const fetchData = useCallback(async () => {
+    console.log("=== TREATMENT HISTORY DEBUG ===");
+    console.log("isParent:", isParent);
+    console.log("parentId:", parentId);
+    console.log("parentIdLoading:", parentIdLoading);
+
+    // Đợi parent ID loading xong
+    if (parentIdLoading) {
+      return;
+    }
+
+    // Kiểm tra nếu không phải parent
+    if (!isParent) {
+      clearError();
+      return;
+    }
+
+    // Kiểm tra nếu không có parent ID
+    if (!parentId) {
+      clearError();
+      return;
+    }
+
+    try {
+      console.log("Fetching treatment history for parent ID:", parentId);
+      await fetchTreatmentHistoryByParentId(parentId);
+      console.log("Treatment history data received:", treatmentHistories);
+    } catch (error) {
+      console.error("Error fetching treatment history:", error);
+    }
+  }, [parentId, isParent, parentIdLoading, fetchTreatmentHistoryByParentId, clearError, treatmentHistories]);
+
+  // Initial fetch
   useEffect(() => {
-    const fetchTreatmentHistory = async () => {
-      console.log("=== TREATMENT HISTORY DEBUG ===");
-      console.log("isParent:", isParent);
-      console.log("parentId:", parentId);
-      console.log("parentIdLoading:", parentIdLoading);
+    fetchData();
+  }, [fetchData]);
 
-      // Đợi parent ID loading xong
-      if (parentIdLoading) {
-        return;
-      }
-
-      // Kiểm tra nếu không phải parent
-      if (!isParent) {
-        setError("Bạn không có quyền truy cập lịch sử bệnh án.");
-        setLoading(false);
-        return;
-      }
-
-      // Kiểm tra nếu không có parent ID
-      if (!parentId) {
-        setError("Không tìm thấy thông tin phụ huynh.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        console.log("Fetching treatment history for parent ID:", parentId);
-        const data = await getTreatmentHistoryByParentId(parentId);
-        console.log("Treatment history data received:", data);
-        setTreatmentHistory(data);
-      } catch (error) {
-        console.error("Error fetching treatment history:", error);
-        setError("Không thể tải lịch sử bệnh án. Vui lòng thử lại sau.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTreatmentHistory();
-  }, [parentId, isParent, parentIdLoading]);
+  // Manual refresh function
+  const handleManualRefresh = useCallback(async () => {
+    console.log("🔄 Manual refresh triggered");
+    await manualRefresh();
+  }, [manualRefresh]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -105,6 +117,26 @@ export default function TreatmentHistoryComponent() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Ngày không hợp lệ";
+
+      return date.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Lỗi định dạng ngày";
+    }
+  };
+
   const handleViewDetails = (event: TreatmentHistory) => {
     setSelectedEvent(event);
     setDetailsOpen(true);
@@ -120,7 +152,7 @@ export default function TreatmentHistoryComponent() {
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -131,7 +163,7 @@ export default function TreatmentHistoryComponent() {
     );
   }
 
-  if (treatmentHistory.length === 0) {
+  if (treatmentHistories.length === 0) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
@@ -145,16 +177,41 @@ export default function TreatmentHistoryComponent() {
 
   return (
     <>
+      {/* Update notification */}
+      <TreatmentHistoryUpdateNotifier onRefresh={handleManualRefresh} />
+      
+      {/* Header with refresh button */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Lịch sử sự cố y tế</h2>
+          {lastUpdated && (
+            <p className="text-sm text-gray-500 mt-1">
+              Cập nhật lần cuối: {new Date(lastUpdated).toLocaleString('vi-VN')}
+            </p>
+          )}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleManualRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Làm mới
+        </Button>
+      </div>
+
       <div className="space-y-4">
-        {treatmentHistory.map((event) => (
+        {treatmentHistories.map((event) => (
           <Card key={event._id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <h3 className="text-lg font-semibold text-gray-900">{event.title}</h3>
-                    <Badge className={getPriorityColor(event.priority)}>
-                      {event.priority}
+                    <Badge className={getPriorityColor(event.priority || "Thấp")}>
+                      {event.priority || "Thấp"}
                     </Badge>
                     <Badge className={getStatusColor(event.status)}>
                       {getStatusText(event.status)}
@@ -165,7 +222,7 @@ export default function TreatmentHistoryComponent() {
                     <div className="flex items-center gap-2 text-gray-600">
                       <User className="h-4 w-4" />
                       <span>
-                        {typeof event.student === 'object' 
+                        {typeof event.student === 'object'
                           ? `${event.student.name} (${event.student.studentId})`
                           : event.student
                         }
@@ -177,7 +234,17 @@ export default function TreatmentHistoryComponent() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar className="h-4 w-4" />
-                      <span>{event.createdAt ? new Date(event.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
+                      <span>
+                        {(() => {
+                          const dateValue = event.date || event.createdAt || "";
+                          console.log("🔍 Date debug for event:", event._id);
+                          console.log("- event.date:", event.date);
+                          console.log("- event.createdAt:", event.createdAt);
+                          console.log("- dateValue:", dateValue);
+                          console.log("- formatted:", formatDate(dateValue));
+                          return formatDate(dateValue);
+                        })()}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <Phone className="h-4 w-4" />
@@ -185,7 +252,9 @@ export default function TreatmentHistoryComponent() {
                     </div>
                   </div>
 
-                  <p className="text-gray-700 mb-4 line-clamp-2">{event.description}</p>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-gray-700 leading-relaxed">{event.description}</p>
+                  </div>
                 </div>
 
                 <Button
@@ -194,7 +263,8 @@ export default function TreatmentHistoryComponent() {
                   onClick={() => handleViewDetails(event)}
                   className="ml-4"
                 >
-                  Xem chi tiết
+                  <Eye className="w-4 h-4 mr-2" />
+                  Chi tiết
                 </Button>
               </div>
             </CardContent>
@@ -238,8 +308,8 @@ export default function TreatmentHistoryComponent() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">Mức độ ưu tiên</label>
-                  <Badge className={getPriorityColor(selectedEvent.priority)}>
-                    {selectedEvent.priority}
+                  <Badge className={getPriorityColor(selectedEvent.priority || "Thấp")}>
+                    {selectedEvent.priority || "Thấp"}
                   </Badge>
                 </div>
                 <div>
@@ -255,7 +325,7 @@ export default function TreatmentHistoryComponent() {
                 <div>
                   <label className="text-sm font-medium text-gray-700">Thời gian</label>
                   <p className="text-gray-900">
-                    {selectedEvent.createdAt ? new Date(selectedEvent.createdAt).toLocaleString('vi-VN') : 'N/A'}
+                    {selectedEvent.date ? new Date(selectedEvent.date).toLocaleString('vi-VN') : (selectedEvent.createdAt ? new Date(selectedEvent.createdAt).toLocaleString('vi-VN') : 'N/A')}
                   </p>
                 </div>
               </div>
@@ -268,7 +338,11 @@ export default function TreatmentHistoryComponent() {
               {selectedEvent.notes && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Ghi chú xử lý</label>
-                  <p className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md">{selectedEvent.notes}</p>
+                  <p className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md whitespace-pre-line">
+                    {selectedEvent.notes.includes('|')
+                      ? selectedEvent.notes.split('|').map((line, idx) => <div key={idx}>{line.trim()}</div>)
+                      : selectedEvent.notes}
+                  </p>
                 </div>
               )}
 
