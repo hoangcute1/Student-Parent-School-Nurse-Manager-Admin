@@ -56,7 +56,7 @@ const navLinks = [
   {
     href: "/admin/events",
     icon: ClipboardCheck,
-    label: "Sự kiện y tế",
+    label: "Sự cố y tế",
     description: "Xử lý y tế khẩn cấp",
   },
   {

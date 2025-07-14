@@ -28,6 +28,7 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getAuthToken } from "@/lib/auth";
@@ -171,21 +172,21 @@ export default function HealthExaminationNotifications({
     switch (status) {
       case "Agree":
         return (
-          <Badge className="bg-green-100 text-green-800">
+          <Badge className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300 font-semibold px-3 py-1 rounded-xl shadow-sm">
             <CheckCircle className="w-3 h-3 mr-1" />
             Đã đồng ý
           </Badge>
         );
       case "Disagree":
         return (
-          <Badge className="bg-red-100 text-red-800">
+          <Badge className="bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300 font-semibold px-3 py-1 rounded-xl shadow-sm">
             <XCircle className="w-3 h-3 mr-1" />
             Đã từ chối
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-yellow-100 text-yellow-800">
+          <Badge className="bg-gradient-to-r from-amber-100 to-yellow-200 text-amber-800 border border-amber-300 font-semibold px-3 py-1 rounded-xl shadow-sm">
             <Clock className="w-3 h-3 mr-1" />
             Chờ phản hồi
           </Badge>
@@ -213,16 +214,20 @@ export default function HealthExaminationNotifications({
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl space-y-6">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          <Card key={i} className="animate-pulse bg-white/70 border-sky-200 shadow-lg rounded-2xl">
+            <CardHeader className="pb-4">
+              <div className="h-5 bg-sky-200 rounded-lg w-3/4"></div>
+              <div className="h-4 bg-sky-100 rounded-lg w-1/2 mt-2"></div>
             </CardHeader>
             <CardContent>
-              <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-4 bg-sky-100 rounded-lg w-full mb-3"></div>
+              <div className="h-4 bg-sky-100 rounded-lg w-2/3 mb-3"></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="h-12 bg-sky-100 rounded-lg"></div>
+                <div className="h-12 bg-sky-100 rounded-lg"></div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -232,10 +237,11 @@ export default function HealthExaminationNotifications({
 
   if (notifications.length === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <p className="text-gray-500">Không có thông báo lịch khám nào</p>
+      <Card className="bg-gradient-to-br from-sky-50 to-blue-50 border-sky-200 shadow-lg rounded-2xl">
+        <CardContent className="text-center py-12">
+          <Calendar className="mx-auto h-16 w-16 text-sky-400 mb-6" />
+          <p className="text-sky-600 font-medium text-lg">Không có thông báo lịch khám nào</p>
+          <p className="text-sky-500 text-sm mt-2">Các thông báo mới sẽ hiển thị tại đây</p>
         </CardContent>
       </Card>
     );

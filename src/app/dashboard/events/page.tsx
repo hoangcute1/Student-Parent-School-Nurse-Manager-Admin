@@ -126,13 +126,13 @@ export default function EventsPage() {
             value="vaccinations"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white px-4 py-2 rounded-md text-center font-medium transition-all"
           >
-            Lịch tiêm chủng
+            Thông báo tiêm chủng
           </TabsTrigger>
           <TabsTrigger
-            value="consultations"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white px-4 py-2 rounded-md text-center font-medium transition-all"
+            value="history"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Lịch hẹn tư vấn
+            Lịch sử sự cố y tế
           </TabsTrigger>
         </TabsList>
 

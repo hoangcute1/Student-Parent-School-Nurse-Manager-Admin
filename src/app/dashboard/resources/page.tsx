@@ -328,34 +328,25 @@ export default function MedicalHistoryPage() {
                             <div className="flex justify-between items-start">
                               <div>
                                 <CardTitle className="text-lg text-blue-800">
-                                  {entry.title}
+                                  {entry.record || "Bệnh án y tế"}
                                 </CardTitle>
                                 <CardDescription className="flex items-center gap-2 text-blue-600">
                                   <Calendar className="h-4 w-4" />
-                                  {formatDate(entry.createdAt || "")}
+                                  {formatDate(entry.date || entry.createdAt || "")}
                                   <span>•</span>
                                   <User className="h-4 w-4" />
                                   {getStudentName(entry.student)}
+                                  {entry.staff && (
+                                    <>
+                                      <span>•</span>
+                                      <span>Nhân viên: {typeof entry.staff === 'string' ? entry.staff : 'N/A'}</span>
+                                    </>
+                                  )}
                                 </CardDescription>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Badge
-                                  className={`${
-                                    entry.priority === "Cao"
-                                      ? "bg-red-100 text-red-800"
-                                      : entry.priority === "Trung bình"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : "bg-green-100 text-green-800"
-                                  }`}
-                                >
-                                  {entry.priority}
-                                </Badge>
-                                <Badge variant="outline">
-                                  {entry.status === "resolved"
-                                    ? "Đã giải quyết"
-                                    : entry.status === "processing"
-                                    ? "Đang xử lý"
-                                    : "Chờ xử lý"}
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                  Bệnh án
                                 </Badge>
                               </div>
                             </div>
@@ -366,43 +357,14 @@ export default function MedicalHistoryPage() {
                                 {entry.description}
                               </p>
 
-                              {entry.location && (
-                                <div className="bg-blue-50 rounded-lg p-3">
-                                  <h4 className="font-medium text-blue-800 mb-1">
-                                    Địa điểm:
-                                  </h4>
-                                  <p className="text-sm text-blue-700">
-                                    {entry.location}
-                                  </p>
-                                </div>
-                              )}
-
                               {entry.notes && (
-                                <div className="bg-gray-50 rounded-lg p-3">
-                                  <h4 className="font-medium text-gray-800 mb-1">
-                                    Ghi chú:
-                                  </h4>
-                                  <p className="text-sm text-gray-700">
-                                    {entry.notes}
+                                <div>
+                                  <label className="text-sm font-medium text-gray-700">Ghi chú:</label>
+                                  <p className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md whitespace-pre-line">
+                                    {entry.notes.includes('|')
+                                      ? entry.notes.split('|').map((line, idx) => <div key={idx}>{line.trim()}</div>)
+                                      : entry.notes}
                                   </p>
-                                </div>
-                              )}
-
-                              {entry.actionTaken && (
-                                <div className="bg-green-50 rounded-lg p-3">
-                                  <h4 className="font-medium text-green-800 mb-1">
-                                    Hành động đã thực hiện:
-                                  </h4>
-                                  <p className="text-sm text-green-700">
-                                    {entry.actionTaken}
-                                  </p>
-                                </div>
-                              )}
-
-                              {entry.contactParent && (
-                                <div className="flex items-center gap-2 text-sm text-blue-600">
-                                  <CheckCircle className="w-4 h-4" />
-                                  <span>Đã liên hệ với phụ huynh</span>
                                 </div>
                               )}
                             </div>
@@ -420,61 +382,3 @@ export default function MedicalHistoryPage() {
     </div>
   );
 }
-
-function getSeverityVariant(severity: string) {
-  switch (severity) {
-    case "Nghiêm trọng":
-      return "destructive";
-    case "Trung bình":
-      return "secondary";
-    case "Nhẹ":
-      return "outline";
-    default:
-      return "outline";
-  }
-}
-
-const medicalTimeline = [
-  {
-    date: "15/05/2025",
-    title: "Khám sức khỏe định kỳ",
-    doctor: "BS. Nguyễn Thị Hương",
-    severity: "Nhẹ",
-    description:
-      "Khám sức khỏe tổng quát định kỳ. Học sinh có sức khỏe tốt, phát triển bình thường theo độ tuổi.",
-    treatment: "Không cần điều trị đặc biệt, tiếp tục theo dõi phát triển.",
-    medications: [],
-    followUp: "6 tháng",
-  },
-  {
-    date: "10/05/2025",
-    title: "Viêm họng cấp",
-    doctor: "BS. Trần Văn Minh",
-    severity: "Trung bình",
-    description:
-      "Học sinh bị viêm họng cấp do virus, có triệu chứng đau họng, sốt nhẹ 37.8°C.",
-    treatment: "Nghỉ ngơi, uống nhiều nước, súc miệng nước muối.",
-    medications: ["Paracetamol 250mg", "Vitamin C"],
-    followUp: "1 tuần",
-  },
-  {
-    date: "25/04/2025",
-    title: "Dị ứng thức ăn",
-    doctor: "BS. Lê Thị Mai",
-    severity: "Trung bình",
-    description: "Phản ứng dị ứng sau khi ăn tôm, xuất hiện mề đay và ngứa.",
-    treatment: "Tránh tiếp xúc với tôm và các loại hải sản khác.",
-    medications: ["Cetirizine 5mg"],
-    followUp: "2 tuần",
-  },
-  {
-    date: "15/03/2025",
-    title: "Té ngã trong sân chơi",
-    doctor: "Y tá Nguyễn Thị Lan",
-    severity: "Nhẹ",
-    description: "Học sinh té ngã khi chơi, bị trầy xước nhẹ ở đầu gối.",
-    treatment: "Vệ sinh vết thương, băng bó và theo dõi.",
-    medications: ["Betadine", "Băng gạc"],
-    followUp: "3 ngày",
-  },
-];
