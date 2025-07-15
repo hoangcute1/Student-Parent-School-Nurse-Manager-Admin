@@ -1,3 +1,4 @@
+import { fetchData } from "./api";
 import { getAuthToken } from "./auth/token";
 
 /**
@@ -16,7 +17,7 @@ export const createNotification = async (data: {
   const token = getAuthToken();
   console.log("Creating notification with data:", data);
 
-  const res = await fetch("http://localhost:3001/simple-notifications", {
+  const res = await fetchData<any>("/simple-notifications", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -25,11 +26,7 @@ export const createNotification = async (data: {
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `HTTP ${res.status}`);
-  }
-  return res.json();
+  return res;
 };
 
 /**
@@ -41,21 +38,13 @@ export const getNotificationsByParentId = async (parentId: string) => {
   const token = getAuthToken();
   console.log("Getting notifications for parent ID:", parentId);
 
-  const res = await fetch(
-    `http://localhost:3001/simple-notifications/parent/${parentId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `HTTP ${res.status}`);
-  }
-  return res.json();
+  const res = await fetchData<any>(`/simple-notifications/parent/${parentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res;
 };
 
 /**
@@ -66,18 +55,14 @@ export const getAllNotifications = async () => {
   const token = getAuthToken();
   console.log("Getting all notifications");
 
-  const res = await fetch("http://localhost:3001/simple-notifications", {
+  const res = await fetchData<any>("/simple-notifications", {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `HTTP ${res.status}`);
-  }
-  return res.json();
+  return res;
 };
 
 /**

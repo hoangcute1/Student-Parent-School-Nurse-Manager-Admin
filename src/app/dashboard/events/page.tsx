@@ -2,13 +2,12 @@
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import ImportantNoti from "./_components/important-noti";
 import NotiList from "./_components/noti-list";
-import TreatmentHistoryComponent from "./_components/treatment-history";
 import HealthExaminationNotifications from "./_components/health-examination-notifications";
 import VaccinationNotifications from "./_components/vaccination-notifications";
 import ConsultationAppointments from "./_components/consultation-appointments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useMemo, useState } from "react";
-import { getAuthToken } from "@/lib/auth";
+import ConsultationComponent from "./_components/consultation";
 
 function calculateDaysRemaining(dateString: string) {
   if (!dateString) return 9999;
@@ -132,7 +131,7 @@ export default function EventsPage() {
             value="history"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Lịch sử sự cố y tế
+            Lịch hẹn tư vấn
           </TabsTrigger>
         </TabsList>
 
@@ -158,7 +157,7 @@ export default function EventsPage() {
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
-          <TreatmentHistoryComponent />
+          <ConsultationComponent />
         </TabsContent>
       </Tabs>
     </div>

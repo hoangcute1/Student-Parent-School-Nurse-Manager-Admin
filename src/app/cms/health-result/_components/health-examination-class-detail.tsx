@@ -1,5 +1,7 @@
 "use client";
 
+import { getParentId } from "@/lib/utils/parent-utils";
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +39,24 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { fetchData } from "@/lib/api/api";
+import { createNotification } from "@/lib/api/notification";
+import { getStudentById } from "@/lib/api/student";
+
+// Hàm lấy parentId từ studentId
+async function fetchParentIdByStudentId(
+  studentId: string
+): Promise<string | null> {
+  try {
+    const res = await fetchData<any>(`/students/${studentId}`);
+    if (res && res.parent) {
+      return typeof res.parent === "string" ? res.parent : res.parent._id;
+    }
+    return null;
+  } catch (err) {
+    console.error("Không lấy được parentId từ studentId:", err);
+    return null;
+  }
+}
 
 interface Student {
   examination_id: string;
@@ -56,6 +76,8 @@ interface Student {
   examination_notes?: string;
   created_at: string;
   updated_at: string;
+  consultation_date?: string; // Thêm trường consultation_date
+  is_consultation?: boolean; // Thêm trường is_consultation
 }
 
 interface ClassDetail {
@@ -202,6 +224,20 @@ export default function HealthExaminationClassDetail({
     return hasConsultationNote || manualConsultationStatus;
   };
 
+  // Thêm hàm kiểm tra học sinh đã có lịch hẹn tư vấn cho ngày này chưa
+  const hasConsultationForDate = (student: Student, date: Date | undefined) => {
+    if (!classDetail || !date) return false;
+    // Giả sử bạn có thể lấy danh sách lịch hẹn tư vấn từ classDetail.students hoặc từ API khác
+    // Ở đây kiểm tra theo student_id và consultation_date (so sánh ngày, không so sánh giờ)
+    return classDetail.students.some(
+      (s) =>
+        s.student._id === student.student._id &&
+        s.consultation_date &&
+        new Date(s.consultation_date).toDateString() === date.toDateString() &&
+        s.is_consultation
+    );
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Approved":
@@ -337,13 +373,7 @@ export default function HealthExaminationClassDetail({
     window.history.back();
   };
   const handleScheduleConsultation = async () => {
-    if (
-      !selectedStudent ||
-      !consultationTitle ||
-      !consultationDate ||
-      !consultationTime ||
-      !consultationDoctor
-    ) {
+    if (!selectedStudent || !consultationDate || !consultationTime) {
       alert("Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -355,11 +385,10 @@ export default function HealthExaminationClassDetail({
         {
           method: "POST",
           body: JSON.stringify({
-            title: consultationTitle,
             consultation_date: consultationDate.toISOString(),
             consultation_time: consultationTime,
-            doctor: consultationDoctor,
             notes: consultationNotes,
+            student_id: String(selectedStudent.student._id),
           }),
           headers: {
             "Content-Type": "application/json",
@@ -369,6 +398,27 @@ export default function HealthExaminationClassDetail({
 
       if (!response) {
         throw new Error("Không thể lập lịch hẹn tư vấn");
+      }
+
+      // Lấy parentId từ API student
+      const parentId = await fetchParentIdByStudentId(
+        selectedStudent.student._id
+      );
+      if (parentId) {
+        await createNotification({
+          parent: parentId,
+          student: String(selectedStudent.student._id),
+          content: `Lịch hẹn tư vấn: ${consultationTitle}`,
+          notes: `Bác sĩ: ${consultationDoctor}\nNgày hẹn: ${consultationDate.toLocaleDateString(
+            "vi-VN"
+          )}\nGiờ hẹn: ${consultationTime}\nGhi chú: ${
+            consultationNotes || "Không có"
+          }`,
+          type: "CONSULTATION_APPOINTMENT",
+          relatedId: `consultation-${Date.now()}`,
+        });
+      } else {
+        console.warn("Không tìm thấy parentId cho học sinh này!");
       }
 
       alert("Lập lịch hẹn tư vấn thành công!");
@@ -381,10 +431,8 @@ export default function HealthExaminationClassDetail({
       }));
 
       // Reset form
-      setConsultationTitle("");
       setConsultationDate(undefined);
       setConsultationTime("");
-      setConsultationDoctor("");
       setConsultationNotes("");
     } catch (error) {
       console.error("Error scheduling consultation:", error);
@@ -724,9 +772,6 @@ export default function HealthExaminationClassDetail({
                     <div className="flex items-center space-x-2">
                       {getStatusBadge(student.status)}
 
-                      
-                      
-
                       {/* Nút Khám */}
                       <Button
                         size="sm"
@@ -746,7 +791,7 @@ export default function HealthExaminationClassDetail({
                       </Button>
 
                       {/* Nút Chuông (Lập lịch hẹn tư vấn) */}
-                      {hasConsultationScheduled(student) ? (
+                      {hasConsultationForDate(student, consultationDate) ? (
                         <Button
                           size="sm"
                           variant="secondary"
