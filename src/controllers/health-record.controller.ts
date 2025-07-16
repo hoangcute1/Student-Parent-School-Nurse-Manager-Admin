@@ -24,8 +24,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateHealthRecordDto } from '@/decorations/dto/create-health-record.dto';
-import { UpdateHealthRecordDto } from '@/decorations/dto/update-health-record.dto';
+
+import { CreateHealthRecordDto, UpdateHealthRecordDto } from '@/decorations/dto/health-record.dto';
 import { Roles } from '@/decorations/roles.decorator';
 import { RolesGuard } from '@/guards/roles.guard';
 import { Role } from '@/enums/role.enum';

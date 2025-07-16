@@ -5,7 +5,7 @@ export type MedicineDeliveryDocument = MedicineDelivery & Document;
 
 export enum MedicineDeliveryStatus {
   PENDING = 'pending',
-  MORNING = 'moring',
+  MORNING = 'morning',
   NOON = 'moon',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
