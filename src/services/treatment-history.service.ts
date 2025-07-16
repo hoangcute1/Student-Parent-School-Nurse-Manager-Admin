@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TreatmentHistory } from '@/schemas/treatment-history.schema';
-import { CreateTreatmentHistoryDto } from '@/decorations/dto/create-treatment-history.dto';
+import { CreateTreatmentHistoryDto } from '@/decorations/dto/treatment-history.dto';
 import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-history.dto';
 import { Student } from '@/schemas/student.schema';
 

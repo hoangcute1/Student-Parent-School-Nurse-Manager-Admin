@@ -8,7 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '@/schemas/student.schema';
-import { CreateStudentDto } from '@/decorations/dto/create-student.dto';
+import { CreateStudentDto } from '@/decorations/dto/student.dto';
 import { UpdateStudentDto } from '@/decorations/dto/update-student.dto';
 import { FilterStudentDto, FilterOperator } from '@/decorations/dto/filter-student.dto';
 import { SortOrder } from '@/decorations/dto/pagination.dto';

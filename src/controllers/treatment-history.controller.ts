@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nes
 import { TreatmentHistoryService } from '@/services/treatment-history.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateTreatmentHistoryDto } from '@/decorations/dto/create-treatment-history.dto';
+import { CreateTreatmentHistoryDto } from '@/decorations/dto/treatment-history.dto';
 import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-history.dto';
 
 @ApiTags('treatment-histories')

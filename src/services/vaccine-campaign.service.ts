@@ -5,7 +5,7 @@ import {
   VaccineCampaign,
   VaccineCampaignDocument,
 } from '@/schemas/vaccine-campaign.schema';
-import { CreateVaccineCampaignDto } from '@/decorations/dto/create-vaccine-campaign.dto';
+import { CreateVaccineCampaignDto } from '@/decorations/dto/vaccine-campaign.dto';
 import { UpdateVaccineCampaignDto } from '@/decorations/dto/update-vaccine-campaign.dto';
 
 @Injectable()

@@ -9,10 +9,9 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateParentDto } from '@/decorations/dto/create-parent.dto';
-import { UpdateParentDto } from '@/decorations/dto/update-parent.dto';
+import { CreateParentDto, CreateUserParentDto } from '@/decorations/dto/parent.dto';
+import { UpdateParentDto } from '@/decorations/dto/parent.dto';
 import { UserService } from '@/services/user.service';
-import { CreateUserParentDto } from '@/decorations/dto/create-user-parent.dto';
 import { SuccessResponseDto } from '@/decorations/dto/success-response.dto';
 
 @ApiTags('parents')

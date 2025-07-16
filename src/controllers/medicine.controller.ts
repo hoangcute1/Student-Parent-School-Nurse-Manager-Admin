@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { MedicineService } from '../services/medicine.service';
 import { Medicine } from '../schemas/medicine.schema';
-import { CreateMedicineDto } from '../decorations/dto/create-medicine.dto';
+import { MedicineDto } from '../decorations/dto/medicine.dto';
 import { ExportHistoryService } from '../services/export-history.service';
 
 @Controller('medicines')
@@ -23,7 +23,7 @@ export class MedicineController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createMedicineDto: CreateMedicineDto) {
+  async create(@Body() createMedicineDto: MedicineDto) {
     const medicine = await this.medicineService.create(createMedicineDto);
     return {
       message: 'Tạo thuốc thành công',

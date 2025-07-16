@@ -14,11 +14,12 @@ import { AdminService } from './admin.service';
 import { StaffService } from './staff.service';
 import { ParentService } from './parent.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '@/decorations/dto/create-user.dto';
+import { CreateUserDto } from '@/decorations/dto/user.dto';
 import { UpdateUserDto } from '@/decorations/dto/update-user.dto';
-import { CreateUserAdminDto } from '@/decorations/dto/create-user-admin.dto';
-import { CreateUserParentDto } from '@/decorations/dto/create-user-parent.dto';
-import { CreateUserStaffDto } from '@/decorations/dto/create-user-staff.dto';
+import { CreateUserAdminDto } from '@/decorations/dto/admin.dto';
+import { CreateUserParentDto } from '@/decorations/dto/parent.dto';
+import { CreateUserStaffDto } from '@/decorations/dto/staff.dto';
+
 @Injectable()
 export class UserService {
   constructor(

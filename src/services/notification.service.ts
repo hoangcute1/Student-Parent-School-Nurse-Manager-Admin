@@ -8,7 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
 import { Notification, NotificationDocument } from '@/schemas/notification.schema';
-import { CreateNotificationDto } from '@/decorations/dto/create-notification.dto';
+import { CreateNotificationDto } from '@/decorations/dto/notification.dto';
 import { UpdateNotificationDto } from '@/decorations/dto/update-notification.dto';
 import { StudentService } from './student.service';
 import { HealthExaminationService } from './health-examination.service';

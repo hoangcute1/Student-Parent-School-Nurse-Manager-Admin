@@ -10,8 +10,8 @@ import {
   CampaignClass,
   CampaignClassDocument,
 } from '@/schemas/campaign-class.schema';
-import { CreateCampaignClassDto } from '@/decorations/dto/create-campaign-class.dto';
-import { UpdateCampaignClassDto } from '@/decorations/dto/update-campaign-class.dto';
+import { CreateCampaignClassDto } from '@/decorations/dto/campaign-class.dto';
+import { UpdateCampaignClassDto } from '@/decorations/dto/campaign-class.dto';
 
 @Injectable()
 export class CampaignClassService {

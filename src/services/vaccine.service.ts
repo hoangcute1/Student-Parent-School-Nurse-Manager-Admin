@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Vaccine, VaccineDocument } from '@/schemas/vaccine.schema';
-import { CreateVaccineDto } from '@/decorations/dto/create-vaccine.dto';
+import { CreateVaccineDto } from '@/decorations/dto/vaccine.dto';
 import { UpdateVaccineDto } from '@/decorations/dto/update-vaccine.dto';
 
 @Injectable()

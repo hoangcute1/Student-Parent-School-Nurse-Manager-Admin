@@ -9,7 +9,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
+import { CreateProfileDto } from '@/decorations/dto/profile.dto';
 import { UpdateProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/update-profile.dto';
 
 @ApiTags('profiles')

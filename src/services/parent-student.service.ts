@@ -3,7 +3,7 @@ import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/commo
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ParentStudent, ParentStudentDocument } from '@/schemas/parent-student.schema';
-import { CreateParentStudentDto } from '@/decorations/dto/create-parent-student.dto';
+import { CreateParentStudentDto } from '@/decorations/dto/parent-student.dto';
 import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.dto';
 import { StudentService } from './student.service';
 import { HealthRecordService } from './health-record.service';

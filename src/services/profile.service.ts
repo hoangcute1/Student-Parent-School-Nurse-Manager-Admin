@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schemas/profile.schema';
-import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
+import { CreateProfileDto } from '@/decorations/dto/profile.dto';
  export { ProfileDocument }; 
 import { UpdateProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/update-profile.dto';
 

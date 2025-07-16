@@ -8,7 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '@/schemas/user.schema';
-import { CreateUserDto } from '@/decorations/dto/create-user.dto';
+import { CreateUserDto } from '@/decorations/dto/user.dto';
 import { UpdateUserDto } from '@/decorations/dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { OtpService } from './otp.service';

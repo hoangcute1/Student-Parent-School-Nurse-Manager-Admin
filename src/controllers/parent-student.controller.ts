@@ -2,16 +2,13 @@ import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Req } from 
 import { ParentStudentService } from '@/services/parent-student.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateParentStudentDto } from '@/decorations/dto/create-parent-student.dto';
+import { CreateParentStudentDto } from '@/decorations/dto/parent-student.dto';
 import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.dto';
-import { Roles } from '@/decorations/roles.decorator';
-import { RolesGuard } from '@/guards/roles.guard';
-import { Role } from '@/enums/role.enum';
 
 @ApiTags('parent-students')
 @Controller('parent-students')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 export class ParentStudentController {
   constructor(private readonly parentStudentService: ParentStudentService) {}
 

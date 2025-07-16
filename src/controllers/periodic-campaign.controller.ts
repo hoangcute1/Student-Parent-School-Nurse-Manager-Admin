@@ -17,7 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreatePeriodicCampaignDto } from '@/decorations/dto/create-periodic-campaign.dto';
+import { CreatePeriodicCampaignDto } from '@/decorations/dto/periodic-campaign.dto';
 import { UpdatePeriodicCampaignDto } from '@/decorations/dto/update-periodic-campaign.dto';
 
 @ApiTags('periodic-campaigns')

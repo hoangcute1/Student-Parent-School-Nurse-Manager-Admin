@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsBoolean, IsNumber, MaxLength } from 'class-validator';
 import { MedicineUnit, MedicineType } from '../../schemas/medicine.schema';
-
-export class CreateMedicineDto {
+export class MedicineDto {
   @ApiProperty({ description: 'Tên thuốc' })
   @IsString()
   @IsNotEmpty()

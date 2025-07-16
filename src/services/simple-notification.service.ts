@@ -5,7 +5,7 @@ import {
   SimpleNotification,
   SimpleNotificationDocument,
 } from '@/schemas/simple-notification.schema';
-import { CreateSimpleNotificationDto } from '@/decorations/dto/create-simple-notification.dto';
+import { CreateSimpleNotificationDto } from '@/decorations/dto/simple-notification.dto';
 
 @Injectable()
 export class SimpleNotificationService {

@@ -17,7 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateVaccineDto } from '@/decorations/dto/create-vaccine.dto';
+import { CreateVaccineDto } from '@/decorations/dto/vaccine.dto';
 import { UpdateVaccineDto } from '@/decorations/dto/update-vaccine.dto';
 
 @ApiTags('vaccines')
