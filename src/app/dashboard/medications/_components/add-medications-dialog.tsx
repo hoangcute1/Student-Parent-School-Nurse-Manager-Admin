@@ -274,18 +274,6 @@ export default function AddMedicineDeliveryForm() {
                   </div>
                 )}
               </div>
-              {/* Bỏ trường lý do sử dụng (reason) */}
-              {/* <div className="space-y-2">
-                <label className="block text-sky-800 font-semibold text-sm">Lý do sử dụng <span className="text-red-500">*</span></label>
-                <Input
-                  name="reason"
-                  value={form.reason}
-                  onChange={e => handleFormChange(idx, e)}
-                  placeholder="Điều trị cảm lạnh, giảm đau..."
-                  required
-                  className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
-                />
-              </div> */}
               <div className="space-y-2">
                 <label className="block text-sky-800 font-semibold text-sm">👩‍⚕️ Lưu ý cho y tá</label>
                 <Textarea
