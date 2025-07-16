@@ -206,30 +206,14 @@ export default function ConsultationComponent() {
       {/* Update notification */}
       <TreatmentHistoryUpdateNotifier onRefresh={handleManualRefresh} />
 
-      {/* Header with refresh button */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Lịch sử sự cố y tế
-          </h2>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleManualRefresh}
-          disabled={loading}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Làm mới
-        </Button>
-      </div>
+     
+      
 
       <Card>
         <CardHeader>
           <CardTitle className="text-blue-800 flex items-center gap-2">
             <Bell className="w-5 h-5" />
-            Thông báo từ trường học
+              Lịch hẹn tư vấn
           </CardTitle>
           <CardDescription className="text-blue-600">
             Các thông báo về sức khỏe và sự kiện y tế của học sinh

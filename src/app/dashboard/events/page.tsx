@@ -7,6 +7,7 @@ import VaccinationNotifications from "./_components/vaccination-notifications";
 import ConsultationAppointments from "./_components/consultation-appointments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useMemo, useState } from "react";
+
 import ConsultationComponent from "./_components/consultation";
 
 function calculateDaysRemaining(dateString: string) {
@@ -125,7 +126,7 @@ export default function EventsPage() {
             value="vaccinations"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white px-4 py-2 rounded-md text-center font-medium transition-all"
           >
-            Thông báo tiêm chủng
+            Lịch tiêm chủng
           </TabsTrigger>
           <TabsTrigger
             value="history"

@@ -231,15 +231,21 @@ export default function VaccinationNotifications() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Thông báo quan trọng */}
-      {importantVaccinations.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-base font-semibold text-blue-800">
-            Thông báo quan trọng
-          </h3>
-          {importantVaccinations.map((vacc: any) => (
-            <Card key={vacc._id} className="border-l-4 border-l-blue-500">
+      <div>
+        <h3 className="text-base font-semibold text-red-700 mb-2">
+          Thông báo quan trọng
+        </h3>
+        {importantVaccinations.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8 text-gray-500">
+              Không có thông báo quan trọng nào
+            </CardContent>
+          </Card>
+        ) : (
+          importantVaccinations.map((vacc: any) => (
+            <Card key={vacc._id} className="border-l-4 border-l-blue-500 mb-2">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -306,17 +312,23 @@ export default function VaccinationNotifications() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
       {/* Sự kiện sắp tới */}
-      {upcomingVaccinations.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-base font-semibold text-blue-800">
-            Sự kiện sắp tới
-          </h3>
-          {upcomingVaccinations.map((vacc: any) => (
-            <Card key={vacc._id} className="border-l-4 border-l-blue-500">
+      <div>
+        <h3 className="text-base font-semibold text-blue-800 mb-2">
+          Sự kiện sắp tới
+        </h3>
+        {upcomingVaccinations.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8 text-gray-500">
+              Không có sự kiện sắp tới
+            </CardContent>
+          </Card>
+        ) : (
+          upcomingVaccinations.map((vacc: any) => (
+            <Card key={vacc._id} className="border-l-4 border-l-blue-500 mb-2">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -330,9 +342,7 @@ export default function VaccinationNotifications() {
                         ` - Lớp ${vacc.student.class.name}`}
                     </CardDescription>
                   </div>
-                  <Badge className="bg-yellow-100 text-yellow-800">
-                    Chờ xác nhận
-                  </Badge>
+                  <Badge className="bg-blue-100 text-blue-800">Sắp tới</Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -383,15 +393,18 @@ export default function VaccinationNotifications() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
       {/* Danh sách các thông báo lịch sử */}
       {notifications.map((notification) => {
         const { description, date, time, location, doctor, vaccineType } =
           parseNotesForVaccinationDetails(notification.notes);
         return (
-          <Card key={notification._id} className="bg-white border border-blue-200 hover:bg-blue-50 transition-colors rounded-xl shadow-sm hover:shadow-md">
+          <Card
+            key={notification._id}
+            className="bg-white border border-blue-200 hover:bg-blue-50 transition-colors rounded-xl shadow-sm hover:shadow-md"
+          >
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -405,7 +418,8 @@ export default function VaccinationNotifications() {
                     <User className="w-4 h-4" />
                     <span className="font-medium">
                       {notification.student.name}
-                      {notification.student.class_name && ` - Lớp ${notification.student.class_name}`}
+                      {notification.student.class_name &&
+                        ` - Lớp ${notification.student.class_name}`}
                     </span>
                   </div>
                 </div>
@@ -417,36 +431,54 @@ export default function VaccinationNotifications() {
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-600" />
                   <div>
-                    <span className="text-xs text-gray-500 block">Ngày tiêm</span>
-                    <span className="text-blue-800 font-medium text-sm">{date}</span>
+                    <span className="text-xs text-gray-500 block">
+                      Ngày tiêm
+                    </span>
+                    <span className="text-blue-800 font-medium text-sm">
+                      {date}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-blue-600" />
                   <div>
-                    <span className="text-xs text-gray-500 block">Giờ tiêm</span>
-                    <span className="text-blue-800 font-medium text-sm">{time}</span>
+                    <span className="text-xs text-gray-500 block">
+                      Giờ tiêm
+                    </span>
+                    <span className="text-blue-800 font-medium text-sm">
+                      {time}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-blue-600" />
                   <div>
-                    <span className="text-xs text-gray-500 block">Địa điểm</span>
-                    <span className="text-blue-800 font-medium text-sm">{location || "Chưa xác định"}</span>
+                    <span className="text-xs text-gray-500 block">
+                      Địa điểm
+                    </span>
+                    <span className="text-blue-800 font-medium text-sm">
+                      {location || "Chưa xác định"}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Syringe className="w-4 h-4 text-blue-600" />
                   <div>
-                    <span className="text-xs text-gray-500 block">Loại vắc-xin</span>
-                    <span className="text-blue-800 font-medium text-sm">{vaccineType || "Chưa xác định"}</span>
+                    <span className="text-xs text-gray-500 block">
+                      Loại vắc-xin
+                    </span>
+                    <span className="text-blue-800 font-medium text-sm">
+                      {vaccineType || "Chưa xác định"}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Description */}
               <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 mb-4">
-                <p className="text-blue-700 text-sm leading-relaxed">{description}</p>
+                <p className="text-blue-700 text-sm leading-relaxed">
+                  {description}
+                </p>
               </div>
 
               {/* Action Buttons */}
@@ -589,7 +621,6 @@ export default function VaccinationNotifications() {
               </div>
             </CardContent>
           </Card>
-
         );
       })}
     </div>
