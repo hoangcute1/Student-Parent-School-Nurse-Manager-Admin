@@ -105,8 +105,8 @@ export function HealthRecordDialog({
                     {student.student.gender === "male"
                       ? "Nam"
                       : student.student.gender === "female"
-                      ? "Nữ"
-                      : "Chưa xác định"}
+                        ? "Nữ"
+                        : "Chưa xác định"}
                   </p>
                 </div>
               </div>
@@ -167,19 +167,6 @@ export function HealthRecordDialog({
                     <p className="text-green-900 font-medium bg-white px-3 py-2 rounded-lg border border-green-200 flex-1">
                       {student.healthRecord?.vision || "Chưa kiểm tra"}
                     </p>
-                    {student.healthRecord?.vision && (
-                      <Badge
-                        className={
-                          student.healthRecord.vision === "Bình thường"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }
-                      >
-                        {student.healthRecord.vision === "Bình thường"
-                          ? "Tốt"
-                          : "Cần theo dõi"}
-                      </Badge>
-                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -190,19 +177,6 @@ export function HealthRecordDialog({
                     <p className="text-green-900 font-medium bg-white px-3 py-2 rounded-lg border border-green-200 flex-1">
                       {student.healthRecord?.hearing || "Chưa kiểm tra"}
                     </p>
-                    {student.healthRecord?.hearing && (
-                      <Badge
-                        className={
-                          student.healthRecord.hearing === "Bình thường"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }
-                      >
-                        {student.healthRecord.hearing === "Bình thường"
-                          ? "Tốt"
-                          : "Cần theo dõi"}
-                      </Badge>
-                    )}
                   </div>
                 </div>
               </div>
@@ -229,11 +203,6 @@ export function HealthRecordDialog({
                     <p className="text-amber-900 font-medium bg-white px-3 py-2 rounded-lg border border-amber-200 flex-1">
                       {student.healthRecord?.allergies || "Không có"}
                     </p>
-                    {student.healthRecord?.allergies && (
-                      <Badge className="bg-red-100 text-red-700">
-                        Có dị ứng
-                      </Badge>
-                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -244,11 +213,6 @@ export function HealthRecordDialog({
                     <p className="text-amber-900 font-medium bg-white px-3 py-2 rounded-lg border border-amber-200 flex-1">
                       {student.healthRecord?.chronic_conditions || "Không có"}
                     </p>
-                    {student.healthRecord?.chronic_conditions && (
-                      <Badge className="bg-orange-100 text-orange-700">
-                        Cần theo dõi
-                      </Badge>
-                    )}
                   </div>
                 </div>
                 <div className="space-y-2">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Clock, Plus } from "lucide-react";
+import { Clock, Eye, Plus, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +24,96 @@ import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { useMedicationStore } from "@/stores/medication-store";
 import { useAuthStore } from "@/stores/auth-store";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import ViewDeliveryDialog from "./_components/view-delivery-dialog";
 import type { MedicineDeliveryByParent } from "@/lib/type/medicine-delivery";
 import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
+
+// Tách TableRow thành component con để tối ưu render
+const DeliveryRow = React.memo(function DeliveryRow({ delivery, onShowDetail, onDelete, deletingId, updatedAt }: {
+  delivery: MedicineDeliveryByParent,
+  onShowDetail: (delivery: MedicineDeliveryByParent) => void,
+  onDelete: (id: string) => void,
+  deletingId: string | null,
+  updatedAt: string | null
+}) {
+  return (
+    <TableRow
+      key={delivery.id}
+      className="hover:bg-sky-50 transition-colors border-sky-100"
+    >
+      <TableCell className="font-medium text-sky-900">
+        {delivery.student?.name || "N/A"}
+      </TableCell>
+      <TableCell className="font-medium text-sky-900">
+        {delivery.name || "N/A"}
+      </TableCell>
+      <TableCell className="font-medium text-sky-900">
+        {delivery.total || 0}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center text-sky-700">
+          <Clock className="mr-2 h-4 w-4 text-sky-500" />
+          <span className="font-medium">{delivery.per_day}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Badge
+          className={
+            delivery.status === "completed"
+              ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+              : delivery.status === "cancelled"
+                ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+                : delivery.status === "morning" || delivery.status === "noon"
+                  ? "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
+                  : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
+          }
+        >
+          {
+            delivery.status === "pending"
+              ? "Chờ xử lý"
+              : delivery.status === "morning"
+                ? "Đã uống vào buổi sáng"
+                : delivery.status === "noon"
+                  ? "Đã uống vào buổi trưa"
+                  : delivery.status === "completed"
+                    ? "Đã hoàn thành"
+                    : delivery.status === "cancelled"
+                      ? "Đã huỷ"
+                      : delivery.status
+          }
+        </Badge>
+      </TableCell>
+      <TableCell className="font-medium text-sky-900">
+        {updatedAt ? new Date(updatedAt).toLocaleDateString("vi-VN", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Chưa có thông tin"}
+      </TableCell>
+      <TableCell className="text-center">
+        <div className="flex gap-2 justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onShowDetail(delivery)}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onDelete(delivery.id)}
+            disabled={deletingId === delivery.id}
+            className="flex items-center gap-2 bg-gradient-to-r from-red-50 to-teal-50 border-red-200 text-red-700 hover:from-red-100 hover:to-teal-100 hover:border-red-300 hover:text-red-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
+            title="Xóa hoàn toàn đơn thuốc khỏi hệ thống. Quản trị viên và nhân viên y tế cũng sẽ không thể thấy đơn này."
+          >
+            <X className="h-4 w-4" />
+            {deletingId === delivery.id  }
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
 
 export default function MedicationsPage() {
   const { isAuthenticated, user } = useAuthStore();
@@ -38,7 +123,6 @@ export default function MedicationsPage() {
     fetchMedicineDeliveryByParentId,
     deleteMedicineDelivery,
   } = useMedicineDeliveryStore();
-  const { medications } = useMedicationStore();
   const {
     fetchStudentsByParent,
   } = useParentStudentsStore();
@@ -57,12 +141,12 @@ export default function MedicationsPage() {
     }
   }, [isAuthenticated, user, fetchMedicineDeliveryByParentId]);
 
-  const handleShowDetail = (delivery: any) => {
+  const handleShowDetail = useCallback((delivery: MedicineDeliveryByParent) => {
     setSelectedDelivery(delivery);
     setShowDetail(true);
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!id) {
       alert("Không tìm thấy ID đơn thuốc để xoá!");
       return;
@@ -71,9 +155,9 @@ export default function MedicationsPage() {
     if (
       !window.confirm(
         "⚠️ LƯU Ý: Bạn có chắc muốn xoá hoàn toàn đơn thuốc này?\n\n" +
-          "Khi xóa, đơn thuốc sẽ bị XÓA HOÀN TOÀN khỏi hệ thống, " +
-          "bao gồm cả view của quản trị viên và nhân viên y tế.\n\n" +
-          "Hành động này KHÔNG THỂ HOÀN TÁC!"
+        "Khi xóa, đơn thuốc sẽ bị XÓA HOÀN TOÀN khỏi hệ thống, " +
+        "bao gồm cả view của quản trị viên và nhân viên y tế.\n\n" +
+        "Hành động này KHÔNG THỂ HOÀN TÁC!"
       )
     )
       return;
@@ -90,7 +174,7 @@ export default function MedicationsPage() {
       alert("❌ Xoá thất bại! Vui lòng thử lại.");
     }
     setDeletingId(null);
-  };
+  }, [deleteMedicineDelivery, fetchMedicineDeliveryByParentId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 p-4 md:p-6">
@@ -150,7 +234,7 @@ export default function MedicationsPage() {
                     Tên thuốc
                   </TableHead>
                   <TableHead className="text-sky-800 font-semibold">
-                    Liều lượng
+                    Số liều
                   </TableHead>
                   <TableHead className="text-sky-800 font-semibold">
                     Thời gian dùng
@@ -158,7 +242,10 @@ export default function MedicationsPage() {
                   <TableHead className="text-sky-800 font-semibold">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="text-right text-sky-800 font-semibold">
+                  <TableHead className="text-sky-800 font-semibold">
+                    Cập nhật lần cuối
+                  </TableHead>
+                  <TableHead className="text-center text-sky-800 font-semibold">
                     Thao tác
                   </TableHead>
                 </TableRow>
@@ -166,7 +253,7 @@ export default function MedicationsPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       <div className="flex flex-col items-center space-y-3">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
                         <p className="text-sky-600">Đang tải dữ liệu...</p>
@@ -186,81 +273,14 @@ export default function MedicationsPage() {
                   </TableRow>
                 ) : (
                   medicineDeliveryByParentId.map((delivery, idx) => (
-                    <TableRow
+                    <DeliveryRow
                       key={delivery.id || idx}
-                      className="hover:bg-sky-50 transition-colors border-sky-100"
-                    >
-                      <TableCell className="font-medium text-sky-900">
-                        {delivery.student?.name || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-sky-800">
-                        {typeof delivery.medicine === "object" &&
-                        delivery.medicine !== null &&
-                        "name" in delivery.medicine
-                          ? (delivery.medicine as any).name
-                          : medications.find(
-                              (m) => m._id === delivery.medicine._id
-                            )?.name ||
-                            delivery.medicine ||
-                            "N/A"}
-                      </TableCell>
-                      <TableCell className="text-sky-700 font-medium">
-                        {delivery.per_dose}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sky-700">
-                          <Clock className="mr-2 h-4 w-4 text-sky-500" />
-                          <span className="font-medium">
-                            {delivery.per_day} lần/ngày
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            delivery.status === "completed"
-                              ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
-                              : delivery.status === "cancelled"
-                              ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-                              : delivery.status === "progress"
-                              ? "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-                              : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
-                          }
-                        >
-                          {delivery.status === "pending"
-                            ? "Chờ xử lý"
-                            : delivery.status === "progress"
-                            ? "Đang làm"
-                            : delivery.status === "completed"
-                            ? "Đã hoàn thành"
-                            : delivery.status === "cancelled"
-                            ? "Đã huỷ"
-                            : delivery.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleShowDetail(delivery)}
-                            className="border-sky-300 text-sky-700 hover:bg-sky-50 hover:border-sky-400"
-                          >
-                            Chi tiết
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(delivery.id)}
-                            disabled={deletingId === delivery.id}
-                            className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
-                            title="Xóa hoàn toàn đơn thuốc khỏi hệ thống. Quản trị viên và nhân viên y tế cũng sẽ không thể thấy đơn này."
-                          >
-                            {deletingId === delivery.id ? "Đang xoá..." : "Xoá"}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                      delivery={delivery}
+                      onShowDetail={handleShowDetail}
+                      onDelete={handleDelete}
+                      deletingId={deletingId}
+                      updatedAt={delivery.updated_at}
+                    />
                   ))
                 )}
               </TableBody>
@@ -273,7 +293,6 @@ export default function MedicationsPage() {
       {showDetail && selectedDelivery && (
         <ViewDeliveryDialog
           delivery={selectedDelivery as MedicineDeliveryByParent}
-          medications={medications}
           onClose={() => setShowDetail(false)}
         />
       )}

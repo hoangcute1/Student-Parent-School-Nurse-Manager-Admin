@@ -31,18 +31,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
-import { ViewDeliveryDialog } from "./view-delivery-dialog";
+
 import { MedicineDeliveryTable } from "./components/medicine-delivery-table";
-import { FilterBar } from "./_components/filter-bar";
+import { FilterBar } from "./components/filter-bar";
 import type { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
+import ViewDeliveryDialog from "./components/view-delivery-dialog";
 
 function SentMedicinesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -108,8 +103,6 @@ function SentMedicinesPage() {
     total: medicineDeliveryByStaffId.length,
     pending: medicineDeliveryByStaffId.filter((d) => d.status === "pending")
       .length,
-    progress: medicineDeliveryByStaffId.filter((d) => d.status === "progress")
-      .length,
     completed: medicineDeliveryByStaffId.filter((d) => d.status === "completed")
       .length,
   };
@@ -136,13 +129,11 @@ function SentMedicinesPage() {
             `"${delivery.student?.class?.name || "N/A"}"`,
             `"${delivery.name || "N/A"}"`,
             `"${delivery.total || "N/A"}"`,
-            `"${delivery.per_dose || "N/A"}"`,
             `"${delivery.parentName || "N/A"}"`,
             `"${getStatusText(delivery.status)}"`,
-            `"${
-              delivery.created_at
-                ? new Date(delivery.created_at).toLocaleDateString("vi-VN")
-                : "N/A"
+            `"${delivery.created_at
+              ? new Date(delivery.created_at).toLocaleDateString("vi-VN")
+              : "N/A"
             }"`,
           ].join(",")
         ),
@@ -192,11 +183,14 @@ function SentMedicinesPage() {
 
   const handleUpdateStatus = async (
     id: string,
-    newStatus: "pending" | "progress" | "completed" | "cancelled"
+    newStatus: "pending" | "morning" | "noon" | "completed" | "cancelled",
+    reason?: string
   ) => {
     try {
       setIsLoading(true);
-      await updateMedicineDelivery(id, { status: newStatus });
+      const updateObj: any = { status: newStatus };
+      if (reason) updateObj.reason = reason;
+      await updateMedicineDelivery(id, updateObj);
       await fetchMedicineDeliveryByStaffId();
     } catch (err) {
       setError("Không thể cập nhật trạng thái");
@@ -227,13 +221,6 @@ function SentMedicinesPage() {
     }
   };
 
-  const handleRefresh = async () => {
-    try {
-      await fetchMedicineDeliveryByStaffId();
-    } catch (err) {
-      setError("Không thể làm mới dữ liệu");
-    }
-  };
 
   if (isLoading && medicineDeliveryByStaffId.length === 0) {
     return (
@@ -390,106 +377,64 @@ function SentMedicinesPage() {
           </Card>
         </div>
 
-        {/* Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar with Quick Actions */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-gray-800">
-                  Thao tác nhanh
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <button
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-white py-3 px-4 rounded-lg hover:from-sky-600 hover:to-sky-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
-                >
-                  <svg
-                    className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  <span>Làm mới dữ liệu</span>
-                </button>
-                <button
-                  onClick={handleExportExcel}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  <span>Xuất báo cáo</span>
-                </button>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Main Data Table */}
-          <div className="lg:col-span-3">
-            <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="pb-4">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-2xl font-bold text-gray-800">
-                      Danh sách đơn thuốc
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 mt-1">
-                      Quản lý các đơn thuốc được gửi từ phụ huynh
-                    </CardDescription>
-                  </div>
+        {/* Main Data Table */}
+        <div className="">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <CardTitle className="text-2xl font-bold text-gray-800">
+                    Danh sách đơn thuốc
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 mt-1">
+                    Quản lý các đơn thuốc được gửi từ phụ huynh
+                  </CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FilterBar
-                  onSearchChange={setSearchTerm}
-                  onStatusFilterChange={setSelectedStatus}
-                  onDateFilterChange={setSelectedDate}
+                <div className="w-full md:w-auto flex justify-end mt-4 md:mt-0">
+                  <Button
+                    onClick={handleExportExcel}
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-3 rounded-lg shadow-lg hover:from-emerald-600 hover:to-emerald-700 flex items-center gap-2"
+                  >
+                    <Download className="h-5 w-5" />
+                    Xuất báo cáo
+                  </Button>
+                </div>
+              </div>
+
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FilterBar
+                onSearchChange={setSearchTerm}
+                onStatusFilterChange={setSelectedStatus}
+                onDateFilterChange={setSelectedDate}
+              />
+              <div className="mt-6">
+                <MedicineDeliveryTable
+                  deliveries={filteredData}
+                  isLoading={isLoading}
+                  onViewDelivery={handleViewDelivery}
+                  onUpdateStatus={handleUpdateStatus}
+                  onDeleteDelivery={handleDeleteDelivery}
                 />
-                <div className="mt-6">
-                  <MedicineDeliveryTable
-                    deliveries={filteredData}
-                    isLoading={isLoading}
-                    onViewDelivery={handleViewDelivery}
-                    onUpdateStatus={handleUpdateStatus}
-                    onDeleteDelivery={handleDeleteDelivery}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* View Dialog */}
-        {showViewDialog && selectedDelivery && (
-          <ViewDeliveryDialog
-            delivery={selectedDelivery}
-            onClose={() => {
-              setShowViewDialog(false);
-              setSelectedDelivery(null);
-            }}
-          />
-        )}
+
       </div>
+
+      {/* Dialog xem chi tiết đơn thuốc */}
+      {showViewDialog && selectedDelivery && (
+        <ViewDeliveryDialog
+          delivery={selectedDelivery}
+          onClose={() => {
+            setShowViewDialog(false);
+            setSelectedDelivery(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -9,7 +9,6 @@ import {
   MedicineDeliveryStaffResponse,
 } from "@/lib/type/medicine-delivery";
 import { fetchData } from "../api";
-import { getAuthToken, parseJwt } from "../auth/token";
 
 const getAllMedicineDeliveries =
   async (): Promise<MedicineDeliveryResponse> => {
@@ -109,6 +108,24 @@ const createMedicineDeliveries = async (
   }
 };
 
+const createManyMedicineDeliveries = async (
+  data: CreateMedicineDelivery[]
+): Promise<CreateMedicineDelivery[]> => {
+  try {
+    const response = await fetchData<CreateMedicineDelivery[]>(
+      "/medicine-deliveries/bulk",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
+    return response;
+  } catch (error: any) {
+    console.error("Error creating medicine delivery:", error);
+    throw new Error(error.message || "Không thể tạo đơn thuốc mới");
+  }
+};
+
 const updateMedicineDelivery = async (
   id: string,
   data: Partial<MedicineDeliveryResponse>
@@ -163,4 +180,5 @@ export {
   deleteMedicineDelivery,
   softDeleteMedicineDelivery,
   getMedicineDeliveriesByStaffId,
+  createManyMedicineDeliveries,
 };

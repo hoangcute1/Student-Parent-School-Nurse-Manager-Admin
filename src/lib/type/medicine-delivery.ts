@@ -1,4 +1,4 @@
-import { create } from "zustand";
+
 import { Medication } from "./medications";
 
 interface MedicineDelivery {
@@ -10,8 +10,7 @@ interface MedicineDelivery {
   name: string;
   date: string; // Chuyển sang string để đồng bộ với API
   total: number;
-  status: "pending" | "progress" | "completed" | "cancelled";
-  per_dose: string;
+  status: "pending" | "morning" | "noon" | "completed" | "cancelled";
   per_day: string;
   note?: string; // Optional
   reason?: string; // Optional
@@ -38,7 +37,6 @@ interface MedicineDelivery {
     _id: string;
     name: string;
   };
-  medicine: Medication;
 }
 
 interface MedicineDeliveryByParent {
@@ -48,8 +46,7 @@ interface MedicineDeliveryByParent {
   name: string;
   date: string;
   total: number;
-  status: "pending" | "progress" | "completed" | "cancelled";
-  per_dose: string;
+  status: "pending" | "morning" | "noon" | "completed" | "cancelled";
   per_day: string;
   note?: string;
   reason?: string;
@@ -64,7 +61,6 @@ interface MedicineDeliveryByParent {
       name: string;
     };
   };
-  medicine: Medication;
   created_at: string;
   updated_at: string;
 }
@@ -80,8 +76,7 @@ interface MedicineDeliveryByStaff {
   name: string;
   date: string;
   total: number;
-  status: "pending" | "progress" | "completed" | "cancelled";
-  per_dose: string;
+  status: "pending" | "morning" | "noon" | "completed" | "cancelled";
   per_day: string;
   note?: string;
   reason?: string;
@@ -96,7 +91,6 @@ interface MedicineDeliveryByStaff {
       name: string;
     };
   };
-  medicine: Medication;
   created_at: string;
   updated_at: string;
 }
@@ -107,11 +101,10 @@ interface MedicineDeliveryStaffResponse {
 interface CreateMedicineDelivery {
   name: string;
   total: number;
-  status: "pending" | "progress" | "completed" | "cancelled";
-  per_dose: string;
+  status: "pending" | "morning" | "noon" | "completed" | "cancelled";
   per_day: string;
   note?: string; // Thành phần thuốc
-  reason: string;
+  reason?: string;
   student: string;
   parent: string;
   staff?: string;
@@ -132,6 +125,7 @@ interface MedicineDeliveryStore {
   fetchMedicineDeliveryByStaffId: () => Promise<void>;
   fetchMedicineDeliveryByParentId: () => Promise<void>;
   addMedicineDelivery: (data: CreateMedicineDelivery) => Promise<any>;
+  addManyMedicineDelivery: (data: CreateMedicineDelivery[]) => Promise<any>;
   updateMedicineDelivery: (
     id: string,
     data: Partial<MedicineDelivery>

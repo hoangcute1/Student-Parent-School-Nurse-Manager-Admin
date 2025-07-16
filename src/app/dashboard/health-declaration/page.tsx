@@ -234,7 +234,6 @@ export default function ParentHealthRecords() {
                                   className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-300 hover:text-emerald-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
                                 >
                                   <Eye className="h-4 w-4" />
-                                  <span className="font-medium">Xem</span>
                                 </Button>
                               }
                             />
@@ -247,7 +246,7 @@ export default function ParentHealthRecords() {
                               className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
                             >
                               <Edit className="h-4 w-4" />
-                              <span className="font-medium">Cập nhật</span>
+
                             </Button>
                           </div>
                         </TableCell>
