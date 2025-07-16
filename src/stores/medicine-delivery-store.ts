@@ -8,6 +8,7 @@ import {
   getMedicineDeliveriesByParentId,
   getMedicineDeliveriesByStaffId,
   updateMedicineDelivery,
+  createManyMedicineDeliveries,
 } from "@/lib/api/medicine-delivery";
 import {
   CreateMedicineDelivery,
@@ -146,6 +147,44 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         set({ isLoading: false });
       }
     },
+
+    addManyMedicineDelivery: async (data: CreateMedicineDelivery[]) => {
+      try {
+        set({ isLoading: true, error: null });
+        const response = await createManyMedicineDeliveries(data);
+        // Type guard kiểm tra item có phải MedicineDeliveryByParent không
+        function isMedicineDeliveryByParent(item: unknown): item is MedicineDeliveryByParent {
+          if (!item || typeof item !== "object") return false;
+          const obj = item as any;
+          return (
+            "id" in obj &&
+            "student" in obj &&
+            "staff" in obj &&
+            "name" in obj &&
+            "date" in obj &&
+            "total" in obj &&
+            "per_day" in obj &&
+            "reason" in obj
+          );
+        }
+        const validResponse = ((Array.isArray(response) ? response : [response]) as unknown[]).filter(isMedicineDeliveryByParent);
+        set({
+          medicineDeliveryByParentId: [
+            ...get().medicineDeliveryByParentId,
+            ...validResponse,
+          ],
+          error: null,
+        });
+        return response;
+      } catch (err: any) {
+        const errorMessage = err.message || "Failed to add medicine delivery";
+        set({ error: errorMessage });
+        throw err;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
 
     // Xóa hoàn toàn đơn thuốc (cho phụ huynh)
     deleteMedicineDelivery: async (id: string) => {
