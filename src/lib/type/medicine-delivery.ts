@@ -104,7 +104,7 @@ interface CreateMedicineDelivery {
   status: "pending" | "morning" | "noon" | "completed" | "cancelled";
   per_day: string;
   note?: string; // Thành phần thuốc
-  reason: string;
+  reason?: string;
   student: string;
   parent: string;
   staff?: string;

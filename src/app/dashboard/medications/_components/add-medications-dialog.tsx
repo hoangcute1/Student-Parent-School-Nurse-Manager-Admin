@@ -31,7 +31,6 @@ export default function AddMedicineDeliveryForm() {
       status: "pending",
       per_day: "",
       note: "",
-      reason: "",
       student: "",
       parent: "",
       staff: "",
@@ -94,7 +93,6 @@ export default function AddMedicineDeliveryForm() {
         status: "pending",
         per_day: "",
         note: "",
-        reason: "",
         student: selectedStudent,
         parent: "",
         staff: selectedStaff,
@@ -132,11 +130,6 @@ export default function AddMedicineDeliveryForm() {
           setLoading(false);
           return;
         }
-        if (!forms[i].reason || forms[i].reason.trim() === "") {
-          setError(`Vui lòng nhập lý do sử dụng cho đơn thứ ${i + 1}!`);
-          setLoading(false);
-          return;
-        }
       }
       // Đảm bảo medications đã được load
       if (!medications || medications.length === 0) {
@@ -158,7 +151,6 @@ export default function AddMedicineDeliveryForm() {
         total: form.total,
         per_day: form.per_day,
         note: form.note,
-        reason: form.reason,
         status: "pending" as const,
         date: currentDate.toISOString(),
         // Không có end_at
@@ -170,10 +162,8 @@ export default function AddMedicineDeliveryForm() {
           name: "",
           total: 1,
           status: "pending",
-
           per_day: "",
           note: "",
-          reason: "",
           student: "",
           parent: "",
           staff: "",
@@ -284,7 +274,8 @@ export default function AddMedicineDeliveryForm() {
                   </div>
                 )}
               </div>
-              <div className="space-y-2">
+              {/* Bỏ trường lý do sử dụng (reason) */}
+              {/* <div className="space-y-2">
                 <label className="block text-sky-800 font-semibold text-sm">Lý do sử dụng <span className="text-red-500">*</span></label>
                 <Input
                   name="reason"
@@ -294,7 +285,7 @@ export default function AddMedicineDeliveryForm() {
                   required
                   className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
                 />
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <label className="block text-sky-800 font-semibold text-sm">👩‍⚕️ Lưu ý cho y tá</label>
                 <Textarea
@@ -315,8 +306,6 @@ export default function AddMedicineDeliveryForm() {
                   </button>
                 </div>
               )}
-
-
             </div>
           </div>
         ))}
