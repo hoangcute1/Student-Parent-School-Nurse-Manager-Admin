@@ -21,7 +21,6 @@ export class CreateMedicineDeliveryDto {
   @IsNotEmpty()
   name: string;
 
-
   @ApiProperty({
     example: 30,
     description: 'Tổng số liều',
@@ -39,7 +38,6 @@ export class CreateMedicineDeliveryDto {
   @IsEnum(MedicineDeliveryStatus)
   @IsOptional()
   status?: MedicineDeliveryStatus;
-
 
   @ApiProperty({
     example: '3 times a day',
@@ -59,14 +57,6 @@ export class CreateMedicineDeliveryDto {
   note?: string;
 
   @ApiProperty({
-    example: 'Fever and headache',
-    description: 'Lý do dùng thuốc',
-  })
-  @IsString()
-  @IsNotEmpty()
-  reason: string;
-
-  @ApiProperty({
     example: '2024-12-31T00:00:00.000Z',
     description: 'Thời gian bắt đầu (mặc định là thời gian hiện tại)',
     required: false,
@@ -74,7 +64,6 @@ export class CreateMedicineDeliveryDto {
   @IsDateString()
   @IsOptional()
   sent_at?: Date;
-
 
   @ApiProperty({
     example: '60d0fe4f5311236168a109ca',
@@ -89,7 +78,6 @@ export class CreateMedicineDeliveryDto {
   })
   @IsMongoId()
   parent: string;
-
 
   @ApiProperty({
     example: '60d0fe4f5311236168a109cc',
@@ -153,7 +141,7 @@ export class UpdateMedicineDeliveryDto {
 
   @ApiProperty({
     example: 'Fever and headache',
-    description: 'Lý do dùng thuốc',
+    description: 'Lý do từ chối',
     required: false,
   })
   @IsString()
