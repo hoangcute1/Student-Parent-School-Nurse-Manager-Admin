@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/auth-store";
-import { API_URL } from "@/lib/env";
+import { useRouter } from "next/navigation"; 
 import { getAuthToken, clearAuthToken, parseJwt } from "@/lib/api/auth/token";
 import { fetchData } from "@/lib/api/api";
 import { GetMeResponse } from "@/lib/type/auth";
@@ -11,6 +11,7 @@ import { GetMeResponse } from "@/lib/type/auth";
 export function useAuthInit() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
   const {
     updateUserInfo,
     clearAuth,
@@ -31,6 +32,7 @@ export function useAuthInit() {
 
       if (!token) {
         console.log("No token found, user not authenticated");
+        router.push("/")
         clearAuth();
         setIsInitialized(true);
         setIsLoading(false);

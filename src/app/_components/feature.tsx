@@ -9,7 +9,6 @@ import {
 import { useEffect, useState } from "react";
 import LoginPopup from "./login-popup";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { features } from "../_constants/feature";
 import { useAuthStore } from "@/stores/auth-store";
 
