@@ -14,8 +14,8 @@ import { AdminService } from './admin.service';
 import { StaffService } from './staff.service';
 import { ParentService } from './parent.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '@/decorations/dto/user.dto';
-import { UpdateUserDto } from '@/decorations/dto/update-user.dto';
+import { UserDto } from '@/decorations/dto/user.dto';
+
 import { CreateUserAdminDto } from '@/decorations/dto/admin.dto';
 import { CreateUserParentDto } from '@/decorations/dto/parent.dto';
 import { CreateUserStaffDto } from '@/decorations/dto/staff.dto';
@@ -106,7 +106,7 @@ export class UserService {
     return { user, profile };
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: UserDto): Promise<User> {
     // Check if email already exists
     const existingUser = await this.userModel.findOne({
       email: createUserDto.email,
@@ -125,7 +125,7 @@ export class UserService {
     return createdUser.save();
   }
 
-  async updateById(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateById(id: string, updateUserDto: UserDto): Promise<User> {
     const user = await this.userModel.findById(id);
     if (!user) {
       throw new NotFoundException(`User với ID "${id}" không tìm thấy`);

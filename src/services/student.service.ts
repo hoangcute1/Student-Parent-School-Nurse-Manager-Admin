@@ -8,8 +8,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Student } from '@/schemas/student.schema';
-import { CreateStudentDto } from '@/decorations/dto/student.dto';
-import { UpdateStudentDto } from '@/decorations/dto/update-student.dto';
+import { StudentDto } from '@/decorations/dto/student.dto';
+
 import { FilterStudentDto, FilterOperator } from '@/decorations/dto/filter-student.dto';
 import { SortOrder } from '@/decorations/dto/pagination.dto';
 import { ParentService } from '@/services/parent.service';
@@ -28,7 +28,7 @@ export class StudentService {
     @InjectModel('User') private userModel: Model<UserDocument>,
     private parentStudentService: ParentStudentService,
   ) {}
-  async create(createStudentDto: CreateStudentDto): Promise<Student> {
+  async create(createStudentDto: StudentDto): Promise<Student> {
     try {
       // Check if student already exists
       const existingStudent = await this.studentModel
@@ -289,7 +289,7 @@ export class StudentService {
     return student;
   }
 
-  async update(id: string, updateStudentDto: UpdateStudentDto): Promise<Student> {
+  async update(id: string, updateStudentDto: StudentDto): Promise<Student> {
     // Check if updating studentId and if it exists already
     if (updateStudentDto.studentId) {
       const existingStudent = await this.studentModel
@@ -305,9 +305,7 @@ export class StudentService {
     } // Add updated date and map parentId to parent field
     const updatedData = {
       ...updateStudentDto,
-      parent: updateStudentDto.parentId, // Map parentId to parent field
-      class: updateStudentDto.classId, // Map classId to class field
-      updatedAt: new Date(),
+      updated_at: new Date(),
     };
     const updatedStudent = await this.studentModel
       .findByIdAndUpdate(id, updatedData, { new: true })
@@ -371,13 +369,13 @@ export class StudentService {
 
     return result;
   }
-  async batchUpdate(updates: { id: string; data: UpdateStudentDto }[]): Promise<{
+  async batchUpdate(updates: { id: string; data: StudentDto }[]): Promise<{
     successful: Student[];
-    failed: { id: string; data: UpdateStudentDto; reason: string }[];
+    failed: { id: string; data: StudentDto; reason: string }[];
   }> {
     const result: {
       successful: Student[];
-      failed: { id: string; data: UpdateStudentDto; reason: string }[];
+      failed: { id: string; data: StudentDto; reason: string }[];
     } = {
       successful: [],
       failed: [],
@@ -406,8 +404,6 @@ export class StudentService {
         } // Add updated date and map fields
         const updatedData = {
           ...update.data,
-          parent: update.data.parentId, // Map parentId to parent field
-          class: update.data.classId, // Map classId to class field
           updatedAt: new Date(),
         };
         const updatedStudent = await this.studentModel

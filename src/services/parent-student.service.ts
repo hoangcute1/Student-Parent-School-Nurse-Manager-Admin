@@ -3,12 +3,12 @@ import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/commo
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ParentStudent, ParentStudentDocument } from '@/schemas/parent-student.schema';
-import { CreateParentStudentDto } from '@/decorations/dto/parent-student.dto';
-import { UpdateParentStudentDto } from '@/decorations/dto/update-parent-student.dto';
-import { StudentService } from './student.service';
+
+
 import { HealthRecordService } from './health-record.service';
 import { ParentService } from './parent.service';
-import path from 'path';
+import { ParentStudentDto } from '@/decorations/dto/parent-student.dto';
+
 
 @Injectable()
 export class ParentStudentService {
@@ -20,7 +20,7 @@ export class ParentStudentService {
     private parentService: ParentService,
   ) {}
 
-  async create(createParentStudentDto: CreateParentStudentDto): Promise<ParentStudent> {
+  async create(createParentStudentDto: ParentStudentDto): Promise<ParentStudent> {
     const createdParentStudent = new this.parentStudentModel(createParentStudentDto);
     return createdParentStudent.save();
   }
@@ -48,7 +48,7 @@ export class ParentStudentService {
     return this.parentStudentModel.find({ student: studentId }).populate('parent').exec();
   }
 
-  async update(id: string, updateParentStudentDto: UpdateParentStudentDto): Promise<ParentStudent> {
+  async update(id: string, updateParentStudentDto: ParentStudentDto): Promise<ParentStudent> {
     const updatedParentStudent = await this.parentStudentModel
       .findByIdAndUpdate(id, updateParentStudentDto, { new: true })
       .populate('parent')

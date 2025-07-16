@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { NotificationService } from '@/services/notification.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { CreateNotificationDto } from '@/decorations/dto/notification.dto';
-import { UpdateNotificationDto } from '@/decorations/dto/update-notification.dto';
+import { NotificationDto } from '@/decorations/dto/notification.dto';
+
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -45,14 +45,14 @@ export class NotificationController {
   @Post()
   @ApiOperation({ summary: 'Tạo thông báo mới' })
   @ApiResponse({ status: 201, description: 'Thông báo đã được tạo.' })
-  async create(@Body() createNotificationDto: CreateNotificationDto) {
+  async create(@Body() createNotificationDto: NotificationDto) {
     return this.notificationService.create(createNotificationDto);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin thông báo' })
   @ApiParam({ name: 'id', description: 'ID của thông báo' })
-  async update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
+  async update(@Param('id') id: string, @Body() updateNotificationDto: NotificationDto) {
     return this.notificationService.update(id, updateNotificationDto);
   }
 

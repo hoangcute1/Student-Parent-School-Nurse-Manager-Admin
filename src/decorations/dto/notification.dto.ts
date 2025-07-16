@@ -1,8 +1,11 @@
 import { NotificationStatus, NotificationType } from '@/enums/notification.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEnum, IsDate } from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum, IsDate, IsOptional } from 'class-validator';
 
-export class CreateNotificationDto {
+
+
+
+export class NotificationDto {
   @ApiProperty({
     description: 'Campaign ID',
     example: '60d0fe4f5311236168a109ca',

@@ -17,8 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreatePeriodicCampaignDto } from '@/decorations/dto/periodic-campaign.dto';
-import { UpdatePeriodicCampaignDto } from '@/decorations/dto/update-periodic-campaign.dto';
+import { PeriodicCampaignDto } from '@/decorations/dto/periodic-campaign.dto';
 
 @ApiTags('periodic-campaigns')
 @Controller('periodic-campaigns')
@@ -62,7 +61,7 @@ export class PeriodicCampaignController {
     status: 201,
     description: 'The periodic campaign has been created.',
   })
-  async create(@Body() createPeriodicCampaignDto: CreatePeriodicCampaignDto) {
+  async create(@Body() createPeriodicCampaignDto: PeriodicCampaignDto) {
     return this.periodicCampaignService.create(createPeriodicCampaignDto);
   }
 
@@ -76,7 +75,7 @@ export class PeriodicCampaignController {
   @ApiResponse({ status: 404, description: 'Periodic campaign not found.' })
   async update(
     @Param('id') id: string,
-    @Body() updatePeriodicCampaignDto: UpdatePeriodicCampaignDto,
+    @Body() updatePeriodicCampaignDto: PeriodicCampaignDto,
   ) {
     return this.periodicCampaignService.update(id, updatePeriodicCampaignDto);
   }

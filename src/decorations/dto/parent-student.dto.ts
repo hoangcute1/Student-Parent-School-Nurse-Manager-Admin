@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateParentStudentDto {
+export class ParentStudentDto {
   @ApiProperty({
     description: 'Parent ID',
     example: '60d0fe4f5311236168a109ca',

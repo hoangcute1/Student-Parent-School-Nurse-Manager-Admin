@@ -8,12 +8,11 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
 import { Notification, NotificationDocument } from '@/schemas/notification.schema';
-import { CreateNotificationDto } from '@/decorations/dto/notification.dto';
-import { UpdateNotificationDto } from '@/decorations/dto/update-notification.dto';
 import { StudentService } from './student.service';
 import { HealthExaminationService } from './health-examination.service';
 import { ParentService } from './parent.service';
 import { ExaminationStatus } from '@/schemas/health-examination.schema';
+import { NotificationDto } from '@/decorations/dto/notification.dto';
 
 @Injectable()
 export class NotificationService {
@@ -25,7 +24,7 @@ export class NotificationService {
     @Inject(forwardRef(() => HealthExaminationService))
     private healthExaminationService: HealthExaminationService,
   ) {}
-  async create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
+  async create(createNotificationDto: NotificationDto): Promise<Notification> {
     const created = new this.notificationModel({
       ...createNotificationDto,
       created_at: new Date(),
@@ -115,7 +114,7 @@ export class NotificationService {
 
     return this.notificationModel.find({ student: studentId }).populate('parent').exec();
   }
-  async update(id: string, updateNotificationDto: UpdateNotificationDto): Promise<Notification> {
+  async update(id: string, updateNotificationDto: NotificationDto): Promise<Notification> {
     const updated = await this.notificationModel
       .findByIdAndUpdate(id, { ...updateNotificationDto, updated_at: new Date() }, { new: true })
       .populate('parent')

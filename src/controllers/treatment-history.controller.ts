@@ -2,8 +2,8 @@ import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nes
 import { TreatmentHistoryService } from '@/services/treatment-history.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateTreatmentHistoryDto } from '@/decorations/dto/treatment-history.dto';
-import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-history.dto';
+import { TreatmentHistoryDto } from '@/decorations/dto/treatment-history.dto';
+
 
 @ApiTags('treatment-histories')
 @Controller('treatment-histories')
@@ -67,7 +67,7 @@ export class TreatmentHistoryController {
     status: 201,
     description: 'The treatment history has been created.',
   })
-  async create(@Body() createTreatmentHistoryDto: CreateTreatmentHistoryDto) {
+  async create(@Body() createTreatmentHistoryDto: TreatmentHistoryDto) {
     return this.treatmentHistoryService.create(createTreatmentHistoryDto);
   }
 

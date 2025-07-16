@@ -9,7 +9,7 @@ import {
 import { CampaignStatus } from '@/enums/campaign.enum';
 import { Type } from 'class-transformer';
 
-export class CreateVaccineCampaignDto {
+export class VaccineCampaignDto {
   @ApiProperty({
     description: 'Vaccine ID',
     example: '60d0fe4f5311236168a109ca',

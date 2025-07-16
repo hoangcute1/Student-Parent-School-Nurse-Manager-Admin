@@ -5,8 +5,8 @@ import {
   VaccineCampaign,
   VaccineCampaignDocument,
 } from '@/schemas/vaccine-campaign.schema';
-import { CreateVaccineCampaignDto } from '@/decorations/dto/vaccine-campaign.dto';
-import { UpdateVaccineCampaignDto } from '@/decorations/dto/update-vaccine-campaign.dto';
+import { VaccineCampaignDto } from '@/decorations/dto/vaccine-campaign.dto';
+
 
 @Injectable()
 export class VaccineCampaignService {
@@ -16,7 +16,7 @@ export class VaccineCampaignService {
   ) {}
 
   async create(
-    createVaccineCampaignDto: CreateVaccineCampaignDto,
+    createVaccineCampaignDto: VaccineCampaignDto,
   ): Promise<VaccineCampaign> {
     const createdVaccineCampaign = new this.vaccineCampaignModel(
       createVaccineCampaignDto,
@@ -62,7 +62,7 @@ export class VaccineCampaignService {
 
   async update(
     id: string,
-    updateVaccineCampaignDto: UpdateVaccineCampaignDto,
+    updateVaccineCampaignDto: VaccineCampaignDto,
   ): Promise<VaccineCampaign> {
     const updatedVaccineCampaign = await this.vaccineCampaignModel
       .findByIdAndUpdate(id, updateVaccineCampaignDto, { new: true })

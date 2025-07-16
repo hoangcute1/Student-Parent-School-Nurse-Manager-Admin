@@ -9,7 +9,7 @@ import {
 import { CampaignStatus } from '@/enums/campaign.enum';
 import { Type } from 'class-transformer';
 
-export class CreatePeriodicCampaignDto {
+export class PeriodicCampaignDto {
   @ApiProperty({
     description: 'Staff ID who created the campaign',
     example: '60d0fe4f5311236168a109ca',

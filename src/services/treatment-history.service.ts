@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TreatmentHistory } from '@/schemas/treatment-history.schema';
-import { CreateTreatmentHistoryDto } from '@/decorations/dto/treatment-history.dto';
-import { UpdateTreatmentHistoryDto } from '@/decorations/dto/update-treatment-history.dto';
+import { TreatmentHistoryDto } from '@/decorations/dto/treatment-history.dto';
+
 import { Student } from '@/schemas/student.schema';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class TreatmentHistoryService {
     private studentModel: Model<Student>,
   ) {}
 
-  async create(createTreatmentHistoryDto: CreateTreatmentHistoryDto): Promise<TreatmentHistory> {
+  async create(createTreatmentHistoryDto: TreatmentHistoryDto): Promise<TreatmentHistory> {
     const createdTreatmentHistory = new this.treatmentHistoryModel(createTreatmentHistoryDto);
     return createdTreatmentHistory.save();
   }
@@ -79,7 +79,7 @@ export class TreatmentHistoryService {
 
   async update(
     id: string,
-    updateTreatmentHistoryDto: UpdateTreatmentHistoryDto,
+    updateTreatmentHistoryDto: TreatmentHistoryDto,
   ): Promise<TreatmentHistory> {
     const updatedTreatmentHistory = await this.treatmentHistoryModel
       .findByIdAndUpdate(id, updateTreatmentHistoryDto, { new: true })

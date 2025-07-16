@@ -16,7 +16,7 @@ export enum Gender {
   FEMALE = 'female'
 }
 
-export class CreateStudentDto {
+export class StudentDto {
   @ApiProperty({ example: 'Nguyen Van A' })
   @IsNotEmpty()
   @IsString()

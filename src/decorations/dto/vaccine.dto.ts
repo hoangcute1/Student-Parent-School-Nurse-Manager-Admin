@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateVaccineDto {
+export class VaccineDto {
   @ApiProperty({
     description: 'Name of the vaccine',
     example: 'COVID-19 Vaccine',

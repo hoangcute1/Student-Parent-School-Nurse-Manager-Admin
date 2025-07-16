@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsDate, IsOptional, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateTreatmentHistoryDto {
+export class TreatmentHistoryDto {
   @ApiProperty({
     description: 'Student ID',
     example: '60d0fe4f5311236168a109ca',

@@ -17,8 +17,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateVaccineDto } from '@/decorations/dto/vaccine.dto';
-import { UpdateVaccineDto } from '@/decorations/dto/update-vaccine.dto';
+import { VaccineDto } from '@/decorations/dto/vaccine.dto';
+
 
 @ApiTags('vaccines')
 @Controller('vaccines')
@@ -46,7 +46,7 @@ export class VaccineController {
   @Post()
   @ApiOperation({ summary: 'Create a new vaccine' })
   @ApiResponse({ status: 201, description: 'The vaccine has been created.' })
-  async create(@Body() createVaccineDto: CreateVaccineDto) {
+  async create(@Body() createVaccineDto: VaccineDto) {
     return this.vaccineService.create(createVaccineDto);
   }
 
@@ -57,7 +57,7 @@ export class VaccineController {
   @ApiResponse({ status: 404, description: 'Vaccine not found.' })
   async update(
     @Param('id') id: string,
-    @Body() updateVaccineDto: UpdateVaccineDto,
+    @Body() updateVaccineDto: VaccineDto,
   ) {
     return this.vaccineService.update(id, updateVaccineDto);
   }
