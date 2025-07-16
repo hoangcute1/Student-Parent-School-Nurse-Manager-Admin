@@ -15,7 +15,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { VaccinationScheduleService } from '@/services/vaccination-schedule.service';
-import { CreateVaccinationScheduleDto } from '@/decorations/dto/create-vaccination-schedule.dto';
+import { CreateVaccinationScheduleDto } from '@/decorations/dto/vaccination-schedule.dto';
 
 @ApiTags('vaccination-schedules')
 @Controller('vaccination-schedules')

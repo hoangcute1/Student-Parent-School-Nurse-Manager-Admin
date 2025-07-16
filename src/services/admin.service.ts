@@ -6,8 +6,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Admin, AdminDocument } from '@/schemas/admin.schema';
-import { CreateAdminDto } from '@/decorations/dto/create-admin.dto';
-import { UpdateAdminDto } from '@/decorations/dto/update-admin.dto';
+import { CreateAdminDto } from '@/decorations/dto/admin.dto';
+import { UpdateAdminDto } from '@/decorations/dto/admin.dto';
 
 /**
  * Service for managing admin records

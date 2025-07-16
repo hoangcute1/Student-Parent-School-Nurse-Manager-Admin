@@ -17,8 +17,8 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CreateUserDto } from '@/decorations/dto/create-user.dto';
-import { UpdateUserDto } from '@/decorations/dto/update-user.dto';
+import { UserDto } from '@/decorations/dto/user.dto';
+
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import { SuccessResponseDto } from '@/decorations/dto/success-response.dto';
 import { PaginatedResponseDto } from '@/decorations/dto/paginated-response.dto';
@@ -61,7 +61,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Tạo mới user' })
   @ApiBody({
-    type: CreateUserDto,
+    type: UserDto,
     description: 'Thông tin của user mới',
     required: true,
   })
@@ -78,7 +78,7 @@ export class UserController {
     status: 400,
     description: 'Thông tin không hợp lệ hoặc đã tồn tại.',
   })
-  async create(@Body() createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: UserDto) {
     const createdUser = await this.userService.create(createUserDto);
     return new SuccessResponseDto('User đã được tạo thành công', createdUser);
   }
@@ -130,7 +130,7 @@ export class UserController {
   @ApiOperation({ summary: 'Cập nhật thông tin user' })
   @ApiParam({ name: 'id', description: 'ID của user' })
   @ApiBody({
-    type: UpdateUserDto,
+    type: UserDto,
     description: 'Thông tin cập nhật user',
     required: true,
   })
@@ -144,7 +144,7 @@ export class UserController {
     status: 403,
     description: 'Không có quyền thực hiện thao tác này.',
   })
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UserDto) {
     // Validate ObjectId format
     if (id.length !== 24) {
       return {

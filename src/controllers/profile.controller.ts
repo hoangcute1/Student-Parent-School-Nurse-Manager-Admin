@@ -9,8 +9,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateProfileDto } from '@/decorations/dto/create-profile.dto';
-import { UpdateProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/update-profile.dto';
+import { ProfileDto, UpdateProfileWithoutUserDto } from '@/decorations/dto/profile.dto';
+
 
 @ApiTags('profiles')
 @Controller('profiles')
@@ -21,9 +21,9 @@ export class ProfileController {
 
   @Post()
   @ApiOperation({ summary: 'Tạo profile mới' })
-  @ApiBody({ type: CreateProfileDto })
+  @ApiBody({ type: ProfileDto })
   @ApiResponse({ status: 201, description: 'Profile đã được tạo.' })
-  async create(@Body() createProfileDto: CreateProfileDto) {
+  async create(@Body() createProfileDto: ProfileDto) {
     return this.profileService.create(createProfileDto);
   }
 
@@ -55,9 +55,9 @@ export class ProfileController {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật profile theo id' })
   @ApiParam({ name: 'id', description: 'ID của profile' })
-  @ApiBody({ type: UpdateProfileDto })
+  @ApiBody({ type: ProfileDto })
   @ApiResponse({ status: 200, description: 'Profile đã được cập nhật.' })
-  async update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
+  async update(@Param('id') id: string, @Body() updateProfileDto: ProfileDto) {
     return this.profileService.updateById(id, updateProfileDto);
   }
 
@@ -72,7 +72,7 @@ export class ProfileController {
   @Put('user/:userId')
   @ApiOperation({ summary: 'Cập nhật profile theo userId' })
   @ApiParam({ name: 'userId', description: 'ID của user' })
-  @ApiBody({ type: UpdateProfileDto })
+  @ApiBody({ type: UpdateProfileWithoutUserDto })
   @ApiResponse({ status: 200, description: 'Profile đã được cập nhật theo userId.' })
   async updateByUserId(
     @Param('userId') userId: string,

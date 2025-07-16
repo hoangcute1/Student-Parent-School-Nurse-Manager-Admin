@@ -10,8 +10,8 @@ import {
   CampaignStudent,
   CampaignStudentDocument,
 } from '@/schemas/campaign-student';
-import { CreateCampaignStudentDto } from '@/decorations/dto/create-campaign-student.dto';
-import { UpdateCampaignStudentDto } from '@/decorations/dto/update-campaign-student.dto';
+import { CreateCampaignStudentDto, UpdateCampaignStudentDto } from '@/decorations/dto/campaign-student.dto';
+
 
 @Injectable()
 export class CampaignStudentService {

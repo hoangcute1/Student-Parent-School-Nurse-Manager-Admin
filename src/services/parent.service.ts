@@ -8,8 +8,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parent, ParentDocument } from '@/schemas/parent.schema';
-import { CreateParentDto } from '@/decorations/dto/create-parent.dto';
-import { UpdateParentDto } from '@/decorations/dto/update-parent.dto';
+import { CreateParentDto } from '@/decorations/dto/parent.dto';
+import { UpdateParentDto } from '@/decorations/dto/parent.dto';
 import { ProfileService } from './profile.service';
 import { UserService } from './user.service';
 

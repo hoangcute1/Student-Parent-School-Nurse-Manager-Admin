@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { ExportHistoryService } from '../services/export-history.service';
-import { CreateExportHistoryDto } from '../decorations/dto/create-export-history.dto';
+import { CreateExportHistoryDto } from '../decorations/dto/export-history.dto';
 
 @Controller('export-history')
 export class ExportHistoryController {

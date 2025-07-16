@@ -18,10 +18,10 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateStaffDto } from '@/decorations/dto/create-staff.dto';
-import { UpdateStaffDto } from '@/decorations/dto/update-staff.dto';
+import { CreateStaffDto, CreateUserStaffDto } from '@/decorations/dto/staff.dto';
+import { UpdateStaffDto } from '@/decorations/dto/staff.dto';
 import { UserService } from '@/services/user.service';
-import { CreateUserStaffDto } from '@/decorations/dto/create-user-staff.dto';
+
 import { SuccessResponseDto } from '@/decorations/dto/success-response.dto';
 
 @ApiTags('staff')

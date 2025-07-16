@@ -11,8 +11,8 @@ import {
   Patch,
 } from '@nestjs/common';
 import { CampaignStudentService } from '@/services/campaign-student.service';
-import { CreateCampaignStudentDto } from '@/decorations/dto/create-campaign-student.dto';
-import { UpdateCampaignStudentDto } from '@/decorations/dto/update-campaign-student.dto';
+import { CreateCampaignStudentDto } from '@/decorations/dto/campaign-student.dto';
+import { UpdateCampaignStudentDto } from '@/decorations/dto/campaign-student.dto';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import {
   ApiTags,

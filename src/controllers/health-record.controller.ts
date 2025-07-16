@@ -7,7 +7,6 @@ import {
   Param,
   Body,
   UseGuards,
-  Query,
   HttpStatus,
   HttpCode,
   BadRequestException,
@@ -26,21 +25,18 @@ import {
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 
 import { CreateHealthRecordDto, UpdateHealthRecordDto } from '@/decorations/dto/health-record.dto';
-import { Roles } from '@/decorations/roles.decorator';
-import { RolesGuard } from '@/guards/roles.guard';
-import { Role } from '@/enums/role.enum';
-import { Request } from 'express';
+
+
 
 @ApiTags('health-records')
 @Controller('health-records')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 export class HealthRecordController {
   constructor(private readonly healthRecordService: HealthRecordService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE, Role.PARENT, Role.STUDENT)
   @ApiOperation({
     summary: 'Get all health records',
     description: 'Retrieves a list of all health records. Can be filtered by query parameters.',
@@ -61,7 +57,6 @@ export class HealthRecordController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.ADMIN, Role.STAFF, Role.DOCTOR, Role.NURSE, Role.PARENT, Role.STUDENT)
   @ApiOperation({
     summary: 'Get health record by ID',
     description: 'Retrieves a health record by its ID.',

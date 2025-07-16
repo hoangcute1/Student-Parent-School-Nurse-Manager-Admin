@@ -5,8 +5,7 @@ import {
   MedicineTreatment,
   MedicineTreatmentDocument,
 } from '@/schemas/medicine-treatment.schema';
-import { CreateMedicineTreatmentDto } from '@/decorations/dto/create-medicine-treatment.dto';
-import { UpdateMedicineTreatmentDto } from '@/decorations/dto/update-medicine-treatment.dto';
+import { CreateMedicineTreatmentDto, UpdateMedicineTreatmentDto } from '@/decorations/dto/medicine-treatment.dto';
 
 @Injectable()
 export class MedicineTreatmentService {

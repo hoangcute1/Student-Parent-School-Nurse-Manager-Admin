@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Vaccine, VaccineDocument } from '@/schemas/vaccine.schema';
-import { CreateVaccineDto } from '@/decorations/dto/create-vaccine.dto';
-import { UpdateVaccineDto } from '@/decorations/dto/update-vaccine.dto';
+import { VaccineDto } from '@/decorations/dto/vaccine.dto';
+
 
 @Injectable()
 export class VaccineService {
@@ -12,7 +12,7 @@ export class VaccineService {
     private vaccineModel: Model<VaccineDocument>,
   ) {}
 
-  async create(createVaccineDto: CreateVaccineDto): Promise<Vaccine> {
+  async create(createVaccineDto: VaccineDto): Promise<Vaccine> {
     const createdVaccine = new this.vaccineModel(createVaccineDto);
     return createdVaccine.save();
   }
@@ -33,7 +33,7 @@ export class VaccineService {
 
   async update(
     id: string,
-    updateVaccineDto: UpdateVaccineDto,
+    updateVaccineDto: VaccineDto,
   ): Promise<Vaccine> {
     const updatedVaccine = await this.vaccineModel
       .findByIdAndUpdate(id, updateVaccineDto, { new: true })

@@ -9,8 +9,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateStudentDto } from '@/decorations/dto/create-student.dto';
-import { UpdateStudentDto } from '@/decorations/dto/update-student.dto';
+import { StudentDto } from '@/decorations/dto/student.dto';
+
 
 @ApiTags('students')
 @Controller('students')
@@ -47,7 +47,7 @@ export class StudentController {
   @ApiOperation({ summary: 'Tạo sinh viên mới' })
   @ApiResponse({ status: 201, description: 'Sinh viên đã được tạo.' })
   @ApiResponse({ status: 403, description: 'Không có quyền tạo sinh viên.' })
-  async create(@Body() createStudentDto: CreateStudentDto) {
+  async create(@Body() createStudentDto: StudentDto) {
     const student = await this.studentService.create(createStudentDto);
     return formatStudentResponse(student);
   }
@@ -59,7 +59,7 @@ export class StudentController {
     description: 'Thông tin sinh viên đã được cập nhật.',
   })
   @ApiResponse({ status: 404, description: 'Không tìm thấy sinh viên.' })
-  async update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
+  async update(@Param('id') id: string, @Body() updateStudentDto: StudentDto) {
     const student = await this.studentService.update(id, updateStudentDto);
     return formatStudentResponse(student);
   }

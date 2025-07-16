@@ -17,8 +17,8 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateMedicineTreatmentDto } from '@/decorations/dto/create-medicine-treatment.dto';
-import { UpdateMedicineTreatmentDto } from '@/decorations/dto/update-medicine-treatment.dto';
+import { CreateMedicineTreatmentDto, UpdateMedicineTreatmentDto } from '@/decorations/dto/medicine-treatment.dto';
+
 
 @ApiTags('medicine-treatments')
 @Controller('medicine-treatments')

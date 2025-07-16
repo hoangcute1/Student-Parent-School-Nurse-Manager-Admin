@@ -8,8 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ClassService } from '@/services/class.service';
-import { CreateClassDto } from '@/decorations/dto/create-class.dto';
-import { UpdateClassDto } from '@/decorations/dto/update-class.dto';
+import { CreateClassDto } from '@/decorations/dto/class.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('classes')
@@ -42,7 +41,7 @@ export class ClassController {
   @ApiParam({ name: 'id', description: 'ID của lớp học' })
   async update(
     @Param('id') id: string,
-    @Body() updateClassDto: UpdateClassDto,
+    @Body() updateClassDto: CreateClassDto,
   ) {
     return this.classService.update(id, updateClassDto);
   }

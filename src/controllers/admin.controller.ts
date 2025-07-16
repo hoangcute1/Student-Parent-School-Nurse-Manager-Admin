@@ -18,10 +18,10 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-import { CreateAdminDto } from '@/decorations/dto/create-admin.dto';
-import { UpdateAdminDto } from '../decorations/dto/update-admin.dto';
+import { CreateAdminDto, CreateUserAdminDto } from '@/decorations/dto/admin.dto';
+import { UpdateAdminDto } from '../decorations/dto/admin.dto';
 import { UserService } from '@/services/user.service';
-import { CreateUserAdminDto } from '@/decorations/dto/create-user-admin.dto';
+
 import { SuccessResponseDto } from '@/decorations/dto/success-response.dto';
 
 @ApiTags('admin')

@@ -10,8 +10,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { CampaignClassService } from '@/services/campaign-class.service';
-import { CreateCampaignClassDto } from '@/decorations/dto/create-campaign-class.dto';
-import { UpdateCampaignClassDto } from '@/decorations/dto/update-campaign-class.dto';
+import { CreateCampaignClassDto } from '@/decorations/dto/campaign-class.dto';
+import { UpdateCampaignClassDto } from '@/decorations/dto/campaign-class.dto';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
 import {
   ApiTags,
