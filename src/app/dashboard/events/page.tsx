@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useMemo, useState } from "react";
 
 import ConsultationComponent from "./_components/consultation";
+import { fetchData } from "@/lib/api/api";
 
 function calculateDaysRemaining(dateString: string) {
   if (!dateString) return 9999;
@@ -29,6 +30,7 @@ export default function EventsPage() {
 
   const [pendingExaminations, setPendingExaminations] = useState<any[]>([]);
   const [pendingVaccinations, setPendingVaccinations] = useState<any[]>([]);
+  const [pendingConsultations, setPendingConsultations] = useState<any[]>([]);
 
   useEffect(() => {
     fetchStudentsByParent();
@@ -39,6 +41,7 @@ export default function EventsPage() {
       if (!studentsData || studentsData.length === 0) {
         setPendingExaminations([]);
         setPendingVaccinations([]);
+        setPendingConsultations([]);
         return;
       }
       // Fetch pending examinations
@@ -69,6 +72,22 @@ export default function EventsPage() {
         )
       );
       setPendingVaccinations(allVaccs.flat());
+
+      // Fetch consultation appointments
+      const allConsults = await Promise.all(
+        studentsData.map((student: any) =>
+          fetchData(
+            `/health-examinations/consultations?studentId=${student.student._id}`
+          ).then((res: any) =>
+            (res || []).map((item: any) => ({
+              ...item,
+              student: student.student,
+              date: item.consultation_date || item.date || "",
+            }))
+          )
+        )
+      );
+      setPendingConsultations(allConsults.flat());
     };
     fetchAll();
   }, [
@@ -95,12 +114,21 @@ export default function EventsPage() {
     [pendingVaccinations]
   );
 
+  const upcomingConsultations = useMemo(
+    () =>
+      pendingConsultations.filter((consult: any) => {
+        const days = calculateDaysRemaining(consult.date);
+        return days > 14;
+      }),
+    [pendingConsultations]
+  );
+
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Thông báo    
+            Thông báo
           </h1>
           <p className="text-blue-600">
             Theo dõi thông báo và thông tin tiêm chủng của con em bạn
@@ -141,6 +169,7 @@ export default function EventsPage() {
           <NotiList
             upcomingExaminations={upcomingExaminations}
             upcomingVaccinations={upcomingVaccinations}
+            upcomingConsultations={upcomingConsultations}
           />
         </TabsContent>
 
