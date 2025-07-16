@@ -157,7 +157,7 @@ export default function AddMedicineDeliveryForm() {
         name: form.name,
         total: form.total,
         per_day: form.per_day,
-        note: form.note + (nurseNotes[idx] ? `\n\n[Lưu ý cho y tá]:\n${nurseNotes[idx]}` : ""),
+        note: form.note,
         reason: form.reason,
         status: "pending" as const,
         date: currentDate.toISOString(),
@@ -304,7 +304,6 @@ export default function AddMedicineDeliveryForm() {
                   className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
                 />
               </div>
-              {/* Nút cộng nằm dưới lưu ý cho y tá */}
               {idx === forms.length - 1 && (
                 <div className="flex justify-center">
                   <button
