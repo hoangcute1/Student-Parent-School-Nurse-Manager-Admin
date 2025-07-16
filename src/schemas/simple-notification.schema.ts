@@ -27,6 +27,15 @@ export class SimpleNotification extends Document {
   @Prop({ trim: true, required: false })
   relatedId?: string;
 
+  @Prop({ type: Date, required: false })
+  consultation_date?: Date;
+
+  @Prop({ trim: true, required: false })
+  consultation_time?: string;
+
+  @Prop({ trim: true, required: false })
+  consultation_doctor?: string;
+
   @Prop({ default: false })
   isRead: boolean;
 

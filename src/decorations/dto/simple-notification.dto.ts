@@ -3,6 +3,30 @@ import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class CreateSimpleNotificationDto {
   @ApiProperty({
+    description: 'Ngày hẹn tư vấn (ISO string hoặc Date)',
+    example: '2025-07-15T09:00:00.000Z',
+    type: 'string',
+    format: 'date-time',
+  })
+  @IsOptional()
+  consultation_date?: string | Date;
+
+  @ApiProperty({
+    description: 'Giờ hẹn tư vấn',
+    example: '09:00',
+  })
+  @IsOptional()
+  @IsString()
+  consultation_time?: string;
+
+  @ApiProperty({
+    description: 'Tên bác sĩ tư vấn',
+    example: 'Bác sĩ Nguyễn Văn A',
+  })
+  @IsOptional()
+  @IsString()
+  consultation_doctor?: string;
+  @ApiProperty({
     description: 'Parent ID',
     example: '60d0fe4f5311236168a109cb',
   })

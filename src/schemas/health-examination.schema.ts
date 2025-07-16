@@ -19,16 +19,16 @@ export type HealthExaminationDocument = HealthExamination & Document;
 
 @Schema({ timestamps: true, versionKey: false })
 export class HealthExamination {
-  @Prop({ required: true })
+  @Prop({ required: false })
   title: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   description: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   examination_date: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   examination_time: string;
 
   @Prop({ required: false })
