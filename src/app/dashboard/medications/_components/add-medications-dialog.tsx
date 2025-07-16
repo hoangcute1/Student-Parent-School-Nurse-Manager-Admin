@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
-import { CreateMedicineDelivery } from "@/lib/type/medicine-delivery";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 import { useStaffStore } from "@/stores/staff-store";
 import { useMedicationStore } from "@/stores/medication-store";
@@ -31,13 +30,11 @@ export default function AddMedicineDeliveryForm() {
       status: "pending",
       per_day: "",
       note: "",
-      student: "",
-      parent: "",
-      staff: "",
+      // Không cần student, staff trong từng form
     },
   ]);
   const [medicineTimes, setMedicineTimes] = useState([
-    { morning: false, noon: false, afternoon: false, evening: false },
+    { morning: false, noon: false },
   ]);
   const [nurseNotes, setNurseNotes] = useState([""]);
   const [loading, setLoading] = useState(false);
@@ -46,6 +43,7 @@ export default function AddMedicineDeliveryForm() {
   // State cho chọn học sinh và nhân viên ngoài forms
   const [selectedStudent, setSelectedStudent] = useState("");
   const [selectedStaff, setSelectedStaff] = useState("");
+  const [selectedParent, setSelectedParent] = useState("");
 
   // Handler cho từng form
   const handleFormChange = (idx: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -67,21 +65,17 @@ export default function AddMedicineDeliveryForm() {
       });
     setForms((prev) => prev.map((f, i) => i === idx ? { ...f, per_day: selectedTimes.join(", ") } : f));
   };
-  const handleNurseNoteChange = (idx: number, value: string) => {
-    setNurseNotes((prev) => prev.map((n, i) => i === idx ? value : n));
-  };
   // Khi chọn học sinh ngoài form
   const handleSelectStudent = (studentId: string) => {
     setSelectedStudent(studentId);
     // Tìm parentId tương ứng với học sinh
     const selectedStudentObj = studentsData.find((s) => s.student._id === studentId);
     const parentId = selectedStudentObj?.parent?._id || "";
-    setForms(prev => prev.map(f => ({ ...f, student: studentId, parent: parentId })));
+    setSelectedParent(parentId);
   };
   // Khi chọn nhân viên ngoài form
   const handleSelectStaff = (staffId: string) => {
     setSelectedStaff(staffId);
-    setForms(prev => prev.map(f => ({ ...f, staff: staffId })));
   };
   // Sửa handleAddForm để gán student/staff mặc định
   const handleAddForm = () => {
@@ -93,19 +87,15 @@ export default function AddMedicineDeliveryForm() {
         status: "pending",
         per_day: "",
         note: "",
-        student: selectedStudent,
-        parent: "",
-        staff: selectedStaff,
+        // Không cần parent
       },
     ]);
-    setMedicineTimes((prev) => [...prev, { morning: false, noon: false, afternoon: false, evening: false }]);
-    setNurseNotes((prev) => [...prev, ""]);
+    setMedicineTimes((prev) => [...prev, { morning: false, noon: false }]);
   };
 
   const handleRemoveForm = (idx: number) => {
     setForms(prev => prev.filter((_, i) => i !== idx));
     setMedicineTimes(prev => prev.filter((_, i) => i !== idx));
-    setNurseNotes(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,23 +127,16 @@ export default function AddMedicineDeliveryForm() {
       }
       // Chuẩn bị payloads
       const currentDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(currentDate.getDate() + 7);
-      let defaultMedicineId = "675d8a1b123456789abcdef0";
-      if (medications && medications.length > 0) {
-        defaultMedicineId = medications[0]._id;
-      }
-      const payloads = forms.map((form, idx) => ({
+      const payloads = forms.map((form) => ({
         student: selectedStudent,
-        staff: form.staff,
-        parent: form.parent || "",
+        staff: selectedStaff,
+        parent: selectedParent,
         name: form.name,
         total: form.total,
         per_day: form.per_day,
         note: form.note,
         status: "pending" as const,
         date: currentDate.toISOString(),
-        // Không có end_at
       }));
       console.log('Payloads gửi lên:', payloads);
       await addManyMedicineDelivery(payloads);
@@ -164,12 +147,10 @@ export default function AddMedicineDeliveryForm() {
           status: "pending",
           per_day: "",
           note: "",
-          student: "",
-          parent: "",
-          staff: "",
+          // Không cần parent
         },
       ]);
-      setMedicineTimes([{ morning: false, noon: false, afternoon: false, evening: false }]);
+      setMedicineTimes([{ morning: false, noon: false }]);
       setNurseNotes([""]);
       setSelectedStudent("");
       setSelectedStaff("");
@@ -276,11 +257,11 @@ export default function AddMedicineDeliveryForm() {
               </div>
               <div className="space-y-2">
                 <label className="block text-sky-800 font-semibold text-sm">👩‍⚕️ Lưu ý cho y tá</label>
-                <Textarea
-                  value={nurseNotes[idx]}
-                  onChange={e => handleNurseNoteChange(idx, e.target.value)}
-                  placeholder="Ghi rõ cách dùng\n(trước/sau ăn), liều lượng chính xác, triệu chứng cần theo dõi, số\nđiện thoại liên hệ khẩn cấp..."
-                  className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg min-h-[80px]"
+                <Input name="note"
+                  value={form.note}
+                  onChange={e => handleFormChange(idx, e)} required
+                  className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+                  placeholder="Ghi cú cho y tá (trước ăn / sau ăn) "
                 />
               </div>
               {idx === forms.length - 1 && (
