@@ -40,7 +40,6 @@ export class MedicineDeliveryService {
       .findById(createdDelivery._id)
       .populate('student', 'name studentId class')
       .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
       .exec();
 
     if (!populatedDelivery) {
@@ -50,35 +49,60 @@ export class MedicineDeliveryService {
     return populatedDelivery;
   }
 
+  async createMany(
+    createMedicineDeliveryDtos: CreateMedicineDeliveryDto[],
+  ): Promise<any[]> {
+    // Gán sent_at nếu chưa có cho từng delivery
+    const deliveriesWithSentAt = createMedicineDeliveryDtos.map(dto => ({
+      ...dto,
+      sent_at: dto.sent_at || new Date(),
+      status: dto.status || MedicineDeliveryStatus.PENDING,
+      note: dto.note ?? '',
+      student: typeof dto.student === 'string' ? new Types.ObjectId(dto.student) : dto.student,
+      parent: typeof dto.parent === 'string' ? new Types.ObjectId(dto.parent) : dto.parent,
+      staff: typeof dto.staff === 'string' ? new Types.ObjectId(dto.staff) : dto.staff,
+    }));
+    const created = await this.medicineDeliveryModel.insertMany(deliveriesWithSentAt);
+    return created;
+  }
+
   async findAll(): Promise<{ data: any; total: number }> {
     const medicineDeliveryList = await this.medicineDeliveryModel
       .find()
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
       .populate('staff')
       .populate('parent')
-      .populate('medicine')
       .sort({ created_at: -1 })
       .exec();
 
     const data = await Promise.all(
       medicineDeliveryList.map(async (item) => {
-        const { _id, parent, staff, ...rest } = item.toObject();
+        const obj = item.toObject();
+        if ('createdAt' in obj) delete obj.createdAt;
+        if ('updatedAt' in obj) delete obj.updatedAt;
+        const { _id, parent, staff, ...rest } = obj;
 
-        const parentUserId = (item.parent as any).user?.toString();
-        const parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)
-          ?.name;
-        const staffUserId = (item.staff as any).user?.toString();
-        const staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)
-          ?.name;
+        let parentUserId = '';
+        let parentName = '';
+        if (item.parent && typeof (item.parent as any).user !== 'undefined' && (item.parent as any).user) {
+          parentUserId = (item.parent as any).user.toString();
+          parentName = ((await this.userService.getUserProfile(parentUserId)).profile as any)?.name || '';
+        }
+        let staffUserId = '';
+        let staffName = '';
+        if (item.staff && typeof (item.staff as any).user !== 'undefined' && (item.staff as any).user) {
+          staffUserId = (item.staff as any).user.toString();
+          staffName = ((await this.userService.getUserProfile(staffUserId)).profile as any)?.name || '';
+        }
 
         return {
           id: item._id,
           parentId:
-            typeof item.parent === 'object' && '_id' in item.parent
+            item.parent && typeof item.parent === 'object' && '_id' in item.parent
               ? (item.parent as any)._id.toString()
               : item.parent?.toString() || parent, // lấy id parent
           staffId:
-            typeof item.staff === 'object' && '_id' in item.staff
+            item.staff && typeof item.staff === 'object' && '_id' in item.staff
               ? (item.staff as any)._id.toString()
               : item.staff?.toString() || staff, // lấy id staff
           parentName: parentName,
@@ -101,7 +125,6 @@ export class MedicineDeliveryService {
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
       .populate('staff')
       .populate('parent')
-      .populate('medicine')
       .sort({ created_at: -1 })
       .exec();
 
@@ -142,7 +165,6 @@ export class MedicineDeliveryService {
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
       .populate('staff')
       .populate('parent')
-      .populate('medicine')
       .sort({ created_at: -1 })
       .exec();
 
@@ -209,7 +231,6 @@ export class MedicineDeliveryService {
         populate: { path: 'class', select: 'name' },
       })
       .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
       .populate('parent', 'user')
       .exec();
 
@@ -234,8 +255,7 @@ export class MedicineDeliveryService {
       .find(query)
       .populate('student', 'name studentId class')
       .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .exec();
   }
 
@@ -244,8 +264,7 @@ export class MedicineDeliveryService {
       .find({ status })
       .populate('student', 'name studentId class')
       .populate('staff', 'name email role')
-      .populate('medicine', 'name dosage unit type')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .exec();
   }
 
@@ -255,10 +274,9 @@ export class MedicineDeliveryService {
   ): Promise<MedicineDeliveryDocument> {
     try {
       const delivery = await this.medicineDeliveryModel
-        .findByIdAndUpdate(id, { $set: updateDto }, { new: true, runValidators: true })
+        .findByIdAndUpdate(id, { $set: { ...updateDto, updated_at: new Date() } }, { new: true, runValidators: true })
         .populate('student', 'name studentId class')
-        .populate('staff', 'name email role')
-        .populate('medicine', 'name dosage unit type');
+        .populate('staff', 'name email role');
 
       if (!delivery) {
         throw new NotFoundException(`Medicine delivery with ID ${id} not found`);
@@ -279,7 +297,6 @@ export class MedicineDeliveryService {
       .populate({ path: 'student', populate: { path: 'class', select: 'name' } })
       .populate('staff')
       .populate('parent')
-      .populate('medicine')
       .exec();
 
     if (!delivery) {
