@@ -110,28 +110,35 @@ export default function ConsultationAppointments() {
             {consultations.map((consultation) => (
               <Card
                 key={consultation._id}
-                className="border-l-4 border-l-blue-500"
+                className="border-none shadow-lg rounded-xl bg-white hover:shadow-2xl transition-shadow duration-300"
               >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-blue-800 mb-1">
-                        {consultation.consultation_title}
-                      </h3>
-                      <div className="text-sm text-gray-600 space-y-1">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-bold text-xl text-blue-800 truncate">
+                          {consultation.consultation_title}
+                        </h3>
+                        <Badge className="ml-2 bg-blue-100 text-blue-700 border border-blue-200">
+                          {consultation.original_examination
+                            ?.examination_type || "-"}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
                         <div className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          <span>
-                            Học sinh:{" "}
+                          <User className="w-4 h-4 text-blue-500" />
+                          <span className="truncate">
+                            <span className="font-medium">Học sinh:</span>{" "}
                             {consultation.student?.full_name ||
                               "Không xác định"}{" "}
                             (MSSV: {consultation.student?.student_id || "-"})
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
+                          <Clock className="w-4 h-4 text-blue-500" />
                           <span>
-                            Ngày hẹn:{" "}
+                            <span className="font-medium">Ngày hẹn:</span>{" "}
                             {consultation.consultation_date
                               ? new Date(
                                   consultation.consultation_date
@@ -141,27 +148,45 @@ export default function ConsultationAppointments() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <UserCheck className="w-4 h-4" />
+                          <UserCheck className="w-4 h-4 text-blue-500" />
                           <span>
-                            Bác sĩ: {consultation.consultation_doctor || "-"}
+                            <span className="font-medium">Bác sĩ:</span>{" "}
+                            {consultation.consultation_doctor || "-"}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
+                          <MapPin className="w-4 h-4 text-blue-500" />
                           <span>
-                            Loại khám:{" "}
+                            <span className="font-medium">Loại khám:</span>{" "}
                             {consultation.original_examination
                               ?.examination_type || "-"}
                           </span>
                         </div>
                       </div>
                     </div>
+                    <div className="flex flex-col items-end gap-2 min-w-[120px]">
+                      <span className="text-xs text-gray-400">
+                        Tạo lúc:{" "}
+                        {consultation.created_at
+                          ? new Date(consultation.created_at).toLocaleString(
+                              "vi-VN"
+                            )
+                          : "-"}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        Cập nhật:{" "}
+                        {consultation.updated_at
+                          ? new Date(consultation.updated_at).toLocaleString(
+                              "vi-VN"
+                            )
+                          : "-"}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="bg-blue-50 p-4 rounded-lg mt-2 border-l-4 border-blue-400">
+                    <div className="flex items-center gap-2 mb-1">
                       <FileText className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium text-blue-800">
+                      <span className="font-semibold text-blue-800">
                         Ghi chú tư vấn:
                       </span>
                     </div>

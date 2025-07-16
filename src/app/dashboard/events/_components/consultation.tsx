@@ -206,14 +206,11 @@ export default function ConsultationComponent() {
       {/* Update notification */}
       <TreatmentHistoryUpdateNotifier onRefresh={handleManualRefresh} />
 
-     
-      
-
       <Card>
         <CardHeader>
           <CardTitle className="text-blue-800 flex items-center gap-2">
             <Bell className="w-5 h-5" />
-              Lịch hẹn tư vấn
+            Lịch hẹn tư vấn
           </CardTitle>
           <CardDescription className="text-blue-600">
             Các thông báo về sức khỏe và sự kiện y tế của học sinh
@@ -234,60 +231,77 @@ export default function ConsultationComponent() {
                 .map((notification: any) => (
                   <div
                     key={notification._id}
-                    className={`p-4 rounded-lg border-l-4 ${
+                    className={`shadow-lg rounded-xl p-6 mb-2 transition-shadow duration-300 border-none bg-white hover:shadow-2xl ${
                       !notification.isRead
-                        ? "border-l-blue-500 bg-blue-50"
-                        : "border-l-gray-300 bg-gray-50"
+                        ? "ring-2 ring-blue-200"
+                        : "ring-1 ring-gray-200"
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                          <Bell className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Bell className="w-5 h-5 text-blue-600" />
+                          <h4 className="font-bold text-lg text-blue-800 truncate">
                             {notification.content}
                           </h4>
-                          <p className="text-sm text-gray-600">
-                            Học sinh: {getStudentName(notification.student)}
-                          </p>
-                          {/* Thông tin chi tiết lịch hẹn tư vấn */}
-                          <div className="mt-2 space-y-1 text-sm text-gray-700">
-                            {notification.consultation_date && (
-                              <div>
-                                <Calendar className="inline-block w-4 h-4 mr-1" />
-                                Ngày hẹn:{" "}
+                          <Badge className="ml-2 bg-blue-100 text-blue-700 border border-blue-200">
+                            Lịch hẹn tư vấn
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-blue-500" />
+                            <span className="truncate">
+                              <span className="font-medium">Học sinh:</span>{" "}
+                              {getStudentName(notification.student)}
+                            </span>
+                          </div>
+                          {notification.consultation_date && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-blue-500" />
+                              <span>
+                                <span className="font-medium">Ngày hẹn:</span>{" "}
                                 {new Date(
                                   notification.consultation_date
                                 ).toLocaleDateString("vi-VN")}
-                              </div>
-                            )}
-                            {notification.consultation_time && (
-                              <div>
-                                <Clock className="inline-block w-4 h-4 mr-1" />
-                                Giờ hẹn: {notification.consultation_time}
-                              </div>
-                            )}
-                            {notification.consultation_doctor && (
-                              <div>
-                                <User className="inline-block w-4 h-4 mr-1" />
-                                Bác sĩ: {notification.consultation_doctor}
-                              </div>
-                            )}
-                          </div>
+                              </span>
+                            </div>
+                          )}
+                          {notification.consultation_time && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-blue-500" />
+                              <span>
+                                <span className="font-medium">Giờ hẹn:</span>{" "}
+                                {notification.consultation_time}
+                              </span>
+                            </div>
+                          )}
+                          {notification.consultation_doctor && (
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-blue-500" />
+                              <span>
+                                <span className="font-medium">Bác sĩ:</span>{" "}
+                                {notification.consultation_doctor}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">
-                          {formatDate(notification.createdAt || "")}
+                      <div className="flex flex-col items-end gap-2 min-w-[120px]">
+                        <span className="text-xs text-gray-400">
+                          Tạo lúc: {formatDate(notification.createdAt || "")}
                         </span>
+                        {notification.updatedAt && (
+                          <span className="text-xs text-gray-400">
+                            Cập nhật: {formatDate(notification.updatedAt)}
+                          </span>
+                        )}
                         {!notification.isRead && (
                           <Button
                             size="sm"
                             onClick={() => handleMarkAsRead(notification._id)}
                             disabled={notificationLoading}
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-blue-600 hover:bg-blue-700 mt-2"
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Đánh dấu đã đọc
@@ -295,10 +309,16 @@ export default function ConsultationComponent() {
                         )}
                       </div>
                     </div>
-                    <div className="bg-white p-3 rounded-md">
-                      <p className="text-sm text-gray-700">
-                        {notification.notes}
-                      </p>
+                    <div className="bg-blue-50 p-4 rounded-lg mt-2 border-l-4 border-blue-400">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <span className="font-semibold text-blue-800">
+                          Ghi chú tư vấn:
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-700 whitespace-pre-line">
+                        {notification.notes || "Không có ghi chú."}
+                      </div>
                     </div>
                   </div>
                 ))}

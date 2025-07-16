@@ -100,7 +100,7 @@ export default function EventsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Thông báo tổng hợp & Thông báo tiêm chủng
+            Thông báo    
           </h1>
           <p className="text-blue-600">
             Theo dõi thông báo và thông tin tiêm chủng của con em bạn
