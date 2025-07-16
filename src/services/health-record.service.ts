@@ -8,8 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HealthRecord, HealthRecordDocument } from '@/schemas/health-record.schema';
-import { CreateHealthRecordDto } from '@/decorations/dto/create-health-record.dto';
-import { UpdateHealthRecordDto } from '@/decorations/dto/update-health-record.dto';
+import { CreateHealthRecordDto, UpdateHealthRecordDto } from '@/decorations/dto/health-record.dto';
 import { StudentService } from './student.service';
 import { ParentService } from './parent.service';
 import { ParentStudentService } from './parent-student.service';
@@ -199,7 +198,11 @@ export class HealthRecordService {
    */
   async update(id: string, updateHealthRecordDto: UpdateHealthRecordDto): Promise<any> {
     const healthRecord = await this.healthRecordModel
-      .findByIdAndUpdate(id, updateHealthRecordDto, { new: true })
+      .findByIdAndUpdate(
+        id,
+        { $set: { ...updateHealthRecordDto, updated_at: new Date() } },
+        { new: true }
+      )
       .populate('student_id')
       .exec();
 

@@ -19,7 +19,6 @@ import { MedicineDeliveryService } from '@/services/medicine-delivery.service';
 import {
   CreateMedicineDeliveryDto,
   UpdateMedicineDeliveryDto,
-  DateRangeDto,
 } from '@/decorations/dto/medicine-delivery.dto';
 import {
   ApiBearerAuth,
@@ -50,17 +49,14 @@ export class MedicineDeliveryController {
     const result: any = {
       id: delivery._id?.toString(),
       name: delivery.name,
-      date: delivery.date,
       total: delivery.total,
       status: delivery.status,
-      per_dose: delivery.per_dose,
       per_day: delivery.per_day,
       note: delivery.note || null,
       reason: delivery.reason,
       sent_at: delivery.sent_at,
-      end_at: delivery.end_at,
-      created_at: delivery['createdAt'],
-      updated_at: delivery['updatedAt'],
+      created_at: delivery.created_at,
+      updated_at: delivery.updated_at,
     };
 
     // Format student if populated
@@ -101,24 +97,7 @@ export class MedicineDeliveryController {
     } else {
       result.staff = null;
     }
-
-    // Format medicine if populated
-    if (delivery.medicine && typeof delivery.medicine === 'object') {
-      const medicine = delivery.medicine as any;
-      result.medicine = {
-        id: medicine._id?.toString() || '',
-        name: medicine.name || '',
-        ...(medicine.dosage && { dosage: medicine.dosage }),
-        ...(medicine.unit && { unit: medicine.unit }),
-        ...(medicine.type && { type: medicine.type }),
-      };
-    } else if (delivery.medicine) {
-      // If medicine is just an ID
-      result.medicine = { id: String(delivery.medicine) };
-    } else {
-      result.medicine = null;
-    }
-
+    // Format medicine if populate
     return result;
   }
 
@@ -136,6 +115,15 @@ export class MedicineDeliveryController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async create(@Body() createMedicineDeliveryDto: CreateMedicineDeliveryDto) {
     return this.medicineDeliveryService.create(createMedicineDeliveryDto);
+  }
+
+  @Post('bulk')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Tạo nhiều lịch giao thuốc cùng lúc' })
+  @ApiBody({ type: [CreateMedicineDeliveryDto] })
+  @ApiResponse({ status: 201, description: 'Các lịch giao thuốc đã được tạo.' })
+  async createMany(@Body() deliveries: CreateMedicineDeliveryDto[]) {
+    return this.medicineDeliveryService.createMany(deliveries);
   }
 
   @Get()
@@ -282,23 +270,16 @@ export class MedicineDeliveryController {
       }
 
       // Validate dates if they are being updated
-      if (updateMedicineDeliveryDto.sent_at || updateMedicineDeliveryDto.end_at) {
-        const sentAt = new Date(updateMedicineDeliveryDto.sent_at || current.delivery.sent_at);
-        const endAt = new Date(updateMedicineDeliveryDto.end_at || current.delivery.end_at);
+      if (updateMedicineDeliveryDto.sent_at) {
+        const sentAt = new Date(updateMedicineDeliveryDto.sent_at);
 
         // Validate date formats
-        if (isNaN(sentAt.getTime()) || isNaN(endAt.getTime())) {
+        if (isNaN(sentAt.getTime())) {
           throw new BadRequestException('Invalid date format');
-        }
-
-        // Validate date logic
-        if (endAt <= sentAt) {
-          throw new BadRequestException('End date must be after start date');
         }
 
         // Update the dates in DTO
         updateMedicineDeliveryDto.sent_at = sentAt;
-        updateMedicineDeliveryDto.end_at = endAt;
       }
 
       // Perform update

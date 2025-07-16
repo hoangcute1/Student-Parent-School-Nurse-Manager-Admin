@@ -70,7 +70,6 @@ export class AdminService {
   }
 
   async findByuser(user: string): Promise<AdminDocument | null> {
-    console.log('Finding admin by user:', user);
     return this.adminModel.findOne({ user: user }).exec();
   }
 

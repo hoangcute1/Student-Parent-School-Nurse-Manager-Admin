@@ -3,7 +3,10 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "eslint.validate": ["javascript", "typescript"],
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -16,5 +19,6 @@
   "prettier.semi": true,
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "editor.formatOnPaste": true
 }
