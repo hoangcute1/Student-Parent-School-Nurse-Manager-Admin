@@ -15,11 +15,19 @@ export class SimpleNotificationService {
   ) {}
 
   async create(createNotificationDto: CreateSimpleNotificationDto): Promise<SimpleNotification> {
-    const created = new this.simpleNotificationModel({
+    // Prepare data for schema, convert consultation_date to Date if present
+    const schemaData: any = {
       ...createNotificationDto,
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
+    if (
+      createNotificationDto.consultation_date &&
+      typeof createNotificationDto.consultation_date === 'string'
+    ) {
+      schemaData.consultation_date = new Date(createNotificationDto.consultation_date);
+    }
+    const created = new this.simpleNotificationModel(schemaData);
     return created.save();
   }
 

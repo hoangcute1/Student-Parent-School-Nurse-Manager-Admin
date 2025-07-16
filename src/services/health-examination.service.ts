@@ -646,6 +646,7 @@ export class HealthExaminationService {
         examination_date: new Date(date),
         examination_time: time,
         location: location,
+        examination_type: classStudents[0]?.examination_type || '', // Thêm dòng này để trả về đúng loại khám
       },
       statistics: {
         total_students: classStudents.length,
@@ -753,6 +754,16 @@ export class HealthExaminationService {
     student_id: string;
     created_by?: string;
   }) {
+    // Kiểm tra đã có lịch hẹn tư vấn cho học sinh này trong ngày này chưa
+    const existed = await this.healthExaminationModel.findOne({
+      student_id: dto.student_id,
+      is_consultation: true,
+      consultation_date: dto.consultation_date,
+    });
+    if (existed) {
+      throw new BadRequestException('Học sinh này đã có lịch hẹn tư vấn cho ngày này!');
+    }
+
     // Tạo mới lịch hẹn tư vấn
     const consultation = new this.healthExaminationModel({
       consultation_date: dto.consultation_date,
