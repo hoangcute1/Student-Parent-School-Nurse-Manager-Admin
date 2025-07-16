@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,11 +23,18 @@ export function FilterBar({
   onDateFilterChange,
 }: FilterBarProps) {
   const [searchValue, setSearchValue] = useState("");
+  // Thêm state cho filter thời gian nếu cần
+  const [selectedDate, setSelectedDate] = useState("today");
+
+  useEffect(() => {
+    onDateFilterChange("today");
+  }, [onDateFilterChange]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
     onSearchChange(value);
   };
+
 
   return (
     <div className="bg-sky-50/50 p-4 rounded-lg border border-sky-100">
@@ -62,7 +69,6 @@ export function FilterBar({
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               <SelectItem value="pending">Chờ xử lý</SelectItem>
-              <SelectItem value="progress">Đang thực hiện</SelectItem>
               <SelectItem value="completed">Đã hoàn thành</SelectItem>
               <SelectItem value="cancelled">Đã hủy</SelectItem>
             </SelectContent>
@@ -71,15 +77,22 @@ export function FilterBar({
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Thời gian</label>
-          <Select onValueChange={onDateFilterChange} defaultValue="all">
+          <Select
+            onValueChange={value => {
+              setSelectedDate(value);
+              onDateFilterChange(value);
+            }}
+            value={selectedDate}
+            defaultValue="today"
+          >
             <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-200">
               <SelectValue placeholder="Chọn thời gian" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả thời gian</SelectItem>
               <SelectItem value="today">Hôm nay</SelectItem>
               <SelectItem value="week">Tuần này</SelectItem>
               <SelectItem value="month">Tháng này</SelectItem>
+              <SelectItem value="all">Tất cả thời gian</SelectItem>
             </SelectContent>
           </Select>
         </div>

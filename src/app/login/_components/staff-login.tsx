@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
@@ -28,34 +28,33 @@ export function StaffLoginForm() {
   }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
+  const [otpEmail, setOtpEmail] = useState(""); // Lưu email dùng cho xác thực OTP
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handler thay đổi input
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [id]: value,
     }));
-
     if (errors[id as keyof typeof errors]) {
       setErrors((prev) => ({
         ...prev,
         [id]: undefined,
       }));
     }
-  };
+  }, [errors]);
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // Toggle hiện/ẩn mật khẩu
+  const toggleShowPassword = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
 
-  const validateForm = (data: LoginRequestCredentials): boolean => {
-    const newErrors: {
-      email?: string;
-      password?: string;
-    } = {};
+  // Validate form
+  const validateForm = useCallback((data: LoginRequestCredentials): boolean => {
+    const newErrors: { email?: string; password?: string } = {};
     let isValid = true;
-
     if (!data.email) {
       newErrors.email = "Email không được để trống";
       isValid = false;
@@ -63,7 +62,6 @@ export function StaffLoginForm() {
       newErrors.email = "Email không hợp lệ";
       isValid = false;
     }
-
     if (!data.password) {
       newErrors.password = "Mật khẩu không được để trống";
       isValid = false;
@@ -71,24 +69,19 @@ export function StaffLoginForm() {
       newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
       isValid = false;
     }
-
     setErrors(newErrors);
     return isValid;
-  };
-  const verifyOTP = async (otp: string) => {
-    try {
-      console.log("Verifying OTP in staff login:", otp);
-      console.log("Using email:", formData.email);
+  }, []);
 
-      // Hiển thị loading trước khi xác thực
+  // Xác thực OTP
+  const verifyOTP = useCallback(async (otp: string) => {
+    try {
       toast({
         title: "Đang xác thực",
         description: "Vui lòng đợi trong giây lát...",
       });
-
-      // Sử dụng AuthService để xác thực OTP và đăng nhập
-      const { success } = await loginStaffOTP(formData.email, otp);
-
+      // Dùng otpEmail thay vì formData.email
+      const { success } = await loginStaffOTP(otpEmail, otp);
       if (success) {
         toast({
           title: "Đăng nhập thành công",
@@ -100,7 +93,6 @@ export function StaffLoginForm() {
         throw new Error("Xác thực OTP thất bại");
       }
     } catch (error) {
-      console.error("OTP Verification failed:", error);
       toast({
         title: "Xác thực thất bại",
         description:
@@ -108,51 +100,44 @@ export function StaffLoginForm() {
         variant: "destructive",
       });
     }
-  };
-  const resendOTP = async () => {
+  }, [otpEmail, router]);
+
+  // Gửi lại OTP
+  const resendOTP = useCallback(async () => {
     try {
-      console.log("Resending OTP with data:", { ...formData });
-      await requestStaffLoginOTP({
-        ...formData,
-      });
+      await requestStaffLoginOTP({ ...formData });
+      setOtpEmail(formData.email); // Đảm bảo otpEmail luôn đúng
       toast({
         title: "Đã gửi lại mã OTP",
         description: "Vui lòng kiểm tra email của bạn",
       });
     } catch (error) {
-      throw error;
+      toast({
+        title: "Gửi lại OTP thất bại",
+        description: error instanceof Error ? error.message : "Vui lòng thử lại sau",
+        variant: "destructive",
+      });
     }
-  };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  }, [formData]);
+
+  // Submit form
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm(formData)) return;
-
     setIsLoading(true);
     try {
-      // Hiển thị thông tin chi tiết hơn để debug
-      console.log("Đang yêu cầu OTP cho staff login với dữ liệu:", {
-        email: formData.email,
-        passwordProvided: formData.password ? "Yes" : "No",
-        passwordLength: formData.password.length,
-      });
-
-      // First step: request OTP
-      const result = await requestStaffLoginOTP({
-        ...formData,
-      });
-      console.log("Kết quả yêu cầu OTP:", result);
-
+      // Không log password ra console
+      // Gửi OTP
+      await requestStaffLoginOTP({ ...formData });
+      setOtpEmail(formData.email); // Lưu email dùng cho xác thực OTP
       setShowOTP(true);
       toast({
         title: "Thành công",
         description: "Mã OTP đã được gửi đến email của bạn",
       });
     } catch (error) {
-      console.error("Login error:", error);
       let message = "Có lỗi xảy ra khi đăng nhập";
-
       if (error instanceof Error) {
-        console.error("Chi tiết lỗi:", error.message);
         if (error.message.includes("401")) {
           message = "Email hoặc mật khẩu không chính xác";
         } else if (error.message.includes("403")) {
@@ -160,11 +145,9 @@ export function StaffLoginForm() {
         } else if (error.message.includes("404")) {
           message = "Không tìm thấy tài khoản với email này";
         } else if (error.message.includes("network")) {
-          message =
-            "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn";
+          message = "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn";
         }
       }
-
       setErrors({ general: message });
       toast({
         variant: "destructive",
@@ -174,7 +157,8 @@ export function StaffLoginForm() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [formData, validateForm]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -186,7 +170,6 @@ export function StaffLoginForm() {
           Quản lý và theo dõi sức khỏe học sinh
         </p>
       </div>
-
       {/* Error Alert */}
       {errors.general && (
         <Alert variant="destructive" className="border-red-200 bg-red-50">
@@ -194,7 +177,6 @@ export function StaffLoginForm() {
           <AlertDescription className="text-red-800">{errors.general}</AlertDescription>
         </Alert>
       )}
-
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Email Field */}
@@ -215,9 +197,10 @@ export function StaffLoginForm() {
               value={formData.email}
               onChange={handleChange}
               required
-              className={`pl-10 h-12 border-gray-300 focus:border-sky-500 focus:ring-sky-500 transition-all duration-200 hover:border-sky-300 ${
-                errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-              }`}
+              aria-label="Email"
+              disabled={isLoading || showOTP}
+              className={`pl-10 h-12 border-gray-300 focus:border-sky-500 focus:ring-sky-500 transition-all duration-200 hover:border-sky-300 ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                }`}
             />
           </div>
           {errors.email && (
@@ -227,7 +210,6 @@ export function StaffLoginForm() {
             </p>
           )}
         </div>
-
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -253,17 +235,20 @@ export function StaffLoginForm() {
               value={formData.password}
               onChange={handleChange}
               required
+              aria-label="Mật khẩu"
+              disabled={isLoading || showOTP}
               placeholder="Nhập mật khẩu của bạn"
-              className={`pl-10 pr-12 h-12 border-gray-300 focus:border-sky-500 focus:ring-sky-500 transition-all duration-200 hover:border-sky-300 ${
-                errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-              }`}
+              className={`pl-10 pr-12 h-12 border-gray-300 focus:border-sky-500 focus:ring-sky-500 transition-all duration-200 hover:border-sky-300 ${errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                }`}
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
+              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
               className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
               onClick={toggleShowPassword}
+              disabled={isLoading || showOTP}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4 text-gray-500" />
@@ -279,13 +264,12 @@ export function StaffLoginForm() {
             </p>
           )}
         </div>
-
         {/* Buttons */}
         <div className="space-y-4 pt-2">
           <Button
             className="w-full h-12 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || showOTP}
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
@@ -299,17 +283,16 @@ export function StaffLoginForm() {
               "Đăng nhập"
             )}
           </Button>
-
           <Button
             className="w-full h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-300 transition-colors"
             type="button"
             variant="outline"
             onClick={() => router.push("/")}
+            disabled={isLoading || showOTP}
           >
             Quay lại
           </Button>
         </div>
-
         {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
@@ -319,13 +302,11 @@ export function StaffLoginForm() {
             <span className="px-4 bg-white text-gray-500">Hoặc</span>
           </div>
         </div>
-
         {/* Google Login */}
         <div className="w-full">
-          <LoginGoogle/>
+          <LoginGoogle />
         </div>
       </form>
-
       {/* OTP Dialog */}
       <OTPDialog
         open={showOTP}

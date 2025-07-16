@@ -8,6 +8,7 @@ import {
   AlertCircle,
   MoreHorizontal,
   Trash2,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,13 +27,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface MedicineDeliveryTableProps {
   deliveries: MedicineDeliveryByStaff[];
   onViewDelivery: (delivery: MedicineDeliveryByStaff) => void;
   onUpdateStatus: (
     id: string,
-    status: "pending" | "progress" | "completed" | "cancelled"
+    status: "pending" | "morning" | "noon" | "completed" | "cancelled",
+    reason?: string
   ) => void;
   onDeleteDelivery?: (delivery: MedicineDeliveryByStaff) => void;
   isLoading?: boolean;
@@ -45,6 +50,11 @@ export function MedicineDeliveryTable({
   onDeleteDelivery,
   isLoading = false,
 }: MedicineDeliveryTableProps) {
+  // State cho dialog từ chối
+  const [rejectOpen, setRejectOpen] = React.useState(false);
+  const [rejectId, setRejectId] = React.useState<string | null>(null);
+  const [rejectReason, setRejectReason] = React.useState("");
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -64,8 +74,10 @@ export function MedicineDeliveryTable({
     switch (status) {
       case "pending":
         return "Chờ xử lý";
-      case "progress":
-        return "Đang thực hiện";
+      case "morning":
+        return "Đã uống buổi sáng";
+      case "noon":
+        return "Đã uống buổi trưa";
       case "completed":
         return "Đã hoàn thành";
       case "cancelled":
@@ -79,7 +91,9 @@ export function MedicineDeliveryTable({
     switch (status) {
       case "pending":
         return <Clock className="w-4 h-4" />;
-      case "progress":
+      case "morning":
+        return <Activity className="w-4 h-4" />;
+      case "noon":
         return <Activity className="w-4 h-4" />;
       case "completed":
         return <CheckCircle className="w-4 h-4" />;
@@ -90,42 +104,6 @@ export function MedicineDeliveryTable({
     }
   };
 
-  const getAvailableActions = (status: string) => {
-    switch (status) {
-      case "pending":
-        return [
-          {
-            label: "Phê duyệt",
-            action: "progress",
-            icon: <CheckCircle className="w-4 h-4" />,
-            color: "text-blue-600",
-          },
-          {
-            label: "Từ chối",
-            action: "cancelled",
-            icon: <X className="w-4 h-4" />,
-            color: "text-red-600",
-          },
-        ];
-      case "progress":
-        return [
-          {
-            label: "Hoàn thành",
-            action: "completed",
-            icon: <CheckCircle className="w-4 h-4" />,
-            color: "text-green-600",
-          },
-          {
-            label: "Hủy bỏ",
-            action: "cancelled",
-            icon: <X className="w-4 h-4" />,
-            color: "text-red-600",
-          },
-        ];
-      default:
-        return [];
-    }
-  };
 
   if (isLoading) {
     return (
@@ -168,16 +146,13 @@ export function MedicineDeliveryTable({
               Học sinh
             </TableHead>
             <TableHead className="font-semibold text-gray-900">
-              Thành phần thuốc
+              Tên thuốc
             </TableHead>
             <TableHead className="font-semibold text-gray-900">
-              Phụ huynh
+              Thời gian dùng
             </TableHead>
             <TableHead className="font-semibold text-gray-900">
               Trạng thái
-            </TableHead>
-            <TableHead className="font-semibold text-gray-900">
-              Ngày tạo
             </TableHead>
             <TableHead className="font-semibold text-gray-900 text-right">
               Hành động
@@ -185,160 +160,218 @@ export function MedicineDeliveryTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {deliveries.map((delivery) => (
-            <TableRow
-              key={delivery.id}
-              className="hover:bg-sky-50/30 transition-colors"
-            >
-              <TableCell>
-                <div className="space-y-1">
-                  <div className="font-medium text-gray-900">
-                    {delivery.student?.name || "N/A"}
+          {deliveries.map((delivery) => {
+            // Kiểm tra per_day có Sáng, Trưa không
+            const hasMorning = delivery.per_day?.includes("Sáng");
+            const hasNoon = delivery.per_day?.includes("Trưa");
+            return (
+              <TableRow
+                key={delivery.id}
+                className="hover:bg-sky-50/30 transition-colors"
+              >
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="font-medium text-gray-900">
+                      {delivery.student?.name || "N/A"}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Lớp: {delivery.student?.class?.name || "N/A"} <br />
+                      Phụ huynh: {delivery.parentName || "N/A"}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Lớp: {delivery.student?.class?.name || "N/A"}
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="font-medium text-gray-900">
+                      {delivery.name}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Số liều: {delivery.total || 0}  <br />
+                    </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-1">
-                  <div className="font-medium text-gray-900">
-                    {delivery.name}
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="font-medium text-gray-900">
+                      {delivery.per_day}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Lưu ý cho y tá: {delivery.note || "Không có"} <br />
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {delivery.note || "Không có thông tin thành phần"}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-gray-900">
-                  {delivery.parentName || "N/A"}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant="secondary"
-                  className={`${getStatusColor(
-                    delivery.status
-                  )} flex items-center gap-1 w-fit`}
-                >
-                  {getStatusIcon(delivery.status)}
-                  {getStatusText(delivery.status)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="text-gray-900">
-                  {delivery.created_at
-                    ? new Date(delivery.created_at).toLocaleDateString(
-                        "vi-VN",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        }
-                      )
-                    : "N/A"}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
-                  {/* Quick action buttons for pending status */}
-                  {delivery.status === "pending" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onUpdateStatus(delivery.id, "progress")}
-                        className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Duyệt
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onUpdateStatus(delivery.id, "cancelled")}
-                        className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Từ chối
-                      </Button>
-                    </>
-                  )}
-
-                  {/* Quick complete button for progress status */}
-                  {delivery.status === "progress" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onUpdateStatus(delivery.id, "completed")}
-                      className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Hoàn thành
-                    </Button>
-                  )}
-
-                  {/* View button - always visible */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onViewDelivery(delivery)}
-                    className="text-sky-600 hover:text-sky-800 hover:bg-sky-50"
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className={`${getStatusColor(
+                      delivery.status
+                    )} flex items-center gap-1 w-fit`}
                   >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-
-                  {/* More actions dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      {/* Status change actions */}
-                      {getAvailableActions(delivery.status).map((action) => (
-                        <DropdownMenuItem
-                          key={action.action}
-                          onClick={() =>
-                            onUpdateStatus(delivery.id, action.action as any)
-                          }
-                          className={`${action.color} hover:bg-gray-50 cursor-pointer`}
-                        >
-                          {action.icon}
-                          <span className="ml-2">{action.label}</span>
-                        </DropdownMenuItem>
-                      ))}
-
-                      {/* Separator if there are both status actions and delete */}
-                      {getAvailableActions(delivery.status).length > 0 &&
-                        onDeleteDelivery && (
-                          <div className="border-t border-gray-100 my-1" />
+                    {getStatusIcon(delivery.status)}
+                    {getStatusText(delivery.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    {/* Nút hành động tuỳ theo per_day và status */}
+                    {delivery.status === "pending" && (
+                      <>
+                        {hasMorning && hasNoon ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onUpdateStatus(delivery.id, "morning")}
+                                  className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Xong buổi sáng</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onUpdateStatus(delivery.id, "completed")}
+                                  className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Hoàn thành</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
-
-                      {/* Soft delete action - only show if function is provided */}
-                      {onDeleteDelivery && (
-                        <DropdownMenuItem
-                          onClick={() => onDeleteDelivery(delivery)}
-                          className="text-orange-600 hover:bg-orange-50 cursor-pointer"
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setRejectId(delivery.id);
+                                  setRejectOpen(true);
+                                  setRejectReason("");
+                                }}
+                                className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Từ chối</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </>
+                    )}
+                    {(delivery.status === "morning" && hasMorning && hasNoon) && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onUpdateStatus(delivery.id, "completed")}
+                              className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                            >
+                              Hoàn thành
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Hoàn thành</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {/* More actions dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                         >
-                          <Trash2 className="w-4 h-4" />
-                          <span className="ml-2">Ẩn đơn</span>
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        {onViewDelivery && (
+                          <DropdownMenuItem
+                            onClick={() => onViewDelivery(delivery)}
+                            className="text-blue-600 hover:bg-orange-50 cursor-pointer"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span className="ml-2">Xem chi tiết</span>
+                          </DropdownMenuItem>
+                        )}
+                        {/* Soft delete action - only show if function is provided */}
+                        {onDeleteDelivery && (
+                          <DropdownMenuItem
+                            onClick={() => onDeleteDelivery(delivery)}
+                            className="text-orange-600 hover:bg-orange-50 cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="ml-2">Ẩn đơn</span>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
+      {/* Dialog nhập lý do từ chối */}
+      <Dialog open={rejectOpen} onOpenChange={(open) => {
+        setRejectOpen(open);
+        if (!open) {
+          setRejectReason("");
+          setRejectId(null);
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nhập lý do từ chối</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={rejectReason}
+            onChange={e => setRejectReason(e.target.value)}
+            placeholder="Nhập lý do từ chối..."
+            className="mt-2"
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRejectOpen(false);
+                setRejectReason("");
+                setRejectId(null);
+              }}
+            >
+              Huỷ
+            </Button>
+            <Button
+              disabled={!rejectReason.trim()}
+              onClick={() => {
+                if (rejectId) {
+                  onUpdateStatus(rejectId, "cancelled", rejectReason);
+                  setRejectOpen(false);
+                  setRejectReason("");
+                  setRejectId(null);
+                }
+              }}
+            >
+              Xác nhận
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

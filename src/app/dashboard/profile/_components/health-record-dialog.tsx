@@ -105,8 +105,8 @@ export function HealthRecordDialog({
                     {student.student.gender === "male"
                       ? "Nam"
                       : student.student.gender === "female"
-                      ? "Nữ"
-                      : "Chưa xác định"}
+                        ? "Nữ"
+                        : "Chưa xác định"}
                   </p>
                 </div>
               </div>
