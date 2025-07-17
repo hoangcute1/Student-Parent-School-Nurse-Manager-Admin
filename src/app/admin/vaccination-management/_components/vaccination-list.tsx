@@ -36,14 +36,16 @@ interface VaccinationEvent {
 
 interface VaccinationListProps {
   onViewDetail?: (id: string) => void;
+  onViewClasses?: (id: string) => void;
   onDelete?: (event: VaccinationEvent) => void;
-  filter?: "today" | "all"; // thêm prop filter
+  filter?: "today" | "all";
 }
 
 export function VaccinationList({
   onViewDetail,
+  onViewClasses,
   onDelete,
-  filter = "all", // mặc định là all
+  filter = "all",
 }: VaccinationListProps) {
   const { events, loading, error, fetchEvents } = useVaccinationStore();
   const router = useRouter();
@@ -52,7 +54,6 @@ export function VaccinationList({
     fetchEvents();
   }, [fetchEvents]);
 
-  // Helper để kiểm tra ngày hôm nay
   function isToday(dateString: string) {
     if (!dateString) return false;
     const d = new Date(dateString);
@@ -64,7 +65,6 @@ export function VaccinationList({
     );
   }
 
-  // Lọc sự kiện theo filter
   const filteredEvents =
     filter === "today"
       ? events.filter((event) => isToday(event.vaccination_date))
@@ -72,7 +72,6 @@ export function VaccinationList({
 
   return (
     <div className="space-y-6">
-      {/* Thống kê nhanh */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -130,7 +129,6 @@ export function VaccinationList({
           </CardContent>
         </Card>
       </div>
-      {/* Danh sách sự kiện tiêm chủng */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -169,7 +167,17 @@ export function VaccinationList({
                 </TableHeader>
                 <TableBody>
                   {filteredEvents.map((event) => (
-                    <TableRow key={event._id} className="hover:bg-blue-50">
+                    <TableRow
+                      key={event._id}
+                      className="hover:bg-blue-50 cursor-pointer"
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest("button")) {
+                          router.push(
+                            `/admin/vaccination-management/event/${event._id}`
+                          );
+                        }
+                      }}
+                    >
                       <TableCell>
                         <div>
                           <p className="font-medium">{event.title}</p>
@@ -232,29 +240,13 @@ export function VaccinationList({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              onViewDetail && onViewDetail(event._id)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewDetail && onViewDetail(event._id);
+                            }}
                           >
                             Xem chi tiết
                           </Button>
-                          {event.completed_count > 0 && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                if (
-                                  window.confirm(
-                                    "Bạn có chắc chắn muốn xoá sự kiện tiêm chủng này?"
-                                  )
-                                ) {
-                                  onDelete && onDelete(event);
-                                }
-                              }}
-                            >
-                              Xoá
-                            </Button>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>

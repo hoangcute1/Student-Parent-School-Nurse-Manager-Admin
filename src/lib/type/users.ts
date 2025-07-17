@@ -6,7 +6,7 @@ interface User {
   updated_at: Date;
 }
 
-interface UserProfile { 
+interface UserProfile {
   name: string;
   gender: string;
   birth: string;
@@ -20,6 +20,7 @@ interface UserProfile {
 type UserRoleType = "staff" | "parent" | "admin";
 
 interface UserLoginResponse {
+  _id: string;
   email: string;
   role: UserRoleType;
 }

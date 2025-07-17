@@ -13,6 +13,7 @@ export const createNotification = async (data: {
   notes: string;
   type: string;
   relatedId?: string;
+  consultation_staff_id?: string; // Thêm trường này
 }) => {
   const token = getAuthToken();
   console.log("Creating notification with data:", data);
