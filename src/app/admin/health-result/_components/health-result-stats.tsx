@@ -78,9 +78,7 @@ export default function HealthResultStats() {
       );
     } else if (rate >= 60) {
       return (
-        <Badge className="bg-blue-100 text-blue-800">
-          {Math.round(rate)}%
-        </Badge>
+        <Badge className="bg-blue-100 text-blue-800">{Math.round(rate)}%</Badge>
       );
     } else if (rate >= 40) {
       return (
@@ -90,9 +88,7 @@ export default function HealthResultStats() {
       );
     } else {
       return (
-        <Badge className="bg-red-100 text-red-800">
-          {Math.round(rate)}%
-        </Badge>
+        <Badge className="bg-red-100 text-red-800">{Math.round(rate)}%</Badge>
       );
     }
   };
@@ -127,52 +123,74 @@ export default function HealthResultStats() {
   return (
     <div className="space-y-6">
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tổng sự kiện</p>
-                <p className="text-2xl font-bold text-blue-600">{events.length}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Tổng sự kiện
+                </p>
+                <p className="text-3xl font-bold text-blue-700">
+                  {events.length}
+                </p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <Calendar className="h-8 w-8 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tổng học sinh</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm font-medium text-gray-600">
+                  Tổng học sinh
+                </p>
+                <p className="text-3xl font-bold text-green-700">
                   {events.reduce((sum, event) => sum + event.total_students, 0)}
                 </p>
               </div>
-              <Users className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-green-100 rounded-xl">
+                <Users className="h-8 w-8 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Tỷ lệ hoàn thành TB</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-sm font-medium text-gray-600">
+                  Tỷ lệ hoàn thành TB
+                </p>
+                <p className="text-3xl font-bold text-purple-700">
                   {(() => {
-                    const totalStudents = events.reduce((sum, event) => sum + event.total_students, 0);
-                    const totalCompleted = events.reduce((sum, event) => sum + event.completed_count, 0);
-                    return totalStudents > 0 ? Math.round((totalCompleted / totalStudents) * 100) : 0;
-                  })()}%
+                    const totalStudents = events.reduce(
+                      (sum, event) => sum + event.total_students,
+                      0
+                    );
+                    const totalCompleted = events.reduce(
+                      (sum, event) => sum + event.completed_count,
+                      0
+                    );
+                    return totalStudents > 0
+                      ? Math.round((totalCompleted / totalStudents) * 100)
+                      : 0;
+                  })()}
+                  %
                 </p>
               </div>
-              <Stethoscope className="h-8 w-8 text-purple-600" />
+              <div className="p-3 bg-purple-100 rounded-xl">
+                <Stethoscope className="h-8 w-8 text-purple-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
     </div>
   );
-} 
+}
