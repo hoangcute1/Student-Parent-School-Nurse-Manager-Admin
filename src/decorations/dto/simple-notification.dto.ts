@@ -26,6 +26,15 @@ export class CreateSimpleNotificationDto {
   @IsOptional()
   @IsString()
   consultation_doctor?: string;
+
+  @ApiProperty({
+    description: 'ID nhân viên y tế lập lịch hẹn tư vấn',
+    example: '60d0fe4f5311236168a109ce',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  consultation_staff_id?: string;
   @ApiProperty({
     description: 'Parent ID',
     example: '60d0fe4f5311236168a109cb',
