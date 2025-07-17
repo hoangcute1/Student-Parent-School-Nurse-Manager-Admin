@@ -39,6 +39,7 @@ import { ExportHistoryModule } from './export-history.module';
 import { HealthExaminationModule } from './health-examination.module';
 import { VaccinationScheduleModule } from './vaccination-schedule.module';
 import { AppController } from '@/controllers/app.controller';
+import { TestModule } from './test.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { AppController } from '@/controllers/app.controller';
     VaccineCampaignModule,
     VaccinationScheduleModule,
     ExportHistoryModule,
+    TestModule
   ],
   controllers: [AppController],
   providers: [
