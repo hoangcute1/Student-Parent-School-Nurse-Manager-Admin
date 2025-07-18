@@ -71,78 +71,73 @@ export default function VaccinationManagementPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-blue-800">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-700 rounded-2xl shadow-lg mb-4">
+            <Syringe className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-700 to-blue-800 bg-clip-text text-transparent">
             Quản lý lịch tiêm chủng
           </h1>
-          <p className="text-blue-600">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Tạo và quản lý lịch tiêm chủng theo khối lớp và từng học sinh
           </p>
         </div>
-        {/* Xoá nút tạo lịch tiêm chủng ở admin */}
-        {/* <Button
-          onClick={handleCreateSchedule}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Syringe className="w-4 h-4 mr-2" />
-          Tạo lịch tiêm chủng
-        </Button> */}
+
+        {/* Tabs */}
+        <Tabs defaultValue="my-schedules" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger
+              value="my-schedules"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <Syringe className="w-4 h-4 mr-2" />
+              Lịch tiêm chủng sắp tới
+            </TabsTrigger>
+            <TabsTrigger
+              value="all-schedules"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Tất cả lịch tiêm
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="my-schedules" className="space-y-6">
+            <VaccinationList
+              filter="today"
+              onViewDetail={setSelectedEventId}
+              onDelete={handleDeleteSchedule}
+            />
+          </TabsContent>
+
+          <TabsContent value="all-schedules" className="space-y-6">
+            <VaccinationList
+              filter="all"
+              onViewDetail={setSelectedEventId}
+              onDelete={handleDeleteSchedule}
+            />
+          </TabsContent>
+        </Tabs>
+
+        {/* Modal tạo lịch tiêm */}
+        {/* {showCreateForm && (
+          <CreateVaccinationSchedule
+            onClose={handleCreateClose}
+            onSuccess={handleCreateSuccess}
+          />
+        )} */}
+
+        {/* Modal xem chi tiết */}
+        {selectedEventId && (
+          <VaccinationDetail
+            eventId={selectedEventId}
+            onClose={() => setSelectedEventId(null)}
+          />
+        )}
       </div>
-
-      {/* Tabs */}
-      <Tabs defaultValue="my-schedules" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger
-            value="my-schedules"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Lịch tiêm chủng sắp tới
-          </TabsTrigger>
-          <TabsTrigger
-            value="all-schedules"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Tất cả lịch tiêm
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="my-schedules" className="space-y-4">
-          {" "}
-          <VaccinationList
-            filter="today" // chỉ hiện lịch tiêm hôm nay
-            onViewDetail={setSelectedEventId}
-            onDelete={handleDeleteSchedule}
-          />
-        </TabsContent>
-
-        <TabsContent value="all-schedules" className="space-y-4">
-          {" "}
-          <VaccinationList
-            filter="all" // hiện tất cả lịch tiêm
-            onViewDetail={setSelectedEventId}
-            onDelete={handleDeleteSchedule}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Modal tạo lịch tiêm */}
-      {/* {showCreateForm && (
-        <CreateVaccinationSchedule
-          onClose={handleCreateClose}
-          onSuccess={handleCreateSuccess}
-        />
-      )} */}
-
-      {/* Modal xem chi tiết */}
-      {selectedEventId && (
-        <VaccinationDetail
-          eventId={selectedEventId}
-          onClose={() => setSelectedEventId(null)}
-        />
-      )}
     </div>
   );
 }
