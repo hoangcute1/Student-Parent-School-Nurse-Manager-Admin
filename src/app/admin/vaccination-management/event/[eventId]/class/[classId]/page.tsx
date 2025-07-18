@@ -176,8 +176,15 @@ export default function VaccinationClassDetailPage() {
       const newRecord: VaccinationRecord = {
         studentId: studentId,
         studentName: selectedStudent.student?.name,
-        vaccinationStatus: vaccinationForm.vaccinationStatus,
-        reaction: vaccinationForm.reaction,
+        vaccinationStatus: vaccinationForm.vaccinationStatus as
+          | "completed"
+          | "contraindication"
+          | "postponed",
+        reaction: vaccinationForm.reaction as
+          | "normal"
+          | "mild"
+          | "moderate"
+          | "severe",
         postVaccinationMonitoring: vaccinationForm.postVaccinationMonitoring,
         medicalNotes: vaccinationForm.medicalNotes,
         vaccinatedAt: new Date().toISOString(),
@@ -671,69 +678,70 @@ export default function VaccinationClassDetailPage() {
                         Kết quả tiêm chủng:
                       </Label>
                       <div className="mt-1 p-3 bg-gray-50 rounded-md">
-                        {selectedStudent.vaccination_result || "Không có"}
+                        {(() => {
+                          try {
+                            const result = JSON.parse(
+                              selectedStudent.vaccination_result || "{}"
+                            );
+                            return (
+                              <div className="space-y-1">
+                                <div>
+                                  <b>Trạng thái:</b>{" "}
+                                  {result.status || "Không có"}
+                                </div>
+                                <div>
+                                  <b>Theo dõi sau tiêm:</b>{" "}
+                                  {result.postVaccinationMonitoring ||
+                                    "Không có"}
+                                </div>
+                                <div>
+                                  <b>Phản ứng:</b>{" "}
+                                  {result.reaction ||
+                                    result.reaction_severity ||
+                                    "Không có"}
+                                </div>
+                                <div>
+                                  <b>Vị trí tiêm:</b>{" "}
+                                  {result.injection_site || "Không có"}
+                                </div>
+                                <div>
+                                  <b>Mức độ phản ứng:</b>{" "}
+                                  {result.reaction_severity || "Không có"}
+                                </div>
+                                <div>
+                                  <b>Bác sĩ:</b>{" "}
+                                  {result.doctor_name || "Không có"}
+                                </div>
+                              </div>
+                            );
+                          } catch {
+                            return (
+                              selectedStudent.vaccination_result || "Không có"
+                            );
+                          }
+                        })()}
                       </div>
                     </div>
 
+                    {/* Xoá các trường bị lặp bên dưới khi đã có trong JSON */}
+                    {/*
                     <div>
                       <Label className="font-semibold">Phản ứng:</Label>
-                      <div className="mt-1">
-                        {(() => {
-                          try {
-                            const result = JSON.parse(
-                              selectedStudent.vaccination_result || "{}"
-                            );
-                            const reaction =
-                              result.reaction ||
-                              result.reaction_severity ||
-                              "normal";
-                            return getReactionBadge(reaction);
-                          } catch {
-                            return (
-                              <Badge variant="secondary">
-                                Không có thông tin
-                              </Badge>
-                            );
-                          }
-                        })()}
-                      </div>
+                      ...
                     </div>
-
                     <div>
                       <Label className="font-semibold">Khuyến nghị:</Label>
-                      <div className="mt-1 p-3 bg-gray-50 rounded-md">
-                        {selectedStudent.recommendations || "Không có"}
-                      </div>
+                      ...
                     </div>
-
                     <div>
                       <Label className="font-semibold">Ghi chú y tế:</Label>
-                      <div className="mt-1 p-3 bg-gray-50 rounded-md">
-                        {selectedStudent.vaccination_notes || "Không có"}
-                      </div>
+                      ...
                     </div>
-
                     <div>
                       <Label className="font-semibold">Bác sĩ thực hiện:</Label>
-                      <div className="mt-1 text-sm">
-                        {(() => {
-                          try {
-                            const result = JSON.parse(
-                              selectedStudent.vaccination_result || "{}"
-                            );
-                            return (
-                              result.doctor_name ||
-                              event.doctor_name ||
-                              "Bác sĩ phụ trách sự kiện"
-                            );
-                          } catch {
-                            return (
-                              event.doctor_name || "Bác sĩ phụ trách sự kiện"
-                            );
-                          }
-                        })()}
-                      </div>
+                      ...
                     </div>
+                    */}
 
                     {selectedStudent.follow_up_required && (
                       <div>

@@ -54,20 +54,20 @@ export function VaccinationList({
     fetchEvents();
   }, [fetchEvents]);
 
-  function isToday(dateString: string) {
+  // Helper để kiểm tra sự kiện hôm nay hoặc tương lai
+  function isUpcoming(dateString: string) {
     if (!dateString) return false;
     const d = new Date(dateString);
     const today = new Date();
-    return (
-      d.getDate() === today.getDate() &&
-      d.getMonth() === today.getMonth() &&
-      d.getFullYear() === today.getFullYear()
-    );
+    today.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    return d >= today;
   }
 
+  // Lọc sự kiện theo filter
   const filteredEvents =
     filter === "today"
-      ? events.filter((event) => isToday(event.vaccination_date))
+      ? events.filter((event) => isUpcoming(event.vaccination_date))
       : events;
 
   return (

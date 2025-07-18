@@ -82,13 +82,14 @@ export default function VaccinationManagementPage() {
             Tạo và quản lý lịch tiêm chủng theo khối lớp và từng học sinh
           </p>
         </div>
-        <Button
+        {/* Xoá nút tạo lịch tiêm chủng ở admin */}
+        {/* <Button
           onClick={handleCreateSchedule}
           className="bg-blue-600 hover:bg-blue-700"
         >
           <Syringe className="w-4 h-4 mr-2" />
           Tạo lịch tiêm chủng
-        </Button>
+        </Button> */}
       </div>
 
       {/* Tabs */}
@@ -98,7 +99,7 @@ export default function VaccinationManagementPage() {
             value="my-schedules"
             className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
           >
-            Lịch tiêm chủng hôm nay
+            Lịch tiêm chủng sắp tới
           </TabsTrigger>
           <TabsTrigger
             value="all-schedules"
@@ -128,12 +129,12 @@ export default function VaccinationManagementPage() {
       </Tabs>
 
       {/* Modal tạo lịch tiêm */}
-      {showCreateForm && (
+      {/* {showCreateForm && (
         <CreateVaccinationSchedule
           onClose={handleCreateClose}
           onSuccess={handleCreateSuccess}
         />
-      )}
+      )} */}
 
       {/* Modal xem chi tiết */}
       {selectedEventId && (

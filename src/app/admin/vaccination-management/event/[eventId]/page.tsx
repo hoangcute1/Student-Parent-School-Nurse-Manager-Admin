@@ -72,9 +72,7 @@ export default function VaccinationEventDetailPage() {
       >
         &larr; Quay lại danh sách
       </button>
-      <h1 className="text-2xl font-bold mb-4">
-        Chi tiết sự kiện khám sức khỏe
-      </h1>
+      <h1 className="text-2xl font-bold mb-4">Chi tiết sự kiện tiêm chủng</h1>
       {/* Thông tin tổng quan */}
       <div className="bg-white rounded-xl shadow p-6 mb-4 border">
         <div className="flex items-center gap-4 mb-2">
@@ -162,7 +160,7 @@ export default function VaccinationEventDetailPage() {
                   className="text-center hover:bg-blue-50 cursor-pointer transition-all"
                   onClick={() =>
                     router.push(
-                      `/cms/vaccination-management/event/${eventId}/class/${cls.class_id}`
+                      `/admin/vaccination-management/event/${eventId}/class/${cls.class_id}`
                     )
                   }
                 >
