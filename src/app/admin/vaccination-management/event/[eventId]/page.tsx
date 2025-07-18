@@ -1,9 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ChevronRight } from "lucide-react";
 import { fetchData } from "@/lib/api/api";
 
 export default function VaccinationEventDetailPage() {
@@ -64,143 +80,219 @@ export default function VaccinationEventDetailPage() {
       0
     ) || 0;
 
+  const getClassStatusBadge = (cls: any) => {
+    if (cls.total_students === 0) {
+      return (
+        <Badge className="bg-gray-100 text-gray-800">Không có học sinh</Badge>
+      );
+    }
+    if (cls.completed_count === cls.total_students && cls.total_students > 0) {
+      return (
+        <Badge className="bg-green-100 text-green-800">Hoàn thành (100%)</Badge>
+      );
+    }
+    if (cls.completed_count > 0) {
+      const percent = Math.round(
+        (cls.completed_count / cls.total_students) * 100
+      );
+      return (
+        <Badge className="bg-blue-100 text-blue-800">
+          Đang thực hiện ({percent}%)
+        </Badge>
+      );
+    }
+    if (cls.approved_count > 0) {
+      const percent = Math.round(
+        (cls.approved_count / cls.total_students) * 100
+      );
+      return (
+        <Badge className="bg-blue-100 text-blue-800">
+          Sẵn sàng ({percent}%)
+        </Badge>
+      );
+    }
+    if (cls.pending_count > cls.approved_count + cls.rejected_count) {
+      return (
+        <Badge className="bg-yellow-100 text-yellow-800">Chờ phản hồi</Badge>
+      );
+    }
+    return <Badge className="bg-red-100 text-red-800">Cần xem xét</Badge>;
+  };
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <button
-        className="mb-4 text-blue-600 hover:underline"
-        onClick={() => history.back()}
-      >
-        &larr; Quay lại danh sách
-      </button>
-      <h1 className="text-2xl font-bold mb-4">Chi tiết sự kiện tiêm chủng</h1>
-      {/* Thông tin tổng quan */}
-      <div className="bg-white rounded-xl shadow p-6 mb-4 border">
-        <div className="flex items-center gap-4 mb-2">
-          <span className="text-2xl font-bold text-blue-900 flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-blue-700" />
-            {event.title}
-          </span>
-          <span className="text-gray-500 text-base font-normal">
-            {event.description}
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-8 text-gray-700 mb-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-blue-600" />
-            <span>
-              {event.vaccination_date
-                ? new Date(event.vaccination_date).toLocaleDateString()
-                : "-"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 bg-blue-400 rounded-full" />
-            <span>{event.vaccination_time || "-"}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-600" />
-            <span>{event.location}</span>
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <Button
+              variant="secondary"
+              className="flex items-center gap-2 text-blue-800 bg-blue-100 border-none hover:bg-blue-200 font-semibold rounded-full px-5 py-2 shadow-sm mb-2"
+              onClick={() => router.push("/admin/vaccination-management")}
+            >
+              <span className="text-xl">&larr;</span>
+              <span>Quay lại</span>
+            </Button>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Chi tiết sự kiện tiêm chủng
+            </h1>
           </div>
         </div>
-        <div className="flex flex-wrap gap-8 mt-2">
-          <div className="flex flex-col items-center">
-            <span className="text-blue-800 font-bold text-xl">
-              {totalStudents}
-            </span>
-            <span className="text-xs text-gray-500 mt-1">Tổng học sinh</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-green-600 font-bold text-xl">{agreed}</span>
-            <span className="text-xs text-gray-500 mt-1">Đã đồng ý</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-yellow-600 font-bold text-xl">{pending}</span>
-            <span className="text-xs text-gray-500 mt-1">Chờ phản hồi</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-red-600 font-bold text-xl">{rejected}</span>
-            <span className="text-xs text-gray-500 mt-1">Từ chối</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-purple-600 font-bold text-xl">
-              {completed}
-            </span>
-            <span className="text-xs text-gray-500 mt-1">Hoàn thành</span>
-          </div>
-        </div>
-      </div>
-      {/* Danh sách lớp tham gia */}
-      <div className="bg-white rounded-xl shadow p-6 border">
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-bold text-lg">Danh sách lớp tham gia</div>
-          <div className="text-sm text-gray-500">
-            Theo dõi tình trạng thực hiện khám sức khỏe của từng lớp.{" "}
-            <span className="text-blue-600 underline cursor-pointer">
-              Click vào lớp để xem chi tiết học sinh.
-            </span>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border rounded-xl overflow-hidden">
-            <thead>
-              <tr className="bg-gray-50 text-gray-700">
-                <th className="p-2 border">Lớp</th>
-                <th className="p-2 border">Tổng học sinh</th>
-                <th className="p-2 border">Đã đồng ý</th>
-                <th className="p-2 border">Chờ phản hồi</th>
-                <th className="p-2 border">Từ chối</th>
-                <th className="p-2 border">Hoàn thành</th>
-                <th className="p-2 border">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              {event.classes?.map((cls: any) => (
-                <tr
-                  key={cls.class_id}
-                  className="text-center hover:bg-blue-50 cursor-pointer transition-all"
-                  onClick={() =>
-                    router.push(
-                      `/admin/vaccination-management/event/${eventId}/class/${cls.class_id}`
-                    )
-                  }
-                >
-                  <td className="border p-2 font-semibold text-blue-800">
-                    <span className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-blue-400" />
-                      {cls.class_name}
-                    </span>
-                    <div className="text-xs text-gray-500">
-                      Khối {cls.grade_level}
-                    </div>
-                  </td>
-                  <td className="border p-2">{cls.total_students}</td>
-                  <td className="border p-2 text-green-600 font-bold">
-                    {cls.approved_count}
-                  </td>
-                  <td className="border p-2 text-yellow-600 font-bold">
-                    {cls.pending_count}
-                  </td>
-                  <td className="border p-2 text-red-600 font-bold">
-                    {cls.rejected_count}
-                  </td>
-                  <td className="border p-2 text-purple-600 font-bold">
-                    {cls.completed_count}
-                  </td>
-                  <td className="border p-2">
-                    {cls.completed_count === cls.total_students &&
-                    cls.total_students > 0 ? (
-                      <Badge className="bg-green-100 text-green-800">
-                        Hoàn thành (100%)
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">Đang thực hiện</Badge>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+
+        {/* Event Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-blue-700" />
+              {event.title}
+            </CardTitle>
+            <CardDescription>{event.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-blue-600" />
+                <span className="text-sm">
+                  {event.vaccination_date
+                    ? new Date(event.vaccination_date).toLocaleDateString(
+                        "vi-VN"
+                      )
+                    : "-"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600" />
+                <span className="text-sm">{event.vaccination_time || "-"}</span>
+              </div>
+              {event.location && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm">{event.location}</span>
+                </div>
+              )}
+            </div>
+            {/* Overall Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {totalStudents}
+                </div>
+                <div className="text-sm text-gray-600">Tổng học sinh</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {agreed}
+                </div>
+                <div className="text-sm text-gray-600">Đã đồng ý</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {pending}
+                </div>
+                <div className="text-sm text-gray-600">Chờ phản hồi</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">
+                  {rejected}
+                </div>
+                <div className="text-sm text-gray-600">Từ chối</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {completed}
+                </div>
+                <div className="text-sm text-gray-600">Hoàn thành</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Classes Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Danh sách lớp tham gia</CardTitle>
+            <CardDescription>
+              Theo dõi tình trạng thực hiện tiêm chủng của từng lớp.
+              <span className="font-medium text-blue-600">
+                {" "}
+                Click vào lớp để xem chi tiết học sinh.
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Lớp</TableHead>
+                  <TableHead>Tổng học sinh</TableHead>
+                  <TableHead>Đã đồng ý</TableHead>
+                  <TableHead>Chờ phản hồi</TableHead>
+                  <TableHead>Từ chối</TableHead>
+                  <TableHead>Hoàn thành</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {event.classes?.map((cls: any) => (
+                  <TableRow
+                    key={cls.class_id}
+                    className="cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() =>
+                      router.push(
+                        `/admin/vaccination-management/event/${eventId}/class/${cls.class_id}`
+                      )
+                    }
+                  >
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium">{cls.class_name}</span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Khối {cls.grade_level}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4 text-gray-600" />
+                        <span className="font-medium">
+                          {cls.total_students}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-green-600 font-medium">
+                        {cls.approved_count}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-yellow-600 font-medium">
+                        {cls.pending_count}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-red-600 font-medium">
+                        {cls.rejected_count}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-purple-600 font-medium">
+                        {cls.completed_count}
+                      </span>
+                    </TableCell>
+                    <TableCell>{getClassStatusBadge(cls)}</TableCell>
+                    <TableCell>
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

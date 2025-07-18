@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { fetchData } from "@/lib/api/api";
 import { toast } from "sonner";
+import { CheckCircle } from "lucide-react";
 
 interface VaccinationRecord {
   studentId: string;
@@ -289,37 +290,53 @@ export default function VaccinationClassDetailPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <Card className="p-6 border mb-4">
-        <div className="font-bold text-xl mb-2">
-          Chi tiết lớp {classDetail.class_name}
+      <Button
+        variant="secondary"
+        className="flex items-center gap-2 text-blue-800 bg-blue-100 border-none hover:bg-blue-200 font-semibold rounded-full px-5 py-2 shadow-sm mb-4"
+        onClick={() => router.back()}
+      >
+        <span className="text-xl">&larr;</span>
+        <span>Quay lại danh sách</span>
+      </Button>
+      <div className="bg-white border rounded-2xl shadow-sm p-8 mb-6">
+        <div className="font-bold text-2xl mb-4 text-blue-800">
+          Chi tiết lớp{" "}
+          <span className="text-blue-700">{classDetail.class_name}</span>
         </div>
-        <div className="text-sm text-gray-700 mb-2">Sự kiện: {event.title}</div>
-        <div className="text-sm text-gray-700 mb-2">
-          Ngày tiêm:{" "}
-          {event.vaccination_date
-            ? new Date(event.vaccination_date).toLocaleDateString()
-            : "-"}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base">
+          <div>
+            <div>
+              <span className="font-semibold">Sự kiện:</span>
+              <br />
+              {event.title}
+            </div>
+            <div className="mt-2">
+              <span className="font-semibold">Giờ tiêm:</span>
+              <br />
+              {event.vaccination_time || "-"}
+            </div>
+            <div className="mt-2">
+              <span className="font-semibold">Loại vaccine:</span>
+              <br />
+              {event.vaccine_type || "-"}
+            </div>
+          </div>
+          <div>
+            <div>
+              <span className="font-semibold">Ngày tiêm:</span>
+              <br />
+              {event.vaccination_date
+                ? new Date(event.vaccination_date).toLocaleDateString()
+                : "-"}
+            </div>
+            <div className="mt-2">
+              <span className="font-semibold">Địa điểm:</span>
+              <br />
+              {event.location}
+            </div>
+          </div>
         </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Giờ tiêm: {event.vaccination_time || "-"}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Địa điểm: {event.location}
-        </div>
-        <div className="text-sm text-gray-700 mb-2">
-          Loại vaccine: {event.vaccine_type || "-"}
-        </div>
-        <div className="mt-4">
-          <button
-            className="text-xs text-blue-600 underline"
-            onClick={() =>
-              router.push(`/cms/vaccination-management/event/${eventId}`)
-            }
-          >
-            &larr; Xem chi tiết sự kiện tiêm chủng
-          </button>
-        </div>
-      </Card>
+      </div>
       <Card className="p-6 border">
         <div className="font-bold text-lg mb-2">
           Danh sách học sinh đã đồng ý tiêm chủng
@@ -338,108 +355,60 @@ export default function VaccinationClassDetailPage() {
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border rounded-xl overflow-hidden">
-              <thead>
-                <tr className="bg-gray-50 text-gray-700">
-                  <th className="p-2 border">Họ tên</th>
-                  <th className="p-2 border">Lớp</th>
-                  <th className="p-2 border">Trạng thái tiêm</th>
-                  <th className="p-2 border">Phản ứng</th>
-                  <th className="p-2 border">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agreedStudents.map((s: any) => {
-                  const vaccinationRecord = getVaccinationRecord(
-                    s.student?._id || s.student?.student_id
-                  );
-                  return (
-                    <tr
-                      key={s.student?._id || s.student?.student_id}
-                      className="text-center hover:bg-blue-50"
+          <div className="space-y-4">
+            {agreedStudents.map((s: any) => {
+              const vaccinationRecord = getVaccinationRecord(
+                s.student?._id || s.student?.student_id
+              );
+              const isVaccinated = vaccinationRecord
+                ? vaccinationRecord.vaccinationStatus === "completed"
+                : s.status === "COMPLETED" ||
+                  s.status === "Completed" ||
+                  s.status === "completed" ||
+                  s.vaccination_result;
+              return (
+                <div
+                  key={s.student?._id || s.student?.student_id}
+                  className="flex items-center justify-between border rounded-xl p-4 bg-white shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <div className="font-semibold text-base">
+                        {s.student?.name || "-"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        MSSV: {s.student?.student_code || "Không xác định"}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Trạng thái:{" "}
+                        <span className="font-semibold text-blue-700">
+                          {isVaccinated ? "Đã tiêm" : "Chờ tiêm"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge
+                      className={
+                        isVaccinated
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }
                     >
-                      <td className="border p-2 font-semibold">
-                        {s.student?.name}
-                      </td>
-                      <td className="border p-2">{classDetail.class_name}</td>
-                      <td className="border p-2">
-                        {vaccinationRecord ? (
-                          getVaccinationStatusBadge(
-                            vaccinationRecord.vaccinationStatus
-                          )
-                        ) : s.status === "COMPLETED" ||
-                          s.status === "Completed" ||
-                          s.status === "completed" ||
-                          s.vaccination_result ? (
-                          <Badge className="bg-green-100 text-green-800">
-                            Đã tiêm
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Chưa tiêm</Badge>
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {vaccinationRecord ? (
-                          getReactionBadge(vaccinationRecord.reaction)
-                        ) : s.vaccination_result ? (
-                          (() => {
-                            try {
-                              const result = JSON.parse(
-                                s.vaccination_result || "{}"
-                              );
-                              const reaction =
-                                result.reaction ||
-                                result.reaction_severity ||
-                                "normal";
-                              return getReactionBadge(reaction);
-                            } catch {
-                              return (
-                                <Badge variant="secondary">
-                                  Không có thông tin
-                                </Badge>
-                              );
-                            }
-                          })()
-                        ) : (
-                          <Badge variant="secondary">Chưa tiêm</Badge>
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                            onClick={() => handleVaccinate(s)}
-                            disabled={
-                              !!s.vaccination_result ||
-                              s.status === "COMPLETED" ||
-                              s.status === "Completed" ||
-                              s.status === "completed" ||
-                              savingVaccination
-                            }
-                          >
-                            {!!s.vaccination_result ||
-                            s.status === "COMPLETED" ||
-                            s.status === "Completed" ||
-                            s.status === "completed"
-                              ? "Đã tiêm"
-                              : "Tiêm"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewDetails(s)}
-                          >
-                            Chi tiết
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      {isVaccinated ? "Đã tiêm" : "Chờ tiêm"}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewDetails(s)}
+                    >
+                      Chi tiết
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </Card>
@@ -562,7 +531,9 @@ export default function VaccinationClassDetailPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              Chi tiết tiêm chủng - {selectedStudent?.student?.name}
+              <span className="font-bold">
+                Chi tiết tiêm chủng - {selectedStudent?.student?.name}
+              </span>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -606,13 +577,14 @@ export default function VaccinationClassDetailPage() {
                       <div>
                         <Label className="font-semibold">Thời gian tiêm:</Label>
                         <div className="mt-1 text-sm">
-                          {new Date(record.vaccinatedAt).toLocaleString(
-                            "vi-VN"
-                          )}
+                          {record.vaccinatedAt
+                            ? new Date(record.vaccinatedAt).toLocaleString(
+                                "vi-VN"
+                              )
+                            : "-"}
                         </div>
                       </div>
                     </div>
-
                     <div>
                       <Label className="font-semibold">
                         Theo dõi sau tiêm:
@@ -621,24 +593,23 @@ export default function VaccinationClassDetailPage() {
                         {record.postVaccinationMonitoring || "Không có"}
                       </div>
                     </div>
-
                     <div>
                       <Label className="font-semibold">Phản ứng:</Label>
                       <div className="mt-1">
                         {getReactionBadge(record.reaction)}
                       </div>
                     </div>
-
                     <div>
                       <Label className="font-semibold">Ghi chú của y tế:</Label>
                       <div className="mt-1 p-3 bg-gray-50 rounded-md">
                         {record.medicalNotes || "Không có"}
                       </div>
                     </div>
-
                     <div>
                       <Label className="font-semibold">Bác sĩ thực hiện:</Label>
-                      <div className="mt-1 text-sm">{record.vaccinatedBy}</div>
+                      <div className="mt-1 text-sm">
+                        {record.vaccinatedBy || "-"}
+                      </div>
                     </div>
                   </div>
                 );
@@ -672,7 +643,6 @@ export default function VaccinationClassDetailPage() {
                         </div>
                       </div>
                     </div>
-
                     <div>
                       <Label className="font-semibold">
                         Kết quả tiêm chủng:
@@ -686,31 +656,16 @@ export default function VaccinationClassDetailPage() {
                             return (
                               <div className="space-y-1">
                                 <div>
-                                  <b>Trạng thái:</b>{" "}
-                                  {result.status || "Không có"}
+                                  <span className="font-medium">
+                                    Trạng thái:
+                                  </span>{" "}
+                                  {result.status || "-"}
                                 </div>
                                 <div>
-                                  <b>Theo dõi sau tiêm:</b>{" "}
-                                  {result.postVaccinationMonitoring ||
-                                    "Không có"}
-                                </div>
-                                <div>
-                                  <b>Phản ứng:</b>{" "}
-                                  {result.reaction ||
-                                    result.reaction_severity ||
-                                    "Không có"}
-                                </div>
-                                <div>
-                                  <b>Vị trí tiêm:</b>{" "}
-                                  {result.injection_site || "Không có"}
-                                </div>
-                                <div>
-                                  <b>Mức độ phản ứng:</b>{" "}
-                                  {result.reaction_severity || "Không có"}
-                                </div>
-                                <div>
-                                  <b>Bác sĩ:</b>{" "}
-                                  {result.doctor_name || "Không có"}
+                                  <span className="font-medium">
+                                    Giám sát sau tiêm:
+                                  </span>{" "}
+                                  {result.postVaccinationMonitoring || "-"}
                                 </div>
                               </div>
                             );
@@ -722,27 +677,62 @@ export default function VaccinationClassDetailPage() {
                         })()}
                       </div>
                     </div>
-
-                    {/* Xoá các trường bị lặp bên dưới khi đã có trong JSON */}
-                    {/*
                     <div>
                       <Label className="font-semibold">Phản ứng:</Label>
-                      ...
+                      <div className="mt-1">
+                        {(() => {
+                          try {
+                            const result = JSON.parse(
+                              selectedStudent.vaccination_result || "{}"
+                            );
+                            const reaction =
+                              result.reaction ||
+                              result.reaction_severity ||
+                              "normal";
+                            return getReactionBadge(reaction);
+                          } catch {
+                            return (
+                              <Badge variant="secondary">
+                                Không có thông tin
+                              </Badge>
+                            );
+                          }
+                        })()}
+                      </div>
                     </div>
                     <div>
                       <Label className="font-semibold">Khuyến nghị:</Label>
-                      ...
+                      <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                        {selectedStudent.recommendations || "Không có"}
+                      </div>
                     </div>
                     <div>
                       <Label className="font-semibold">Ghi chú y tế:</Label>
-                      ...
+                      <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                        {selectedStudent.vaccination_notes || "Không có"}
+                      </div>
                     </div>
                     <div>
                       <Label className="font-semibold">Bác sĩ thực hiện:</Label>
-                      ...
+                      <div className="mt-1 text-sm">
+                        {(() => {
+                          try {
+                            const result = JSON.parse(
+                              selectedStudent.vaccination_result || "{}"
+                            );
+                            return (
+                              result.doctor_name ||
+                              event.doctor_name ||
+                              "Bác sĩ phụ trách sự kiện"
+                            );
+                          } catch {
+                            return (
+                              event.doctor_name || "Bác sĩ phụ trách sự kiện"
+                            );
+                          }
+                        })()}
+                      </div>
                     </div>
-                    */}
-
                     {selectedStudent.follow_up_required && (
                       <div>
                         <Label className="font-semibold">Cần theo dõi:</Label>
@@ -763,15 +753,14 @@ export default function VaccinationClassDetailPage() {
                 );
               }
             })()}
-
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setIsDetailsModalOpen(false)}
-              >
-                Đóng
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end mt-6">
+            <Button
+              onClick={() => setIsDetailsModalOpen(false)}
+              variant="outline"
+            >
+              Đóng
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
