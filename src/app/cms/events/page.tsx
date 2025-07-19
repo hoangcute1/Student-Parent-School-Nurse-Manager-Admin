@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Clock, Download, RefreshCw } from "lucide-react";
-
+import { Plus, Download, RefreshCw, AlertTriangle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-
+import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
+import { EventStats } from "./components/stats-cards";
+import { FilterBar } from "./_components/filter-bar";
+import { EventTable } from "./components/event-table";
 import {
   Select,
   SelectContent,
@@ -43,14 +44,10 @@ import {
   getAllTreatmentHistories,
   updateTreatmentHistory,
 } from "@/lib/api/treatment-history";
-import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
-import { EventStats } from "./components/stats-cards";
-import { FilterBar } from "./_components/filter-bar";
-import { EventTable } from "./components/event-table";
-import { AlertTriangle, User, Users, MapPin, FileText, PhoneCall, UserCheck, Flag } from "lucide-react";
+import { Clock, User, Users, MapPin, FileText, PhoneCall, UserCheck, Flag } from "lucide-react";
 
 export default function MedicalEvents() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -489,6 +486,8 @@ export default function MedicalEvents() {
     });
   };
 
+  const refreshEvents = fetchAllTreatmentHistories;
+
   if (eventLoading) {
     return (
       <div className="space-y-8">
@@ -526,79 +525,97 @@ export default function MedicalEvents() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-sky-800">
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Header Section */}
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-sky-500 to-sky-600 rounded-2xl shadow-lg mb-4">
+          <AlertTriangle className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-700 to-sky-800 bg-clip-text text-transparent">
           Quản lý sự cố y tế
         </h1>
-        <p className="text-sky-600">
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Theo dõi và xử lý các sự cố y tế trong trường học
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Dashboard Stats Cards */}
       <EventStats stats={stats} />
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setAddEventOpen(true)}
-            className="bg-sky-600 hover:bg-sky-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm sự kiện
-          </Button>
-          <Button
-            onClick={handleExportExcel}
-            variant="outline"
-            className="border-sky-200 text-sky-700 hover:bg-sky-50"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Xuất Excel
-          </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar with Quick Actions */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-800">
+                Thao tác nhanh
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                onClick={() => setAddEventOpen(true)}
+                className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-white py-3 px-4 rounded-lg hover:from-sky-600 hover:to-sky-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Thêm sự kiện</span>
+              </Button>
+              <Button
+                onClick={handleExportExcel}
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
+              >
+                <Download className="h-4 w-4" />
+                <span>Xuất Excel</span>
+              </Button>
+              <Button
+                onClick={refreshEvents}
+                className="w-full bg-gradient-to-r from-sky-400 to-sky-500 text-white py-3 px-4 rounded-lg hover:from-sky-500 hover:to-sky-600 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span>Làm mới</span>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        <Button
-          onClick={() => {
-            getAllTreatmentHistories()
-              .then((data) => {
-                // Đảm bảo mỗi sự kiện có ngày tạo
-                const processedData = ensureCreatedAt(data);
-              })
-              .catch((error) => {
-                console.error("Error refreshing treatment histories:", error);
-                setEventError("Không thể tải danh sách sự kiện");
-              })
-              .finally(() => {
-              });
-          }}
-          variant="outline"
-          className="border-sky-200 text-sky-700 hover:bg-sky-50"
-        >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Làm mới
-        </Button>
+
+        {/* Main Data Table */}
+        <div className="lg:col-span-3 space-y-6">
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+            <CardHeader className="pb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <CardTitle className="text-2xl font-bold text-gray-800">
+                    Danh sách sự cố y tế
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 mt-1">
+                    Quản lý thông tin về các sự cố y tế và xử lý
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <FilterBar
+                onSearchChange={setSearchTerm}
+                onStatusFilterChange={setSelectedStatus}
+                onPriorityFilterChange={setSelectedPriority}
+                onDateFilterChange={setSelectedDate}
+              />
+              <div className="mt-6">
+                <EventTable
+                  events={filteredEvents}
+                  onView={handleViewDetails}
+                  onProcess={handleProcessEvent}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Filter Bar */}
-      <FilterBar
-        onSearchChange={setSearchTerm}
-        onStatusFilterChange={setSelectedStatus}
-        onPriorityFilterChange={setSelectedPriority}
-        onDateFilterChange={setSelectedDate}
-      />
-
-      {/* Events Table */}
-      <EventTable
-        events={filteredEvents}
-        onView={handleViewDetails}
-        onProcess={handleProcessEvent}
-      />
-
+      {/* Dialogs: Add, Update, View, Process, EmergencyProcess giữ nguyên, chỉ chỉnh className cho đồng bộ style (bo góc, shadow, màu sắc) */}
+      {/* ... giữ nguyên các Dialog, chỉ cần chỉnh className nếu cần */}
       {/* Add Event Dialog */}
       <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl rounded-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-teal-800">Thêm sự cố y tế</DialogTitle>
             <DialogDescription className="text-teal-600">
@@ -835,7 +852,7 @@ export default function MedicalEvents() {
 
       {/* Update Event Dialog */}
       <Dialog open={updateEventOpen} onOpenChange={setUpdateEventOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl rounded-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-teal-800">
               Cập nhật sự cố y tế
@@ -1055,7 +1072,7 @@ export default function MedicalEvents() {
 
       {/* Process Event Dialog */}
       <Dialog open={processEventOpen} onOpenChange={setProcessEventOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl rounded-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-teal-800">
               Xử lý sự cố y tế
@@ -1212,7 +1229,7 @@ export default function MedicalEvents() {
         open={viewEventDetailsOpen}
         onOpenChange={setViewEventDetailsOpen}
       >
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl rounded-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-teal-800 text-2xl font-bold flex items-center gap-2">
               <AlertTriangle className="w-6 h-6 text-orange-500" />
@@ -1343,7 +1360,7 @@ export default function MedicalEvents() {
         open={emergencyProcessOpen}
         onOpenChange={setEmergencyProcessOpen}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl rounded-2xl shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-red-800">
               Xử lý sự kiện khẩn cấp
