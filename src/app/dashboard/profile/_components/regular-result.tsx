@@ -50,6 +50,7 @@ import {
 } from "@/lib/api/health-examination";
 import VaccinationResults from "./vaccination-results";
 import { fetchData } from "@/lib/api/api";
+// import { shallow } from "zustand/shallow";
 
 // Component hiển thị thông tin chi tiết của lần khám
 interface ExaminationDetailsProps {
@@ -190,7 +191,8 @@ interface ExaminationHistoryItem {
 }
 
 export default function RegularResultsPage() {
-  const { selectedStudent } = useParentStudentsStore();
+  const selectedStudent = useParentStudentsStore((state) => state.selectedStudent);
+  const updateStudent = useParentStudentsStore((state) => state.updateStudent);
   const [selectedExam, setSelectedExam] =
     useState<ExaminationHistoryItem | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -201,6 +203,7 @@ export default function RegularResultsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("recent");
+  const [isSyncingHealthRecord, setIsSyncingHealthRecord] = useState(false);
 
   const handleOpenDialog = (exam: ExaminationHistoryItem) => {
     setSelectedExam(exam);
@@ -218,6 +221,62 @@ export default function RegularResultsPage() {
       fetchVaccinationResults();
     }
   }, [selectedStudent]);
+
+  // Tự động đồng bộ healthRecord với kết quả khám sức khỏe định kỳ mới nhất
+  useEffect(() => {
+    if (
+      !selectedStudent ||
+      healthExaminations.length === 0 ||
+      isSyncingHealthRecord
+    )
+      return;
+    // Tìm kết quả khám sức khỏe định kỳ mới nhất
+    const latestExam = healthExaminations
+      .filter((exam) => {
+        try {
+          if (!exam.health_result) return false;
+          const parsed = JSON.parse(exam.health_result);
+          return parsed.type === "Khám sức khỏe định kỳ";
+        } catch {
+          return false;
+        }
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.examination_date).getTime() -
+          new Date(a.examination_date).getTime()
+      )[0];
+    if (!latestExam) return;
+    // Lấy các chỉ số từ kết quả mới nhất
+    let height = "";
+    let weight = "";
+    let vision = "";
+    try {
+      const parsed = JSON.parse(latestExam.health_result);
+      height = parsed.height || "";
+      weight = parsed.weight || "";
+      vision = parsed.vision || "";
+    } catch {}
+    // Nếu healthRecord hiện tại khác với kết quả mới nhất thì cập nhật
+    const current = selectedStudent.healthRecord;
+    if (
+      height &&
+      weight &&
+      vision &&
+      (current.height !== height ||
+        current.weight !== weight ||
+        current.vision !== vision)
+    ) {
+      setIsSyncingHealthRecord(true);
+      updateStudent(selectedStudent.student._id, {
+        height,
+        weight,
+        vision,
+      }).finally(() => {
+        setIsSyncingHealthRecord(false);
+      });
+    }
+  }, [selectedStudent, healthExaminations, updateStudent]);
 
   const fetchHealthExaminations = async () => {
     if (!selectedStudent) return;
