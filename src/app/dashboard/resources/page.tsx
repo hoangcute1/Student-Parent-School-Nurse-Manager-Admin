@@ -23,16 +23,25 @@ import { useEffect, useState } from "react";
 import { getParentId } from "@/lib/utils/parent-utils";
 import { getTreatmentHistoryByParentId } from "@/lib/api/treatment-history";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MedicalHistoryPage() {
-  const { fetchStudentsByParent } = useParentStudentsStore();
-
+  const { fetchStudentsByParent, studentsData, isLoading: studentsLoading, error: studentsError, selectedStudentId, setSelectedStudentId } = useParentStudentsStore();
   // State để lưu treatment history
-  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>(
-    []
-  );
+  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Tự động set học sinh đầu tiên khi có dữ liệu
+  useEffect(() => {
+    if (studentsData.length > 0 && !selectedStudentId) {
+      setSelectedStudentId(studentsData[0].student._id);
+    }
+  }, [studentsData, selectedStudentId, setSelectedStudentId]);
+
+  useEffect(() => {
+    fetchStudentsByParent();
+  }, [fetchStudentsByParent]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +52,7 @@ export default function MedicalHistoryPage() {
           setError(null);
           const treatmentData = await getTreatmentHistoryByParentId(parentId);
           setTreatmentHistory(treatmentData);
+          console.log("Fetched treatmentHistory:", treatmentData);
         } else {
           setError("Không tìm thấy thông tin phụ huynh.");
         }
@@ -54,6 +64,16 @@ export default function MedicalHistoryPage() {
     };
     fetchData();
   }, [fetchStudentsByParent]);
+
+  // Lọc lịch sử bệnh án theo học sinh được chọn (kiểm tra kỹ kiểu dữ liệu)
+  const filteredHistory = selectedStudentId
+    ? treatmentHistory.filter(
+        (entry) =>
+          entry.student &&
+          typeof entry.student === "object" &&
+          entry.student._id === selectedStudentId
+      )
+    : treatmentHistory;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
@@ -121,6 +141,26 @@ export default function MedicalHistoryPage() {
           Theo dõi lịch sử bệnh án của học sinh
         </p>
       </div>
+      {/* Dropdown chọn học sinh */}
+      {studentsData.length > 1 && (
+        <div className="mb-4">
+          <Select
+            value={selectedStudentId}
+            onValueChange={setSelectedStudentId}
+          >
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Chọn học sinh" />
+            </SelectTrigger>
+            <SelectContent>
+              {studentsData.map((stu) => (
+                <SelectItem key={stu.student._id} value={stu.student._id}>
+                  {stu.student.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -156,15 +196,15 @@ export default function MedicalHistoryPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {treatmentHistory.length === 0 ? (
+          {filteredHistory.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               Chưa có lịch sử bệnh án nào
             </div>
           ) : (
             <div className="space-y-6">
-              {treatmentHistory.map((entry, index) => (
+              {filteredHistory.map((entry, index) => (
                 <div key={entry._id} className="relative">
-                  {index !== treatmentHistory.length - 1 && (
+                  {index !== filteredHistory.length - 1 && (
                     <div className="absolute left-6 top-12 h-full w-0.5 bg-blue-200"></div>
                   )}
                   <div className="flex gap-4">
@@ -208,11 +248,11 @@ export default function MedicalHistoryPage() {
                           {entry.notes && (
                             <div>
                               <label className="text-sm font-medium text-gray-700">Ghi chú:</label>
-                              <p className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md whitespace-pre-line">
-                                {entry.notes.includes('|')
-                                  ? entry.notes.split('|').map((line, idx) => <div key={idx}>{line.trim()}</div>)
+                              <div className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md whitespace-pre-line">
+                                {entry.notes.includes('||')
+                                  ? entry.notes.split('||').map((line, idx) => <div key={idx}>{line.trim()}</div>)
                                   : entry.notes}
-                              </p>
+                              </div>
                             </div>
                           )}
                         </div>

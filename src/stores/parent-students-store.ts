@@ -16,15 +16,21 @@ import {
 import { create } from "zustand";
 import { fetchData } from "@/lib/api/api";
 
-export const useParentStudentsStore = create<ParentStudentsStore>(
+export const useParentStudentsStore = create<ParentStudentsStore & {
+  selectedStudentId: string;
+  setSelectedStudentId: (id: string) => void;
+}>(
   (set, get) => ({
     studentsData: [],
     isLoading: false,
     error: null,
     selectedStudent: null,
-
+    selectedStudentId: "",
     setSelectedStudent: (student) => {
       set({ selectedStudent: student });
+    },
+    setSelectedStudentId: (id) => {
+      set({ selectedStudentId: id });
     },
 
     fetchStudentsByParent: async () => {
