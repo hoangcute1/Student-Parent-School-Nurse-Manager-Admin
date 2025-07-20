@@ -75,6 +75,8 @@ export default function MedicalEvents() {
   
   // State để lưu danh sách học sinh đã lọc theo lớp
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  // State để lưu danh sách lớp có học sinh
+  const [availableClasses, setAvailableClasses] = useState<string[]>([]);
 
   // Sử dụng store cho treatment history
   const { 
@@ -124,6 +126,11 @@ export default function MedicalEvents() {
       .then(([studentsData, staffsData]) => {
         setStudents(studentsData);
         setFilteredStudents(studentsData); // Khởi tạo filteredStudents với tất cả học sinh
+        
+        // Tạo danh sách lớp có học sinh
+        const classes = [...new Set(studentsData.map(student => student.class?.name).filter(Boolean))];
+        setAvailableClasses(classes);
+        
         setStaffs(staffsData);
       })
       .catch((error) => {
@@ -496,19 +503,14 @@ export default function MedicalEvents() {
       return;
     }
     
-    // Tạm thời comment logic lọc để tránh lỗi TypeScript
-    // const filtered = students.filter((student) => {
-    //   // Kiểm tra lớp của học sinh - dựa trên cấu trúc dữ liệu thực tế
-    //   // Có thể cần điều chỉnh tùy theo backend
-    //   const studentClass = student.student?.class || "";
-    //   return studentClass === selectedClass;
-    // });
+    // Lọc học sinh theo lớp đã chọn
+    const filtered = students.filter((student) => {
+      // Kiểm tra lớp của học sinh - dựa trên cấu trúc dữ liệu thực tế
+      const studentClassName = student.class?.name || "";
+      return studentClassName === selectedClass;
+    });
     
-    // Tạm thời hiển thị tất cả học sinh
-    setFilteredStudents(students);
-    
-    // Thông báo cho người dùng (có thể bỏ sau khi hoàn thiện)
-    console.log(`Đã chọn lớp: ${selectedClass}. Tính năng lọc học sinh đang được phát triển.`);
+    setFilteredStudents(filtered);
   };
 
   const refreshEvents = () => {
@@ -743,12 +745,17 @@ export default function MedicalEvents() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Lớp 1A">Lớp 1A</SelectItem>
-                          <SelectItem value="Lớp 1B">Lớp 1B</SelectItem>
-                          <SelectItem value="Lớp 2A">Lớp 2A</SelectItem>
-                          <SelectItem value="Lớp 2B">Lớp 2B</SelectItem>
-                          <SelectItem value="Lớp 3A">Lớp 3A</SelectItem>
-                          <SelectItem value="Lớp 3B">Lớp 3B</SelectItem>
+                          {availableClasses.length === 0 ? (
+                            <div className="p-2 text-gray-500 text-sm">
+                              Không có lớp nào có học sinh
+                            </div>
+                          ) : (
+                            availableClasses.map((className) => (
+                              <SelectItem key={className} value={className}>
+                                {className}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -982,12 +989,17 @@ export default function MedicalEvents() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Lớp 1A">Lớp 1A</SelectItem>
-                          <SelectItem value="Lớp 1B">Lớp 1B</SelectItem>
-                          <SelectItem value="Lớp 2A">Lớp 2A</SelectItem>
-                          <SelectItem value="Lớp 2B">Lớp 2B</SelectItem>
-                          <SelectItem value="Lớp 3A">Lớp 3A</SelectItem>
-                          <SelectItem value="Lớp 3B">Lớp 3B</SelectItem>
+                          {availableClasses.length === 0 ? (
+                            <div className="p-2 text-gray-500 text-sm">
+                              Không có lớp nào có học sinh
+                            </div>
+                          ) : (
+                            availableClasses.map((className) => (
+                              <SelectItem key={className} value={className}>
+                                {className}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
