@@ -40,10 +40,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
 import { useTreatmentHistorySync } from "@/hooks/use-treatment-history-sync";
 import { TreatmentHistoryUpdateNotifier } from "@/components/treatment-history-update-notifier";
-import { getNotificationsByParentId } from "@/lib/api/notification";
+import { getNotificationsByParentId, markNotificationAsRead } from "@/lib/api/notification";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 
-export default function ConsultationComponent() {
+interface ConsultationComponentProps {
+  onMarkAsRead?: () => void;
+}
+
+export default function ConsultationComponent({ onMarkAsRead }: ConsultationComponentProps) {
   const [selectedEvent, setSelectedEvent] = useState<TreatmentHistory | null>(
     null
   );
@@ -81,13 +85,20 @@ export default function ConsultationComponent() {
   const handleMarkAsRead = async (notificationId: string) => {
     setNotificationLoading(true);
     try {
-      // TODO: Gọi API đánh dấu đã đọc ở đây
+      // Gọi API đánh dấu đã đọc
+      await markNotificationAsRead(notificationId);
+      
+      // Cập nhật state local
       setNotifications((prev) =>
         prev.map((n: any) =>
           n._id === notificationId ? { ...n, isRead: true } : n
         )
       );
+      
+      // Gọi callback để cập nhật badge
+      onMarkAsRead?.();
     } catch (error) {
+      console.error("Error marking notification as read:", error);
       // Xử lý lỗi nếu cần
     } finally {
       setNotificationLoading(false);

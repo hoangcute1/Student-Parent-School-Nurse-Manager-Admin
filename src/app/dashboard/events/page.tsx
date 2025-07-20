@@ -7,6 +7,8 @@ import VaccinationNotifications from "./_components/vaccination-notifications";
 import ConsultationAppointments from "./_components/consultation-appointments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useMemo, useState } from "react";
+import { NotificationBadge } from "@/components/ui/notification-badge";
+import { useUnreadConsultations } from "@/hooks/use-unread-consultations";
 
 import ConsultationComponent from "./_components/consultation";
 import { fetchData } from "@/lib/api/api";
@@ -27,6 +29,8 @@ export default function EventsPage() {
     fetchHealthExaminationsPending,
     fetchVaccinationSchedulesPending,
   } = useParentStudentsStore();
+
+  const { unreadCount, refreshUnreadCount } = useUnreadConsultations();
 
   const [pendingExaminations, setPendingExaminations] = useState<any[]>([]);
   const [pendingVaccinations, setPendingVaccinations] = useState<any[]>([]);
@@ -158,9 +162,12 @@ export default function EventsPage() {
           </TabsTrigger>
           <TabsTrigger
             value="history"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white relative"
           >
-            Lịch hẹn tư vấn
+            <span className="flex items-center gap-2">
+              Lịch hẹn tư vấn
+              <NotificationBadge count={unreadCount} />
+            </span>
           </TabsTrigger>
         </TabsList>
 
@@ -182,12 +189,8 @@ export default function EventsPage() {
           <VaccinationNotifications />
         </TabsContent>
 
-        <TabsContent value="consultations" className="space-y-6">
-          <ConsultationAppointments />
-        </TabsContent>
-
         <TabsContent value="history" className="space-y-6">
-          <ConsultationComponent />
+          <ConsultationComponent onMarkAsRead={refreshUnreadCount} />
         </TabsContent>
       </Tabs>
     </div>
