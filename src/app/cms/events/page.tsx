@@ -62,6 +62,9 @@ export default function MedicalEvents() {
   const [processEventOpen, setProcessEventOpen] = useState(false);
   const [viewEventDetailsOpen, setViewEventDetailsOpen] = useState(false);
   const [emergencyProcessOpen, setEmergencyProcessOpen] = useState(false);
+  
+  // State for emergency mode
+  const [isEmergencyMode, setIsEmergencyMode] = useState(false);
 
   // State for selected event
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -101,6 +104,12 @@ export default function MedicalEvents() {
     location: z.string().min(1, "Vui lòng nhập địa điểm"),
     priority: z.enum(["Cao", "Trung bình", "Thấp"]),
     contactStatus: z.string().min(1, "Vui lòng nhập trạng thái liên hệ"),
+    // Các trường khẩn cấp (optional)
+    immediateAction: z.string().optional(),
+    notifyParent: z.boolean().optional(),
+    transferToHospital: z.boolean().optional(),
+    hospitalName: z.string().optional(),
+    emergencyNotes: z.string().optional(),
   });
 
   // Form for adding new event
@@ -115,6 +124,11 @@ export default function MedicalEvents() {
       description: "",
       contactStatus: "Chưa liên hệ",
       reporter: "",
+      immediateAction: "",
+      notifyParent: false,
+      transferToHospital: false,
+      hospitalName: "",
+      emergencyNotes: "",
     },
   });
 
@@ -203,6 +217,22 @@ export default function MedicalEvents() {
   const onAddEvent = async (data: z.infer<typeof eventFormSchema>) => {
     try {
       console.log("Add event data:", data);
+      
+      // Tạo notes với thông tin khẩn cấp nếu có
+      let notes = `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`;
+      
+      if (data.priority === "Cao") {
+        const emergencyInfo = [];
+        if (data.immediateAction) emergencyInfo.push(`Hành động tức thì: ${data.immediateAction}`);
+        if (data.notifyParent) emergencyInfo.push("Đã thông báo phụ huynh");
+        if (data.transferToHospital) emergencyInfo.push(`Chuyển viện: ${data.hospitalName || "Không rõ"}`);
+        if (data.emergencyNotes) emergencyInfo.push(`Ghi chú khẩn cấp: ${data.emergencyNotes}`);
+        
+        if (emergencyInfo.length > 0) {
+          notes += ` | KHẨN CẤP: ${emergencyInfo.join(" | ")}`;
+        }
+      }
+      
       // Gửi đúng schema backend yêu cầu
       await createTreatmentHistory({
         title: data.title,
@@ -215,7 +245,7 @@ export default function MedicalEvents() {
         description: data.description,
         record: "507f1f77bcf86cd799439011", // ObjectId giả cho health record
         date: new Date().toISOString(), // Ngày hiện tại
-        notes: `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`,
+        notes: notes,
       });
 
       // Refresh danh sách events ngay sau khi tạo thành công
@@ -223,7 +253,13 @@ export default function MedicalEvents() {
 
       setAddEventOpen(false);
       addEventForm.reset();
-      alert("Thêm sự cố y tế thành công!");
+      setIsEmergencyMode(false); // Reset emergency mode
+      
+      if (data.priority === "Cao") {
+        alert("🚨 Thêm sự cố khẩn cấp thành công! Vui lòng xử lý ngay lập tức!");
+      } else {
+        alert("Thêm sự cố y tế thành công!");
+      }
     } catch (error) {
       alert("Không thể thêm sự kiện mới!");
       console.error(error);
@@ -520,11 +556,17 @@ export default function MedicalEvents() {
   // Tự động set reporter khi mở form thêm mới
   const handleOpenAddEvent = () => {
     setAddEventOpen(true);
+    setIsEmergencyMode(false); // Reset emergency mode
     // Tự động set người báo cáo là user đang đăng nhập
     if (user) {
       const currentUser = user as any;
       addEventForm.setValue("reporter", currentUser._id || currentUser.id || currentUser.email || "");
     }
+  };
+
+  const handlePriorityChange = (value: "Cao" | "Trung bình" | "Thấp") => {
+    setIsEmergencyMode(value === "Cao");
+    addEventForm.setValue("priority", value);
   };
 
   if (isLoading) {
@@ -654,19 +696,90 @@ export default function MedicalEvents() {
       {/* ... giữ nguyên các Dialog, chỉ cần chỉnh className nếu cần */}
       {/* Add Event Dialog */}
       <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
-        <DialogContent className="max-w-2xl rounded-2xl shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-teal-800">Thêm sự cố y tế</DialogTitle>
-            <DialogDescription className="text-teal-600">
-              Nhập thông tin về sự cố y tế mới
-            </DialogDescription>
+        <DialogContent className={`max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden ${
+          isEmergencyMode ? "border-2 border-red-500 bg-gradient-to-br from-red-50 to-pink-50" : ""
+        }`}>
+          <DialogHeader className={`sticky top-0 z-10 ${isEmergencyMode ? "bg-gradient-to-r from-red-600 to-red-700 text-white rounded-t-lg" : "bg-white"}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {isEmergencyMode ? (
+                  <div className="w-8 h-8 animate-pulse">🚨</div>
+                ) : null}
+                <div>
+                  <DialogTitle className={isEmergencyMode ? "text-white text-2xl font-bold" : "text-teal-800"}>
+                    {isEmergencyMode ? "🚨 THÊM SỰ CỐ KHẨN CẤP" : "Thêm sự cố y tế"}
+                  </DialogTitle>
+                  <DialogDescription className={isEmergencyMode ? "text-red-100" : "text-teal-600"}>
+                    {isEmergencyMode 
+                      ? "Sự cố nghiêm trọng - Cần xử lý ngay lập tức!" 
+                      : "Nhập thông tin về sự cố y tế mới"
+                    }
+                  </DialogDescription>
+                </div>
+              </div>
+              {isEmergencyMode && (
+                <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                  ⚠️ KHẨN CẤP
+                </div>
+              )}
+            </div>
           </DialogHeader>
 
           <Form {...addEventForm}>
             <form
               onSubmit={addEventForm.handleSubmit(onAddEvent)}
-              className="space-y-4"
+              className="space-y-4 max-h-[calc(90vh-200px)] overflow-y-auto pr-2 pt-4 pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
             >
+              {/* Emergency Alert */}
+              {isEmergencyMode && (
+                <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 rounded-r-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 text-red-600">⚠️</div>
+                    <div>
+                      <h4 className="font-bold text-red-800">⚠️ SỰ CỐ KHẨN CẤP</h4>
+                      <p className="text-red-700 text-sm">
+                        Vui lòng xử lý ngay lập tức và tuân thủ quy trình khẩn cấp!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Emergency Checklist */}
+              {isEmergencyMode && (
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <h4 className="font-bold text-yellow-800 mb-3 flex items-center">
+                    <span className="mr-2">⏰</span>
+                    ✅ Checklist khẩn cấp:
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Đánh giá tình trạng học sinh</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Gọi cấp cứu (nếu cần)</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Liên hệ phụ huynh ngay</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Chuẩn bị chuyển viện</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Ghi chép đầy đủ</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Thông báo ban giám hiệu</span>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={addEventForm.control}
@@ -812,20 +925,27 @@ export default function MedicalEvents() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mức độ ưu tiên</FormLabel>
+                      <FormLabel className={isEmergencyMode ? "text-red-700 font-semibold" : ""}>
+                        Mức độ ưu tiên
+                      </FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value: "Cao" | "Trung bình" | "Thấp") => {
+                          handlePriorityChange(value);
+                          field.onChange(value);
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className={isEmergencyMode ? "border-red-300" : ""}>
                             <SelectValue placeholder="Chọn mức độ" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Cao">Cao</SelectItem>
-                          <SelectItem value="Trung bình">Trung bình</SelectItem>
-                          <SelectItem value="Thấp">Thấp</SelectItem>
+                          <SelectItem value="Cao" className="text-red-600 font-semibold">
+                            🚨 Cao (Khẩn cấp)
+                          </SelectItem>
+                          <SelectItem value="Trung bình">⚡ Trung bình</SelectItem>
+                          <SelectItem value="Thấp">📋 Thấp</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -883,16 +1003,163 @@ export default function MedicalEvents() {
                 )}
               />
 
-              <DialogFooter>
+              {/* Emergency Fields - Only show when priority is HIGH */}
+              {isEmergencyMode && (
+                <div className="space-y-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <h3 className="text-lg font-bold text-red-800 flex items-center">
+                    <span className="mr-2">🚨</span>
+                    Thông tin khẩn cấp
+                  </h3>
+
+                  <FormField
+                    control={addEventForm.control}
+                    name="immediateAction"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-red-700 font-semibold">
+                          Hành động tức thì đã thực hiện
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Mô tả hành động khẩn cấp đã thực hiện..."
+                            className="min-h-[80px] border-red-300 focus:border-red-500"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription className="text-red-600">
+                          Ghi chép ngay những hành động đã thực hiện để xử lý khẩn cấp
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={addEventForm.control}
+                      name="notifyParent"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="mt-1"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-red-700 font-semibold flex items-center">
+                              <span className="mr-2">📞</span>
+                              Thông báo khẩn cấp cho phụ huynh
+                            </FormLabel>
+                            <FormDescription className="text-red-600">
+                              Gửi SMS và gọi điện ngay lập tức
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={addEventForm.control}
+                      name="transferToHospital"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="mt-1"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-red-700 font-semibold flex items-center">
+                              <span className="mr-2">🏥</span>
+                              Cần chuyển bệnh viện
+                            </FormLabel>
+                            <FormDescription className="text-red-600">
+                              Chuẩn bị chuyển viện khẩn cấp
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {addEventForm.watch("transferToHospital") && (
+                    <FormField
+                      control={addEventForm.control}
+                      name="hospitalName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-red-700 font-semibold">
+                            Tên bệnh viện
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Nhập tên bệnh viện dự định chuyển đến"
+                              className="border-red-300 focus:border-red-500"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  <FormField
+                    control={addEventForm.control}
+                    name="emergencyNotes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-red-700 font-semibold">
+                          Ghi chú khẩn cấp
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Ghi chép thêm thông tin khẩn cấp..."
+                            className="min-h-[60px] border-red-300 focus:border-red-500"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              <DialogFooter className={`sticky bottom-0 pt-4 border-t ${
+                isEmergencyMode ? "bg-red-50" : "bg-white"
+              }`}>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setAddEventOpen(false)}
+                  onClick={() => {
+                    setAddEventOpen(false);
+                    setIsEmergencyMode(false);
+                  }}
                 >
                   Hủy
                 </Button>
-                <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
-                  Lưu sự kiện
+                <Button 
+                  type="submit" 
+                  className={`font-bold ${
+                    isEmergencyMode 
+                      ? "bg-red-600 hover:bg-red-700 text-white shadow-lg" 
+                      : "bg-teal-600 hover:bg-teal-700"
+                  }`}
+                >
+                  {isEmergencyMode ? (
+                    <>
+                      🚨 LƯU VÀ XỬ LÝ KHẨN CẤP
+                    </>
+                  ) : (
+                    "Lưu sự kiện"
+                  )}
                 </Button>
               </DialogFooter>
             </form>

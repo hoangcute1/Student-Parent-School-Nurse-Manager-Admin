@@ -22,6 +22,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     isLoading,
     selectedStudent,
     setSelectedStudent,
+    selectedStudentId,
+    setSelectedStudentId,
   } = useParentStudentsStore();
   const { isAuthenticated, user } = useAuthStore();
 
@@ -168,11 +170,20 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                           >
                             <div className="flex-1 text-left">
                               <div className="text-md text-blue-800">
-                                {selectedStudent?.student.name || "N/A"}
+                                {(() => {
+                                  const selected = studentsData.find(
+                                    (stu) => stu.student._id === selectedStudentId
+                                  );
+                                  return selected?.student.name || "N/A";
+                                })()}
                               </div>
                               <div className="text-xs text-blue-600">
-                                Lớp{" "}
-                                {selectedStudent?.student.class.name || "N/A"}
+                                Lớp {(() => {
+                                  const selected = studentsData.find(
+                                    (stu) => stu.student._id === selectedStudentId
+                                  );
+                                  return selected?.student.class.name || "N/A";
+                                })()}
                               </div>
                             </div>
                             <ChevronDown
@@ -185,12 +196,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         ) : (
                           <div className="text-left">
                             <div className="font-medium text-blue-800">
-                              {selectedStudent?.student.name || "N/A"}
+                              {studentsData[0]?.student.name || "N/A"}
                             </div>
                             <div className="text-xs text-blue-600">
-                              Lớp{" "}
-                              {(selectedStudent?.student.class?.name as any) ||
-                                "N/A"}{" "}
+                              Lớp {studentsData[0]?.student.class?.name || "N/A"}
                             </div>
                           </div>
                         )}
@@ -198,45 +207,26 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     </div>
                   </div>
 
-                  {/* Student list */}
-                  {studentsData.length > 1 && (
-                    <div
-                      className={cn(
-                        "grid transition-all duration-300 ease-in-out",
-                        showStudentList
-                          ? "grid-rows-[1fr] opacity-100"
-                          : "grid-rows-[0fr] opacity-0"
-                      )}
-                    >
-                      <div className="overflow-hidden">
-                        <div className="space-y-2 p-2 bg-white rounded-lg border border-blue-200">
-                          {studentsData.map(
-                            (studentData) =>
-                              selectedStudent &&
-                              studentData.student._id !==
-                                selectedStudent.student._id && (
-                                <button
-                                  key={studentData.student._id}
-                                  onClick={() => {
-                                    setSelectedStudent(studentData);
-                                    setShowStudentList(false);
-                                  }}
-                                  className="flex items-center gap-2 w-full p-2 rounded-md hover:bg-blue-50 transition-colors"
-                                >
-                                  <div className="flex flex-col text-left">
-                                    <span className="font-medium text-md text-blue-800">
-                                      {studentData.student.name}
-                                    </span>
-                                    <span className="text-xs text-blue-600">
-                                      Lớp{" "}
-                                      {studentData.student.class?.name || "N/A"}{" "}
-                                    </span>
-                                  </div>
-                                </button>
-                              )
+                  {/* Dropdown chọn học sinh khi có nhiều học sinh */}
+                  {studentsData.length > 1 && showStudentList && (
+                    <div className="mt-2 border-t pt-2">
+                      {studentsData.map((stu) => (
+                        <button
+                          key={stu.student._id}
+                          className={cn(
+                            "block w-full text-left px-3 py-2 rounded hover:bg-blue-100 transition-all",
+                            selectedStudentId === stu.student._id && "bg-blue-100 font-bold"
                           )}
-                        </div>
-                      </div>
+                          onClick={() => {
+                            setSelectedStudentId(stu.student._id);
+                            setSelectedStudent(stu);
+                            setShowStudentList(false);
+                          }}
+                        >
+                          <div className="text-blue-800">{stu.student.name}</div>
+                          <div className="text-xs text-blue-600">Lớp {stu.student.class.name}</div>
+                        </button>
+                      ))}
                     </div>
                   )}
 
