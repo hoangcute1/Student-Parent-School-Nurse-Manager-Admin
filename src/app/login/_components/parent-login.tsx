@@ -147,9 +147,11 @@ export function ParentLoginForm() {
 
       if (error instanceof Error) {
         if (error.message.includes("401")) {
-          message = "Email hoặc mật khẩu không chính xác";
+          message = "Bạn đã nhập sai mật khẩu, hãy thử lại";
         } else if (error.message.includes("403")) {
           message = "Tài khoản của bạn không có quyền truy cập";
+        } else {
+          message = "Bạn đã nhập sai mật khẩu, hãy thử lại";
         }
       }
 

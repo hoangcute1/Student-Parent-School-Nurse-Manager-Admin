@@ -139,13 +139,11 @@ export function StaffLoginForm() {
       let message = "Có lỗi xảy ra khi đăng nhập";
       if (error instanceof Error) {
         if (error.message.includes("401")) {
-          message = "Email hoặc mật khẩu không chính xác";
+          message = "Bạn đã nhập sai mật khẩu, hãy thử lại";
         } else if (error.message.includes("403")) {
           message = "Tài khoản của bạn không có quyền truy cập";
-        } else if (error.message.includes("404")) {
-          message = "Không tìm thấy tài khoản với email này";
-        } else if (error.message.includes("network")) {
-          message = "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn";
+        } else {
+          message = "Bạn đã nhập sai mật khẩu, hãy thử lại";
         }
       }
       setErrors({ general: message });
