@@ -182,7 +182,9 @@ export function ParentLoginForm() {
       {errors.general && (
         <Alert variant="destructive" className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-red-800">{errors.general}</AlertDescription>
+          <AlertDescription className="text-red-800">
+            {errors.general}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -195,8 +197,18 @@ export function ParentLoginForm() {
           </Label>
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-sky-500">
-              <svg className="h-5 w-5 text-gray-400 group-focus-within:text-sky-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              <svg
+                className="h-5 w-5 text-gray-400 group-focus-within:text-sky-500 transition-colors duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                />
               </svg>
             </div>
             <Input
@@ -207,7 +219,9 @@ export function ParentLoginForm() {
               onChange={handleChange}
               required
               className={`pl-10 h-12 border-gray-300 focus:border-sky-500 focus:ring-sky-500 transition-all duration-200 hover:border-sky-300 ${
-                errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                errors.email
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : ""
               }`}
             />
           </div>
@@ -222,7 +236,10 @@ export function ParentLoginForm() {
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+            <Label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-700"
+            >
               Mật khẩu
             </Label>
             <Link
@@ -234,8 +251,18 @@ export function ParentLoginForm() {
           </div>
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400 group-focus-within:text-sky-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <svg
+                className="h-5 w-5 text-gray-400 group-focus-within:text-sky-500 transition-colors duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             </div>
             <Input
@@ -246,7 +273,9 @@ export function ParentLoginForm() {
               required
               placeholder="Nhập mật khẩu của bạn"
               className={`pl-10 pr-12 h-12 border-gray-300 focus:border-sky-500 focus:ring-sky-500 transition-all duration-200 hover:border-sky-300 ${
-                errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                errors.password
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : ""
               }`}
             />
             <Button
@@ -280,9 +309,24 @@ export function ParentLoginForm() {
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Đang đăng nhập...
               </div>
@@ -313,7 +357,7 @@ export function ParentLoginForm() {
 
         {/* Google Login */}
         <div className="w-full">
-          <LoginGoogle/>
+          <LoginGoogle />
         </div>
       </form>
 

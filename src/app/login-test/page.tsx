@@ -52,7 +52,7 @@ export default function LoginTestPage() {
 
   const handleLogin = () => {
     const userData = {
-      id: "test-user-id",
+      _id: "test-user-id",
       email,
       name,
       role,
