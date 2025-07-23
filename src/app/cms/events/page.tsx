@@ -558,9 +558,11 @@ export default function MedicalEvents() {
     setAddEventOpen(true);
     setIsEmergencyMode(false); // Reset emergency mode
     // Tự động set người báo cáo là user đang đăng nhập
-    if (user) {
-      const currentUser = user as any;
-      addEventForm.setValue("reporter", currentUser._id || currentUser.id || currentUser.email || "");
+    if (user && user._id) {
+      addEventForm.setValue("reporter", user._id);
+    } else {
+      // Nếu không có _id, không set hoặc có thể báo lỗi
+      addEventForm.setValue("reporter", "");
     }
   };
 
@@ -897,17 +899,8 @@ export default function MedicalEvents() {
                     <FormItem>
                       <FormLabel>Người báo cáo</FormLabel>
                       <FormControl>
-                        <Input 
-                          value={(() => {
-                            if (user) {
-                              const currentUser = user as any;
-                              const userName = typeof currentUser.name === "string" ? currentUser.name : "";
-                              const userEmail = typeof currentUser.email === "string" ? currentUser.email : "";
-                              const userRole = typeof currentUser.role === "string" ? currentUser.role : "Staff";
-                              return `${userName || userEmail || "Unknown"} - ${userRole}`;
-                            }
-                            return "Không xác định";
-                          })()}
+                        <Input
+                          value={profile?.name || user?.email || "Không xác định"}
                           disabled
                           className="bg-gray-50 text-gray-600"
                         />
@@ -1291,35 +1284,24 @@ export default function MedicalEvents() {
                 <FormField
                   control={updateEventForm.control}
                   name="reporter"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Người báo cáo</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn người báo cáo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {staffs.length === 0 ? (
-                              <div className="p-2 text-gray-500 text-sm">
-                                Không có nhân viên
-                              </div>
-                            ) : (
-                              staffs.map((staff) => (
-                                <SelectItem key={staff._id} value={staff._id}>
-                                  {staff.profile?.name} - {staff.user?.role || "Staff"}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    // Tìm staff theo ID
+                    const staffId = field.value;
+                    const staff = staffs.find((s) => s._id === staffId);
+                    const staffName = staff?.profile?.name || staff?.user?.email || "Không xác định";
+                    return (
+                      <FormItem>
+                        <FormLabel>Người báo cáo</FormLabel>
+                        <FormControl>
+                          <Input value={staffName} disabled className="bg-gray-50 text-gray-600" />
+                        </FormControl>
+                        <FormDescription className="text-xs text-gray-500">
+                          Tự động lấy từ người tạo sự kiện, không thể thay đổi
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
@@ -1633,9 +1615,14 @@ export default function MedicalEvents() {
                     <span className="text-gray-800">
                       {(() => {
                         if (typeof selectedEvent.staff === "object" && selectedEvent.staff !== null) {
-                          return selectedEvent.staff.name || selectedEvent.staff.email || "Không rõ";
+                          // Ưu tiên profile.name, rồi user.email
+                          return selectedEvent.staff.profile?.name || selectedEvent.staff.user?.email || profile?.name || user?.email || "Không rõ";
                         }
-                        return String(selectedEvent.staff || "Không rõ");
+                        if (typeof selectedEvent.staff === "string") {
+                          const staffObj = staffs.find((s) => s._id === selectedEvent.staff);
+                          return staffObj?.profile?.name || staffObj?.user?.email || profile?.name || user?.email || "Không rõ";
+                        }
+                        return profile?.name || user?.email || "Không rõ";
                       })()}
                     </span>
                   </div>

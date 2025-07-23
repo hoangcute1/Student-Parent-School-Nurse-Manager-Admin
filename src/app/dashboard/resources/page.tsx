@@ -24,9 +24,12 @@ import { getParentId } from "@/lib/utils/parent-utils";
 import { getTreatmentHistoryByParentId } from "@/lib/api/treatment-history";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStaffStore } from "@/stores/staff-store";
+import { Staff } from "@/lib/type/staff";
 
 export default function MedicalHistoryPage() {
   const { fetchStudentsByParent, studentsData, isLoading: studentsLoading, error: studentsError, selectedStudentId, setSelectedStudentId } = useParentStudentsStore();
+  const { staffs, fetchStaffs } = useStaffStore();
   // State để lưu treatment history
   const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +67,10 @@ export default function MedicalHistoryPage() {
     };
     fetchData();
   }, [fetchStudentsByParent]);
+
+  useEffect(() => {
+    fetchStaffs();
+  }, [fetchStaffs]);
 
   // Lọc lịch sử bệnh án theo học sinh được chọn (kiểm tra kỹ kiểu dữ liệu)
   const filteredHistory = selectedStudentId
@@ -227,7 +234,17 @@ export default function MedicalHistoryPage() {
                               {entry.staff && (
                                 <>
                                   <span>•</span>
-                                  <span>Nhân viên: {typeof entry.staff === 'string' ? entry.staff : 'N/A'}</span>
+                                  <span>Nhân viên: {(() => {
+                                    if (typeof entry.staff === 'object' && entry.staff !== null) {
+                                      const staffObj = (staffs as Staff[]).find((s) => s._id === entry.staff);
+                                      return staffObj?.profile?.name || staffObj?.user?.email || "Không rõ";
+                                    }
+                                    if (typeof entry.staff === 'string') {
+                                      const staffObj = staffs.find((s) => s._id === entry.staff);
+                                      return staffObj?.profile?.name || staffObj?.user?.email || "Không rõ";
+                                    }
+                                    return "Không rõ";
+                                  })()}</span>
                                 </>
                               )}
                             </CardDescription>
