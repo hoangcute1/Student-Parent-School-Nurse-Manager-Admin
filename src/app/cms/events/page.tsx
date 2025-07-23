@@ -398,6 +398,15 @@ export default function MedicalEvents() {
 
   // Filter events based on search and filters
   const filteredEvents = treatmentHistories.filter((event) => {
+    // Lấy tiêu đề từ title hoặc từ notes (nếu có)
+    let eventTitle = event.title || "";
+    if (!eventTitle && event.notes) {
+      const match = event.notes.match(/Title: ([^|]+)/);
+      if (match) eventTitle = match[1].trim();
+    }
+    // Loại bỏ sự kiện có tiêu đề 'Ngã cầu thang'
+    if (eventTitle === "Ngã cầu thang") return false;
+
     const eventStudent =
       typeof event.student === "object" && event.student?.name
         ? event.student.name
@@ -407,7 +416,7 @@ export default function MedicalEvents() {
 
     const matchesSearch =
       eventStudent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      eventTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.location?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
