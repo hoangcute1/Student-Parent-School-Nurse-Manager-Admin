@@ -95,12 +95,16 @@ export default function HealthResultStats() {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="animate-pulse text-center">
         <CardContent className="p-6">
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
+          <div className="flex flex-col items-center">
+            <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
+            <div className="text-2xl font-bold text-blue-700">
+              Y tế học đường
+            </div>
+            <div className="text-sky-500 mt-2">
+              Đang tải dữ liệu, vui lòng chờ...
+            </div>
           </div>
         </CardContent>
       </Card>

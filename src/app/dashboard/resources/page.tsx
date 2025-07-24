@@ -23,15 +23,30 @@ import { useEffect, useState } from "react";
 import { getParentId } from "@/lib/utils/parent-utils";
 import { getTreatmentHistoryByParentId } from "@/lib/api/treatment-history";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useStaffStore } from "@/stores/staff-store";
 import { Staff } from "@/lib/type/staff";
 
 export default function MedicalHistoryPage() {
-  const { fetchStudentsByParent, studentsData, isLoading: studentsLoading, error: studentsError, selectedStudentId, setSelectedStudentId } = useParentStudentsStore();
+  const {
+    fetchStudentsByParent,
+    studentsData,
+    isLoading: studentsLoading,
+    error: studentsError,
+    selectedStudentId,
+    setSelectedStudentId,
+  } = useParentStudentsStore();
   const { staffs, fetchStaffs } = useStaffStore();
   // State để lưu treatment history
-  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>([]);
+  const [treatmentHistory, setTreatmentHistory] = useState<TreatmentHistory[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,16 +135,12 @@ export default function MedicalHistoryPage() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 items-center">
+          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Tài nguyên phụ huynh
+            Y tế học đường
           </h1>
-          <p className="text-blue-600">
-            Theo dõi lịch sử bệnh án của học sinh
-          </p>
-        </div>
-        <div className="flex justify-center items-center py-8">
-          <div className="text-blue-600">Đang tải dữ liệu...</div>
+          <p className="text-sky-500">Đang tải dữ liệu, vui lòng chờ...</p>
         </div>
       </div>
     );
@@ -143,9 +154,7 @@ export default function MedicalHistoryPage() {
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
             Tài nguyên phụ huynh
           </h1>
-          <p className="text-blue-600">
-            Theo dõi lịch sử bệnh án của học sinh
-          </p>
+          <p className="text-blue-600">Theo dõi lịch sử bệnh án của học sinh</p>
         </div>
         <div className="flex justify-center items-center py-8">
           <div className="text-red-600">{error}</div>
@@ -160,9 +169,7 @@ export default function MedicalHistoryPage() {
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
           Tài nguyên phụ huynh
         </h1>
-        <p className="text-blue-600">
-          Theo dõi lịch sử bệnh án của học sinh
-        </p>
+        <p className="text-blue-600">Theo dõi lịch sử bệnh án của học sinh</p>
       </div>
       {/* Dropdown chọn học sinh */}
       {studentsData.length > 1 && (
@@ -188,9 +195,7 @@ export default function MedicalHistoryPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-blue-800">
-                Lịch sử bệnh án
-              </CardTitle>
+              <CardTitle className="text-blue-800">Lịch sử bệnh án</CardTitle>
               <CardDescription className="text-blue-600">
                 Theo dõi toàn bộ lịch sử bệnh án và điều trị của học sinh
               </CardDescription>
@@ -247,25 +252,53 @@ export default function MedicalHistoryPage() {
                               <FileText className="h-6 w-6 text-blue-500" />
                               {typeof entry.record === "string"
                                 ? entry.record
-                                : (entry.record && typeof entry.record === "object" && (entry.record as any).name)
-                                  ? (entry.record as any).name
-                                  : (entry.record && typeof entry.record === "object" && (entry.record as any)._id)
-                                    ? (entry.record as any)._id
-                                    : "Bệnh án y tế"}
+                                : entry.record &&
+                                  typeof entry.record === "object" &&
+                                  (entry.record as any).name
+                                ? (entry.record as any).name
+                                : entry.record &&
+                                  typeof entry.record === "object" &&
+                                  (entry.record as any)._id
+                                ? (entry.record as any)._id
+                                : "Bệnh án y tế"}
                             </CardTitle>
                             <CardDescription className="flex flex-wrap items-center gap-3 text-blue-700 mt-2">
-                              <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />{formatDate(entry.date || entry.createdAt || "")}</span>
-                              <span className="flex items-center gap-1"><User className="h-4 w-4" />{getStudentName(entry.student)}</span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                {formatDate(
+                                  entry.date || entry.createdAt || ""
+                                )}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <User className="h-4 w-4" />
+                                {getStudentName(entry.student)}
+                              </span>
                               {entry.staff && (
-                                <span className="flex items-center gap-1"><User className="h-4 w-4 text-blue-400" />
+                                <span className="flex items-center gap-1">
+                                  <User className="h-4 w-4 text-blue-400" />
                                   {(() => {
-                                    if (typeof entry.staff === 'object' && entry.staff !== null) {
-                                      const staffObj = (staffs as Staff[]).find((s) => s._id === entry.staff);
-                                      return staffObj?.profile?.name || staffObj?.user?.email || "Không rõ";
+                                    if (
+                                      typeof entry.staff === "object" &&
+                                      entry.staff !== null
+                                    ) {
+                                      const staffObj = (staffs as Staff[]).find(
+                                        (s) => s._id === entry.staff
+                                      );
+                                      return (
+                                        staffObj?.profile?.name ||
+                                        staffObj?.user?.email ||
+                                        "Không rõ"
+                                      );
                                     }
-                                    if (typeof entry.staff === 'string') {
-                                      const staffObj = staffs.find((s) => s._id === entry.staff);
-                                      return staffObj?.profile?.name || staffObj?.user?.email || "Không rõ";
+                                    if (typeof entry.staff === "string") {
+                                      const staffObj = staffs.find(
+                                        (s) => s._id === entry.staff
+                                      );
+                                      return (
+                                        staffObj?.profile?.name ||
+                                        staffObj?.user?.email ||
+                                        "Không rõ"
+                                      );
                                     }
                                     return "Không rõ";
                                   })()}
@@ -274,7 +307,10 @@ export default function MedicalHistoryPage() {
                             </CardDescription>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-semibold px-3 py-1 rounded-full shadow-sm">
+                            <Badge
+                              variant="outline"
+                              className="bg-blue-50 text-blue-700 border-blue-200 font-semibold px-3 py-1 rounded-full shadow-sm"
+                            >
                               Bệnh án
                             </Badge>
                           </div>
@@ -285,37 +321,73 @@ export default function MedicalHistoryPage() {
                           <p className="text-blue-800 text-base font-medium bg-blue-50 rounded-lg p-3 shadow-inner">
                             {entry.description}
                           </p>
-                          {entry.notes ? (
-                            (() => {
-                              const parsed = parseTechnicalNotes(entry.notes!);
-                              if (parsed) {
-                                return (
-                                  <div>
-                                    <label className="text-sm font-semibold text-blue-700">Ghi chú:</label>
-                                    <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner space-y-1">
-                                      <div><span className="font-semibold">Tiêu đề:</span> {parsed["Title"]}</div>
-                                      <div><span className="font-semibold">Địa điểm:</span> {parsed["Location"]}</div>
-                                      <div><span className="font-semibold">Mức độ ưu tiên:</span> {parsed["Priority"]}</div>
-                                      <div><span className="font-semibold">Lớp:</span> {parsed["Class"]}</div>
-                                      <div><span className="font-semibold">Trạng thái liên hệ:</span> {parsed["Contact Status"]}</div>
-                                      {parsed["Ghi chú khẩn cấp"] && (
-                                        <div className="mt-2"><span className="font-semibold text-red-700">Ghi chú khẩn cấp:</span> {parsed["Ghi chú khẩn cấp"]}</div>
-                                      )}
-                                    </div>
-                                  </div>
+                          {entry.notes
+                            ? (() => {
+                                const parsed = parseTechnicalNotes(
+                                  entry.notes!
                                 );
-                              } else {
-                                return (
-                                  <div>
-                                    <label className="text-sm font-semibold text-blue-700">Ghi chú:</label>
-                                    <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner">
-                                      {entry.notes}
+                                if (parsed) {
+                                  return (
+                                    <div>
+                                      <label className="text-sm font-semibold text-blue-700">
+                                        Ghi chú:
+                                      </label>
+                                      <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner space-y-1">
+                                        <div>
+                                          <span className="font-semibold">
+                                            Tiêu đề:
+                                          </span>{" "}
+                                          {parsed["Title"]}
+                                        </div>
+                                        <div>
+                                          <span className="font-semibold">
+                                            Địa điểm:
+                                          </span>{" "}
+                                          {parsed["Location"]}
+                                        </div>
+                                        <div>
+                                          <span className="font-semibold">
+                                            Mức độ ưu tiên:
+                                          </span>{" "}
+                                          {parsed["Priority"]}
+                                        </div>
+                                        <div>
+                                          <span className="font-semibold">
+                                            Lớp:
+                                          </span>{" "}
+                                          {parsed["Class"]}
+                                        </div>
+                                        <div>
+                                          <span className="font-semibold">
+                                            Trạng thái liên hệ:
+                                          </span>{" "}
+                                          {parsed["Contact Status"]}
+                                        </div>
+                                        {parsed["Ghi chú khẩn cấp"] && (
+                                          <div className="mt-2">
+                                            <span className="font-semibold text-red-700">
+                                              Ghi chú khẩn cấp:
+                                            </span>{" "}
+                                            {parsed["Ghi chú khẩn cấp"]}
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              }
-                            })()
-                          ) : null}
+                                  );
+                                } else {
+                                  return (
+                                    <div>
+                                      <label className="text-sm font-semibold text-blue-700">
+                                        Ghi chú:
+                                      </label>
+                                      <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner">
+                                        {entry.notes}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              })()
+                            : null}
                         </div>
                       </CardContent>
                     </Card>

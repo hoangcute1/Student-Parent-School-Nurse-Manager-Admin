@@ -68,7 +68,7 @@ export function StudentTable({
                 colSpan={6}
                 className="text-center py-10 text-blue-600"
               >
-                Đang tải dữ liệu...
+                Y tế học đường
               </TableCell>
             </TableRow>
           ) : error ? (

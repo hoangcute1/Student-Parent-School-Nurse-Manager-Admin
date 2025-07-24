@@ -48,7 +48,15 @@ export default function VaccinationEventDetailPage() {
   }, [eventId]);
 
   if (loading)
-    return <div className="p-8 text-center">Đang tải dữ liệu...</div>;
+    return (
+      <div className="p-8 text-center text-2xl font-bold text-blue-700">
+        Y tế học đường
+        <br />
+        <span className="text-sky-500 text-base font-normal block mt-2">
+          Đang tải dữ liệu, vui lòng chờ...
+        </span>
+      </div>
+    );
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
   if (!event)
     return <div className="p-8 text-center">Không tìm thấy sự kiện</div>;

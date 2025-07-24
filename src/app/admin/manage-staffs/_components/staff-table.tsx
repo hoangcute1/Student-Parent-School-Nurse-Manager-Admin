@@ -61,7 +61,7 @@ export function StaffTable({ staffs, isLoading, error }: StaffTableProps) {
                 colSpan={8}
                 className="text-center py-10 text-blue-600"
               >
-                Đang tải dữ liệu...
+                Y tế học đường
               </TableCell>
             </TableRow>
           ) : error ? (
@@ -220,7 +220,7 @@ export function StaffTable({ staffs, isLoading, error }: StaffTableProps) {
                         variant: "default",
                       });
                       setDeleteStaff(null);
-                       await fetchStaffs();
+                      await fetchStaffs();
                     } catch (err: any) {
                       toast({
                         title: "Lỗi khi xoá",

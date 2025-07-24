@@ -148,10 +148,13 @@ export default function ParentHealthRecords() {
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-12">
                         <div className="flex flex-col items-center space-y-4">
-                          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-600"></div>
-                          <p className="text-sky-600 text-lg font-medium">
-                            Đang tải dữ liệu...
-                          </p>
+                          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
+                          <div className="text-2xl font-bold text-blue-700">
+                            Y tế học đường
+                          </div>
+                          <div className="text-sky-500 mt-2">
+                            Đang tải dữ liệu, vui lòng chờ...
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -246,7 +249,6 @@ export default function ParentHealthRecords() {
                               className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 hover:text-blue-800 rounded-lg px-3 py-2 h-9 transition-all duration-200 shadow-sm hover:shadow-md"
                             >
                               <Edit className="h-4 w-4" />
-
                             </Button>
                           </div>
                         </TableCell>

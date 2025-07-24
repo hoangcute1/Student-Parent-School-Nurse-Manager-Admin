@@ -375,11 +375,11 @@ export default function FeedbackPage() {
                       <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-sky-500 to-sky-600 rounded-full animate-pulse mb-6 shadow-lg">
                         <ThumbsUp className="w-10 h-10 text-white" />
                       </div>
-                      <p className="text-sky-600 text-xl font-medium">
-                        Đang tải thắc mắc...
+                      <p className="text-blue-700 text-2xl font-bold tracking-wide animate-pulse">
+                        Y tế học đường
                       </p>
-                      <p className="text-sky-400 text-sm mt-2">
-                        Vui lòng chờ trong giây lát
+                      <p className="text-blue-400 text-base mt-2">
+                        Vui lòng chờ trong giây lát...
                       </p>
                     </div>
                   ) : (

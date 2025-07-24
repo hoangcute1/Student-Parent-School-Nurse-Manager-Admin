@@ -186,6 +186,7 @@ export default function EventsPage() {
         </TabsContent>
 
         <TabsContent value="vaccinations" className="space-y-6">
+          {/* Thông báo quan trọng và sự kiện sắp tới cho lịch tiêm chủng */}
           <VaccinationNotifications />
         </TabsContent>
 

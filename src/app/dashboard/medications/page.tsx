@@ -31,12 +31,18 @@ import AddMedicineDeliveryForm from "./_components/add-medications-dialog";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 // Tách TableRow thành component con để tối ưu render
-const DeliveryRow = React.memo(function DeliveryRow({ delivery, onShowDetail, onDelete, deletingId, updatedAt }: {
-  delivery: MedicineDeliveryByParent,
-  onShowDetail: (delivery: MedicineDeliveryByParent) => void,
-  onDelete: (id: string) => void,
-  deletingId: string | null,
-  updatedAt: string | null
+const DeliveryRow = React.memo(function DeliveryRow({
+  delivery,
+  onShowDetail,
+  onDelete,
+  deletingId,
+  updatedAt,
+}: {
+  delivery: MedicineDeliveryByParent;
+  onShowDetail: (delivery: MedicineDeliveryByParent) => void;
+  onDelete: (id: string) => void;
+  deletingId: string | null;
+  updatedAt: string | null;
 }) {
   return (
     <TableRow
@@ -64,29 +70,35 @@ const DeliveryRow = React.memo(function DeliveryRow({ delivery, onShowDetail, on
             delivery.status === "completed"
               ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
               : delivery.status === "cancelled"
-                ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
-                : delivery.status === "morning" || delivery.status === "noon"
-                  ? "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-                  : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
+              ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+              : delivery.status === "morning" || delivery.status === "noon"
+              ? "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
+              : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
           }
         >
-          {
-            delivery.status === "pending"
-              ? "Chờ xử lý"
-              : delivery.status === "morning"
-                ? "Đã uống vào buổi sáng"
-                : delivery.status === "noon"
-                  ? "Đã uống vào buổi trưa"
-                  : delivery.status === "completed"
-                    ? "Đã hoàn thành"
-                    : delivery.status === "cancelled"
-                      ? "Đã huỷ"
-                      : delivery.status
-          }
+          {delivery.status === "pending"
+            ? "Chờ xử lý"
+            : delivery.status === "morning"
+            ? "Đã uống vào buổi sáng"
+            : delivery.status === "noon"
+            ? "Đã uống vào buổi trưa"
+            : delivery.status === "completed"
+            ? "Đã hoàn thành"
+            : delivery.status === "cancelled"
+            ? "Đã huỷ"
+            : delivery.status}
         </Badge>
       </TableCell>
       <TableCell className="font-medium text-sky-900">
-        {updatedAt ? new Date(updatedAt).toLocaleDateString("vi-VN", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "Chưa có thông tin"}
+        {updatedAt
+          ? new Date(updatedAt).toLocaleDateString("vi-VN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "Chưa có thông tin"}
       </TableCell>
       <TableCell className="text-center">
         <div className="flex gap-2 justify-center">
@@ -107,7 +119,7 @@ const DeliveryRow = React.memo(function DeliveryRow({ delivery, onShowDetail, on
             title="Xóa hoàn toàn đơn thuốc khỏi hệ thống. Quản trị viên và nhân viên y tế cũng sẽ không thể thấy đơn này."
           >
             <X className="h-4 w-4" />
-            {deletingId === delivery.id  }
+            {deletingId === delivery.id}
           </Button>
         </div>
       </TableCell>
@@ -123,9 +135,7 @@ export default function MedicationsPage() {
     fetchMedicineDeliveryByParentId,
     deleteMedicineDelivery,
   } = useMedicineDeliveryStore();
-  const {
-    fetchStudentsByParent,
-  } = useParentStudentsStore();
+  const { fetchStudentsByParent } = useParentStudentsStore();
 
   useEffect(() => {
     fetchStudentsByParent();
@@ -146,35 +156,38 @@ export default function MedicationsPage() {
     setShowDetail(true);
   }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
-    if (!id) {
-      alert("Không tìm thấy ID đơn thuốc để xoá!");
-      return;
-    }
-    console.log("Attempting to delete medicine delivery with ID:", id);
-    if (
-      !window.confirm(
-        "⚠️ LƯU Ý: Bạn có chắc muốn xoá hoàn toàn đơn thuốc này?\n\n" +
-        "Khi xóa, đơn thuốc sẽ bị XÓA HOÀN TOÀN khỏi hệ thống, " +
-        "bao gồm cả view của quản trị viên và nhân viên y tế.\n\n" +
-        "Hành động này KHÔNG THỂ HOÀN TÁC!"
+  const handleDelete = useCallback(
+    async (id: string) => {
+      if (!id) {
+        alert("Không tìm thấy ID đơn thuốc để xoá!");
+        return;
+      }
+      console.log("Attempting to delete medicine delivery with ID:", id);
+      if (
+        !window.confirm(
+          "⚠️ LƯU Ý: Bạn có chắc muốn xoá hoàn toàn đơn thuốc này?\n\n" +
+            "Khi xóa, đơn thuốc sẽ bị XÓA HOÀN TOÀN khỏi hệ thống, " +
+            "bao gồm cả view của quản trị viên và nhân viên y tế.\n\n" +
+            "Hành động này KHÔNG THỂ HOÀN TÁC!"
+        )
       )
-    )
-      return;
-    setDeletingId(id);
-    try {
-      console.log("Calling deleteMedicineDelivery...");
-      await deleteMedicineDelivery(id);
-      console.log("Delete successful, refreshing data...");
-      await fetchMedicineDeliveryByParentId();
-      console.log("Data refreshed successfully");
-      alert("✅ Đã xóa đơn thuốc thành công!");
-    } catch (error) {
-      console.error("Delete failed:", error);
-      alert("❌ Xoá thất bại! Vui lòng thử lại.");
-    }
-    setDeletingId(null);
-  }, [deleteMedicineDelivery, fetchMedicineDeliveryByParentId]);
+        return;
+      setDeletingId(id);
+      try {
+        console.log("Calling deleteMedicineDelivery...");
+        await deleteMedicineDelivery(id);
+        console.log("Delete successful, refreshing data...");
+        await fetchMedicineDeliveryByParentId();
+        console.log("Data refreshed successfully");
+        alert("✅ Đã xóa đơn thuốc thành công!");
+      } catch (error) {
+        console.error("Delete failed:", error);
+        alert("❌ Xoá thất bại! Vui lòng thử lại.");
+      }
+      setDeletingId(null);
+    },
+    [deleteMedicineDelivery, fetchMedicineDeliveryByParentId]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 p-4 md:p-6">
@@ -254,9 +267,14 @@ export default function MedicationsPage() {
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
-                        <p className="text-sky-600">Đang tải dữ liệu...</p>
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <p className="text-blue-700 text-2xl font-bold tracking-wide animate-pulse">
+                          Y tế học đường
+                        </p>
+                        <p className="text-blue-400 text-base mt-2">
+                          Vui lòng chờ trong giây lát...
+                        </p>
                       </div>
                     </TableCell>
                   </TableRow>

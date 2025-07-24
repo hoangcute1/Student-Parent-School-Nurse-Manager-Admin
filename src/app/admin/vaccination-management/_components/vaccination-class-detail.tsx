@@ -63,7 +63,18 @@ export default function VaccinationClassDetail({
     }
   };
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="text-2xl font-bold text-blue-700">Y tế học đường</div>
+          <div className="text-sky-500 mt-2">
+            Đang tải dữ liệu, vui lòng chờ...
+          </div>
+        </div>
+      </div>
+    );
   if (!classDetail) return <div>Không tìm thấy thông tin lớp</div>;
 
   // Lọc chỉ học sinh đã đồng ý

@@ -68,13 +68,13 @@ export default function ParentMedicine() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-center items-center h-96">
-            <span className="text-sky-600 text-lg font-semibold">
-              Đang tải dữ liệu...
-            </span>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <span className="text-2xl font-bold text-blue-700">
+            Y tế học đường
+          </span>
+          <p className="text-sky-500 mt-2">Đang tải dữ liệu, vui lòng chờ...</p>
         </div>
       </div>
     );

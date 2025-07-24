@@ -34,10 +34,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-sky-100/50">
         <div className="text-center">
-          <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-lg">Đang tải thông tin...</p>
+          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="mt-4 text-2xl font-bold text-blue-700">
+            Y tế học đường
+          </p>
+          <p className="text-sky-500 mt-2">Đang tải dữ liệu, vui lòng chờ...</p>
         </div>
       </div>
     );

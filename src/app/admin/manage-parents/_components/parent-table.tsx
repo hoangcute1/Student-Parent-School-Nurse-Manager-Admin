@@ -61,7 +61,7 @@ export function ParentTable({ parents, isLoading, error }: ParentTableProps) {
                 colSpan={8}
                 className="text-center py-10 text-blue-600"
               >
-                Đang tải dữ liệu...
+                Y tế học đường
               </TableCell>
             </TableRow>
           ) : error ? (

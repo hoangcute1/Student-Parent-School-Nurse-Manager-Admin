@@ -50,7 +50,13 @@ import { TreatmentHistory } from "@/lib/type/treatment-history";
 import { EventStats } from "./components/stats-cards";
 import { FilterBar } from "./_components/filter-bar";
 import { EventTable } from "./components/event-table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 export default function MedicalEvents() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,12 +81,12 @@ export default function MedicalEvents() {
   const [eventError, setEventError] = useState<string | null>(null);
 
   // Sử dụng store cho treatment history
-  const { 
-    treatmentHistories: eventList, 
-    isLoading: eventLoading, 
+  const {
+    treatmentHistories: eventList,
+    isLoading: eventLoading,
     error: storeError,
     fetchAllTreatmentHistories,
-    updateTreatmentHistoryItem 
+    updateTreatmentHistoryItem,
   } = useTreatmentHistoryStore();
 
   // Form schema for adding/updating event
@@ -457,16 +463,12 @@ export default function MedicalEvents() {
   if (eventLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-2 items-center">
+          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
           <h1 className="text-3xl font-bold tracking-tight text-sky-800">
-            Quản lý sự cố y tế
+            Y tế học đường
           </h1>
-          <p className="text-sky-600">
-            Theo dõi và xử lý các sự cố y tế trong trường học
-          </p>
-        </div>
-        <div className="flex justify-center items-center py-8">
-          <div className="text-sky-600">Đang tải dữ liệu...</div>
+          <p className="text-sky-600">Đang tải dữ liệu, vui lòng chờ...</p>
         </div>
       </div>
     );
