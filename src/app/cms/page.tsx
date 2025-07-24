@@ -8,4 +8,5 @@ export default function CMSPage() {
   useEffect(() => {
     router.push("cms/manage-students");
   }, [router]);
+  
 }
