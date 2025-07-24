@@ -99,27 +99,35 @@ export default function MedicationsPage() {
 
   // Transform Medication data for display
   const displayMedications = Array.isArray(medications)
-    ? medications
-        .filter((medication: any) => {
-          // Apply search filter if exists
-          if (searchQuery && searchQuery.trim() !== "") {
-            const query = searchQuery.toLowerCase();
-            return (
-              medication.name?.toLowerCase().includes(query) ||
-              medication.type?.toLowerCase().includes(query) ||
-              medication.description?.toLowerCase().includes(query)
-            );
-          }
-          return true;
-        })
-        // Apply type filter if not "all"
-        .filter((medication: any) => {
-          if (typeFilter !== "all") {
-            return medication.type?.toLowerCase() === typeFilter.toLowerCase();
-          }
-          return true;
-        })
-    : [];
+  ? medications
+      .filter((medication: any) => {
+        // Lọc theo từ khóa tìm kiếm
+        if (searchQuery && searchQuery.trim() !== "") {
+          const query = searchQuery.toLowerCase();
+          return (
+            medication.name?.toLowerCase().includes(query) ||
+            medication.type?.toLowerCase().includes(query) ||
+            medication.description?.toLowerCase().includes(query)
+          );
+        }
+        return true;
+      })
+      .filter((medication: any) => {
+        // Lọc theo loại thuốc
+        if (typeFilter !== "all") {
+          return (
+            medication.type?.toLowerCase() === typeFilter.toLowerCase()
+          );
+        }
+        return true;
+      })
+      .sort((a: any, b: any) => {
+        const dateA = new Date(a.createdAt || a.created_at).getTime();
+        const dateB = new Date(b.createdAt || b.created_at).getTime();
+        return dateB - dateA; // 🆕 Sắp xếp mới nhất trước
+      })
+  : [];
+
 
   useEffect(() => {
     // Fetch medications when component mounts

@@ -63,7 +63,10 @@ function SentMedicinesPage() {
   }, [fetchMedicineDeliveryByStaffId]);
 
   // Filter data based on search and status
-  const filteredData = medicineDeliveryByStaffId.filter((delivery) => {
+  console.log("🔍 Tất cả created_at:", medicineDeliveryByStaffId.map(d => d.created_at));
+  const filteredData = [...medicineDeliveryByStaffId]
+  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) // ✅ mới nhất lên đầu
+  .filter((delivery) => {
     const matchesSearch =
       delivery.student?.name
         ?.toLowerCase()
