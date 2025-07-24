@@ -100,6 +100,22 @@ export default function MedicalHistoryPage() {
     return "N/A";
   };
 
+  // Helper để parse notes dạng kỹ thuật
+  const parseTechnicalNotes = (notes: string) => {
+    if (!notes) return null;
+    // Kiểm tra có phải dạng kỹ thuật không
+    if (!notes.includes("Title:") || !notes.includes("Location:")) return null;
+    const fields = notes.split("|").map((item) => item.trim());
+    const result: Record<string, string> = {};
+    fields.forEach((field) => {
+      const [key, ...rest] = field.split(":");
+      if (key && rest.length > 0) {
+        result[key.trim()] = rest.join(":").trim();
+      }
+    });
+    return result;
+  };
+
   // Hiển thị loading
   if (loading) {
     return (
@@ -208,33 +224,41 @@ export default function MedicalHistoryPage() {
               Chưa có lịch sử bệnh án nào
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-10">
               {filteredHistory.map((entry, index) => (
                 <div key={entry._id} className="relative">
                   {index !== filteredHistory.length - 1 && (
-                    <div className="absolute left-6 top-12 h-full w-0.5 bg-blue-200"></div>
+                    <div className="absolute left-7 top-14 h-full w-0.5 bg-gradient-to-b from-blue-200 to-blue-50 z-0"></div>
                   )}
-                  <div className="flex gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 border-2 border-blue-300">
-                      <FileText className="h-5 w-5 text-blue-600" />
+                  <div className="flex gap-4 items-start">
+                    <div className="flex flex-col items-center z-10">
+                      <div className="h-14 w-14 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-400 shadow-md">
+                        <FileText className="h-7 w-7 text-blue-600" />
+                      </div>
+                      {index !== filteredHistory.length - 1 && (
+                        <div className="flex-1 w-1 bg-gradient-to-b from-blue-200 to-blue-50"></div>
+                      )}
                     </div>
-                    <Card className="flex-1 border-blue-100 hover:border-blue-300 transition-all duration-300">
+                    <Card className="flex-1 border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl bg-white/90 backdrop-blur-md">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-lg text-blue-800">
-                              {entry.record || "Bệnh án y tế"}
+                            <CardTitle className="text-2xl font-bold text-blue-800 flex items-center gap-2">
+                              <FileText className="h-6 w-6 text-blue-500" />
+                              {typeof entry.record === "string"
+                                ? entry.record
+                                : (entry.record && typeof entry.record === "object" && (entry.record as any).name)
+                                  ? (entry.record as any).name
+                                  : (entry.record && typeof entry.record === "object" && (entry.record as any)._id)
+                                    ? (entry.record as any)._id
+                                    : "Bệnh án y tế"}
                             </CardTitle>
-                            <CardDescription className="flex items-center gap-2 text-blue-600">
-                              <Calendar className="h-4 w-4" />
-                              {formatDate(entry.date || entry.createdAt || "")}
-                              <span>•</span>
-                              <User className="h-4 w-4" />
-                              {getStudentName(entry.student)}
+                            <CardDescription className="flex flex-wrap items-center gap-3 text-blue-700 mt-2">
+                              <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />{formatDate(entry.date || entry.createdAt || "")}</span>
+                              <span className="flex items-center gap-1"><User className="h-4 w-4" />{getStudentName(entry.student)}</span>
                               {entry.staff && (
-                                <>
-                                  <span>•</span>
-                                  <span>Nhân viên: {(() => {
+                                <span className="flex items-center gap-1"><User className="h-4 w-4 text-blue-400" />
+                                  {(() => {
                                     if (typeof entry.staff === 'object' && entry.staff !== null) {
                                       const staffObj = (staffs as Staff[]).find((s) => s._id === entry.staff);
                                       return staffObj?.profile?.name || staffObj?.user?.email || "Không rõ";
@@ -244,13 +268,13 @@ export default function MedicalHistoryPage() {
                                       return staffObj?.profile?.name || staffObj?.user?.email || "Không rõ";
                                     }
                                     return "Không rõ";
-                                  })()}</span>
-                                </>
+                                  })()}
+                                </span>
                               )}
                             </CardDescription>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-semibold px-3 py-1 rounded-full shadow-sm">
                               Bệnh án
                             </Badge>
                           </div>
@@ -258,20 +282,40 @@ export default function MedicalHistoryPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          <p className="text-blue-700">
+                          <p className="text-blue-800 text-base font-medium bg-blue-50 rounded-lg p-3 shadow-inner">
                             {entry.description}
                           </p>
-
-                          {entry.notes && (
-                            <div>
-                              <label className="text-sm font-medium text-gray-700">Ghi chú:</label>
-                              <div className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md whitespace-pre-line">
-                                {entry.notes.includes('||')
-                                  ? entry.notes.split('||').map((line, idx) => <div key={idx}>{line.trim()}</div>)
-                                  : entry.notes}
-                              </div>
-                            </div>
-                          )}
+                          {entry.notes ? (
+                            (() => {
+                              const parsed = parseTechnicalNotes(entry.notes!);
+                              if (parsed) {
+                                return (
+                                  <div>
+                                    <label className="text-sm font-semibold text-blue-700">Ghi chú:</label>
+                                    <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner space-y-1">
+                                      <div><span className="font-semibold">Tiêu đề:</span> {parsed["Title"]}</div>
+                                      <div><span className="font-semibold">Địa điểm:</span> {parsed["Location"]}</div>
+                                      <div><span className="font-semibold">Mức độ ưu tiên:</span> {parsed["Priority"]}</div>
+                                      <div><span className="font-semibold">Lớp:</span> {parsed["Class"]}</div>
+                                      <div><span className="font-semibold">Trạng thái liên hệ:</span> {parsed["Contact Status"]}</div>
+                                      {parsed["Ghi chú khẩn cấp"] && (
+                                        <div className="mt-2"><span className="font-semibold text-red-700">Ghi chú khẩn cấp:</span> {parsed["Ghi chú khẩn cấp"]}</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <div>
+                                    <label className="text-sm font-semibold text-blue-700">Ghi chú:</label>
+                                    <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner">
+                                      {entry.notes}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            })()
+                          ) : null}
                         </div>
                       </CardContent>
                     </Card>

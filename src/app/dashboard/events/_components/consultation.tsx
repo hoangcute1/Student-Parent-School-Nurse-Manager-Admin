@@ -43,7 +43,12 @@ import { TreatmentHistoryUpdateNotifier } from "@/components/treatment-history-u
 import { getNotificationsByParentId } from "@/lib/api/notification";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 
-export default function ConsultationComponent() {
+// Thêm type cho prop
+interface ConsultationComponentProps {
+  onMarkAsRead?: () => Promise<void>;
+}
+
+export default function ConsultationComponent({ onMarkAsRead }: ConsultationComponentProps) {
   const [selectedEvent, setSelectedEvent] = useState<TreatmentHistory | null>(
     null
   );
@@ -87,6 +92,8 @@ export default function ConsultationComponent() {
           n._id === notificationId ? { ...n, isRead: true } : n
         )
       );
+      // Gọi callback nếu có
+      if (onMarkAsRead) await onMarkAsRead();
     } catch (error) {
       // Xử lý lỗi nếu cần
     } finally {
