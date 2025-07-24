@@ -36,7 +36,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     fetchStudentsByParent();
   }, []); // Chỉ chạy một lần khi component mount
 
-  
   useEffect(() => {
     if (studentsData.length > 0) {
       setSelectedStudent(studentsData[0]);
@@ -44,7 +43,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       setSelectedStudent(null);
     }
   }, [studentsData]);
-    
+
   return (
     <aside
       className={cn(
@@ -163,7 +162,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   <div className="bg-white rounded-lg border border-blue-200 p-3">
                     <div className="flex items-center gap-3">
                       <div className="flex-1">
-                        {studentsData.length > 1 ? (
+                        {studentsData.length === 0 ? (
+                          <div className="text-center text-blue-600 py-2">
+                            Chưa có học sinh
+                          </div>
+                        ) : studentsData.length > 1 ? (
                           <button
                             onClick={() => setShowStudentList(!showStudentList)}
                             className="flex items-center gap-2 group transition-all duration-300 hover:text-blue-600 w-full"
@@ -172,17 +175,23 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                               <div className="text-md text-blue-800">
                                 {(() => {
                                   const selected = studentsData.find(
-                                    (stu) => stu.student._id === selectedStudentId
+                                    (stu) =>
+                                      stu.student._id === selectedStudentId
                                   );
-                                  return selected?.student.name || "N/A";
+                                  return (
+                                    selected?.student.name || "Chưa có học sinh"
+                                  );
                                 })()}
                               </div>
                               <div className="text-xs text-blue-600">
-                                Lớp {(() => {
+                                {(() => {
                                   const selected = studentsData.find(
-                                    (stu) => stu.student._id === selectedStudentId
+                                    (stu) =>
+                                      stu.student._id === selectedStudentId
                                   );
-                                  return selected?.student.class.name || "N/A";
+                                  return selected?.student.class?.name
+                                    ? `Lớp ${selected.student.class.name}`
+                                    : "";
                                 })()}
                               </div>
                             </div>
@@ -196,10 +205,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         ) : (
                           <div className="text-left">
                             <div className="font-medium text-blue-800">
-                              {studentsData[0]?.student.name || "N/A"}
+                              {studentsData[0]?.student.name ||
+                                "Chưa có học sinh"}
                             </div>
                             <div className="text-xs text-blue-600">
-                              Lớp {studentsData[0]?.student.class?.name || "N/A"}
+                              {studentsData[0]?.student.class?.name
+                                ? `Lớp ${studentsData[0].student.class.name}`
+                                : ""}
                             </div>
                           </div>
                         )}
@@ -215,7 +227,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                           key={stu.student._id}
                           className={cn(
                             "block w-full text-left px-3 py-2 rounded hover:bg-blue-100 transition-all",
-                            selectedStudentId === stu.student._id && "bg-blue-100 font-bold"
+                            selectedStudentId === stu.student._id &&
+                              "bg-blue-100 font-bold"
                           )}
                           onClick={() => {
                             setSelectedStudentId(stu.student._id);
@@ -223,8 +236,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                             setShowStudentList(false);
                           }}
                         >
-                          <div className="text-blue-800">{stu.student.name}</div>
-                          <div className="text-xs text-blue-600">Lớp {stu.student.class.name}</div>
+                          <div className="text-blue-800">
+                            {stu.student.name}
+                          </div>
+                          <div className="text-xs text-blue-600">
+                            Lớp {stu.student.class.name}
+                          </div>
                         </button>
                       ))}
                     </div>

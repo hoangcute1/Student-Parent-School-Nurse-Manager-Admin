@@ -48,7 +48,27 @@ interface ConsultationComponentProps {
   onMarkAsRead?: () => Promise<void>;
 }
 
-export default function ConsultationComponent({ onMarkAsRead }: ConsultationComponentProps) {
+// Hàm parse notes dạng text
+function parseConsultationNotes(notes: string) {
+  if (!notes) return {};
+  const result: any = {};
+  const lines = notes.split(/\r?\n/);
+  lines.forEach((line) => {
+    if (line.startsWith("Bác sĩ:"))
+      result.doctor = line.replace("Bác sĩ:", "").trim();
+    else if (line.startsWith("Ngày hẹn:"))
+      result.date = line.replace("Ngày hẹn:", "").trim();
+    else if (line.startsWith("Giờ hẹn:"))
+      result.time = line.replace("Giờ hẹn:", "").trim();
+    else if (line.startsWith("Ghi chú:"))
+      result.note = line.replace("Ghi chú:", "").trim();
+  });
+  return result;
+}
+
+export default function ConsultationComponent({
+  onMarkAsRead,
+}: ConsultationComponentProps) {
   const [selectedEvent, setSelectedEvent] = useState<TreatmentHistory | null>(
     null
   );
@@ -224,80 +244,95 @@ export default function ConsultationComponent({ onMarkAsRead }: ConsultationComp
               (notification: any) =>
                 notification.type === "CONSULTATION_APPOINTMENT"
             )
-            .map((notification: any) => (
-              <div
-                key={notification._id}
-                className={`shadow-lg rounded-xl p-6 mb-2 transition-shadow duration-300 border-none bg-white hover:shadow-2xl ${
-                  !notification.isRead
-                    ? "ring-2 ring-blue-200"
-                    : "ring-1 ring-gray-200"
-                }`}
-              >
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Bell className="w-5 h-5 text-blue-600" />
-                      <h4 className="font-bold text-lg text-blue-800 truncate">
-                        {notification.content}
-                      </h4>
-                      <Badge className="ml-2 bg-blue-100 text-blue-700 border border-blue-200">
-                        Lịch hẹn tư vấn
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-blue-500" />
-                        <span className="truncate">
-                          <span className="font-medium">Học sinh:</span>{" "}
-                          {getStudentName(notification.student)}
-                        </span>
+            .map((notification: any) => {
+              // Ưu tiên lấy trường riêng, nếu không có thì parse từ notes
+              const parsed = parseConsultationNotes(notification.notes || "");
+              const doctor = notification.consultation_doctor || parsed.doctor;
+              const date = notification.consultation_date
+                ? new Date(notification.consultation_date).toLocaleDateString(
+                    "vi-VN"
+                  )
+                : parsed.date;
+              const time = notification.consultation_time || parsed.time;
+              const note = parsed.note;
+              return (
+                <div
+                  key={notification._id}
+                  className={`shadow-lg rounded-xl p-6 mb-2 transition-shadow duration-300 border-none bg-white hover:shadow-2xl ${
+                    !notification.isRead
+                      ? "ring-2 ring-blue-200"
+                      : "ring-1 ring-gray-200"
+                  }`}
+                >
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Bell className="w-5 h-5 text-blue-600" />
+                        <h4 className="font-bold text-lg text-blue-800 truncate">
+                          {notification.content}
+                        </h4>
+                        <Badge className="ml-2 bg-blue-100 text-blue-700 border border-blue-200">
+                          Lịch hẹn tư vấn
+                        </Badge>
                       </div>
-                      {notification.consultation_date && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-blue-500" />
-                          <span>
-                            <span className="font-medium">Ngày hẹn:</span>{" "}
-                            {new Date(
-                              notification.consultation_date
-                            ).toLocaleDateString("vi-VN")}
+                      {/* Khối thông tin lịch hẹn */}
+                      <div className="flex flex-wrap gap-2 items-center bg-blue-50 border border-blue-100 rounded-lg p-3 mb-2">
+                        <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                          <User className="w-4 h-4 text-blue-500 mr-1" />
+                          <span>Học sinh:</span>
+                          <span className="font-semibold text-gray-900 ml-1">
+                            {getStudentName(notification.student)}
                           </span>
                         </div>
-                      )}
-                      {notification.consultation_time && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-blue-500" />
-                          <span>
-                            <span className="font-medium">Giờ hẹn:</span>{" "}
-                            {notification.consultation_time}
-                          </span>
-                        </div>
-                      )}
-                      {notification.consultation_doctor && (
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-500" />
-                          <span>
-                            <span className="font-medium">Bác sĩ:</span>{" "}
-                            {notification.consultation_doctor}
-                          </span>
-                        </div>
-                      )}
+                        {date && (
+                          <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                            <Calendar className="w-4 h-4 text-blue-500 mr-1" />
+                            <span>Ngày hẹn:</span>
+                            <span className="font-semibold text-gray-900 ml-1">
+                              {date}
+                            </span>
+                          </div>
+                        )}
+                        {time && (
+                          <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                            <Clock className="w-4 h-4 text-blue-500 mr-1" />
+                            <span>Giờ hẹn:</span>
+                            <span className="font-semibold text-gray-900 ml-1">
+                              {time}
+                            </span>
+                          </div>
+                        )}
+                        {doctor && (
+                          <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                            <User className="w-4 h-4 text-blue-500 mr-1" />
+                            <span>Bác sĩ:</span>
+                            <span className="font-semibold text-gray-900 ml-1">
+                              {doctor}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-2 min-w-[120px]">
-                    <span className="text-xs text-gray-400">
-                      Tạo lúc: {formatDate(notification.createdAt || "")}
-                    </span>
-                    {notification.updatedAt && (
-                      <span className="text-xs text-gray-400">
-                        Cập nhật: {formatDate(notification.updatedAt)}
+                  <div className="bg-blue-50 p-4 rounded-lg mt-2 border-l-4 border-blue-400">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span className="font-semibold text-blue-800">
+                        Ghi chú tư vấn:
                       </span>
-                    )}
+                    </div>
+                    <div className="text-sm text-gray-700 whitespace-pre-line">
+                      {note || notification.notes || "Không có ghi chú."}
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-4">
                     {!notification.isRead && (
                       <Button
                         size="sm"
                         onClick={() => handleMarkAsRead(notification._id)}
                         disabled={notificationLoading}
-                        className="bg-blue-600 hover:bg-blue-700 mt-2"
+                        className="rounded-full bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 shadow-sm flex items-center gap-2"
+                        style={{ minWidth: 160 }}
                       >
                         <CheckCircle className="w-4 h-4 mr-1" />
                         Đánh dấu đã đọc
@@ -305,19 +340,8 @@ export default function ConsultationComponent({ onMarkAsRead }: ConsultationComp
                     )}
                   </div>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg mt-2 border-l-4 border-blue-400">
-                  <div className="flex items-center gap-2 mb-1">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <span className="font-semibold text-blue-800">
-                      Ghi chú tư vấn:
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-700 whitespace-pre-line">
-                    {notification.notes || "Không có ghi chú."}
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       )}
 
