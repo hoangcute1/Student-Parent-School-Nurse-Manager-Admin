@@ -21,12 +21,14 @@ interface StatsCardProps {
     label: string;
     isPositive: boolean;
   };
+  onClick?: () => void;
 }
 
-function StatsCard({ title, value, icon, color, trend }: StatsCardProps) {
+function StatsCard({ title, value, icon, color, trend, onClick }: StatsCardProps) {
   return (
     <Card
-      className={`${color} bg-white/70 backdrop-blur-sm border-2 hover:shadow-lg transition-all duration-200`}
+      className={`${color} bg-white/70 backdrop-blur-sm border-2 hover:shadow-lg transition-all duration-200 cursor-pointer select-none`}
+      onClick={onClick}
     >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -77,7 +79,7 @@ interface EventStatsProps {
   };
 }
 
-export function EventStats({ stats, trends }: EventStatsProps) {
+export function EventStats({ stats, trends, onCardClick }: EventStatsProps & { onCardClick?: (type: string) => void }) {
   const resolutionRate =
     stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0;
   const pendingRate =
@@ -99,6 +101,7 @@ export function EventStats({ stats, trends }: EventStatsProps) {
               }
             : undefined
         }
+        onClick={() => onCardClick && onCardClick("all")}
       />
       <StatsCard
         title="Chờ xử lý"
@@ -114,6 +117,7 @@ export function EventStats({ stats, trends }: EventStatsProps) {
               }
             : undefined
         }
+        onClick={() => onCardClick && onCardClick("pending")}
       />
       <StatsCard
         title="Đã giải quyết"
@@ -129,12 +133,14 @@ export function EventStats({ stats, trends }: EventStatsProps) {
               }
             : undefined
         }
+        onClick={() => onCardClick && onCardClick("resolved")}
       />
       <StatsCard
         title="Ưu tiên cao"
         value={stats.high}
         icon={<AlertTriangle className="w-5 h-5 text-red-600" />}
         color="border-red-200"
+        onClick={() => onCardClick && onCardClick("high")}
       />
     </div>
   );

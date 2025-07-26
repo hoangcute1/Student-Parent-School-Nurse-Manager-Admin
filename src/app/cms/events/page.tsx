@@ -580,6 +580,23 @@ export default function MedicalEvents() {
     addEventForm.setValue("priority", value);
   };
 
+  // Hàm xử lý khi click stats card
+  const handleStatsCardClick = (type: string) => {
+    if (type === "all") {
+      setSelectedStatus("all");
+      setSelectedPriority("all");
+    } else if (type === "pending") {
+      setSelectedStatus("pending");
+      setSelectedPriority("all");
+    } else if (type === "resolved") {
+      setSelectedStatus("resolved");
+      setSelectedPriority("all");
+    } else if (type === "high") {
+      setSelectedPriority("Cao");
+      setSelectedStatus("all");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -632,7 +649,7 @@ export default function MedicalEvents() {
       </div>
 
       {/* Dashboard Stats Cards */}
-      <EventStats stats={stats} />
+      <EventStats stats={stats} onCardClick={handleStatsCardClick} />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar with Quick Actions */}
@@ -834,7 +851,7 @@ export default function MedicalEvents() {
                                     key={studentId}
                                     value={studentId}
                                   >
-                                    {studentName} ({studentId})
+                                    {studentName}
                                   </SelectItem>
                                 );
                               })
@@ -1229,7 +1246,7 @@ export default function MedicalEvents() {
                                     key={studentId}
                                     value={studentId}
                                   >
-                                    {studentName} ({studentId})
+                                    {studentName}
                                   </SelectItem>
                                 );
                               })
