@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -9,12 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ParentTable } from "./_components/parent-table";
-import { FilterBar } from "./_components/filter-bar";
+import { SearchAdvanced } from "./_components/search-advanced";
+import { SearchResults } from "./_components/search-results";
 import { StatsCards } from "./_components/stats-cards";
 import { useParentStore } from "@/stores/parent-store";
 import { Button } from "@/components/ui/button";
 import { Plus, Users, Phone, Mail } from "lucide-react";
 import { AddParentDialog } from "./_components/add-parent-dialog";
+import { Parent } from "@/lib/type/parents";
 
 export default function ParentsPage() {
   const { parents, isLoading, error, fetchParents, addParent } =
@@ -30,12 +32,38 @@ export default function ParentsPage() {
     }
   }, [fetchParents, parents.length]);
 
-  // Calculate stats
-  const totalParents = parents.length;
-  const parentsWithEmail = parents.filter(
+  // Filter parents based on search query and filters
+  const filteredParents = useMemo(() => {
+    return parents.filter((parent) => {
+      const profile = parent.profile || {};
+      const user = parent.user || {};
+
+      // Search filter
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        !searchQuery ||
+        (profile.name && profile.name.toLowerCase().includes(searchLower)) ||
+        (user.email && user.email.toLowerCase().includes(searchLower)) ||
+        (profile.phone && profile.phone.toLowerCase().includes(searchLower)) ||
+        (profile.address &&
+          profile.address.toLowerCase().includes(searchLower));
+
+      // Class filter - simplified since we don't have direct student data
+      const matchesClass = classFilter === "all";
+
+      // Health filter - simplified since we don't have direct student data
+      const matchesHealth = healthFilter === "all";
+
+      return matchesSearch && matchesClass && matchesHealth;
+    });
+  }, [parents, searchQuery, classFilter, healthFilter]);
+
+  // Calculate stats based on filtered data
+  const totalParents = filteredParents.length;
+  const parentsWithEmail = filteredParents.filter(
     (parent) => parent.user?.email
   ).length;
-  const parentsWithPhone = parents.filter(
+  const parentsWithPhone = filteredParents.filter(
     (parent) => parent.profile?.phone
   ).length;
 
@@ -121,6 +149,12 @@ export default function ParentsPage() {
                 </CardTitle>
                 <CardDescription className="text-gray-600 mt-1">
                   Quản lý thông tin và liên lạc với phụ huynh trong trường
+                  {searchQuery && (
+                    <span className="ml-2 text-sky-600">
+                      • Kết quả tìm kiếm: "{searchQuery}" (
+                      {filteredParents.length} kết quả)
+                    </span>
+                  )}
                 </CardDescription>
               </div>
               <Button
@@ -134,14 +168,28 @@ export default function ParentsPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <FilterBar
+            <SearchAdvanced
+              searchQuery={searchQuery}
+              classFilter={classFilter}
+              healthFilter={healthFilter}
               onSearchChange={setSearchQuery}
               onClassFilterChange={setClassFilter}
               onHealthStatusChange={setHealthFilter}
-              onAddParent={addParent}
+              onClearAll={() => {
+                setSearchQuery("");
+                setClassFilter("all");
+                setHealthFilter("all");
+              }}
+            />
+            <SearchResults
+              searchQuery={searchQuery}
+              classFilter={classFilter}
+              healthFilter={healthFilter}
+              totalResults={filteredParents.length}
+              totalOriginal={parents.length}
             />
             <ParentTable
-              parents={parents}
+              parents={filteredParents}
               isLoading={isLoading}
               error={error}
             />

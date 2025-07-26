@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,9 @@ import { Plus, Users, UserCheck, Shield } from "lucide-react";
 import { useStaffStore } from "@/stores/staff-store";
 import { AddStaffDialog } from "./_components/add-staff-dialog";
 import { StaffTable } from "./_components/staff-table";
-import { FilterBar } from "./_components/filter-bar";
+import { SearchAdvanced } from "./_components/search-advanced";
+import { SearchResults } from "./_components/search-results";
+import { Staff } from "@/lib/type/staff";
 
 export default function StaffsPage() {
   const { staffs, isLoading, error, fetchStaffs, addStaff } = useStaffStore();
@@ -28,10 +30,41 @@ export default function StaffsPage() {
     }
   }, [fetchStaffs, staffs.length]);
 
-  // Calculate stats
-  const totalStaffs = staffs.length;
-  const activeStaffs = staffs.filter((staff) => staff.user?.email).length;
-  const adminStaffs = staffs.filter(
+  // Filter staffs based on search query and filters
+  const filteredStaffs = useMemo(() => {
+    return staffs.filter((staff) => {
+      const profile = staff.profile || {};
+      const user = staff.user || {};
+
+      // Search filter
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        !searchQuery ||
+        (profile.name && profile.name.toLowerCase().includes(searchLower)) ||
+        (user.email && user.email.toLowerCase().includes(searchLower)) ||
+        (profile.phone && profile.phone.toLowerCase().includes(searchLower)) ||
+        (profile.address &&
+          profile.address.toLowerCase().includes(searchLower)) ||
+        (user.role && user.role.toLowerCase().includes(searchLower));
+
+      // Department filter
+      const matchesDepartment =
+        classFilter === "all" || (user.role && user.role === classFilter);
+
+      // Status filter
+      const matchesStatus =
+        healthFilter === "all" || (user.status && user.status === healthFilter);
+
+      return matchesSearch && matchesDepartment && matchesStatus;
+    });
+  }, [staffs, searchQuery, classFilter, healthFilter]);
+
+  // Calculate stats based on filtered data
+  const totalStaffs = filteredStaffs.length;
+  const activeStaffs = filteredStaffs.filter(
+    (staff) => staff.user?.email
+  ).length;
+  const adminStaffs = filteredStaffs.filter(
     (staff) => staff.user?.role === "admin"
   ).length;
 
@@ -118,6 +151,12 @@ export default function StaffsPage() {
                 </CardTitle>
                 <CardDescription className="text-gray-600 mt-1">
                   Quản lý thông tin và quyền hạn của nhân viên trong hệ thống
+                  {searchQuery && (
+                    <span className="ml-2 text-sky-600">
+                      • Kết quả tìm kiếm: "{searchQuery}" (
+                      {filteredStaffs.length} kết quả)
+                    </span>
+                  )}
                 </CardDescription>
               </div>
               <Button
@@ -131,13 +170,31 @@ export default function StaffsPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <FilterBar
+            <SearchAdvanced
+              searchQuery={searchQuery}
+              classFilter={classFilter}
+              healthFilter={healthFilter}
               onSearchChange={setSearchQuery}
               onClassFilterChange={setClassFilter}
               onHealthStatusChange={setHealthFilter}
-              onAddStaff={addStaff}
+              onClearAll={() => {
+                setSearchQuery("");
+                setClassFilter("all");
+                setHealthFilter("all");
+              }}
             />
-            <StaffTable staffs={staffs} isLoading={isLoading} error={error} />
+            <SearchResults
+              searchQuery={searchQuery}
+              classFilter={classFilter}
+              healthFilter={healthFilter}
+              totalResults={filteredStaffs.length}
+              totalOriginal={staffs.length}
+            />
+            <StaffTable
+              staffs={filteredStaffs}
+              isLoading={isLoading}
+              error={error}
+            />
           </CardContent>
         </Card>
 
