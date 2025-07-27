@@ -136,27 +136,36 @@ export default function MedicationsPage() {
 
   // Transform Medication data for display
   const displayMedications = Array.isArray(medications)
-    ? medications
-        .filter((medication: any) => {
-          // Apply search filter if exists
-          if (searchQuery && searchQuery.trim() !== "") {
-            const query = searchQuery.toLowerCase();
-            return (
-              medication.name?.toLowerCase().includes(query) ||
-              medication.type?.toLowerCase().includes(query) ||
-              medication.description?.toLowerCase().includes(query)
-            );
-          }
-          return true;
-        })
-        // Apply type filter if not "all"
-        .filter((medication: any) => {
-          if (typeFilter !== "all") {
-            return medication.type?.toLowerCase() === typeFilter.toLowerCase();
-          }
-          return true;
-        })
-    : [];
+  ? medications
+      .slice() // tạo bản sao để không thay đổi state gốc
+      .sort((a: Medication, b: Medication) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      })
+      .filter((medication: any) => {
+        // Apply search filter if exists
+        if (searchQuery && searchQuery.trim() !== "") {
+          const query = searchQuery.toLowerCase();
+          return (
+            medication.name?.toLowerCase().includes(query) ||
+            medication.type?.toLowerCase().includes(query) ||
+            medication.description?.toLowerCase().includes(query)
+          );
+        }
+        return true;
+      })
+      // Apply type filter if not "all"
+      .filter((medication: any) => {
+        if (typeFilter !== "all") {
+          return (
+            medication.type?.toLowerCase() === typeFilter.toLowerCase()
+          );
+        }
+        return true;
+      })
+  : [];
+
 
   const handleExportToExcel = () => {
     try {
