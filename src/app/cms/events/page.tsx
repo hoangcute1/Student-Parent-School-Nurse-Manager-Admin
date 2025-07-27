@@ -397,57 +397,66 @@ export default function MedicalEvents() {
   };
 
   // Filter events based on search and filters
-  const filteredEvents = treatmentHistories.filter((event) => {
-    // Lấy tiêu đề từ title hoặc từ notes (nếu có)
-    let eventTitle = event.title || "";
-    if (!eventTitle && event.notes) {
-      const match = event.notes.match(/Title: ([^|]+)/);
-      if (match) eventTitle = match[1].trim();
-    }
-    // Loại bỏ sự kiện có tiêu đề 'Ngã cầu thang'
-    if (eventTitle === "Ngã cầu thang") return false;
-
-    const eventStudent =
-      typeof event.student === "object" && event.student?.name
-        ? event.student.name
-        : typeof event.student === "string"
-        ? event.student
-        : "";
-
-    const matchesSearch =
-      eventStudent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      eventTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.location?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      selectedStatus === "all" || event.status === selectedStatus;
-
-    const matchesPriority =
-      selectedPriority === "all" || event.priority === selectedPriority;
-
-    // Date filtering logic
-    let matchesDate = true;
-    if (selectedDate !== "all" && event.createdAt) {
-      const eventDate = new Date(event.createdAt);
-      const now = new Date();
-
-      switch (selectedDate) {
-        case "today":
-          matchesDate = eventDate.toDateString() === now.toDateString();
-          break;
-        case "week":
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          matchesDate = eventDate >= weekAgo;
-          break;
-        case "month":
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          matchesDate = eventDate >= monthAgo;
-          break;
+  const filteredEvents = [...treatmentHistories]
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date || 0).getTime();
+      const dateB = new Date(b.createdAt || b.date || 0).getTime();
+      if (dateB !== dateA) return dateB - dateA;
+      // Nếu thời gian bằng nhau, sort tiếp theo _id (nếu có)
+      if (a._id && b._id) return b._id.localeCompare(a._id);
+      return 0;
+    })
+    .filter((event) => {
+      // Lấy tiêu đề từ title hoặc từ notes (nếu có)
+      let eventTitle = event.title || "";
+      if (!eventTitle && event.notes) {
+        const match = event.notes.match(/Title: ([^|]+)/);
+        if (match) eventTitle = match[1].trim();
       }
-    }
+      // Loại bỏ sự kiện có tiêu đề 'Ngã cầu thang'
+      if (eventTitle === "Ngã cầu thang") return false;
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesDate;
-  });
+      const eventStudent =
+        typeof event.student === "object" && event.student?.name
+          ? event.student.name
+          : typeof event.student === "string"
+          ? event.student
+          : "";
+
+      const matchesSearch =
+        eventStudent.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        eventTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.location?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        selectedStatus === "all" || event.status === selectedStatus;
+
+      const matchesPriority =
+        selectedPriority === "all" || event.priority === selectedPriority;
+
+      // Date filtering logic
+      let matchesDate = true;
+      if (selectedDate !== "all" && event.createdAt) {
+        const eventDate = new Date(event.createdAt);
+        const now = new Date();
+
+        switch (selectedDate) {
+          case "today":
+            matchesDate = eventDate.toDateString() === now.toDateString();
+            break;
+          case "week":
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            matchesDate = eventDate >= weekAgo;
+            break;
+          case "month":
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            matchesDate = eventDate >= monthAgo;
+            break;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesDate;
+    });
 
   // Calculate stats
   const stats = {
@@ -743,19 +752,18 @@ export default function MedicalEvents() {
             <div className="sticky top-8 space-y-6">
               {/* Quick Actions Card */}
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                {/* <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                   <CardTitle className="text-lg font-semibold flex items-center">
                     <span className="mr-2">⚡</span>
                     Thao tác nhanh
                   </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
+                </CardHeader> */}
+                <CardContent className="p-6 space-y-4 flex flex-col items-center">
                   <Button
                     onClick={handleOpenAddEvent}
                     className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
-                    <Plus className="h-5 w-5" />
-                    <span className="font-medium">Thêm sự kiện</span>
+                    <span className="font-medium">Thêm sự cố</span>
                   </Button>
                   
                   <Button
@@ -766,13 +774,7 @@ export default function MedicalEvents() {
                     <span className="font-medium">Xuất Excel</span>
                   </Button>
                   
-                  <Button
-                    onClick={refreshEvents}
-                    className="w-full bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    <RefreshCw className="h-5 w-5" />
-                    <span className="font-medium">Làm mới</span>
-                  </Button>
+                  {/* Đã xóa nút Làm mới */}
                 </CardContent>
               </Card>
 
@@ -794,11 +796,12 @@ export default function MedicalEvents() {
                       Quản lý và theo dõi tất cả sự cố y tế trong hệ thống
                     </CardDescription>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  {/* Xóa phần tổng số sự kiện */}
+                  {/* <div className="flex items-center space-x-2">
                     <div className="text-sm text-gray-500">
                       Tổng: <span className="font-semibold text-gray-700">{filteredEvents.length}</span> sự kiện
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </CardHeader>
               <CardContent className="p-6">
