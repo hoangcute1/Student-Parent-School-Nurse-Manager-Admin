@@ -75,20 +75,13 @@ export const markNotificationAsRead = async (id: string) => {
   const token = getAuthToken();
   console.log("Marking notification as read:", id);
 
-  const res = await fetch(
-    `http://localhost:3001/simple-notifications/${id}/read`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await fetchData<any>(`/simple-notifications/${id}/read`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || `HTTP ${res.status}`);
-  }
-  return res.json();
+  return res;
 };

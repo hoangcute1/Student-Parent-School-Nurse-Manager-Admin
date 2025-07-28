@@ -11,6 +11,7 @@ export const useUnreadConsultations = () => {
       setLoading(true);
       const parentId = await getParentId();
       const notifications = await getNotificationsByParentId(parentId);
+      console.log("Fetched notifications for unread count:", notifications);
 
       // Đếm số lượng thông báo lịch hẹn tư vấn chưa đọc
       const unreadConsultations = notifications.filter(
@@ -18,6 +19,9 @@ export const useUnreadConsultations = () => {
           notification.type === "CONSULTATION_APPOINTMENT" &&
           !notification.isRead
       );
+
+      console.log("Unread consultations:", unreadConsultations);
+      console.log("Unread count:", unreadConsultations.length);
 
       setUnreadCount(unreadConsultations.length);
     } catch (error) {
@@ -36,6 +40,11 @@ export const useUnreadConsultations = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Log khi unreadCount thay đổi
+  useEffect(() => {
+    console.log("Unread count changed:", unreadCount);
+  }, [unreadCount]);
 
   return {
     unreadCount,

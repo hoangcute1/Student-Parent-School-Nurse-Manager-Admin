@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Download, RefreshCw, AlertTriangle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
@@ -41,13 +47,20 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAllStudents } from "@/lib/api/student";
 import { getAllStaffs } from "@/lib/api/staff";
-import {
-  updateTreatmentHistory,
-} from "@/lib/api/treatment-history";
+import { updateTreatmentHistory } from "@/lib/api/treatment-history";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
-import { Clock, User, Users, MapPin, FileText, PhoneCall, UserCheck, Flag } from "lucide-react";
+import {
+  Clock,
+  User,
+  Users,
+  MapPin,
+  FileText,
+  PhoneCall,
+  UserCheck,
+  Flag,
+} from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function MedicalEvents() {
@@ -62,7 +75,7 @@ export default function MedicalEvents() {
   const [processEventOpen, setProcessEventOpen] = useState(false);
   const [viewEventDetailsOpen, setViewEventDetailsOpen] = useState(false);
   const [emergencyProcessOpen, setEmergencyProcessOpen] = useState(false);
-  
+
   // State for emergency mode
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
 
@@ -75,19 +88,19 @@ export default function MedicalEvents() {
   const [studentsError, setStudentsError] = useState<string | null>(null);
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const [eventError, setEventError] = useState<string | null>(null);
-  
+
   // State để lưu danh sách học sinh đã lọc theo lớp
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   // State để lưu danh sách lớp có học sinh
   const [availableClasses, setAvailableClasses] = useState<string[]>([]);
 
   // Sử dụng store cho treatment history
-  const { 
-    treatmentHistories, 
-    isLoading, 
-    error, 
-    fetchAllTreatmentHistories, 
-    updateTreatmentHistoryItem 
+  const {
+    treatmentHistories,
+    isLoading,
+    error,
+    fetchAllTreatmentHistories,
+    updateTreatmentHistoryItem,
   } = useTreatmentHistoryStore();
 
   // Lấy thông tin user đang đăng nhập
@@ -140,11 +153,15 @@ export default function MedicalEvents() {
       .then(([studentsData, staffsData]) => {
         setStudents(studentsData);
         setFilteredStudents(studentsData); // Khởi tạo filteredStudents với tất cả học sinh
-        
+
         // Tạo danh sách lớp có học sinh
-        const classes = [...new Set(studentsData.map(student => student.class?.name).filter(Boolean))];
+        const classes = [
+          ...new Set(
+            studentsData.map((student) => student.class?.name).filter(Boolean)
+          ),
+        ];
         setAvailableClasses(classes);
-        
+
         setStaffs(staffsData);
       })
       .catch((error) => {
@@ -217,22 +234,25 @@ export default function MedicalEvents() {
   const onAddEvent = async (data: z.infer<typeof eventFormSchema>) => {
     try {
       console.log("Add event data:", data);
-      
+
       // Tạo notes với thông tin khẩn cấp nếu có
       let notes = `Title: ${data.title} | Location: ${data.location} | Priority: ${data.priority} | Class: ${data.class} | Contact Status: ${data.contactStatus}`;
-      
+
       if (data.priority === "Cao") {
         const emergencyInfo = [];
-        if (data.immediateAction) emergencyInfo.push(`Hành động tức thì: ${data.immediateAction}`);
+        if (data.immediateAction)
+          emergencyInfo.push(`Hành động tức thì: ${data.immediateAction}`);
         if (data.notifyParent) emergencyInfo.push("Đã thông báo phụ huynh");
-        if (data.transferToHospital) emergencyInfo.push(`Chuyển viện: ${data.hospitalName || "Không rõ"}`);
-        if (data.emergencyNotes) emergencyInfo.push(`Ghi chú khẩn cấp: ${data.emergencyNotes}`);
-        
+        if (data.transferToHospital)
+          emergencyInfo.push(`Chuyển viện: ${data.hospitalName || "Không rõ"}`);
+        if (data.emergencyNotes)
+          emergencyInfo.push(`Ghi chú khẩn cấp: ${data.emergencyNotes}`);
+
         if (emergencyInfo.length > 0) {
           notes += ` | KHẨN CẤP: ${emergencyInfo.join(" | ")}`;
         }
       }
-      
+
       // Gửi đúng schema backend yêu cầu
       await createTreatmentHistory({
         title: data.title,
@@ -254,9 +274,11 @@ export default function MedicalEvents() {
       setAddEventOpen(false);
       addEventForm.reset();
       setIsEmergencyMode(false); // Reset emergency mode
-      
+
       if (data.priority === "Cao") {
-        alert("🚨 Thêm sự cố khẩn cấp thành công! Vui lòng xử lý ngay lập tức!");
+        alert(
+          "🚨 Thêm sự cố khẩn cấp thành công! Vui lòng xử lý ngay lập tức!"
+        );
       } else {
         alert("Thêm sự cố y tế thành công!");
       }
@@ -300,7 +322,7 @@ export default function MedicalEvents() {
       console.log("Event ID being processed:", data._id);
 
       // Cập nhật treatment history với thông tin xử lý
-      const existingEvent = treatmentHistories.find(e => e._id === data._id);
+      const existingEvent = treatmentHistories.find((e) => e._id === data._id);
       const currentNotes = existingEvent?.notes || "";
       const processInfo = `Contact Parent: ${data.contactParent} | Action: ${data.actionTaken} | Process Notes: ${data.notes}`;
 
@@ -462,10 +484,12 @@ export default function MedicalEvents() {
   const stats = {
     total: treatmentHistories.length,
     pending: treatmentHistories.filter((e) => e.status === "pending").length,
-    processing: treatmentHistories.filter((e) => e.status === "processing").length,
+    processing: treatmentHistories.filter((e) => e.status === "processing")
+      .length,
     resolved: treatmentHistories.filter((e) => e.status === "resolved").length,
     high: treatmentHistories.filter((e) => e.priority === "Cao").length,
-    medium: treatmentHistories.filter((e) => e.priority === "Trung bình").length,
+    medium: treatmentHistories.filter((e) => e.priority === "Trung bình")
+      .length,
     low: treatmentHistories.filter((e) => e.priority === "Thấp").length,
   };
 
@@ -556,14 +580,14 @@ export default function MedicalEvents() {
       setFilteredStudents(students);
       return;
     }
-    
+
     // Lọc học sinh theo lớp đã chọn
     const filtered = students.filter((student) => {
       // Kiểm tra lớp của học sinh - dựa trên cấu trúc dữ liệu thực tế
       const studentClassName = student.class?.name || "";
       return studentClassName === selectedClass;
     });
-    
+
     setFilteredStudents(filtered);
   };
 
@@ -626,7 +650,10 @@ export default function MedicalEvents() {
           {/* Loading Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+              <div
+                key={i}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl"
+              >
                 <div className="h-4 w-24 bg-gray-200 rounded animate-pulse mb-3"></div>
                 <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
               </div>
@@ -641,7 +668,10 @@ export default function MedicalEvents() {
                   <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                      <div
+                        key={i}
+                        className="h-12 bg-gray-200 rounded-lg animate-pulse"
+                      ></div>
                     ))}
                   </div>
                 </div>
@@ -652,7 +682,10 @@ export default function MedicalEvents() {
                 <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-6"></div>
                 <div className="space-y-4">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="h-16 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div
+                      key={i}
+                      className="h-16 bg-gray-200 rounded-lg animate-pulse"
+                    ></div>
                   ))}
                 </div>
               </div>
@@ -765,7 +798,7 @@ export default function MedicalEvents() {
                   >
                     <span className="font-medium">Thêm sự cố</span>
                   </Button>
-                  
+
                   <Button
                     onClick={handleExportExcel}
                     className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -773,12 +806,10 @@ export default function MedicalEvents() {
                     <Download className="h-5 w-5" />
                     <span className="font-medium">Xuất Excel</span>
                   </Button>
-                  
+
                   {/* Đã xóa nút Làm mới */}
                 </CardContent>
               </Card>
-
-             
             </div>
           </div>
 
@@ -830,23 +861,29 @@ export default function MedicalEvents() {
       {/* ... giữ nguyên các Dialog, chỉ cần chỉnh className nếu cần */}
       {/* Add Event Dialog */}
       <Dialog open={addEventOpen} onOpenChange={setAddEventOpen}>
-        <DialogContent className={`max-w-4xl max-h-[95vh] rounded-3xl shadow-2xl overflow-hidden border-0 ${
-          isEmergencyMode 
-            ? "bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 border-2 border-red-200" 
-            : "bg-gradient-to-br from-white to-gray-50"
-        }`}>
-          <DialogHeader className={`sticky top-0 z-10 backdrop-blur-sm ${
-            isEmergencyMode 
-              ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-3xl shadow-lg" 
-              : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-3xl shadow-lg"
-          }`}>
+        <DialogContent
+          className={`max-w-4xl max-h-[95vh] rounded-3xl shadow-2xl overflow-hidden border-0 ${
+            isEmergencyMode
+              ? "bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 border-2 border-red-200"
+              : "bg-gradient-to-br from-white to-gray-50"
+          }`}
+        >
+          <DialogHeader
+            className={`sticky top-0 z-10 backdrop-blur-sm ${
+              isEmergencyMode
+                ? "bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-t-3xl shadow-lg"
+                : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-3xl shadow-lg"
+            }`}
+          >
             <div className="flex items-center justify-between p-6">
               <div className="flex items-center space-x-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                  isEmergencyMode 
-                    ? "bg-red-500/20 backdrop-blur-sm" 
-                    : "bg-white/20 backdrop-blur-sm"
-                }`}>
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                    isEmergencyMode
+                      ? "bg-red-500/20 backdrop-blur-sm"
+                      : "bg-white/20 backdrop-blur-sm"
+                  }`}
+                >
                   {isEmergencyMode ? (
                     <span className="text-2xl animate-pulse">🚨</span>
                   ) : (
@@ -854,18 +891,23 @@ export default function MedicalEvents() {
                   )}
                 </div>
                 <div>
-                  <DialogTitle className={`text-2xl font-bold ${
-                    isEmergencyMode ? "text-white" : "text-white"
-                  }`}>
-                    {isEmergencyMode ? "THÊM SỰ CỐ KHẨN CẤP" : "➕ Thêm sự cố y tế"}
+                  <DialogTitle
+                    className={`text-2xl font-bold ${
+                      isEmergencyMode ? "text-white" : "text-white"
+                    }`}
+                  >
+                    {isEmergencyMode
+                      ? "THÊM SỰ CỐ KHẨN CẤP"
+                      : " Thêm sự cố y tế"}
                   </DialogTitle>
-                  <DialogDescription className={`mt-1 ${
-                    isEmergencyMode ? "text-red-100" : "text-blue-100"
-                  }`}>
-                    {isEmergencyMode 
-                      ? "Sự cố nghiêm trọng - Cần xử lý ngay lập tức!" 
-                      : "Nhập thông tin chi tiết về sự cố y tế mới"
-                    }
+                  <DialogDescription
+                    className={`mt-1 ${
+                      isEmergencyMode ? "text-red-100" : "text-blue-100"
+                    }`}
+                  >
+                    {isEmergencyMode
+                      ? "Sự cố nghiêm trọng - Cần xử lý ngay lập tức!"
+                      : "Nhập thông tin chi tiết về sự cố y tế mới"}
                   </DialogDescription>
                 </div>
               </div>
@@ -890,10 +932,13 @@ export default function MedicalEvents() {
                       <span className="text-white text-lg">⚠️</span>
                     </div>
                     <div>
-                      <h4 className="font-bold text-red-800 text-lg mb-2">🚨 SỰ CỐ KHẨN CẤP</h4>
+                      <h4 className="font-bold text-red-800 text-lg mb-2">
+                        {" "}
+                        SỰ CỐ KHẨN CẤP
+                      </h4>
                       <p className="text-red-700 text-base leading-relaxed">
-                        Vui lòng xử lý ngay lập tức và tuân thủ quy trình khẩn cấp! 
-                        Đảm bảo an toàn cho học sinh là ưu tiên hàng đầu.
+                        Vui lòng xử lý ngay lập tức và tuân thủ quy trình khẩn
+                        cấp! Đảm bảo an toàn cho học sinh là ưu tiên hàng đầu.
                       </p>
                     </div>
                   </div>
@@ -904,8 +949,8 @@ export default function MedicalEvents() {
               {isEmergencyMode && (
                 <div className="mb-6 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl shadow-lg">
                   <h4 className="font-bold text-yellow-800 mb-4 flex items-center text-lg">
-                    <span className="mr-3 text-xl">⏰</span>
-                    ✅ Checklist khẩn cấp:
+                    <span className="mr-3 text-xl">⏰</span>✅ Checklist khẩn
+                    cấp:
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     {[
@@ -914,11 +959,16 @@ export default function MedicalEvents() {
                       "Liên hệ phụ huynh ngay",
                       "Chuẩn bị chuyển viện",
                       "Ghi chép đầy đủ",
-                      "Thông báo ban giám hiệu"
+                      "Thông báo ban giám hiệu",
                     ].map((item, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-2 bg-white/50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center space-x-3 p-2 bg-white/50 rounded-lg"
+                      >
                         <div className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></div>
-                        <span className="text-gray-700 font-medium">{item}</span>
+                        <span className="text-gray-700 font-medium">
+                          {item}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -936,12 +986,14 @@ export default function MedicalEvents() {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Tiêu đề sự kiện</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Tiêu đề sự kiện
+                        </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Nhập tiêu đề sự kiện..." 
+                          <Input
+                            placeholder="Nhập tiêu đề sự kiện..."
                             className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -954,7 +1006,9 @@ export default function MedicalEvents() {
                     name="student"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Học sinh</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Học sinh
+                        </FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
@@ -974,7 +1028,8 @@ export default function MedicalEvents() {
                               ) : (
                                 filteredStudents.map((student) => {
                                   const studentId = student.student?._id || "";
-                                  const studentName = student.student?.name || "Không rõ";
+                                  const studentName =
+                                    student.student?.name || "Không rõ";
                                   return (
                                     <SelectItem
                                       key={studentId}
@@ -1004,7 +1059,9 @@ export default function MedicalEvents() {
                     name="class"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Lớp</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Lớp
+                        </FormLabel>
                         <Select
                           onValueChange={(value) => {
                             field.onChange(value);
@@ -1028,7 +1085,11 @@ export default function MedicalEvents() {
                               </div>
                             ) : (
                               availableClasses.map((className) => (
-                                <SelectItem key={className} value={className} className="rounded-lg">
+                                <SelectItem
+                                  key={className}
+                                  value={className}
+                                  className="rounded-lg"
+                                >
                                   <div className="flex items-center space-x-2">
                                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                                       <Users className="w-3 h-3 text-green-600" />
@@ -1050,12 +1111,14 @@ export default function MedicalEvents() {
                     name="location"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Địa điểm</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Địa điểm
+                        </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Địa điểm xảy ra sự cố..." 
+                          <Input
+                            placeholder="Địa điểm xảy ra sự cố..."
                             className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1068,10 +1131,14 @@ export default function MedicalEvents() {
                     name="reporter"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Người báo cáo</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Người báo cáo
+                        </FormLabel>
                         <FormControl>
                           <Input
-                            value={profile?.name || user?.email || "Không xác định"}
+                            value={
+                              profile?.name || user?.email || "Không xác định"
+                            }
                             disabled
                             className="rounded-xl bg-gray-50 text-gray-600 border-gray-200"
                           />
@@ -1090,31 +1157,47 @@ export default function MedicalEvents() {
                     name="priority"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={`font-medium ${isEmergencyMode ? "text-red-700" : "text-gray-700"}`}>
+                        <FormLabel
+                          className={`font-medium ${
+                            isEmergencyMode ? "text-red-700" : "text-gray-700"
+                          }`}
+                        >
                           Mức độ ưu tiên
                         </FormLabel>
                         <Select
-                          onValueChange={(value: "Cao" | "Trung bình" | "Thấp") => {
+                          onValueChange={(
+                            value: "Cao" | "Trung bình" | "Thấp"
+                          ) => {
                             handlePriorityChange(value);
                             field.onChange(value);
                           }}
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className={`rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${
-                              isEmergencyMode ? "border-red-300 bg-red-50" : ""
-                            }`}>
+                            <SelectTrigger
+                              className={`rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${
+                                isEmergencyMode
+                                  ? "border-red-300 bg-red-50"
+                                  : ""
+                              }`}
+                            >
                               <SelectValue placeholder="Chọn mức độ" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="rounded-xl">
-                            <SelectItem value="Cao" className="text-red-600 font-semibold rounded-lg">
+                            <SelectItem
+                              value="Cao"
+                              className="text-red-600 font-semibold rounded-lg"
+                            >
                               <div className="flex items-center space-x-2">
                                 <span className="text-lg">🚨</span>
                                 <span>Cao (Khẩn cấp)</span>
                               </div>
                             </SelectItem>
-                            <SelectItem value="Trung bình" className="rounded-lg">
+                            <SelectItem
+                              value="Trung bình"
+                              className="rounded-lg"
+                            >
                               <div className="flex items-center space-x-2">
                                 <span className="text-lg">⚡</span>
                                 <span>Trung bình</span>
@@ -1147,7 +1230,9 @@ export default function MedicalEvents() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Mô tả chi tiết</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Mô tả chi tiết
+                        </FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Mô tả chi tiết về sự cố y tế..."
@@ -1165,7 +1250,9 @@ export default function MedicalEvents() {
                     name="contactStatus"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 font-medium">Trạng thái liên hệ phụ huynh</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">
+                          Trạng thái liên hệ phụ huynh
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -1176,7 +1263,10 @@ export default function MedicalEvents() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="rounded-xl">
-                            <SelectItem value="Chưa liên hệ" className="rounded-lg">
+                            <SelectItem
+                              value="Chưa liên hệ"
+                              className="rounded-lg"
+                            >
                               <div className="flex items-center space-x-2">
                                 <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
                                 <span>Chưa liên hệ</span>
@@ -1188,13 +1278,19 @@ export default function MedicalEvents() {
                                 <span>Đang gọi</span>
                               </div>
                             </SelectItem>
-                            <SelectItem value="Đã liên hệ" className="rounded-lg">
+                            <SelectItem
+                              value="Đã liên hệ"
+                              className="rounded-lg"
+                            >
                               <div className="flex items-center space-x-2">
                                 <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                                 <span>Đã liên hệ</span>
                               </div>
                             </SelectItem>
-                            <SelectItem value="Phụ huynh" className="rounded-lg">
+                            <SelectItem
+                              value="Phụ huynh"
+                              className="rounded-lg"
+                            >
                               <div className="flex items-center space-x-2">
                                 <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
                                 <span>Phụ huynh đang đến</span>
@@ -1244,7 +1340,8 @@ export default function MedicalEvents() {
                           </FormControl>
                           <FormDescription className="text-red-600 flex items-center">
                             <span className="mr-2">💡</span>
-                            Ghi chép ngay những hành động đã thực hiện để xử lý khẩn cấp
+                            Ghi chép ngay những hành động đã thực hiện để xử lý
+                            khẩn cấp
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -1369,11 +1466,11 @@ export default function MedicalEvents() {
                       <span className="mr-2">❌</span>
                       Hủy
                     </Button>
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className={`font-bold px-8 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 ${
-                        isEmergencyMode 
-                          ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg" 
+                        isEmergencyMode
+                          ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg"
                           : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
                       }`}
                     >
@@ -1457,13 +1554,14 @@ export default function MedicalEvents() {
                               </div>
                             ) : (
                               students.map((student: any) => {
-                                const studentId = student.student?._id || student._id || "";
-                                const studentName = student.student?.name || student.name || "Không rõ";
+                                const studentId =
+                                  student.student?._id || student._id || "";
+                                const studentName =
+                                  student.student?.name ||
+                                  student.name ||
+                                  "Không rõ";
                                 return (
-                                  <SelectItem
-                                    key={studentId}
-                                    value={studentId}
-                                  >
+                                  <SelectItem key={studentId} value={studentId}>
                                     {studentName}
                                   </SelectItem>
                                 );
@@ -1532,12 +1630,19 @@ export default function MedicalEvents() {
                     // Tìm staff theo ID
                     const staffId = field.value;
                     const staff = staffs.find((s) => s._id === staffId);
-                    const staffName = staff?.profile?.name || staff?.user?.email || "Không xác định";
+                    const staffName =
+                      staff?.profile?.name ||
+                      staff?.user?.email ||
+                      "Không xác định";
                     return (
                       <FormItem>
                         <FormLabel>Người báo cáo</FormLabel>
                         <FormControl>
-                          <Input value={staffName} disabled className="bg-gray-50 text-gray-600" />
+                          <Input
+                            value={staffName}
+                            disabled
+                            className="bg-gray-50 text-gray-600"
+                          />
                         </FormControl>
                         <FormDescription className="text-xs text-gray-500">
                           Tự động lấy từ người tạo sự kiện, không thể thay đổi
@@ -1662,11 +1767,16 @@ export default function MedicalEvents() {
                 <div>
                   {/* Safely access student name and class */}
                   {(() => {
-                    if (typeof selectedEvent.student === "object" && selectedEvent.student !== null) {
-                      const studentName = selectedEvent.student.name || "Không rõ";
-                      const studentClass = typeof selectedEvent.student.class === "object" 
-                        ? selectedEvent.student.class?.name || "Không rõ"
-                        : selectedEvent.student.class || "Không rõ";
+                    if (
+                      typeof selectedEvent.student === "object" &&
+                      selectedEvent.student !== null
+                    ) {
+                      const studentName =
+                        selectedEvent.student.name || "Không rõ";
+                      const studentClass =
+                        typeof selectedEvent.student.class === "object"
+                          ? selectedEvent.student.class?.name || "Không rõ"
+                          : selectedEvent.student.class || "Không rõ";
                       return `${studentName} - ${studentClass}`;
                     }
                     return selectedEvent.student || "Không rõ";
@@ -1813,7 +1923,11 @@ export default function MedicalEvents() {
               <div className="flex-1">
                 <DialogTitle className="text-2xl font-bold flex items-center gap-2">
                   <span>👁️</span>
-                  {String(selectedEvent ? selectedEvent.title || "Không có tiêu đề" : "Không có tiêu đề")}
+                  {String(
+                    selectedEvent
+                      ? selectedEvent.title || "Không có tiêu đề"
+                      : "Không có tiêu đề"
+                  )}
                 </DialogTitle>
                 <DialogDescription className="mt-1 text-blue-100">
                   Thông tin chi tiết về sự cố y tế
@@ -1832,7 +1946,10 @@ export default function MedicalEvents() {
                     <span className="font-medium text-gray-700">Học sinh:</span>
                     <span className="text-gray-800">
                       {(() => {
-                        if (typeof selectedEvent.student === "object" && selectedEvent.student !== null) {
+                        if (
+                          typeof selectedEvent.student === "object" &&
+                          selectedEvent.student !== null
+                        ) {
                           return selectedEvent.student.name || "Không rõ";
                         }
                         return String(selectedEvent.student || "Không rõ");
@@ -1844,7 +1961,10 @@ export default function MedicalEvents() {
                     <span className="font-medium text-gray-700">Lớp:</span>
                     <span className="text-gray-800">
                       {(() => {
-                        if (typeof selectedEvent.class === "object" && selectedEvent.class !== null) {
+                        if (
+                          typeof selectedEvent.class === "object" &&
+                          selectedEvent.class !== null
+                        ) {
                           return selectedEvent.class.name || "Không rõ";
                         }
                         return String(selectedEvent.class || "Không rõ");
@@ -1862,16 +1982,35 @@ export default function MedicalEvents() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <UserCheck className="w-4 h-4 text-sky-700" />
-                    <span className="font-medium text-gray-700">Người báo cáo:</span>
+                    <span className="font-medium text-gray-700">
+                      Người báo cáo:
+                    </span>
                     <span className="text-gray-800">
                       {(() => {
-                        if (typeof selectedEvent.staff === "object" && selectedEvent.staff !== null) {
+                        if (
+                          typeof selectedEvent.staff === "object" &&
+                          selectedEvent.staff !== null
+                        ) {
                           // Ưu tiên profile.name, rồi user.email
-                          return selectedEvent.staff.profile?.name || selectedEvent.staff.user?.email || profile?.name || user?.email || "Không rõ";
+                          return (
+                            selectedEvent.staff.profile?.name ||
+                            selectedEvent.staff.user?.email ||
+                            profile?.name ||
+                            user?.email ||
+                            "Không rõ"
+                          );
                         }
                         if (typeof selectedEvent.staff === "string") {
-                          const staffObj = staffs.find((s) => s._id === selectedEvent.staff);
-                          return staffObj?.profile?.name || staffObj?.user?.email || profile?.name || user?.email || "Không rõ";
+                          const staffObj = staffs.find(
+                            (s) => s._id === selectedEvent.staff
+                          );
+                          return (
+                            staffObj?.profile?.name ||
+                            staffObj?.user?.email ||
+                            profile?.name ||
+                            user?.email ||
+                            "Không rõ"
+                          );
                         }
                         return profile?.name || user?.email || "Không rõ";
                       })()}
@@ -1879,20 +2018,27 @@ export default function MedicalEvents() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Flag className="w-4 h-4 text-sky-700" />
-                    <span className="font-medium text-gray-700">Mức độ ưu tiên:</span>
+                    <span className="font-medium text-gray-700">
+                      Mức độ ưu tiên:
+                    </span>
                     <span className="text-gray-800">
                       {String(selectedEvent.priority || "Không rõ")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-sky-700" />
-                    <span className="font-medium text-gray-700">Thời gian:</span>
+                    <span className="font-medium text-gray-700">
+                      Thời gian:
+                    </span>
                     <span className="text-gray-800">
                       {selectedEvent.createdAt
-                        ? new Date(selectedEvent.createdAt).toLocaleString("vi-VN", {
-                            dateStyle: "full",
-                            timeStyle: "medium",
-                          })
+                        ? new Date(selectedEvent.createdAt).toLocaleString(
+                            "vi-VN",
+                            {
+                              dateStyle: "full",
+                              timeStyle: "medium",
+                            }
+                          )
                         : "Không rõ"}
                     </span>
                   </div>
@@ -1914,7 +2060,9 @@ export default function MedicalEvents() {
               <div className="bg-sky-50 rounded-lg border p-4 flex items-center gap-3">
                 <PhoneCall className="w-5 h-5 text-teal-700" />
                 <div>
-                  <div className="font-semibold text-gray-700">Trạng thái liên hệ phụ huynh</div>
+                  <div className="font-semibold text-gray-700">
+                    Trạng thái liên hệ phụ huynh
+                  </div>
                   <div className="text-gray-800">
                     {(() => {
                       let contactStatus;
@@ -1922,7 +2070,7 @@ export default function MedicalEvents() {
                         "Chưa liên hệ",
                         "Đang gọi",
                         "Đã liên hệ",
-                        "Phụ huynh đang đến"
+                        "Phụ huynh đang đến",
                       ];
                       if (
                         selectedEvent.contactStatus &&
@@ -1930,8 +2078,13 @@ export default function MedicalEvents() {
                       ) {
                         contactStatus = selectedEvent.contactStatus;
                       } else if (selectedEvent.notes) {
-                        const match = selectedEvent.notes.match(/Contact Status: ([^|]+)/);
-                        if (match && validContactStatus.includes(match[1].trim())) {
+                        const match = selectedEvent.notes.match(
+                          /Contact Status: ([^|]+)/
+                        );
+                        if (
+                          match &&
+                          validContactStatus.includes(match[1].trim())
+                        ) {
                           contactStatus = match[1].trim();
                         }
                       }
@@ -1944,7 +2097,10 @@ export default function MedicalEvents() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setViewEventDetailsOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setViewEventDetailsOpen(false)}
+            >
               Đóng
             </Button>
             {!selectedEvent?.status && selectedEvent && (
