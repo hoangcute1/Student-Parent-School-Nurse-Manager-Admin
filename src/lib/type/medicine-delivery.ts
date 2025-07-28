@@ -1,12 +1,11 @@
 
-import { Medication } from "./medications";
 
 interface MedicineDelivery {
   id: string;
   parentId: string;
-  staffId: string;
   parentName: string;
-  staffName: string;
+  // staffId: string;
+  // staffName: string;
   name: string;
   date: string; // Chuyển sang string để đồng bộ với API
   total: number;
@@ -29,10 +28,10 @@ interface MedicineDelivery {
       name: string;
     };
   };
-  staff: {
-    _id: string;
-    name: string;
-  };
+  // staff: {
+  //   _id: string;
+  //   name: string;
+  // };
   parent: {
     _id: string;
     name: string;
@@ -41,8 +40,8 @@ interface MedicineDelivery {
 
 interface MedicineDeliveryByParent {
   id: string;
-  staffId: string;
-  staffName: string;
+  // staffId: string;
+  // staffName: string;
   name: string;
   date: string;
   total: number;
@@ -69,35 +68,35 @@ interface MedicineDeliveryParentResponse {
   total: number;
 }
 
-interface MedicineDeliveryByStaff {
-  id: string;
-  parentId: string;
-  parentName: string;
-  name: string;
-  date: string;
-  total: number;
-  status: "pending" | "morning" | "noon" | "completed" | "cancelled";
-  per_day: string;
-  note?: string;
-  reason?: string;
-  sent_at: string;
-  end_at: string;
-  student: {
-    _id: string;
-    name: string;
-    studentId: string;
-    class: {
-      _id: string;
-      name: string;
-    };
-  };
-  created_at: string;
-  updated_at: string;
-}
-interface MedicineDeliveryStaffResponse {
-  data: MedicineDeliveryByStaff[];
-  total: number;
-}
+// interface MedicineDeliveryByStaff {
+//   id: string;
+//   parentId: string;
+//   parentName: string;
+//   name: string;
+//   date: string;
+//   total: number;
+//   status: "pending" | "morning" | "noon" | "completed" | "cancelled";
+//   per_day: string;
+//   note?: string;
+//   reason?: string;
+//   sent_at: string;
+//   end_at: string;
+//   student: {
+//     _id: string;
+//     name: string;
+//     studentId: string;
+//     class: {
+//       _id: string;
+//       name: string;
+//     };
+//   };
+//   created_at: string;
+//   updated_at: string;
+// }
+// interface MedicineDeliveryStaffResponse {
+//   data: MedicineDeliveryByStaff[];
+//   total: number;
+// }
 interface CreateMedicineDelivery {
   name: string;
   total: number;
@@ -107,7 +106,7 @@ interface CreateMedicineDelivery {
   reason?: string;
   student: string;
   parent: string;
-  staff?: string;
+  // staff?: string;
 }
 
 interface MedicineDeliveryResponse {
@@ -118,11 +117,11 @@ interface MedicineDeliveryResponse {
 interface MedicineDeliveryStore {
   medicineDeliveries: MedicineDelivery[];
   medicineDeliveryByParentId: MedicineDeliveryByParent[];
-  medicineDeliveryByStaffId: MedicineDeliveryByStaff[];
+  // medicineDeliveryByStaffId: MedicineDeliveryByStaff[];
   isLoading: boolean;
   error: string | null;
   fetchMedicineDeliveries: () => Promise<void>;
-  fetchMedicineDeliveryByStaffId: () => Promise<void>;
+  // fetchMedicineDeliveryByStaffId: () => Promise<void>;
   fetchMedicineDeliveryByParentId: () => Promise<void>;
   addMedicineDelivery: (data: CreateMedicineDelivery) => Promise<any>;
   addManyMedicineDelivery: (data: CreateMedicineDelivery[]) => Promise<any>;
@@ -144,6 +143,6 @@ export type {
   CreateMedicineDelivery,
   MedicineDeliveryByParent,
   MedicineDeliveryParentResponse,
-  MedicineDeliveryByStaff,
-  MedicineDeliveryStaffResponse,
+  // MedicineDeliveryByStaff,
+  // MedicineDeliveryStaffResponse,
 };

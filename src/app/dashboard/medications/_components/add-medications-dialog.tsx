@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -12,14 +11,17 @@ import {
 } from "@/components/ui/select";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
-import { useStaffStore } from "@/stores/staff-store";
+// import { useStaffStore } from "@/stores/staff-store";
 import { useMedicationStore } from "@/stores/medication-store";
 
-export default function AddMedicineDeliveryForm() {
+export default function AddMedicineDeliveryForm({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+}) {
   const { addManyMedicineDelivery } = useMedicineDeliveryStore();
   const { studentsData } = useParentStudentsStore(); // danh sách học sinh của tài khoản này
-  const { staffs, fetchStaffs } = useStaffStore(); // danh sách staff
-  const { medications, fetchMedications } = useMedicationStore(); // để lấy medicine ID
+  // const { staffs, fetchStaffs } = useStaffStore(); // danh sách staff
   const { fetchMedicineDeliveryByParentId } = useMedicineDeliveryStore();
 
   // State cho nhiều form
@@ -42,41 +44,57 @@ export default function AddMedicineDeliveryForm() {
 
   // State cho chọn học sinh và nhân viên ngoài forms
   const [selectedStudent, setSelectedStudent] = useState("");
-  const [selectedStaff, setSelectedStaff] = useState("");
+  // const [selectedStaff, setSelectedStaff] = useState("");
   const [selectedParent, setSelectedParent] = useState("");
 
   // Handler cho từng form
-  const handleFormChange = (idx: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (
+    idx: number,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setForms((prev) => prev.map((f, i) => i === idx ? { ...f, [name]: value } : f));
+    setForms((prev) =>
+      prev.map((f, i) => (i === idx ? { ...f, [name]: value } : f))
+    );
   };
   const handleTimeChange = (idx: number, time: string, checked: boolean) => {
-    setMedicineTimes((prev) => prev.map((t, i) => i === idx ? { ...t, [time]: checked } : t));
+    setMedicineTimes((prev) =>
+      prev.map((t, i) => (i === idx ? { ...t, [time]: checked } : t))
+    );
     // Update per_day
     const newTimes = { ...medicineTimes[idx], [time]: checked };
     const selectedTimes = Object.entries(newTimes)
       .filter(([_, isSelected]) => isSelected)
       .map(([time, _]) => {
         switch (time) {
-          case "morning": return "Sáng";
-          case "noon": return "Trưa";
-          default: return "";
+          case "morning":
+            return "Sáng";
+          case "noon":
+            return "Trưa";
+          default:
+            return "";
         }
       });
-    setForms((prev) => prev.map((f, i) => i === idx ? { ...f, per_day: selectedTimes.join(", ") } : f));
+    setForms((prev) =>
+      prev.map((f, i) =>
+        i === idx ? { ...f, per_day: selectedTimes.join(", ") } : f
+      )
+    );
   };
   // Khi chọn học sinh ngoài form
   const handleSelectStudent = (studentId: string) => {
     setSelectedStudent(studentId);
     // Tìm parentId tương ứng với học sinh
-    const selectedStudentObj = studentsData.find((s) => s.student._id === studentId);
+    const selectedStudentObj = studentsData.find(
+      (s) => s.student._id === studentId
+    );
     const parentId = selectedStudentObj?.parent?._id || "";
     setSelectedParent(parentId);
   };
   // Khi chọn nhân viên ngoài form
-  const handleSelectStaff = (staffId: string) => {
-    setSelectedStaff(staffId);
-  };
+  // const handleSelectStaff = (staffId: string) => {
+  //   setSelectedStaff(staffId);
+  // };
   // Sửa handleAddForm để gán student/staff mặc định
   const handleAddForm = () => {
     setForms((prev) => [
@@ -94,8 +112,8 @@ export default function AddMedicineDeliveryForm() {
   };
 
   const handleRemoveForm = (idx: number) => {
-    setForms(prev => prev.filter((_, i) => i !== idx));
-    setMedicineTimes(prev => prev.filter((_, i) => i !== idx));
+    setForms((prev) => prev.filter((_, i) => i !== idx));
+    setMedicineTimes((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,26 +128,27 @@ export default function AddMedicineDeliveryForm() {
           setLoading(false);
           return;
         }
-        if (!selectedStaff) {
-          setError(`Vui lòng chọn nhân viên phụ trách!`);
-          setLoading(false);
-          return;
-        }
+        // if (!selectedStaff) {
+        //   setError(`Vui lòng chọn nhân viên phụ trách!`);
+        //   setLoading(false);
+        //   return;
+        // }
         if (!forms[i].per_day) {
-          setError(`Vui lòng chọn ít nhất một thời gian dùng thuốc cho đơn thứ ${i + 1}!`);
+          setError(
+            `Vui lòng chọn ít nhất một thời gian dùng thuốc cho đơn thứ ${
+              i + 1
+            }!`
+          );
           setLoading(false);
           return;
         }
       }
       // Đảm bảo medications đã được load
-      if (!medications || medications.length === 0) {
-        await fetchMedications();
-      }
       // Chuẩn bị payloads
       const currentDate = new Date();
       const payloads = forms.map((form) => ({
         student: selectedStudent,
-        staff: selectedStaff,
+        // staff: selectedStaff,
         parent: selectedParent,
         name: form.name,
         total: form.total,
@@ -138,7 +157,7 @@ export default function AddMedicineDeliveryForm() {
         status: "pending" as const,
         date: currentDate.toISOString(),
       }));
-      console.log('Payloads gửi lên:', payloads);
+      console.log("Payloads gửi lên:", payloads);
       await addManyMedicineDelivery(payloads);
       setForms([
         {
@@ -153,9 +172,12 @@ export default function AddMedicineDeliveryForm() {
       setMedicineTimes([{ morning: false, noon: false }]);
       setNurseNotes([""]);
       setSelectedStudent("");
-      setSelectedStaff("");
+      // setSelectedStaff("");
       alert("Thêm đơn thuốc thành công!");
       await fetchMedicineDeliveryByParentId();
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err: any) {
       setError(err.message || "Có lỗi xảy ra");
     } finally {
@@ -163,24 +185,24 @@ export default function AddMedicineDeliveryForm() {
     }
   };
 
-  useEffect(() => {
-    if (!staffs || staffs.length === 0) {
-      fetchStaffs();
-    }
-    if (!medications || medications.length === 0) {
-      fetchMedications();
-    }
-  }, [staffs, fetchStaffs, medications, fetchMedications]);
+  // useEffect(() => {
+  //   if (!staffs || staffs.length === 0) {
+  //     fetchStaffs();
+  //   }
+
+  // }, [staffs,fetchStaffs]);
 
   // Thêm type cho medicineTimes
-  type MedicineTimes = { morning: boolean; noon: boolean; };
+  type MedicineTimes = { morning: boolean; noon: boolean };
 
   return (
     <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-6 rounded-2xl">
       <form className="space-y-4" onSubmit={handleSubmit}>
         {/* Select học sinh ngoài forms.map */}
         <div className="space-y-2">
-          <label className="block text-sky-800 font-semibold text-sm">Tên học sinh</label>
+          <label className="block text-sky-800 font-semibold text-sm">
+            Tên học sinh
+          </label>
           <Select
             value={selectedStudent}
             onValueChange={handleSelectStudent}
@@ -203,7 +225,10 @@ export default function AddMedicineDeliveryForm() {
           </Select>
         </div>
         {forms.map((form, idx) => (
-          <div key={idx} className="p-4 mb-4 rounded-xl border border-sky-200 bg-white shadow-sm space-y-4 relative">
+          <div
+            key={idx}
+            className="p-4 mb-4 rounded-xl border border-sky-200 bg-white shadow-sm space-y-4 relative"
+          >
             {/* Nút trừ ở góc phải trên */}
             {forms.length > 1 && (
               <button
@@ -212,7 +237,18 @@ export default function AddMedicineDeliveryForm() {
                 className="absolute top-2 right-2 p-1 group"
                 title="Xoá đơn này"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 group-hover:text-sky-600 transition-colors duration-150">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-500 group-hover:text-sky-600 transition-colors duration-150"
+                >
                   <line x1="4" y1="4" x2="16" y2="16" />
                   <line x1="16" y1="4" x2="4" y2="16" />
                 </svg>
@@ -221,45 +257,89 @@ export default function AddMedicineDeliveryForm() {
             {/* Khối thông tin đơn thuốc */}
             <div className="p-4 mt-2 mb-2 rounded-lg border border-sky-100 bg-sky-50 space-y-4">
               <div className="space-y-2">
-                <label className="block text-sky-800 font-semibold text-sm">Tên đơn thuốc</label>
-                <Input name="name" value={form.name} onChange={e => handleFormChange(idx, e)} required className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg" />
+                <label className="block text-sky-800 font-semibold text-sm">
+                  Tên đơn thuốc
+                </label>
+                <Input
+                  name="name"
+                  value={form.name}
+                  onChange={(e) => handleFormChange(idx, e)}
+                  required
+                  className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+                />
               </div>
               <div className="space-y-2">
-                <label className="block text-sky-800 font-semibold text-sm">Tổng số liều</label>
-                <Input type="number" name="total" value={form.total} min={1} onChange={e => handleFormChange(idx, e)} required className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg" />
+                <label className="block text-sky-800 font-semibold text-sm">
+                  Tổng số liều
+                </label>
+                <Input
+                  type="number"
+                  name="total"
+                  value={form.total}
+                  min={1}
+                  onChange={(e) => handleFormChange(idx, e)}
+                  required
+                  className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
+                />
               </div>
               <div className="space-y-2">
-                <label className="block text-sky-800 font-semibold text-sm">Thời gian dùng thuốc trong ngày</label>
+                <label className="block text-sky-800 font-semibold text-sm">
+                  Thời gian dùng thuốc trong ngày
+                </label>
                 <div className="grid grid-cols-2 gap-3 p-4 bg-white rounded-lg border border-sky-200">
                   {[
                     { key: "morning", label: "Sáng", time: "(6:00 - 10:00)" },
                     { key: "noon", label: "Trưa", time: "(11:00 - 13:00)" },
                   ].map((timeSlot) => (
-                    <div key={timeSlot.key} className="flex items-center space-x-3">
+                    <div
+                      key={timeSlot.key}
+                      className="flex items-center space-x-3"
+                    >
                       <Checkbox
                         id={`${timeSlot.key}-${idx}`}
-                        checked={medicineTimes[idx][timeSlot.key as keyof MedicineTimes]}
-                        onCheckedChange={checked => handleTimeChange(idx, timeSlot.key, checked as boolean)}
+                        checked={
+                          medicineTimes[idx][
+                            timeSlot.key as keyof MedicineTimes
+                          ]
+                        }
+                        onCheckedChange={(checked) =>
+                          handleTimeChange(
+                            idx,
+                            timeSlot.key,
+                            checked as boolean
+                          )
+                        }
                         className="border-sky-300 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
                       />
-                      <label htmlFor={`${timeSlot.key}-${idx}`} className="text-sm font-medium text-sky-800 cursor-pointer flex flex-col">
+                      <label
+                        htmlFor={`${timeSlot.key}-${idx}`}
+                        className="text-sm font-medium text-sky-800 cursor-pointer flex flex-col"
+                      >
                         <span>{timeSlot.label}</span>
-                        <span className="text-xs text-sky-600">{timeSlot.time}</span>
+                        <span className="text-xs text-sky-600">
+                          {timeSlot.time}
+                        </span>
                       </label>
                     </div>
                   ))}
                 </div>
                 {form.per_day && (
                   <div className="mt-2 p-2 bg-sky-100 rounded-lg">
-                    <span className="text-sm text-sky-700 font-medium">Đã chọn: {form.per_day}</span>
+                    <span className="text-sm text-sky-700 font-medium">
+                      Đã chọn: {form.per_day}
+                    </span>
                   </div>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="block text-sky-800 font-semibold text-sm">👩‍⚕️ Lưu ý cho y tá</label>
-                <Input name="note"
+                <label className="block text-sky-800 font-semibold text-sm">
+                  👩‍⚕️ Lưu ý cho y tá
+                </label>
+                <Input
+                  name="note"
                   value={form.note}
-                  onChange={e => handleFormChange(idx, e)} required
+                  onChange={(e) => handleFormChange(idx, e)}
+                  required
                   className="border-sky-200 focus:border-sky-400 focus:ring-sky-200 rounded-lg"
                   placeholder="Ghi cú cho y tá (trước ăn / sau ăn) "
                 />
@@ -279,7 +359,7 @@ export default function AddMedicineDeliveryForm() {
           </div>
         ))}
         {/* Select nhân viên phụ trách ngoài forms.map */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="block text-sky-800 font-semibold text-sm">Nhân viên phụ trách</label>
           <Select
             value={selectedStaff}
@@ -304,7 +384,7 @@ export default function AddMedicineDeliveryForm() {
         </div>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
-        )}
+        )} */}
         <div className="pt-4 flex justify-end">
           <Button
             type="submit"

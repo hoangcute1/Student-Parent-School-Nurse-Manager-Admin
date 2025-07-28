@@ -30,13 +30,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 
 import { MedicineDeliveryTable } from "./components/medicine-delivery-table";
 import { FilterBar } from "./components/filter-bar";
-import type { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
+import type { MedicineDelivery } from "@/lib/type/medicine-delivery";
 import ViewDeliveryDialog from "./components/view-delivery-dialog";
 
 function SentMedicinesPage() {
@@ -44,12 +44,12 @@ function SentMedicinesPage() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedDate, setSelectedDate] = useState("all");
   const [selectedDelivery, setSelectedDelivery] =
-    useState<MedicineDeliveryByStaff | null>(null);
+    useState<MedicineDelivery | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
 
   const {
-    medicineDeliveryByStaffId,
-    fetchMedicineDeliveryByStaffId,
+    medicineDeliveries,
+    fetchMedicineDeliveries,
     updateMedicineDelivery,
     softDeleteMedicineDelivery,
     isLoading,
@@ -59,12 +59,12 @@ function SentMedicinesPage() {
   } = useMedicineDeliveryStore();
 
   useEffect(() => {
-    fetchMedicineDeliveryByStaffId();
-  }, [fetchMedicineDeliveryByStaffId]);
+    fetchMedicineDeliveries();
+  }, [fetchMedicineDeliveries]);
 
   // Filter data based on search and status
-  console.log("🔍 Tất cả created_at:", medicineDeliveryByStaffId.map(d => d.created_at));
-  const filteredData = [...medicineDeliveryByStaffId]
+  console.log("🔍 Tất cả created_at:", medicineDeliveries.map(d => d.created_at));
+  const filteredData = [...medicineDeliveries]
   .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) // ✅ mới nhất lên đầu
   .filter((delivery) => {
     const matchesSearch =
@@ -103,10 +103,10 @@ function SentMedicinesPage() {
 
   // Stats calculation
   const stats = {
-    total: medicineDeliveryByStaffId.length,
-    pending: medicineDeliveryByStaffId.filter((d) => d.status === "pending")
+    total: medicineDeliveries.length,
+    pending: medicineDeliveries.filter((d) => d.status === "pending")
       .length,
-    completed: medicineDeliveryByStaffId.filter((d) => d.status === "completed")
+    completed: medicineDeliveries.filter((d) => d.status === "completed")
       .length,
   };
 
@@ -179,7 +179,7 @@ function SentMedicinesPage() {
   };
 
   // Action handlers for deliveries
-  const handleViewDelivery = (delivery: MedicineDeliveryByStaff) => {
+  const handleViewDelivery = (delivery: MedicineDelivery) => {
     setSelectedDelivery(delivery);
     setShowViewDialog(true);
   };
@@ -194,7 +194,7 @@ function SentMedicinesPage() {
       const updateObj: any = { status: newStatus };
       if (reason) updateObj.reason = reason;
       await updateMedicineDelivery(id, updateObj);
-      await fetchMedicineDeliveryByStaffId();
+      await fetchMedicineDeliveries();
     } catch (err) {
       setError("Không thể cập nhật trạng thái");
     } finally {
@@ -202,7 +202,7 @@ function SentMedicinesPage() {
     }
   };
 
-  const handleDeleteDelivery = async (delivery: MedicineDeliveryByStaff) => {
+  const handleDeleteDelivery = async (delivery: MedicineDelivery) => {
     const confirmed = window.confirm(
       `Bạn có chắc chắn muốn ẩn đơn thuốc "${delivery.name}" cho học sinh "${delivery.student?.name}"?`
     );
@@ -213,7 +213,7 @@ function SentMedicinesPage() {
       setIsLoading(true);
       if (softDeleteMedicineDelivery) {
         await softDeleteMedicineDelivery(delivery.id);
-        await fetchMedicineDeliveryByStaffId();
+        await fetchMedicineDeliveries();
       } else {
         setError("Chức năng ẩn đơn thuốc không khả dụng");
       }
@@ -225,7 +225,7 @@ function SentMedicinesPage() {
   };
 
 
-  if (isLoading && medicineDeliveryByStaffId.length === 0) {
+  if (isLoading && medicineDeliveries.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white p-6">
         <div className="max-w-7xl mx-auto">
