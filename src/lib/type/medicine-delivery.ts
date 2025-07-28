@@ -1,5 +1,3 @@
-
-
 interface MedicineDelivery {
   id: string;
   parentId: string;

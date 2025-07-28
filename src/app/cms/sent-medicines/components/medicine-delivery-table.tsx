@@ -26,20 +26,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
+import type { MedicineDelivery } from "@/lib/type/medicine-delivery";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
 interface MedicineDeliveryTableProps {
-  deliveries: MedicineDeliveryByStaff[];
-  onViewDelivery: (delivery: MedicineDeliveryByStaff) => void;
+  deliveries: MedicineDelivery[];
+  onViewDelivery: (delivery: MedicineDelivery) => void;
   onUpdateStatus: (
     id: string,
     status: "pending" | "morning" | "noon" | "completed" | "cancelled",
     reason?: string
   ) => void;
-  onDeleteDelivery?: (delivery: MedicineDeliveryByStaff) => void;
+  onDeleteDelivery?: (delivery: MedicineDelivery) => void;
   isLoading?: boolean;
 }
 
