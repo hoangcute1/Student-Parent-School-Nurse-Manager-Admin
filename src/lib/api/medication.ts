@@ -17,6 +17,7 @@ export const createMedication = async (
   formData: MedicationFormValues
 ): Promise<Medication> => {
   try {
+    // Tạo object mới đúng chuẩn interface Medication
     const newMedication: Partial<Medication> = {
       name: formData.name ?? "",
       dosage: formData.dosage ?? "",
@@ -43,6 +44,7 @@ export const createMedication = async (
           : Boolean((formData as any).is_prescription_required),
     };
 
+    // Xóa các trường undefined/null/rỗng để API không nhận giá trị rỗng
     Object.keys(newMedication).forEach((key) => {
       const v = (newMedication as any)[key];
       if (v === undefined || v === null || v === "") {
@@ -50,6 +52,7 @@ export const createMedication = async (
       }
     });
 
+    // Gửi request
     return await fetchData<Medication>("/medicines", {
       method: "POST",
       body: JSON.stringify(newMedication),
@@ -79,11 +82,11 @@ export const updateMedicationForm = async (
 };
 
 /**
- * ❗️FIXED: Delete a medication by ID (đã sửa đúng endpoint)
+ * Delete a medication by ID
  */
 export const deleteMedication = async (id: string): Promise<void> => {
   try {
-    await fetchData(`/medicines/${id}`, {
+    await fetchData(`/medicine-deliveries/${id}`, {
       method: "DELETE",
     });
     return;
@@ -115,6 +118,7 @@ export const exportMedication = async (exportData: {
   medicalStaffName: string;
 }): Promise<{ success: boolean; message: string }> => {
   try {
+    // Gọi API để cập nhật số lượng thuốc sau khi xuất
     const response = await fetchData<{ success: boolean; message: string }>(
       `/medicines/${exportData.medicationId}/export`,
       {

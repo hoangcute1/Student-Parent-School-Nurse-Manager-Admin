@@ -156,6 +156,12 @@ export default function MedicationsPage() {
           }
           return true;
         })
+        // Sort by createdAt - newest first (mới nhất lên đầu)
+        .sort((a: any, b: any) => {
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB.getTime() - dateA.getTime(); // Descending order (mới nhất trước)
+        })
     : [];
 
   const handleExportToExcel = () => {
