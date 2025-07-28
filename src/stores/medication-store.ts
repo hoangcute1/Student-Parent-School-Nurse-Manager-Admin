@@ -2,9 +2,6 @@ import { create } from "zustand";
 import {
   getAllMedications,
   getMedicationById,
-  createMedication as apiAddMedication,
-  updateMedicationForm as apiUpdateMedication,
-  deleteMedication as apiDeleteMedication,
   createMedication,
   updateMedicationForm,
   deleteMedication,
