@@ -31,7 +31,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
 
 import { MedicineDeliveryTable } from "./components/medicine-delivery-table";
@@ -43,6 +42,7 @@ function SentMedicinesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedDate, setSelectedDate] = useState("all");
+  const [selectedTime, setSelectedTime] = useState("all");
   const [selectedDelivery, setSelectedDelivery] =
     useState<MedicineDelivery | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
@@ -63,49 +63,71 @@ function SentMedicinesPage() {
   }, [fetchMedicineDeliveries]);
 
   // Filter data based on search and status
-  console.log("🔍 Tất cả created_at:", medicineDeliveries.map(d => d.created_at));
+  console.log(
+    "🔍 Tất cả created_at:",
+    medicineDeliveries.map((d) => d.created_at)
+  );
   const filteredData = [...medicineDeliveries]
-  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) // ✅ mới nhất lên đầu
-  .filter((delivery) => {
-    const matchesSearch =
-      delivery.student?.name
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      delivery.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      delivery.parentName?.toLowerCase().includes(searchTerm.toLowerCase());
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    ) // ✅ mới nhất lên đầu
+    .filter((delivery) => {
+      const matchesSearch =
+        delivery.student?.name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        delivery.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        delivery.parentName?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      selectedStatus === "all" || delivery.status === selectedStatus;
+      const matchesStatus =
+        selectedStatus === "all" || delivery.status === selectedStatus;
 
-    // Date filtering logic
-    let matchesDate = true;
-    if (selectedDate !== "all" && delivery.created_at) {
-      const deliveryDate = new Date(delivery.created_at);
-      const now = new Date();
+      // Date filtering logic
+      let matchesDate = true;
+      if (selectedDate !== "all" && delivery.created_at) {
+        const deliveryDate = new Date(delivery.created_at);
+        const now = new Date();
 
-      switch (selectedDate) {
-        case "today":
-          matchesDate = deliveryDate.toDateString() === now.toDateString();
-          break;
-        case "week":
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          matchesDate = deliveryDate >= weekAgo;
-          break;
-        case "month":
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          matchesDate = deliveryDate >= monthAgo;
-          break;
+        switch (selectedDate) {
+          case "today":
+            matchesDate = deliveryDate.toDateString() === now.toDateString();
+            break;
+          case "week":
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            matchesDate = deliveryDate >= weekAgo;
+            break;
+          case "month":
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            matchesDate = deliveryDate >= monthAgo;
+            break;
+        }
       }
-    }
 
-    return matchesSearch && matchesStatus && matchesDate;
-  });
+      // Time filtering logic
+      let matchesTime = true;
+      if (selectedTime !== "all" && delivery.per_day) {
+        const perDay = delivery.per_day.toLowerCase();
+        switch (selectedTime) {
+          case "morning":
+            matchesTime = perDay.includes("sáng");
+            break;
+          case "noon":
+            matchesTime = perDay.includes("trưa");
+            break;
+          case "both":
+            matchesTime = perDay.includes("sáng") && perDay.includes("trưa");
+            break;
+        }
+      }
+
+      return matchesSearch && matchesStatus && matchesDate && matchesTime;
+    });
 
   // Stats calculation
   const stats = {
     total: medicineDeliveries.length,
-    pending: medicineDeliveries.filter((d) => d.status === "pending")
-      .length,
+    pending: medicineDeliveries.filter((d) => d.status === "pending").length,
     completed: medicineDeliveries.filter((d) => d.status === "completed")
       .length,
   };
@@ -134,9 +156,10 @@ function SentMedicinesPage() {
             `"${delivery.total || "N/A"}"`,
             `"${delivery.parentName || "N/A"}"`,
             `"${getStatusText(delivery.status)}"`,
-            `"${delivery.created_at
-              ? new Date(delivery.created_at).toLocaleDateString("vi-VN")
-              : "N/A"
+            `"${
+              delivery.created_at
+                ? new Date(delivery.created_at).toLocaleDateString("vi-VN")
+                : "N/A"
             }"`,
           ].join(",")
         ),
@@ -223,7 +246,6 @@ function SentMedicinesPage() {
       setIsLoading(false);
     }
   };
-
 
   if (isLoading && medicineDeliveries.length === 0) {
     return (
@@ -380,7 +402,6 @@ function SentMedicinesPage() {
           </Card>
         </div>
 
-
         {/* Main Data Table */}
         <div className="">
           <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
@@ -404,13 +425,13 @@ function SentMedicinesPage() {
                   </Button>
                 </div>
               </div>
-
             </CardHeader>
             <CardContent className="space-y-6">
               <FilterBar
                 onSearchChange={setSearchTerm}
                 onStatusFilterChange={setSelectedStatus}
                 onDateFilterChange={setSelectedDate}
+                onTimeFilterChange={setSelectedTime}
               />
               <div className="mt-6">
                 <MedicineDeliveryTable
@@ -424,8 +445,6 @@ function SentMedicinesPage() {
             </CardContent>
           </Card>
         </div>
-
-
       </div>
 
       {/* Dialog xem chi tiết đơn thuốc */}
