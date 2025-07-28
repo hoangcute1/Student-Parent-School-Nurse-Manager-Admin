@@ -86,7 +86,7 @@ export const updateMedicationForm = async (
  */
 export const deleteMedication = async (id: string): Promise<void> => {
   try {
-    await fetchData(`/medicine-deliveries/${id}`, {
+    await fetchData(`/medicines/${id}`, {
       method: "DELETE",
     });
     return;
