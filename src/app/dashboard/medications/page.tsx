@@ -21,7 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMedicineDeliveryStore } from "@/stores/medicine-delivery-store";
-import { useMedicationStore } from "@/stores/medication-store";
 import { useAuthStore } from "@/stores/auth-store";
 
 import React, { useState, useCallback } from "react";
@@ -144,6 +143,7 @@ export default function MedicationsPage() {
     useState<MedicineDeliveryByParent | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -189,6 +189,10 @@ export default function MedicationsPage() {
     [deleteMedicineDelivery, fetchMedicineDeliveryByParentId]
   );
 
+  const handleAddSuccess = useCallback(() => {
+    setIsAddDialogOpen(false);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -203,7 +207,7 @@ export default function MedicationsPage() {
                 Theo dõi và quản lý việc gửi thuốc cho học sinh
               </p>
             </div>
-            <Dialog>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button
                   size="lg"
@@ -222,7 +226,7 @@ export default function MedicationsPage() {
                     Nhập thông tin đơn thuốc cho học sinh
                   </DialogDescription>
                 </DialogHeader>
-                <AddMedicineDeliveryForm />
+                <AddMedicineDeliveryForm onSuccess={handleAddSuccess} />
               </DialogContent>
             </Dialog>
           </div>

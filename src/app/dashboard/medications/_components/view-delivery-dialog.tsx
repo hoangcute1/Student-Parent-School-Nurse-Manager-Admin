@@ -97,13 +97,14 @@ const ViewDeliveryDialog: React.FC<ViewDeliveryDialogProps> = React.memo(({ deli
                 <InfoRow label="Tên đơn thuốc" value={delivery.name || "N/A"} />
                 <InfoRow label="Thành phần thuốc" value={delivery.note || "Không có thông tin thành phần"} />
                 <InfoRow label="Thời gian dùng" value={delivery.per_day} />
-                <InfoRow label="Người nhận" value={delivery.staffName || "Chưa có"} />
+                {/* <InfoRow label="Người nhận" value={delivery.staffName || "Chưa có"} /> */}
                 <div className="space-y-2">
                   <span className="text-sm font-medium text-sky-600">Trạng thái</span>
                   <div className="flex">
                     <StatusBadge status={delivery.status} />
                   </div>
                 </div>
+                <br />
                 <InfoRow label="Thời gian tạo đơn" value={createdAt} />
                 <InfoRow label="Thời gian cập nhật" value={updatedAt} />
               </div>

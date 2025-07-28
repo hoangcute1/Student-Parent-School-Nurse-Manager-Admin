@@ -6,7 +6,7 @@ import {
   getAllMedicineDeliveries,
   getMedicineDeliveriesById,
   getMedicineDeliveriesByParentId,
-  getMedicineDeliveriesByStaffId,
+  // getMedicineDeliveriesByStaffId,
   updateMedicineDelivery,
   createManyMedicineDeliveries,
 } from "@/lib/api/medicine-delivery";
@@ -25,7 +25,7 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
     error: null,
     students: [],
     medicineDeliveryByParentId: [],
-    medicineDeliveryByStaffId: [],
+    // medicineDeliveryByStaffId: [],
 
     fetchMedicineDeliveries: async () => {
       try {
@@ -95,33 +95,33 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
       }
     },
 
-    fetchMedicineDeliveryByStaffId: async (): Promise<void> => {
-      try {
-        set({ isLoading: true, error: null });
-        const token = getAuthToken();
-        console.log("Token in fetchMedicineDeliveryByStaffId:", token);
-        if (!token) {
-          console.log("No auth token found, skipping fetch");
-          set({ isLoading: false });
-          return;
-        }
-        const userId = parseJwt(token)?.sub;
-        if (!userId) {
-          console.log("No user ID found in token, skipping fetch");
-          set({ isLoading: false });
-          return;
-        }
-        const response = await getMedicineDeliveriesByStaffId(userId);
-        set({ medicineDeliveryByStaffId: response || [] });
-      } catch (err: any) {
-        const errorMessage =
-          err.message || "Failed to fetch medicine delivery by staff ID";
-        set({ error: errorMessage });
-        throw err;
-      } finally {
-        set({ isLoading: false });
-      }
-    },
+    // fetchMedicineDeliveryByStaffId: async (): Promise<void> => {
+    //   try {
+    //     set({ isLoading: true, error: null });
+    //     const token = getAuthToken();
+    //     console.log("Token in fetchMedicineDeliveryByStaffId:", token);
+    //     if (!token) {
+    //       console.log("No auth token found, skipping fetch");
+    //       set({ isLoading: false });
+    //       return;
+    //     }
+    //     const userId = parseJwt(token)?.sub;
+    //     if (!userId) {
+    //       console.log("No user ID found in token, skipping fetch");
+    //       set({ isLoading: false });
+    //       return;
+    //     }
+    //     const response = await getMedicineDeliveriesByStaffId(userId);
+    //     set({ medicineDeliveryByStaffId: response || [] });
+    //   } catch (err: any) {
+    //     const errorMessage =
+    //       err.message || "Failed to fetch medicine delivery by staff ID";
+    //     set({ error: errorMessage });
+    //     throw err;
+    //   } finally {
+    //     set({ isLoading: false });
+    //   }
+    // },
 
     addMedicineDelivery: async (data: CreateMedicineDelivery) => {
       try {
@@ -133,7 +133,8 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
             ...get().medicineDeliveryByParentId,
             ...(Array.isArray(response) ? response : [response]).filter(
               (item): item is MedicineDeliveryByParent =>
-                item && "student" in item && "staff" in item
+                item && "student" in item 
+              // && "staff" in item
             ),
           ],
           error: null,
@@ -159,7 +160,7 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
           return (
             "id" in obj &&
             "student" in obj &&
-            "staff" in obj &&
+            // "staff" in obj &&
             "name" in obj &&
             "date" in obj &&
             "total" in obj &&
@@ -199,7 +200,7 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         const currentState = get();
         console.log("Current state before update:", {
           parentCount: currentState.medicineDeliveryByParentId.length,
-          staffCount: currentState.medicineDeliveryByStaffId.length,
+          // staffCount: currentState.medicineDeliveryByStaffId.length,
           allCount: currentState.medicineDeliveries.length,
         });
 
@@ -210,10 +211,10 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
           );
 
         // Cập nhật danh sách cho nhân viên
-        const updatedStaffDeliveries =
-          currentState.medicineDeliveryByStaffId.filter(
-            (delivery) => delivery.id !== id
-          );
+        // const updatedStaffDeliveries =
+        //   currentState.medicineDeliveryByStaffId.filter(
+        //     (delivery) => delivery.id !== id
+        //   );
 
         // Cập nhật danh sách chung cho quản lý
         const updatedAllDeliveries = currentState.medicineDeliveries.filter(
@@ -222,13 +223,13 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
 
         console.log("Updated counts after filter:", {
           parentCount: updatedParentDeliveries.length,
-          staffCount: updatedStaffDeliveries.length,
+          // staffCount: updatedStaffDeliveries.length,
           allCount: updatedAllDeliveries.length,
         });
 
         set({
           medicineDeliveryByParentId: updatedParentDeliveries,
-          medicineDeliveryByStaffId: updatedStaffDeliveries,
+          // medicineDeliveryByStaffId: updatedStaffDeliveries,
           medicineDeliveries: updatedAllDeliveries,
         });
 
@@ -255,17 +256,17 @@ export const useMedicineDeliveryStore = create<MedicineDeliveryStore>(
         const currentState = get();
 
         // Chỉ xóa khỏi view staff và admin
-        const updatedStaffDeliveries =
-          currentState.medicineDeliveryByStaffId.filter(
-            (delivery) => delivery.id !== id
-          );
+        // const updatedStaffDeliveries =
+        //   currentState.medicineDeliveryByStaffId.filter(
+        //     (delivery) => delivery.id !== id
+        //   );
 
         const updatedAllDeliveries = currentState.medicineDeliveries.filter(
           (delivery) => delivery.id !== id
         );
 
         set({
-          medicineDeliveryByStaffId: updatedStaffDeliveries,
+          // medicineDeliveryByStaffId: updatedStaffDeliveries,
           medicineDeliveries: updatedAllDeliveries,
           // Không cập nhật medicineDeliveryByParentId để phụ huynh vẫn thấy được
         });

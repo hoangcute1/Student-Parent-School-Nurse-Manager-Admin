@@ -22,15 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import {
   Select,
   SelectContent,
@@ -89,13 +81,13 @@ export default function ParentMedicine() {
     (m) => m.status === "completed"
   ).length;
   const progressMedicines = medicineDeliveries.filter(
-    (m) => m.status === "progress"
+    (m) => m.status === "morning" || m.status === "noon"
   ).length;
 
   // Handler cập nhật trạng thái
   const handleUpdateStatus = async (
     id: string,
-    status: "progress" | "completed" | "cancelled"
+    status: "morning" | "noon" | "completed" | "cancelled"
   ) => {
     try {
       setIsLoading(true);
@@ -264,14 +256,16 @@ export default function ParentMedicine() {
                           ? "bg-yellow-100 text-yellow-800 border-yellow-200"
                           : request.status === "completed"
                           ? "bg-green-100 text-green-800 border-green-200"
-                          : request.status === "progress"
+                          : request.status === "morning" ||
+                            request.status === "noon"
                           ? "bg-blue-100 text-blue-800 border-blue-200"
                           : "bg-red-100 text-red-800 border-red-200"
                       }
                     >
                       {request.status === "pending"
                         ? "Chờ xử lí"
-                        : request.status === "progress"
+                        : request.status === "morning" ||
+                          request.status === "noon"
                         ? "Đang làm"
                         : request.status === "completed"
                         ? "Đã hoàn thành"
@@ -310,14 +304,6 @@ export default function ParentMedicine() {
                           Số lần uống:
                         </span>{" "}
                         <span className="text-gray-900">{request.per_day}</span>
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium text-gray-700">
-                          Người nhận:
-                        </span>{" "}
-                        <span className="text-gray-900">
-                          {request.staffName}
-                        </span>
                       </p>
                     </div>
                   </div>
