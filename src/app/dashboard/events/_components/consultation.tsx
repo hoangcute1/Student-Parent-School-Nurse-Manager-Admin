@@ -40,7 +40,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTreatmentHistoryStore } from "@/stores/treatment-history-store";
 import { useTreatmentHistorySync } from "@/hooks/use-treatment-history-sync";
 import { TreatmentHistoryUpdateNotifier } from "@/components/treatment-history-update-notifier";
-import { getNotificationsByParentId } from "@/lib/api/notification";
+import {
+  getNotificationsByParentId,
+  markNotificationAsRead,
+} from "@/lib/api/notification";
 import { useParentStudentsStore } from "@/stores/parent-students-store";
 
 // Thêm type cho prop
@@ -79,22 +82,34 @@ export default function ConsultationComponent({
   const { manualRefresh } = useTreatmentHistorySync();
   const { fetchStudentsByParent } = useParentStudentsStore();
   const [notificationLoading, setNotificationLoading] = useState(false); // Thêm state loading
+  const [markAsReadError, setMarkAsReadError] = useState<string | null>(null); // Thêm state lỗi
+
+  const fetchNotifications = async () => {
+    try {
+      const parentId = await getParentId();
+      const notificationData = await getNotificationsByParentId(parentId);
+      console.log("Fetched notifications:", notificationData);
+      setNotifications(notificationData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const parentId = await getParentId();
-        const notificationData = await getNotificationsByParentId(parentId);
-        setNotifications(notificationData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchNotifications();
   }, [fetchStudentsByParent]);
+
+  // Tự động refresh mỗi 30 giây để đảm bảo dữ liệu luôn mới
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Manual refresh function
   const handleManualRefresh = useCallback(async () => {
@@ -105,17 +120,32 @@ export default function ConsultationComponent({
   // Hàm đánh dấu đã đọc
   const handleMarkAsRead = async (notificationId: string) => {
     setNotificationLoading(true);
+    setMarkAsReadError(null); // Reset lỗi
     try {
-      // TODO: Gọi API đánh dấu đã đọc ở đây
-      setNotifications((prev) =>
-        prev.map((n: any) =>
-          n._id === notificationId ? { ...n, isRead: true } : n
-        )
-      );
-      // Gọi callback nếu có
-      if (onMarkAsRead) await onMarkAsRead();
+      console.log("Marking notification as read:", notificationId);
+
+      // Gọi API đánh dấu đã đọc
+      await markNotificationAsRead(notificationId);
+      console.log("Successfully marked notification as read");
+
+      // Refresh lại dữ liệu từ server để đảm bảo đồng bộ
+      await fetchNotifications();
+
+      // Gọi callback để cập nhật badge count
+      if (onMarkAsRead) {
+        console.log("Calling onMarkAsRead callback");
+        await onMarkAsRead();
+      }
+
+      // Thêm delay nhỏ để đảm bảo UI cập nhật
+      setTimeout(() => {
+        if (onMarkAsRead) {
+          onMarkAsRead();
+        }
+      }, 1000);
     } catch (error) {
-      // Xử lý lỗi nếu cần
+      console.error("Error marking notification as read:", error);
+      setMarkAsReadError("Không thể đánh dấu đã đọc. Vui lòng thử lại.");
     } finally {
       setNotificationLoading(false);
     }
@@ -233,18 +263,45 @@ export default function ConsultationComponent({
       {/* Update notification */}
       <TreatmentHistoryUpdateNotifier onRefresh={handleManualRefresh} />
 
+      {/* Hiển thị lỗi đánh dấu đã đọc */}
+      {markAsReadError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{markAsReadError}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Button refresh thủ công */}
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchNotifications}
+          disabled={loading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          Làm mới
+        </Button>
+      </div>
+
       {notifications.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           Không có thông báo nào
         </div>
       ) : (
         <div className="space-y-4">
-          {notifications
-            .filter(
+          {(() => {
+            const consultationNotifications = notifications.filter(
               (notification: any) =>
                 notification.type === "CONSULTATION_APPOINTMENT"
-            )
-            .map((notification: any) => {
+            );
+            console.log("All notifications:", notifications);
+            console.log(
+              "Consultation notifications:",
+              consultationNotifications
+            );
+            return consultationNotifications.map((notification: any) => {
               // Ưu tiên lấy trường riêng, nếu không có thì parse từ notes
               const parsed = parseConsultationNotes(notification.notes || "");
               const doctor = notification.consultation_doctor || parsed.doctor;
@@ -334,14 +391,21 @@ export default function ConsultationComponent({
                         className="rounded-full bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 shadow-sm flex items-center gap-2"
                         style={{ minWidth: 160 }}
                       >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Đánh dấu đã đọc
+                        {notificationLoading ? (
+                          <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                        )}
+                        {notificationLoading
+                          ? "Đang xử lý..."
+                          : "Đánh dấu đã đọc"}
                       </Button>
                     )}
                   </div>
                 </div>
               );
-            })}
+            });
+          })()}
         </div>
       )}
 

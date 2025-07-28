@@ -137,6 +137,12 @@ export default function MedicationsPage() {
   // Transform Medication data for display
   const displayMedications = Array.isArray(medications)
     ? medications
+        .slice() // tạo bản sao để không thay đổi state gốc
+        .sort((a: Medication, b: Medication) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA; // Descending order (mới nhất trước)
+        })
         .filter((medication: any) => {
           // Apply search filter if exists
           if (searchQuery && searchQuery.trim() !== "") {
@@ -152,15 +158,11 @@ export default function MedicationsPage() {
         // Apply type filter if not "all"
         .filter((medication: any) => {
           if (typeFilter !== "all") {
-            return medication.type?.toLowerCase() === typeFilter.toLowerCase();
+            return (
+              medication.type?.toLowerCase() === typeFilter.toLowerCase()
+            );
           }
           return true;
-        })
-        // Sort by createdAt - newest first (mới nhất lên đầu)
-        .sort((a: any, b: any) => {
-          const dateA = new Date(a.createdAt || 0);
-          const dateB = new Date(b.createdAt || 0);
-          return dateB.getTime() - dateA.getTime(); // Descending order (mới nhất trước)
         })
     : [];
 

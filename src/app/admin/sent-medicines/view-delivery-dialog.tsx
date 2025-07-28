@@ -20,10 +20,10 @@ import {
   Activity,
   X,
 } from "lucide-react";
-import { MedicineDeliveryByStaff } from "@/lib/type/medicine-delivery";
+import { MedicineDelivery } from "@/lib/type/medicine-delivery";
 
 interface ViewDeliveryDialogProps {
-  delivery: MedicineDeliveryByStaff;
+  delivery: MedicineDelivery;
   onClose: () => void;
 }
 
@@ -65,7 +65,9 @@ export function ViewDeliveryDialog({
     switch (status) {
       case "pending":
         return <Clock className="w-4 h-4" />;
-      case "progress":
+      case "morning":
+        return <Activity className="w-4 h-4" />;
+      case "noon":
         return <Activity className="w-4 h-4" />;
       case "completed":
         return <CheckCircle className="w-4 h-4" />;
@@ -78,7 +80,7 @@ export function ViewDeliveryDialog({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white rounded-xl shadow-2xl border border-sky-200">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-2xl border border-sky-200">
         <DialogHeader className="border-b border-sky-100 pb-4">
           <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
             <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
@@ -176,12 +178,6 @@ export function ViewDeliveryDialog({
                     Tổng số liều
                   </label>
                   <p className="text-gray-900">{delivery.total} liều</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    Liều mỗi lần
-                  </label>
-                  <p className="text-gray-900">{delivery.per_dose}</p>
                 </div>
               </div>
               <div>

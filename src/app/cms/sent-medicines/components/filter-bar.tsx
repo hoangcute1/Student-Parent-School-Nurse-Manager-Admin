@@ -15,26 +15,29 @@ interface FilterBarProps {
   onSearchChange: (value: string) => void;
   onStatusFilterChange: (value: string) => void;
   onDateFilterChange: (value: string) => void;
+  onTimeFilterChange: (value: string) => void;
 }
 
 export function FilterBar({
   onSearchChange,
   onStatusFilterChange,
   onDateFilterChange,
+  onTimeFilterChange,
 }: FilterBarProps) {
   const [searchValue, setSearchValue] = useState("");
   // Thêm state cho filter thời gian nếu cần
   const [selectedDate, setSelectedDate] = useState("today");
+  const [selectedTime, setSelectedTime] = useState("all");
 
   useEffect(() => {
     onDateFilterChange("today");
-  }, [onDateFilterChange]);
+    onTimeFilterChange("all");
+  }, [onDateFilterChange, onTimeFilterChange]);
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
     onSearchChange(value);
   };
-
 
   return (
     <div className="bg-sky-50/50 p-4 rounded-lg border border-sky-100">
@@ -44,7 +47,7 @@ export function FilterBar({
           Bộ lọc & Tìm kiếm
         </h3>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Tìm kiếm</label>
           <div className="relative">
@@ -78,7 +81,7 @@ export function FilterBar({
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Thời gian</label>
           <Select
-            onValueChange={value => {
+            onValueChange={(value) => {
               setSelectedDate(value);
               onDateFilterChange(value);
             }}
@@ -93,6 +96,30 @@ export function FilterBar({
               <SelectItem value="week">Tuần này</SelectItem>
               <SelectItem value="month">Tháng này</SelectItem>
               <SelectItem value="all">Tất cả thời gian</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">
+            Thời gian dùng thuốc
+          </label>
+          <Select
+            onValueChange={(value) => {
+              setSelectedTime(value);
+              onTimeFilterChange(value);
+            }}
+            value={selectedTime}
+            defaultValue="all"
+          >
+            <SelectTrigger className="border-sky-200 focus:border-sky-500 focus:ring-sky-200">
+              <SelectValue placeholder="Chọn thời gian dùng" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả thời gian</SelectItem>
+              <SelectItem value="morning">Sáng</SelectItem>
+              <SelectItem value="noon">Trưa</SelectItem>
+              <SelectItem value="both">Sáng và Trưa</SelectItem>
             </SelectContent>
           </Select>
         </div>

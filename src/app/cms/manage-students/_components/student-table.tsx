@@ -20,7 +20,7 @@ interface StudentTableProps {
   error?: string | null;
   onView?: (student: Student) => void;
   onEdit?: (student: Student) => void;
-  onDelete?: (student: Student) => void;
+  // onDelete?: (student: Student) => void;
   onAddHealthEvent?: (student: Student) => void;
 }
 
@@ -31,7 +31,7 @@ export function StudentTable({
   onView,
   onEdit,
   onAddHealthEvent,
-  onDelete,
+  // onDelete,
 }: StudentTableProps) {
   return (
     <div className="rounded-md border border-sky-200">
@@ -117,7 +117,7 @@ export function StudentTable({
                     </Button>
 
                     {/* Add Health Event Button */}
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onAddHealthEvent?.(eachStudent)}
@@ -125,10 +125,10 @@ export function StudentTable({
                       title="Tạo lịch tư vấn"
                     >
                       <Bell className="h-4 w-4" />
-                    </Button>
+                    </Button> */}
 
                     {/* Delete Button */}
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onDelete?.(eachStudent)}
@@ -136,7 +136,7 @@ export function StudentTable({
                       title="Xóa học sinh"
                     >
                       <Delete className="h-4 w-4" />
-                    </Button>
+                    </Button> */}
                   </div>
                 </TableCell>
               </TableRow>
