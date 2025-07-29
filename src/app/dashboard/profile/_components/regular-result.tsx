@@ -191,7 +191,9 @@ interface ExaminationHistoryItem {
 }
 
 export default function RegularResultsPage() {
-  const selectedStudent = useParentStudentsStore((state) => state.selectedStudent);
+  const selectedStudent = useParentStudentsStore(
+    (state) => state.selectedStudent
+  );
   const updateStudent = useParentStudentsStore((state) => state.updateStudent);
   const [selectedExam, setSelectedExam] =
     useState<ExaminationHistoryItem | null>(null);
@@ -482,173 +484,85 @@ export default function RegularResultsPage() {
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-blue-50">
-          <TabsTrigger
-            value="recent"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Kết quả khám sức khoẻ
-          </TabsTrigger>
-          <TabsTrigger
-            value="vaccination"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Kết quả tiêm chủng
-          </TabsTrigger>
-          <TabsTrigger
-            value="history"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-          >
-            Lịch sử khám và tiêm chủng
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="recent" className="mt-6 space-y-4">
-          {/* Hiển thị kết quả khám sức khỏe gần đây */}
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-blue-600">Đang tải kết quả...</div>
-            </div>
-          ) : error ? (
-            <Card className="border-red-200 bg-red-50/30">
-              <CardContent className="p-6">
-                <div className="text-center text-red-600">{error}</div>
-              </CardContent>
-            </Card>
-          ) : displayRecentResults.length === 0 ? (
-            <Card className="border-blue-100 bg-blue-50/30">
-              <CardContent className="p-6">
-                <div className="text-center text-blue-600">
-                  Chưa có kết quả khám sức khỏe nào cho học sinh này.
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayRecentResults.map((result, index) => (
-                <Card
-                  key={index}
-                  className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        <CardTitle className="text-lg text-blue-800">
-                          {result.type}
-                        </CardTitle>
-                      </div>
-                      <Badge
-                        variant={
-                          result.status === "Bình thường"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={
-                          result.status === "Bình thường"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }
-                      >
-                        {result.status === "Bình thường" ? (
-                          <CheckCircle className="mr-1 h-3 w-3" />
-                        ) : (
-                          <AlertCircle className="mr-1 h-3 w-3" />
-                        )}
-                        {result.status}
-                      </Badge>
+      <div className="space-y-4">
+        {/* Hiển thị kết quả khám sức khỏe gần đây */}
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-blue-600">Đang tải kết quả...</div>
+          </div>
+        ) : error ? (
+          <Card className="border-red-200 bg-red-50/30">
+            <CardContent className="p-6">
+              <div className="text-center text-red-600">{error}</div>
+            </CardContent>
+          </Card>
+        ) : displayRecentResults.length === 0 ? (
+          <Card className="border-blue-100 bg-blue-50/30">
+            <CardContent className="p-6">
+              <div className="text-center text-blue-600">
+                Chưa có kết quả khám sức khỏe nào cho học sinh này.
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayRecentResults.map((result, index) => (
+              <Card
+                key={index}
+                className="border-blue-100 hover:border-blue-300 transition-all duration-300 hover:shadow-lg"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <CardTitle className="text-lg text-blue-800">
+                        {result.type}
+                      </CardTitle>
                     </div>
-                    <CardDescription className="text-blue-600">
-                      Ngày khám: {result.date}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {result.measurements.map((m, i) => (
-                        <div key={i} className="flex justify-between text-sm">
-                          <span className="text-gray-600">{m.name}</span>
-                          <span className="font-semibold text-blue-800">
-                            {m.value}
-                          </span>
-                        </div>
-                      ))}
-                      <div className="text-xs text-gray-500 mt-2">
-                        {result.notes}
+                    <Badge
+                      variant={
+                        result.status === "Bình thường"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className={
+                        result.status === "Bình thường"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }
+                    >
+                      {result.status === "Bình thường" ? (
+                        <CheckCircle className="mr-1 h-3 w-3" />
+                      ) : (
+                        <AlertCircle className="mr-1 h-3 w-3" />
+                      )}
+                      {result.status}
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-blue-600">
+                    Ngày khám: {result.date}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {result.measurements.map((m, i) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        <span className="text-gray-600">{m.name}</span>
+                        <span className="font-semibold text-blue-800">
+                          {m.value}
+                        </span>
                       </div>
+                    ))}
+                    <div className="text-xs text-gray-500 mt-2">
+                      {result.notes}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="vaccination" className="mt-6 space-y-4">
-          <VaccinationResults />
-        </TabsContent>
-
-        <TabsContent value="history" className="mt-6 space-y-4">
-          {/* Hiển thị lịch sử khám sức khỏe */}
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-blue-600">Đang tải lịch sử khám...</div>
-            </div>
-          ) : error ? (
-            <Card className="border-red-200 bg-red-50/30">
-              <CardContent className="p-6">
-                <div className="text-center text-red-600">{error}</div>
-              </CardContent>
-            </Card>
-          ) : mergedHistory.length === 0 ? (
-            <Card className="border-blue-100 bg-blue-50/30">
-              <CardContent className="p-6">
-                <div className="text-center text-blue-600">
-                  Chưa có lịch sử khám hoặc tiêm chủng nào cho học sinh này.
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Ngày</TableHead>
-                  <TableHead>Loại sự kiện</TableHead>
-                  <TableHead>Chi tiết</TableHead>
-                  <TableHead>Bác sĩ</TableHead>
-                  <TableHead>Kết quả</TableHead>
-                  <TableHead>Ghi chú</TableHead>
-                  <TableHead>Địa điểm</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mergedHistory.map((item, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell>{item.date}</TableCell>
-                    <TableCell>{item.type}</TableCell>
-                    <TableCell>{item.subtype}</TableCell>
-                    <TableCell>{item.doctor}</TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          item.result === "Bình thường" ||
-                          item.result === "Hoàn thành"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }
-                      >
-                        {item.result}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{item.notes}</TableCell>
-                    <TableCell>{item.location}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </TabsContent>
-      </Tabs>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
 
       {selectedExam && (
         <ExaminationDetailsDialog
