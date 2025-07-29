@@ -44,15 +44,15 @@ export class MedicineDelivery extends Document {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Parent', required: true })
   parent: MongooseSchema.Types.ObjectId;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Staff', required: true })
-  staff: MongooseSchema.Types.ObjectId;
+  // @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Staff', required: true })
+  // staff: MongooseSchema.Types.ObjectId;
 
   @Prop({ default: Date.now })
   created_at: Date;
 
   @Prop({ default: Date.now })
   updated_at: Date;
-  
+
   // Array of staff IDs who have hidden this delivery from their view
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Staff', default: [] })
   hiddenFromStaff: MongooseSchema.Types.ObjectId[];

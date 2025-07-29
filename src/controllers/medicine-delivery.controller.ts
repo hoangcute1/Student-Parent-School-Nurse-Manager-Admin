@@ -83,20 +83,20 @@ export class MedicineDeliveryController {
     }
 
     // Format staff if populated
-    if (delivery.staff && typeof delivery.staff === 'object') {
-      const staff = delivery.staff as any;
-      result.staff = {
-        id: staff._id?.toString() || '',
-        name: staff.name || '',
-        ...(staff.email && { email: staff.email }),
-        ...(staff.role && { role: staff.role }),
-      };
-    } else if (delivery.staff) {
-      // If staff is just an ID
-      result.staff = { id: String(delivery.staff) };
-    } else {
-      result.staff = null;
-    }
+    // if (delivery.staff && typeof delivery.staff === 'object') {
+    //   const staff = delivery.staff as any;
+    //   result.staff = {
+    //     id: staff._id?.toString() || '',
+    //     name: staff.name || '',
+    //     ...(staff.email && { email: staff.email }),
+    //     ...(staff.role && { role: staff.role }),
+    //   };
+    // } else if (delivery.staff) {
+    //   // If staff is just an ID
+    //   result.staff = { id: String(delivery.staff) };
+    // } else {
+    //   result.staff = null;
+    // }
     // Format medicine if populate
     return result;
   }
@@ -149,17 +149,17 @@ export class MedicineDeliveryController {
     return this.medicineDeliveryService.findByUserId(userId);
   }
 
-  @Get('staff/:userId')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Get medicine deliveries by userId',
-    description: 'Get all medicine deliveries for a specific parent',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 404, description: 'Parent not found.' })
-  async findbyStaff(@Param('userId') userId: string) {
-    return this.medicineDeliveryService.findByUserStaff(userId);
-  }
+  // @Get('staff/:userId')
+  // @HttpCode(HttpStatus.OK)
+  // @ApiOperation({
+  //   summary: 'Get medicine deliveries by userId',
+  //   description: 'Get all medicine deliveries for a specific parent',
+  // })
+  // @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  // @ApiResponse({ status: 404, description: 'Parent not found.' })
+  // async findbyStaff(@Param('userId') userId: string) {
+  //   return this.medicineDeliveryService.findByUserStaff(userId);
+  // }
 
   /**
    * Get deliveries for a student
@@ -222,7 +222,7 @@ export class MedicineDeliveryController {
       const formattedDelivery = this.formatDeliveryResponse(delivery.delivery);
       return {
         ...formattedDelivery,
-        staffName: delivery.staffName || null,
+        // staffName: delivery.staffName || null,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

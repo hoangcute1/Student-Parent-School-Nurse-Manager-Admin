@@ -79,14 +79,7 @@ export class CreateMedicineDeliveryDto {
   @IsMongoId()
   parent: string;
 
-  @ApiProperty({
-    example: '60d0fe4f5311236168a109cc',
-    description: 'ID của nhân viên y tế',
-    required: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  staff?: string;
+ 
 }
 
 export class UpdateMedicineDeliveryDto {
