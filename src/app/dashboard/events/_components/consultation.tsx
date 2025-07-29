@@ -29,6 +29,7 @@ import {
   Bell,
   CheckCircle,
   Clock,
+  Flag,
 } from "lucide-react";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
 import {
@@ -296,115 +297,209 @@ export default function ConsultationComponent({
               (notification: any) =>
                 notification.type === "CONSULTATION_APPOINTMENT"
             );
-            console.log("All notifications:", notifications);
-            console.log(
-              "Consultation notifications:",
-              consultationNotifications
+            const medicalRecords = notifications.filter(
+              (notification: any) =>
+                notification.type === "MEDICAL_INCIDENT" || 
+                notification.type === "TREATMENT_HISTORY" ||
+                notification.type === "MEDICAL_RECORD"
             );
-            return consultationNotifications.map((notification: any) => {
-              // Ưu tiên lấy trường riêng, nếu không có thì parse từ notes
-              const parsed = parseConsultationNotes(notification.notes || "");
-              const doctor = notification.consultation_doctor || parsed.doctor;
-              const date = notification.consultation_date
-                ? new Date(notification.consultation_date).toLocaleDateString(
-                    "vi-VN"
-                  )
-                : parsed.date;
-              const time = notification.consultation_time || parsed.time;
-              const note = parsed.note;
-              return (
-                <div
-                  key={notification._id}
-                  className={`shadow-lg rounded-xl p-6 mb-2 transition-shadow duration-300 border-none bg-white hover:shadow-2xl ${
-                    !notification.isRead
-                      ? "ring-2 ring-blue-200"
-                      : "ring-1 ring-gray-200"
-                  }`}
-                >
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Bell className="w-5 h-5 text-blue-600" />
-                        <h4 className="font-bold text-lg text-blue-800 truncate">
-                          {notification.content}
-                        </h4>
-                        <Badge className="ml-2 bg-blue-100 text-blue-700 border border-blue-200">
-                          Lịch hẹn tư vấn
-                        </Badge>
+            
+            console.log("All notifications:", notifications);
+            console.log("Consultation notifications:", consultationNotifications);
+            console.log("Medical records:", medicalRecords);
+            
+            return (
+              <>
+                {/* Hiển thị bệnh án y tế */}
+                {medicalRecords.map((record: any) => {
+                  const recordDate = record.date || record.createdAt || record.incident_date;
+                  const recordTime = recordDate ? new Date(recordDate).toLocaleTimeString("vi-VN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }) : "";
+                  const recordDateFormatted = recordDate ? new Date(recordDate).toLocaleDateString("vi-VN") : "";
+                  
+                  return (
+                    <div
+                      key={record._id}
+                      className={`shadow-lg rounded-xl p-6 mb-4 transition-shadow duration-300 border-none bg-white hover:shadow-2xl ${
+                        !record.isRead
+                          ? "ring-2 ring-blue-200"
+                          : "ring-1 ring-gray-200"
+                      }`}
+                    >
+                      {/* Header Area - giống hình "Bệnh án y tế" */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <FileText className="w-6 h-6 text-blue-600" />
+                        <h3 className="text-xl font-bold text-blue-800">
+                          Bệnh án y tế
+                        </h3>
                       </div>
-                      {/* Khối thông tin lịch hẹn */}
-                      <div className="flex flex-wrap gap-2 items-center bg-blue-50 border border-blue-100 rounded-lg p-3 mb-2">
-                        <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
-                          <User className="w-4 h-4 text-blue-500 mr-1" />
-                          <span>Học sinh:</span>
-                          <span className="font-semibold text-gray-900 ml-1">
-                            {getStudentName(notification.student)}
+                      
+                      {/* Date and Student Info */}
+                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{recordTime} {recordDateFormatted}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <User className="w-4 h-4" />
+                          <span>{getStudentName(record.student)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-4 h-4" />
+                          <span>Tiêu đề: {record.title || "N/A"}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>Địa điểm: {record.location || "N/A"}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Flag className="w-4 h-4" />
+                          <span>Mức độ ưu tiên: {record.priority || "Thấp"}</span>
+                        </div>
+                      </div>
+
+                      {/* Ghi chú Section - giống hình */}
+                      <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <div className="font-semibold text-blue-800 mb-2">Ghi chú:</div>
+                        <div className="space-y-1 text-sm text-gray-700">
+                          <div>{record.description || record.title || "Không có mô tả"}</div>
+                          <div>Lớp: {record.class || "N/A"}</div>
+                          <div>Trạng thái liên hệ: {record.contactStatus || "N/A"}</div>
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex justify-end mt-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleViewDetails(record)}
+                          className="mr-2"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Xem chi tiết
+                        </Button>
+                        {!record.isRead && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleMarkAsRead(record._id)}
+                            disabled={notificationLoading}
+                            className="rounded-full bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 shadow-sm flex items-center gap-2"
+                          >
+                            {notificationLoading
+                              ? "Đang xử lý..."
+                              : "Đánh dấu đã đọc"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Hiển thị lịch hẹn tư vấn */}
+                {consultationNotifications.map((notification: any) => {
+                  // Ưu tiên lấy trường riêng, nếu không có thì parse từ notes
+                  const parsed = parseConsultationNotes(notification.notes || "");
+                  const doctor = notification.consultation_doctor || parsed.doctor;
+                  const date = notification.consultation_date
+                    ? new Date(notification.consultation_date).toLocaleDateString(
+                        "vi-VN"
+                      )
+                    : parsed.date;
+                  const time = notification.consultation_time || parsed.time;
+                  const note = parsed.note;
+                  return (
+                    <div
+                      key={notification._id}
+                      className={`shadow-lg rounded-xl p-6 mb-2 transition-shadow duration-300 border-none bg-white hover:shadow-2xl ${
+                        !notification.isRead
+                          ? "ring-2 ring-blue-200"
+                          : "ring-1 ring-gray-200"
+                      }`}
+                    >
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Bell className="w-5 h-5 text-blue-600" />
+                            <h4 className="font-bold text-lg text-blue-800 truncate">
+                              {notification.content}
+                            </h4>
+                            <Badge className="ml-2 bg-blue-100 text-blue-700 border border-blue-200">
+                              Lịch hẹn tư vấn
+                            </Badge>
+                          </div>
+                          {/* Khối thông tin lịch hẹn */}
+                          <div className="flex flex-wrap gap-2 items-center bg-blue-50 border border-blue-100 rounded-lg p-3 mb-2">
+                            <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                              <User className="w-4 h-4 text-blue-500 mr-1" />
+                              <span>Học sinh:</span>
+                              <span className="font-semibold text-gray-900 ml-1">
+                                {getStudentName(notification.student)}
+                              </span>
+                            </div>
+                            {date && (
+                              <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                                <Calendar className="w-4 h-4 text-blue-500 mr-1" />
+                                <span>Ngày hẹn:</span>
+                                <span className="font-semibold text-gray-900 ml-1">
+                                  {date}
+                                </span>
+                              </div>
+                            )}
+                            {time && (
+                              <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                                <Clock className="w-4 h-4 text-blue-500 mr-1" />
+                                <span>Giờ hẹn:</span>
+                                <span className="font-semibold text-gray-900 ml-1">
+                                  {time}
+                                </span>
+                              </div>
+                            )}
+                            {doctor && (
+                              <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
+                                <User className="w-4 h-4 text-blue-500 mr-1" />
+                                <span>Bác sĩ:</span>
+                                <span className="font-semibold text-gray-900 ml-1">
+                                  {doctor}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-blue-50 p-4 rounded-lg mt-2 border-l-4 border-blue-400">
+                        <div className="flex items-center gap-2 mb-1">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <span className="font-semibold text-blue-800">
+                            Ghi chú tư vấn:
                           </span>
                         </div>
-                        {date && (
-                          <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
-                            <Calendar className="w-4 h-4 text-blue-500 mr-1" />
-                            <span>Ngày hẹn:</span>
-                            <span className="font-semibold text-gray-900 ml-1">
-                              {date}
-                            </span>
-                          </div>
-                        )}
-                        {time && (
-                          <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
-                            <Clock className="w-4 h-4 text-blue-500 mr-1" />
-                            <span>Giờ hẹn:</span>
-                            <span className="font-semibold text-gray-900 ml-1">
-                              {time}
-                            </span>
-                          </div>
-                        )}
-                        {doctor && (
-                          <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-blue-200 bg-white text-sm font-medium text-blue-800">
-                            <User className="w-4 h-4 text-blue-500 mr-1" />
-                            <span>Bác sĩ:</span>
-                            <span className="font-semibold text-gray-900 ml-1">
-                              {doctor}
-                            </span>
-                          </div>
+                        <div className="text-sm text-gray-700 whitespace-pre-line">
+                          {note || notification.notes || "Không có ghi chú."}
+                        </div>
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        {!notification.isRead && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleMarkAsRead(notification._id)}
+                            disabled={notificationLoading}
+                            className="rounded-full bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 shadow-sm flex items-center gap-2"
+                          >
+                            {notificationLoading
+                              ? "Đang xử lý..."
+                              : "Đánh dấu đã đọc"}
+                          </Button>
                         )}
                       </div>
                     </div>
-                  </div>
-                  <div className="bg-blue-50 p-4 rounded-lg mt-2 border-l-4 border-blue-400">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="w-4 h-4 text-blue-600" />
-                      <span className="font-semibold text-blue-800">
-                        Ghi chú tư vấn:
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-700 whitespace-pre-line">
-                      {note || notification.notes || "Không có ghi chú."}
-                    </div>
-                  </div>
-                  <div className="flex justify-end mt-4">
-                    {!notification.isRead && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleMarkAsRead(notification._id)}
-                        disabled={notificationLoading}
-                        className="rounded-full bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 shadow-sm flex items-center gap-2"
-                        style={{ minWidth: 160 }}
-                      >
-                        {notificationLoading ? (
-                          <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
-                        ) : (
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                        )}
-                        {notificationLoading
-                          ? "Đang xử lý..."
-                          : "Đánh dấu đã đọc"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            });
+                  );
+                })}
+              </>
+            );
           })()}
         </div>
       )}
@@ -423,92 +518,113 @@ export default function ConsultationComponent({
 
           {selectedEvent && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Tiêu đề
-                  </label>
-                  <p className="text-gray-900">{selectedEvent.title}</p>
+              {/* Header Section - giống lịch hẹn tư vấn */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Học sinh
-                  </label>
-                  <p className="text-gray-900">
+                <h3 className="text-xl font-bold text-purple-800">
+                  Lịch sử bệnh án: {selectedEvent.title}
+                </h3>
+                <Badge className="ml-2 bg-purple-100 text-purple-700 border border-blue-200">
+                  Lịch sử bệnh án
+                </Badge>
+              </div>
+
+              {/* Key Information Section - các badge nằm ngang */}
+              <div className="flex flex-wrap gap-2 items-center bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <User className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Học sinh:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
                     {typeof selectedEvent.student === "object"
-                      ? `${selectedEvent.student.name} (${selectedEvent.student.studentId})`
+                      ? selectedEvent.student.name
                       : selectedEvent.student}
-                  </p>
+                  </span>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Lớp
-                  </label>
-                  <p className="text-gray-900">{selectedEvent.class}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Địa điểm
-                  </label>
-                  <p className="text-gray-900">{selectedEvent.location}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Mức độ ưu tiên
-                  </label>
-                  <Badge
-                    className={getPriorityColor(
-                      selectedEvent.priority || "Thấp"
-                    )}
-                  >
-                    {selectedEvent.priority || "Thấp"}
-                  </Badge>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Trạng thái xử lý
-                  </label>
-                  <Badge className={getStatusColor(selectedEvent.status)}>
-                    {getStatusText(selectedEvent.status)}
-                  </Badge>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Trạng thái liên hệ
-                  </label>
-                  <p className="text-gray-900">{selectedEvent.contactStatus}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Thời gian
-                  </label>
-                  <p className="text-gray-900">
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <Calendar className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Ngày:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
                     {selectedEvent.date
-                      ? new Date(selectedEvent.date).toLocaleString("vi-VN")
+                      ? new Date(selectedEvent.date).toLocaleDateString("vi-VN")
                       : selectedEvent.createdAt
-                      ? new Date(selectedEvent.createdAt).toLocaleString(
-                          "vi-VN"
-                        )
+                      ? new Date(selectedEvent.createdAt).toLocaleDateString("vi-VN")
                       : "N/A"}
-                  </p>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <Clock className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Giờ:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {selectedEvent.date
+                      ? new Date(selectedEvent.date).toLocaleTimeString("vi-VN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <User className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Lớp:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {selectedEvent.class || "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <MapPin className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Địa điểm:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {selectedEvent.location || "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <Flag className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Mức độ ưu tiên:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {selectedEvent.priority || "Thấp"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <CheckCircle className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Trạng thái:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {getStatusText(selectedEvent.status)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full border border-purple-200 bg-white text-sm font-medium text-purple-800">
+                  <Phone className="w-4 h-4 text-purple-500 mr-1" />
+                  <span>Liên hệ:</span>
+                  <span className="font-semibold text-gray-900 ml-1">
+                    {selectedEvent.contactStatus || "N/A"}
+                  </span>
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Mô tả chi tiết
-                </label>
-                <p className="text-gray-900 mt-1 p-3 bg-gray-50 rounded-md">
-                  {selectedEvent.description}
-                </p>
-              </div>
-
-              {selectedEvent.notes && (
+              {/* Mô tả chi tiết */}
+              {selectedEvent.description && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    Ghi chú xử lý
+                    Mô tả chi tiết
                   </label>
-                  <p className="text-gray-900 mt-1 p-3 bg-blue-50 rounded-md whitespace-pre-line">
+                  <p className="text-gray-900 mt-1 p-3 bg-gray-50 rounded-md">
+                    {selectedEvent.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Ghi chú xử lý - giống lịch hẹn tư vấn */}
+              {selectedEvent.notes && (
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileText className="w-4 h-4 text-purple-600" />
+                    <span className="font-semibold text-purple-800">
+                      Ghi chú xử lý:
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-700 whitespace-pre-line">
                     {selectedEvent.notes.includes("|")
                       ? selectedEvent.notes
                           .split("|")
@@ -516,10 +632,11 @@ export default function ConsultationComponent({
                             <div key={idx}>{line.trim()}</div>
                           ))
                       : selectedEvent.notes}
-                  </p>
+                  </div>
                 </div>
               )}
 
+              {/* Hành động đã thực hiện */}
               {selectedEvent.actionTaken && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">

@@ -152,7 +152,7 @@ export default function MedicalHistoryPage() {
       <div className="space-y-8">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-            Tài nguyên phụ huynh
+            Sự cố y tế học sinh
           </h1>
           <p className="text-blue-600">Theo dõi lịch sử bệnh án của học sinh</p>
         </div>
@@ -167,7 +167,7 @@ export default function MedicalHistoryPage() {
     <div className="space-y-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-blue-800">
-          Tài nguyên phụ huynh
+        Sự cố y tế học sinh
         </h1>
         <p className="text-blue-600">Theo dõi lịch sử bệnh án của học sinh</p>
       </div>
@@ -248,63 +248,48 @@ export default function MedicalHistoryPage() {
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-2xl font-bold text-blue-800 flex items-center gap-2">
-                              <FileText className="h-6 w-6 text-blue-500" />
-                              {typeof entry.record === "string"
-                                ? entry.record
-                                : entry.record &&
-                                  typeof entry.record === "object" &&
-                                  (entry.record as any).name
-                                ? (entry.record as any).name
-                                : entry.record &&
-                                  typeof entry.record === "object" &&
-                                  (entry.record as any)._id
-                                ? (entry.record as any)._id
-                                : "Bệnh án y tế"}
-                            </CardTitle>
-                            <CardDescription className="flex flex-wrap items-center gap-3 text-blue-700 mt-2">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-4 w-4" />
-                                {formatDate(
-                                  entry.date || entry.createdAt || ""
-                                )}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <User className="h-4 w-4" />
-                                {getStudentName(entry.student)}
-                              </span>
-                              {entry.staff && (
-                                <span className="flex items-center gap-1">
-                                  <User className="h-4 w-4 text-blue-400" />
-                                  {(() => {
-                                    if (
-                                      typeof entry.staff === "object" &&
-                                      entry.staff !== null
-                                    ) {
-                                      const staffObj = (staffs as Staff[]).find(
-                                        (s) => s._id === entry.staff
-                                      );
-                                      return (
-                                        staffObj?.profile?.name ||
-                                        staffObj?.user?.email ||
-                                        "Không rõ"
-                                      );
-                                    }
-                                    if (typeof entry.staff === "string") {
-                                      const staffObj = staffs.find(
-                                        (s) => s._id === entry.staff
-                                      );
-                                      return (
-                                        staffObj?.profile?.name ||
-                                        staffObj?.user?.email ||
-                                        "Không rõ"
-                                      );
-                                    }
-                                    return "Không rõ";
-                                  })()}
-                                </span>
-                              )}
-                            </CardDescription>
+                            {/* Header Area - giống hình "Bệnh án y tế" */}
+                            <div className="flex items-center gap-2 mb-3">
+                              <FileText className="w-6 h-6 text-blue-600" />
+                              <CardTitle className="text-xl font-bold text-blue-800">
+                                Bệnh án y tế
+                              </CardTitle>
+                            </div>
+                            
+                            {/* Date and Student Info */}
+                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                <span>{formatDate(entry.date || entry.createdAt || "")}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <User className="w-4 h-4" />
+                                <span>{getStudentName(entry.student)}</span>
+                              </div>
+                              {(() => {
+                                const parsed = parseTechnicalNotes(entry.notes || "");
+                                if (parsed) {
+                                  return (
+                                    <>
+                                      <div className="flex items-center gap-1">
+                                        <FileText className="w-4 h-4" />
+                                        <span>Tiêu đề: {parsed["Title"] || "N/A"}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <span>Địa điểm: {parsed["Location"] || "N/A"}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <span>Mức độ ưu tiên: {parsed["Priority"] || "Thấp"}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <span>Trạng thái liên hệ: {parsed["Contact Status"] || "N/A"}</span>
+                                      </div>
+                                    </>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge
@@ -318,76 +303,34 @@ export default function MedicalHistoryPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          <p className="text-blue-800 text-base font-medium bg-blue-50 rounded-lg p-3 shadow-inner">
-                            {entry.description}
-                          </p>
-                          {entry.notes
-                            ? (() => {
-                                const parsed = parseTechnicalNotes(
-                                  entry.notes!
-                                );
-                                if (parsed) {
-                                  return (
-                                    <div>
-                                      <label className="text-sm font-semibold text-blue-700">
-                                        Ghi chú:
-                                      </label>
-                                      <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner space-y-1">
-                                        <div>
-                                          <span className="font-semibold">
-                                            Tiêu đề:
-                                          </span>{" "}
-                                          {parsed["Title"]}
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">
-                                            Địa điểm:
-                                          </span>{" "}
-                                          {parsed["Location"]}
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">
-                                            Mức độ ưu tiên:
-                                          </span>{" "}
-                                          {parsed["Priority"]}
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">
-                                            Lớp:
-                                          </span>{" "}
-                                          {parsed["Class"]}
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">
-                                            Trạng thái liên hệ:
-                                          </span>{" "}
-                                          {parsed["Contact Status"]}
-                                        </div>
+                          {/* Ghi chú Section - giống hình */}
+                          {entry.notes && (
+                            <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-400">
+                              <div className="font-semibold text-blue-800 mb-2">Ghi chú:</div>
+                              <div className="space-y-1 text-sm text-gray-700">
+                                {(() => {
+                                  const parsed = parseTechnicalNotes(entry.notes || "");
+                                  if (parsed) {
+                                    return (
+                                      <>
+                                        <div>{entry.description || "Không có mô tả"}</div>
+                                        <div>Lớp: {parsed["Class"] || "N/A"}</div>
                                         {parsed["Ghi chú khẩn cấp"] && (
-                                          <div className="mt-2">
-                                            <span className="font-semibold text-red-700">
-                                              Ghi chú khẩn cấp:
-                                            </span>{" "}
-                                            {parsed["Ghi chú khẩn cấp"]}
+                                          <div className="text-red-700">
+                                            Ghi chú khẩn cấp: {parsed["Ghi chú khẩn cấp"]}
                                           </div>
                                         )}
-                                      </div>
-                                    </div>
-                                  );
-                                } else {
-                                  return (
-                                    <div>
-                                      <label className="text-sm font-semibold text-blue-700">
-                                        Ghi chú:
-                                      </label>
-                                      <div className="text-blue-900 mt-1 p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg whitespace-pre-line shadow-inner">
-                                        {entry.notes}
-                                      </div>
-                                    </div>
-                                  );
-                                }
-                              })()
-                            : null}
+                                      </>
+                                    );
+                                  } else {
+                                    return (
+                                      <div>{entry.notes}</div>
+                                    );
+                                  }
+                                })()}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

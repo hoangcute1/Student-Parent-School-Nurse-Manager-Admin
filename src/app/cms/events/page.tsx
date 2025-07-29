@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Download, RefreshCw, AlertTriangle } from "lucide-react";
+import { Plus, Download, RefreshCw, AlertTriangle, Clock, User, Users, MapPin, FileText, PhoneCall, UserCheck, Flag } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -51,16 +51,6 @@ import { updateTreatmentHistory } from "@/lib/api/treatment-history";
 import { Student } from "@/lib/type/students";
 import { Staff } from "@/lib/type/staff";
 import { TreatmentHistory } from "@/lib/type/treatment-history";
-import {
-  Clock,
-  User,
-  Users,
-  MapPin,
-  FileText,
-  PhoneCall,
-  UserCheck,
-  Flag,
-} from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function MedicalEvents() {
@@ -743,39 +733,55 @@ export default function MedicalEvents() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Modern Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg flex items-center justify-center">
-                  <AlertTriangle className="w-7 h-7 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-yellow-900">!</span>
-                </div>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Quản lý sự cố y tế
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Hệ thống theo dõi và xử lý sự cố y tế trong trường học
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Hệ thống hoạt động</span>
-              </div>
-            </div>
+        {/* Header Section - Centered, icon on top, title and description below */}
+        <div className="mb-10 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg flex items-center justify-center mb-4">
+            <AlertTriangle className="w-9 h-9 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Quản lý sự cố y tế</h1>
+          <p className="text-gray-600 max-w-xl">
+            Hệ thống theo dõi và xử lý sự cố y tế trong trường học
+          </p>
         </div>
 
-        {/* Enhanced Stats Cards */}
-        <div className="mb-8">
-          <EventStats stats={stats} onCardClick={handleStatsCardClick} />
+        {/* Stats Cards - 4 columns, soft color, icon right, rounded, shadow */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-blue-700">{stats.total}</div>
+              <div className="text-sm text-gray-500 mt-1">Tổng sự kiện</div>
+            </div>
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-blue-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-yellow-600">{stats.pending}</div>
+              <div className="text-sm text-gray-500 mt-1">Chờ xử lý</div>
+            </div>
+            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Clock className="w-6 h-6 text-yellow-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-red-600">{stats.high}</div>
+              <div className="text-sm text-gray-500 mt-1">Ưu tiên cao</div>
+            </div>
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <Flag className="w-6 h-6 text-red-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center justify-between">
+            <div>
+              <div className="text-3xl font-bold text-emerald-600">{stats.resolved}</div>
+              <div className="text-sm text-gray-500 mt-1">Đã giải quyết</div>
+            </div>
+            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+              <UserCheck className="w-6 h-6 text-emerald-500" />
+            </div>
+          </div>
         </div>
 
         {/* Main Content Grid */}
